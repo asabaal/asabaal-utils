@@ -1,7 +1,83 @@
 import importlib
+import os
 import types
+import yt_dlp
 
 from pathlib import Path
+
+def download_youtube_video(url, output_path=None, resolution="best"):
+    """
+    Download a YouTube video from the given URL using yt-dlp.
+
+    Parameters
+    ----------
+    url : str
+        The URL of the YouTube video to download
+    output_path : str, optional
+        Directory to save the video. If None, saves to Downloads folder
+    resolution : str, optional
+        Desired resolution for the video download. Options:
+            - "best": Highest available quality (default)
+            - "worst": Lowest available quality
+            - "720", "1080", etc.: Specific resolution (without 'p')
+
+    Returns
+    -------
+    str
+        Full path to the downloaded video file
+
+    Raises
+    ------
+    Exception
+        If video cannot be downloaded or URL is invalid
+
+    Examples
+    --------
+    >>> # Download at best quality to Downloads folder
+    >>> video_path = download_youtube_video("https://www.youtube.com/watch?v=VIDEO_ID")
+    
+    >>> # Download to specific folder with specific resolution
+    >>> video_path = download_youtube_video(
+    ...     "https://www.youtube.com/watch?v=VIDEO_ID",
+    ...     output_path="/path/to/folder",
+    ...     resolution="720"
+    ... )
+    """
+    try:
+        # Set default output path to Downloads folder if none provided
+        if output_path is None:
+            output_path = str(Path.home() / "Downloads")
+        
+        # Create output directory if it doesn't exist
+        os.makedirs(output_path, exist_ok=True)
+        
+        # Configure yt-dlp options
+        resolution_format = {
+            "best": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+            "worst": "worstvideo[ext=mp4]+worstaudio[ext=m4a]/worst[ext=mp4]/worst"
+        }
+        
+        if resolution.isdigit():
+            format_str = f"bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/best[height<={resolution}][ext=mp4]/best"
+        else:
+            format_str = resolution_format.get(resolution, resolution_format["best"])
+        
+        ydl_opts = {
+            'format': format_str,
+            'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
+            'progress_hooks': [lambda d: print(f'Downloading: {d["_percent_str"]} of {d["_total_bytes_str"]}' if d['status'] == 'downloading' else '')],
+        }
+        
+        # Download the video
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            video_path = os.path.join(output_path, ydl.prepare_filename(info))
+            print(f"Download complete! Saved to: {video_path}")
+            
+        return video_path
+        
+    except Exception as e:
+        raise Exception(f"Error downloading video: {str(e)}")
 
 def find_package_location(package_name_or_module: str | types.ModuleType) -> str:
     """
