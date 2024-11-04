@@ -2,17 +2,23 @@ import importlib
 import json
 import logging
 import os
+import pathspec
 import re
 import requests
 import sqlite3
 import types
 import yt_dlp
 
-from pathlib import Path
 from bs4 import BeautifulSoup
-from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+from typing import Dict, List, Optional
 from urllib.parse import quote, urljoin
 
 @dataclass
@@ -721,27 +727,201 @@ def find_package_location(package_name_or_module: str | types.ModuleType) -> str
     site_packages_parent: Path = package_path.parent.parent.parent
     return str(site_packages_parent)
 
-import os
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
-from reportlab.lib.units import inch
+# Common extension sets for different types of files
+EXTENSION_SETS = {
+    'python': {'.py', '.pyx', '.pyi', '.pyw'},
+    'web': {'.html', '.css', '.js', '.jsx', '.ts', '.tsx'},
+    'java': {'.java', '.class', '.jar'},
+    'c_cpp': {'.c', '.cpp', '.h', '.hpp'},
+    'rust': {'.rs', '.rlib'},
+    'go': {'.go'},
+    'ruby': {'.rb', '.erb'},
+    'php': {'.php'},
+    'shell': {'.sh', '.bash'},
+    'data': {'.json', '.yaml', '.yml', '.xml'},
+    'sql': {'.sql'},
+    'docs': {'.md', '.rst', '.txt'}
+}
 
-def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
+# Common extension sets for different types of files
+EXTENSION_SETS = {
+    'python': {'.py', '.pyx', '.pyi', '.pyw'},
+    'web': {'.html', '.css', '.js', '.jsx', '.ts', '.tsx'},
+    'java': {'.java', '.class', '.jar'},
+    'c_cpp': {'.c', '.cpp', '.h', '.hpp'},
+    'rust': {'.rs', '.rlib'},
+    'go': {'.go'},
+    'ruby': {'.rb', '.erb'},
+    'php': {'.php'},
+    'shell': {'.sh', '.bash'},
+    'data': {'.json', '.yaml', '.yml', '.xml'},
+    'sql': {'.sql'},
+    'docs': {'.md', '.rst', '.txt'}
+}
+
+# Default directories to exclude
+DEFAULT_EXCLUDE_DIRS = {
+    # Package management
+    'node_modules',
+    'venv',
+    'env',
+    '.env',
+    'vendor',
+    'packages',
+    '.npm',
+    'bower_components',
+    
+    # Build outputs
+    'build',
+    'dist',
+    'out',
+    'target',
+    'output',
+    '__pycache__',
+    '.next',
+    '.nuxt',
+    
+    # IDE and tools
+    '.idea',
+    '.vscode',
+    '.vs',
+    '.eclipse',
+    '.settings',
+    
+    # Other common excludes
+    'coverage',
+    'logs',
+    'temp',
+    'tmp',
+    'cache',
+    '.cache',
+    'assets',
+    'public/assets',
+    'static/assets',
+}
+
+# File patterns to exclude
+DEFAULT_EXCLUDE_PATTERNS = {
+    # Compiled files
+    '*.pyc', '*.pyo', '*.pyd',
+    '*.so', '*.dll', '*.dylib',
+    '*.class', '*.jar',
+    '*.min.js', '*.min.css',
+    
+    # Generated files
+    '*.generated.*',
+    '*.auto.*',
+    '*_generated.*',
+    
+    # Package files
+    'package-lock.json',
+    'yarn.lock',
+    'Gemfile.lock',
+    'poetry.lock',
+    
+    # Large data files
+    '*.csv', '*.sqlite', '*.db',
+    '*.pkl', '*.pickle',
+    '*.parquet', '*.hdf5',
+    
+    # Media files
+    '*.jpg', '*.jpeg', '*.png', 
+    '*.gif', '*.ico', '*.svg',
+    '*.mp3', '*.mp4', '*.wav',
+    
+    # Other
+    '*.log', '*.cache',
+    '*.bak', '*.swp', '*.swo',
+    'thumbs.db', '.DS_Store'
+}
+
+def create_code_pdf(directory_path, output_file='code_documentation.pdf', include_extensions=None, 
+                   exclude_extensions=None, max_file_size_kb=500, max_total_files=1000):
     """
     Creates a PDF containing all code files from the given directory,
-    including the directory structure.
+    including the directory structure. Respects .gitignore and applies smart exclusions.
     
     Args:
         directory_path (str): Path to the directory containing code files
         output_file (str): Name of the output PDF file
+        include_extensions (set/list/str): Extensions or preset names to include
+        exclude_extensions (set/list/str): Extensions to exclude
+        max_file_size_kb (int): Maximum size of individual files to include (in KB)
+        max_total_files (int): Maximum number of files to include in the PDF
     """
-    # File extensions to include
-    CODE_EXTENSIONS = {
-        '.py', '.js', '.java', '.cpp', '.h', '.css', '.html',
-        '.sql', '.rb', '.go', '.rs', '.ts', '.php'
-    }
+    def load_gitignore(directory):
+        """Load and parse .gitignore file if it exists."""
+        gitignore_path = os.path.join(directory, '.gitignore')
+        if os.path.exists(gitignore_path):
+            with open(gitignore_path, 'r') as f:
+                spec = pathspec.PathSpec.from_lines(
+                    pathspec.patterns.GitWildMatchPattern, 
+                    f.readlines()
+                )
+            return spec
+        return None
+
+    def resolve_extensions(ext_input):
+        """Convert extension input to a set of extensions."""
+        if ext_input is None:
+            return set()
+        
+        if isinstance(ext_input, str):
+            if ext_input.startswith('.'):
+                return {ext_input.lower()}
+            return EXTENSION_SETS.get(ext_input.lower(), set())
+        
+        extensions = set()
+        for item in ext_input:
+            if item.startswith('.'):
+                extensions.add(item.lower())
+            elif item.lower() in EXTENSION_SETS:
+                extensions.update(EXTENSION_SETS[item.lower()])
+        return extensions
+
+    # Resolve includes and excludes
+    if include_extensions is None:
+        include_exts = set().union(*EXTENSION_SETS.values())
+    else:
+        include_exts = resolve_extensions(include_extensions)
+    
+    exclude_exts = resolve_extensions(exclude_extensions)
+    CODE_EXTENSIONS = include_exts - exclude_exts
+    
+    # Load gitignore patterns
+    gitignore_spec = load_gitignore(directory_path)
+    
+    def matches_pattern(path, patterns):
+        """Check if path matches any of the glob patterns."""
+        from fnmatch import fnmatch
+        return any(fnmatch(path, pattern) for pattern in patterns)
+    
+    def should_include_path(path, is_dir=False):
+        """Check if a path should be included based on various criteria."""
+        rel_path = os.path.relpath(path, directory_path)
+        basename = os.path.basename(path)
+        
+        # Skip hidden files/directories
+        if basename.startswith('.'):
+            return False
+            
+        # Skip excluded directories
+        if is_dir and basename in DEFAULT_EXCLUDE_DIRS:
+            return False
+            
+        # Skip files matching exclude patterns
+        if not is_dir and matches_pattern(basename, DEFAULT_EXCLUDE_PATTERNS):
+            return False
+            
+        # Check against gitignore patterns
+        if gitignore_spec and gitignore_spec.match_file(rel_path):
+            return False
+            
+        # Skip large files
+        if not is_dir and os.path.getsize(path) > max_file_size_kb * 1024:
+            return False
+            
+        return True
     
     def is_code_file(filename):
         """Check if a file is a code file based on its extension."""
@@ -754,6 +934,10 @@ def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
             items = sorted(os.listdir(path))
             for item in items:
                 item_path = os.path.join(path, item)
+                
+                if not should_include_path(item_path, os.path.isdir(item_path)):
+                    continue
+                    
                 if os.path.isfile(item_path) and is_code_file(item):
                     structure.append(f"{indent}└── {item}")
                 elif os.path.isdir(item_path):
@@ -771,7 +955,7 @@ def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
         except Exception as e:
             return f"Error reading file: {str(e)}"
 
-    # Initialize the PDF document
+    # Initialize PDF document
     doc = SimpleDocTemplate(
         output_file,
         pagesize=letter,
@@ -781,7 +965,6 @@ def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
         bottomMargin=72
     )
     
-    # Get styles
     styles = getSampleStyleSheet()
     title_style = styles['Heading1']
     heading_style = styles['Heading2']
@@ -792,11 +975,21 @@ def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
         fontName='Courier'
     )
     
-    # Create the content
     content = []
     
-    # Add title
+    # Add title and settings info
     content.append(Paragraph("Code Documentation", title_style))
+    content.append(Spacer(1, 0.5 * inch))
+    
+    content.append(Paragraph("Documentation Settings:", heading_style))
+    content.append(Spacer(1, 0.2 * inch))
+    settings_text = [
+        f"• Maximum file size: {max_file_size_kb}KB",
+        f"• File types included: {', '.join(sorted(CODE_EXTENSIONS))}",
+        "• Excluding common build, dependency, and generated directories",
+    ]
+    for setting in settings_text:
+        content.append(Paragraph(setting, styles['Normal']))
     content.append(Spacer(1, 0.5 * inch))
     
     # Add directory structure
@@ -811,22 +1004,31 @@ def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
     content.append(Paragraph("File Contents:", heading_style))
     content.append(Spacer(1, 0.2 * inch))
     
-    for root, _, files in os.walk(directory_path):
+    file_count = 0
+    for root, dirs, files in os.walk(directory_path, topdown=True):
+        # Skip excluded directories
+        dirs[:] = [d for d in dirs if should_include_path(os.path.join(root, d), True)]
+        
         for file in sorted(files):
-            if is_code_file(file):
-                file_path = os.path.join(root, file)
-                rel_path = os.path.relpath(file_path, directory_path)
+            if file_count >= max_total_files:
+                content.append(Paragraph(f"Maximum file limit ({max_total_files}) reached.", styles['Normal']))
+                break
                 
-                # Add file header
-                content.append(Paragraph(f"File: {rel_path}", styles['Heading3']))
-                content.append(Spacer(1, 0.1 * inch))
+            file_path = os.path.join(root, file)
+            
+            if not should_include_path(file_path) or not is_code_file(file):
+                continue
                 
-                # Add file content
-                file_content = read_file_content(file_path)
-                content.append(Preformatted(file_content, code_style))
-                content.append(Spacer(1, 0.3 * inch))
+            rel_path = os.path.relpath(file_path, directory_path)
+            
+            content.append(Paragraph(f"File: {rel_path}", styles['Heading3']))
+            content.append(Spacer(1, 0.1 * inch))
+            
+            file_content = read_file_content(file_path)
+            content.append(Preformatted(file_content, code_style))
+            content.append(Spacer(1, 0.3 * inch))
+            
+            file_count += 1
     
-    # Build the PDF
     doc.build(content)
-    
     return output_file
