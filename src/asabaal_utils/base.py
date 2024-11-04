@@ -1,9 +1,528 @@
 import importlib
+import json
+import logging
 import os
+import re
+import requests
+import sqlite3
 import types
 import yt_dlp
 
 from pathlib import Path
+from bs4 import BeautifulSoup
+from typing import Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime
+from urllib.parse import quote, urljoin
+
+@dataclass
+class Album:
+    """
+    Data class representing an album with its metadata.
+
+    Parameters
+    ----------
+    title : str
+        The album title
+    release_date : str
+        Release date in YYYY-MM-DD format
+    album_type : str
+        Type of album (e.g., studio, live, compilation)
+    sources : List[str]
+        List of sources where this album was found
+    tracks : List[str]
+        List of track titles
+    url : Optional[str]
+        URL to the album
+    artist : str
+        Name of the artist
+    last_updated : str
+        Timestamp of last update
+    """
+    title: str
+    release_date: str
+    album_type: str
+    sources: List[str]
+    tracks: List[str]
+    artist: str
+    url: Optional[str] = None
+    last_updated: str = datetime.now().isoformat()
+
+class DatabaseManager:
+    """
+    Handles all database operations for storing and retrieving music data.
+
+    Parameters
+    ----------
+    db_path : str
+        Path to SQLite database file
+    """
+    
+    def __init__(self, db_path: str = "music_data.db"):
+        self.db_path = db_path
+        self._init_db()
+
+    def _init_db(self) -> None:
+        """Initialize database tables if they don't exist."""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS albums (
+                    id INTEGER PRIMARY KEY,
+                    artist TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    release_date TEXT,
+                    album_type TEXT,
+                    sources TEXT,
+                    tracks TEXT,
+                    url TEXT,
+                    last_updated TEXT,
+                    UNIQUE(artist, title)
+                )
+            """)
+            
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS cache (
+                    url TEXT PRIMARY KEY,
+                    content TEXT,
+                    timestamp TEXT
+                )
+            """)
+
+    def save_album(self, album: Album) -> None:
+        """
+        Save album to database.
+
+        Parameters
+        ----------
+        album : Album
+            Album to save
+        """
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                INSERT OR REPLACE INTO albums 
+                (artist, title, release_date, album_type, sources, tracks, url, last_updated)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                album.artist,
+                album.title,
+                album.release_date,
+                album.album_type,
+                json.dumps(album.sources),
+                json.dumps(album.tracks),
+                album.url,
+                album.last_updated
+            ))
+
+    def get_artist_albums(self, artist: str) -> List[Album]:
+        """
+        Retrieve all albums for an artist.
+
+        Parameters
+        ----------
+        artist : str
+            Artist name
+
+        Returns
+        -------
+        List[Album]
+            List of albums found in database
+        """
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.execute(
+                "SELECT * FROM albums WHERE artist = ? ORDER BY release_date",
+                (artist,)
+            )
+            return [Album(
+                artist=row['artist'],
+                title=row['title'],
+                release_date=row['release_date'],
+                album_type=row['album_type'],
+                sources=json.loads(row['sources']),
+                tracks=json.loads(row['tracks']),
+                url=row['url'],
+                last_updated=row['last_updated']
+            ) for row in cursor.fetchall()]
+
+class WebScraper:
+    """
+    Enhanced web scraper with better section targeting.
+
+    Parameters
+    ----------
+    db_manager : DatabaseManager
+        Database manager instance for caching
+    cache_duration : int
+        How long to cache results in seconds (default: 1 day)
+    """
+
+    def __init__(self, db_manager: DatabaseManager, cache_duration: int = 86400):
+        self.db_manager = db_manager
+        self.cache_duration = cache_duration
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'MusicDataAggregator/1.0 (Educational Purpose)'
+        })
+
+    def _get_cached_or_fetch(self, url: str) -> str:
+        """
+        Get content from cache or fetch from web.
+
+        Parameters
+        ----------
+        url : str
+            URL to fetch
+
+        Returns
+        -------
+        str
+            Page content
+        """
+        with sqlite3.connect(self.db_manager.db_path) as conn:
+            cursor = conn.execute(
+                "SELECT content, timestamp FROM cache WHERE url = ?",
+                (url,)
+            )
+            result = cursor.fetchone()
+            
+            if result:
+                content, timestamp = result
+                cached_time = datetime.fromisoformat(timestamp)
+                if (datetime.now() - cached_time).seconds < self.cache_duration:
+                    return content
+
+        response = self.session.get(url)
+        response.raise_for_status()
+        content = response.text
+        
+        with sqlite3.connect(self.db_manager.db_path) as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO cache (url, content, timestamp) VALUES (?, ?, ?)",
+                (url, content, datetime.now().isoformat())
+            )
+        
+        return content
+
+    def get_wikipedia_albums(self, artist: str) -> List[Album]:
+        """
+        Scrape album information from Wikipedia using section targeting.
+
+        Parameters
+        ----------
+        artist : str
+            Artist name
+
+        Returns
+        -------
+        List[Album]
+            List of albums found on Wikipedia
+        """
+        try:
+            # First, get the base Wikipedia URL for the artist
+            search_url = f"https://en.wikipedia.org/w/api.php"
+            params = {
+                "action": "query",
+                "format": "json",
+                "list": "search",
+                "srsearch": f"{artist} musician",
+                "utf8": 1
+            }
+            
+            response = self.session.get(search_url, params=params)
+            data = response.json()
+            
+            if not data.get("query", {}).get("search"):
+                return []
+
+            # Get the page title and construct the URL with the Discography section
+            title = data["query"]["search"][0]["title"]
+            wiki_url = f"https://en.wikipedia.org/wiki/{quote(title.replace(' ', '_'))}#Discography"
+            
+            # Fetch the page content
+            content = self._get_cached_or_fetch(wiki_url)
+            soup = BeautifulSoup(content, 'html.parser')
+            albums: List[Album] = []
+
+            # Find the Discography section using its ID
+            discography_section = soup.find(id='Discography')
+            if not discography_section:
+                logging.warning(f"No Discography section found for {artist}")
+                return albums
+
+            # Get the section content (everything up to the next h2)
+            current = discography_section.parent  # The h2 containing "Discography"
+            section_content = []
+            for sibling in current.find_next_siblings():
+                if sibling.name == 'h2':
+                    break
+                section_content.append(sibling)
+
+            # Look for album lists within the section
+            for element in section_content:
+                if element.name == 'ul':
+                    for item in element.find_all('li', recursive=False):
+                        # Remove reference tags and notes
+                        [ref.decompose() for ref in item.find_all(['sup', 'small'])]
+                        text = item.get_text().strip()
+                        
+                        # Match pattern: Album Name (Year) or Album Name (with Artist) (Year)
+                        match = re.search(r'^[*•]?\s*(.+?)\s*(?:\((?:with|featuring|feat\.?).*?\))?\s*\((\d{4})\)', text)
+                        
+                        if match:
+                            title, year = match.groups()
+                            # Clean up title
+                            title = title.strip('*• ')
+                            
+                            albums.append(Album(
+                                title=title,
+                                release_date=year,
+                                album_type='studio',
+                                sources=['Wikipedia'],
+                                tracks=[],
+                                artist=artist,
+                                url=wiki_url
+                            ))
+
+            return albums
+
+        except Exception as e:
+            logging.error(f"Error scraping Wikipedia for {artist}: {str(e)}")
+            logging.debug(f"Error details: {str(e)}", exc_info=True)
+            return []
+        
+    def _get_discogs_page_url(self, artist: str) -> Optional[str]:
+        """
+        Find the correct Discogs page URL for an artist.
+
+        Parameters
+        ----------
+        artist : str
+            Artist name
+
+        Returns
+        -------
+        Optional[str]
+            Discogs artist URL if found
+        """
+        search_url = "https://api.discogs.com/database/search"
+        params = {
+            "q": artist,
+            "type": "artist",
+            "per_page": 1
+        }
+        
+        try:
+            response = self.session.get(search_url, params=params)
+            data = response.json()
+            
+            if data.get("results"):
+                return data["results"][0].get("uri")
+        except Exception as e:
+            logging.error(f"Error finding Discogs page for {artist}: {str(e)}")
+        
+        return None
+
+
+    def get_discogs_albums(self, artist: str) -> List[Album]:
+        """
+        Enhanced Discogs scraping with better artist page detection.
+
+        Parameters
+        ----------
+        artist : str
+            Artist name
+
+        Returns
+        -------
+        List[Album]
+            List of albums found on Discogs
+        """
+        discogs_url = self._get_discogs_page_url(artist)
+        if not discogs_url:
+            return []
+
+        try:
+            content = self._get_cached_or_fetch(discogs_url)
+            soup = BeautifulSoup(content, 'html.parser')
+            albums: List[Album] = []
+
+            # Find the releases section
+            releases_section = soup.find(id='artist-releases') or soup.find(class_='releases')
+            if releases_section:
+                for release in releases_section.find_all(class_=['release', 'card']):
+                    title_elem = release.find(class_=['title', 'release-title'])
+                    date_elem = release.find(class_=['year', 'release-year'])
+                    
+                    if title_elem:
+                        title = title_elem.get_text().strip()
+                        date = date_elem.get_text().strip() if date_elem else ""
+                        
+                        # Try to determine album type
+                        album_type = 'unknown'
+                        format_elem = release.find(class_=['format', 'release-format'])
+                        if format_elem:
+                            format_text = format_elem.get_text().lower()
+                            if 'lp' in format_text or 'album' in format_text:
+                                album_type = 'studio'
+                            elif 'live' in format_text:
+                                album_type = 'live'
+                            elif 'compilation' in format_text:
+                                album_type = 'compilation'
+
+                        albums.append(Album(
+                            title=title,
+                            release_date=date,
+                            album_type=album_type,
+                            sources=['Discogs'],
+                            tracks=[],
+                            artist=artist,
+                            url=urljoin(discogs_url, release.get('href', ''))
+                        ))
+
+            return albums
+
+        except Exception as e:
+            logging.error(f"Error scraping Discogs for {artist}: {str(e)}")
+            return []        
+        
+class CommunityDataManager:
+    """
+    Handles loading and managing community-provided data files.
+
+    Parameters
+    ----------
+    data_dir : str
+        Directory containing community data files
+    """
+
+    def __init__(self, data_dir: str = "community_data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+    def load_community_data(self, artist: str) -> List[Album]:
+        """
+        Load album data from community files.
+
+        Parameters
+        ----------
+        artist : str
+            Artist name
+
+        Returns
+        -------
+        List[Album]
+            List of albums found in community data
+        """
+        albums: List[Album] = []
+        
+        # Try JSON files first
+        artist_file = self.data_dir / f"{artist.lower().replace(' ', '_')}.json"
+        if artist_file.exists():
+            with open(artist_file) as f:
+                data = json.load(f)
+                for album_data in data.get('albums', []):
+                    albums.append(Album(
+                        **{**album_data, 'sources': ['Community Data']}
+                    ))
+
+        return albums
+
+class MusicDataAggregator:
+    """
+    Main class that coordinates data collection from all sources.
+
+    Parameters
+    ----------
+    db_path : str
+        Path to SQLite database
+    data_dir : str
+        Path to community data directory
+    """
+
+    def __init__(self, db_path: str = "music_data.db", data_dir: str = "community_data"):
+        self.db_manager = DatabaseManager(db_path)
+        self.web_scraper = WebScraper(self.db_manager)
+        self.community_data = CommunityDataManager(data_dir)
+
+    def get_artist_discography(self, artist: str, force_refresh: bool = False) -> List[Album]:
+        """
+        Get complete discography from all sources.
+
+        Parameters
+        ----------
+        artist : str
+            Artist name
+        force_refresh : bool
+            Whether to force refresh from sources
+
+        Returns
+        -------
+        List[Album]
+            Combined list of unique albums
+        """
+        if not force_refresh:
+            cached_albums = self.db_manager.get_artist_albums(artist)
+            if cached_albums:
+                return cached_albums
+
+        # Collect from all sources
+        wikipedia_albums = self.web_scraper.get_wikipedia_albums(artist)
+        discogs_albums = self.web_scraper.get_discogs_albums(artist)
+        community_albums = self.community_data.load_community_data(artist)
+
+        # Combine and deduplicate
+        all_albums: Dict[str, Album] = {}
+        
+        for album in wikipedia_albums + discogs_albums + community_albums:
+            key = f"{album.title.lower()}_{album.release_date}"
+            if key in all_albums:
+                existing = all_albums[key]
+                existing.sources = list(set(existing.sources + album.sources))
+                if album.tracks:
+                    existing.tracks = list(set(existing.tracks + album.tracks))
+                if not existing.url and album.url:
+                    existing.url = album.url
+            else:
+                all_albums[key] = album
+
+        # Save to database
+        for album in all_albums.values():
+            self.db_manager.save_album(album)
+
+        return list(all_albums.values())
+
+def format_discography(albums: List[Album]) -> str:
+    """
+    Format discography data as a readable string.
+
+    Parameters
+    ----------
+    albums : List[Album]
+        List of albums to format
+
+    Returns
+    -------
+    str
+        Formatted string representation of the discography
+    """
+    if not albums:
+        return "No albums found."
+
+    output = []
+    for album in sorted(albums, key=lambda x: x.release_date or "9999"):
+        output.append(f"\nAlbum: {album.title}")
+        if album.release_date:
+            output.append(f"Released: {album.release_date}")
+        output.append(f"Sources: {', '.join(album.sources)}")
+        if album.url:
+            output.append(f"URL: {album.url}")
+        if album.tracks:
+            output.append("\nTracks:")
+            for i, track in enumerate(album.tracks, 1):
+                output.append(f"{i}. {track}")
+        output.append("-" * 50)
+
+    return "\n".join(output)
 
 def download_youtube_video(url, output_path=None, resolution="best"):
     """
@@ -201,3 +720,113 @@ def find_package_location(package_name_or_module: str | types.ModuleType) -> str
     # This is typically two levels up from the module file for regular packages
     site_packages_parent: Path = package_path.parent.parent.parent
     return str(site_packages_parent)
+
+import os
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+from reportlab.lib.units import inch
+
+def create_code_pdf(directory_path, output_file='code_documentation.pdf'):
+    """
+    Creates a PDF containing all code files from the given directory,
+    including the directory structure.
+    
+    Args:
+        directory_path (str): Path to the directory containing code files
+        output_file (str): Name of the output PDF file
+    """
+    # File extensions to include
+    CODE_EXTENSIONS = {
+        '.py', '.js', '.java', '.cpp', '.h', '.css', '.html',
+        '.sql', '.rb', '.go', '.rs', '.ts', '.php'
+    }
+    
+    def is_code_file(filename):
+        """Check if a file is a code file based on its extension."""
+        return any(filename.lower().endswith(ext) for ext in CODE_EXTENSIONS)
+    
+    def get_directory_structure(path, indent=''):
+        """Returns a formatted string representing the directory structure."""
+        structure = []
+        try:
+            items = sorted(os.listdir(path))
+            for item in items:
+                item_path = os.path.join(path, item)
+                if os.path.isfile(item_path) and is_code_file(item):
+                    structure.append(f"{indent}└── {item}")
+                elif os.path.isdir(item_path):
+                    structure.append(f"{indent}└── {item}/")
+                    structure.extend(get_directory_structure(item_path, indent + "    "))
+        except PermissionError:
+            structure.append(f"{indent}[Permission Denied]")
+        return structure
+
+    def read_file_content(file_path):
+        """Reads and returns the content of a file."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            return f"Error reading file: {str(e)}"
+
+    # Initialize the PDF document
+    doc = SimpleDocTemplate(
+        output_file,
+        pagesize=letter,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=72
+    )
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    title_style = styles['Heading1']
+    heading_style = styles['Heading2']
+    code_style = ParagraphStyle(
+        'CodeStyle',
+        parent=styles['Code'],
+        fontSize=8,
+        fontName='Courier'
+    )
+    
+    # Create the content
+    content = []
+    
+    # Add title
+    content.append(Paragraph("Code Documentation", title_style))
+    content.append(Spacer(1, 0.5 * inch))
+    
+    # Add directory structure
+    content.append(Paragraph("Directory Structure:", heading_style))
+    content.append(Spacer(1, 0.2 * inch))
+    structure = get_directory_structure(directory_path)
+    structure_text = '\n'.join(structure)
+    content.append(Preformatted(structure_text, code_style))
+    content.append(Spacer(1, 0.5 * inch))
+    
+    # Add file contents
+    content.append(Paragraph("File Contents:", heading_style))
+    content.append(Spacer(1, 0.2 * inch))
+    
+    for root, _, files in os.walk(directory_path):
+        for file in sorted(files):
+            if is_code_file(file):
+                file_path = os.path.join(root, file)
+                rel_path = os.path.relpath(file_path, directory_path)
+                
+                # Add file header
+                content.append(Paragraph(f"File: {rel_path}", styles['Heading3']))
+                content.append(Spacer(1, 0.1 * inch))
+                
+                # Add file content
+                file_content = read_file_content(file_path)
+                content.append(Preformatted(file_content, code_style))
+                content.append(Spacer(1, 0.3 * inch))
+    
+    # Build the PDF
+    doc.build(content)
+    
+    return output_file
