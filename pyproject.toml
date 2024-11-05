@@ -16,6 +16,7 @@ classifiers = [
 ]
 dependencies = [
     "requests>=2.26.0",
+    "webbrowser",  # For opening the image viewer
 ]
 
 [project.urls]
@@ -24,3 +25,12 @@ dependencies = [
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"asabaal_utils.image_viewer.web_app" = ["**/*"]
+
+[project.scripts]
+image-viewer = "asabaal_utils.image_viewer.viewer:main"
