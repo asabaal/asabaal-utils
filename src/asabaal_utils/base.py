@@ -1,3 +1,4 @@
+import cv2
 import importlib
 import json
 import logging
@@ -8,6 +9,8 @@ import requests
 import sqlite3
 import types
 import yt_dlp
+
+import numpy as np
 
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
@@ -1032,3 +1035,175 @@ def create_code_pdf(directory_path, output_file='code_documentation.pdf', includ
     
     doc.build(content)
     return output_file
+
+def create_3d_rotation(image_path, angle_degrees, output_path=None):
+    """
+    Apply a vertical-axis rotation effect to an image (like a door opening).
+    
+    Parameters:
+    - image_path: Path to input image
+    - angle_degrees: Rotation angle in degrees (positive rotates right edge away, negative rotates left edge away)
+    - output_path: Path to save the output image (optional)
+    
+    Returns:
+    - The transformed image
+    """
+    # Read the image
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError("Could not read the image")
+    
+    # Get image dimensions
+    height, width = img.shape[:2]
+    
+    # Convert angle to radians
+    angle_rad = np.deg2rad(angle_degrees)
+    
+    # Calculate the horizontal compression factor based on the cosine of the angle
+    # This creates the foreshortening effect we see when viewing a rectangular object at an angle
+    compression = np.cos(angle_rad)
+    
+    # Define the source points (original image corners)
+    src_points = np.float32([
+        [0, 0],            # Top-left
+        [width, 0],        # Top-right
+        [0, height],       # Bottom-left
+        [width, height]    # Bottom-right
+    ])
+    
+    # Define the destination points
+    if angle_degrees > 0:  # Rotating right edge away
+        dst_points = np.float32([
+            [0, 0],                    # Top-left stays fixed
+            [width * compression, 0],   # Top-right moves left
+            [0, height],               # Bottom-left stays fixed
+            [width * compression, height] # Bottom-right moves left
+        ])
+    else:  # Rotating left edge away
+        # For negative angles, we compress from the left side
+        offset = width * (1 - compression)
+        dst_points = np.float32([
+            [offset, 0],        # Top-left moves right
+            [width, 0],         # Top-right stays fixed
+            [offset, height],   # Bottom-left moves right
+            [width, height]     # Bottom-right stays fixed
+        ])
+    
+    # Calculate perspective transform matrix
+    matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+    
+    # Apply the transformation
+    result = cv2.warpPerspective(
+        img, 
+        matrix, 
+        (width, height),
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(255, 255, 255)  # White background
+    )
+    
+    # Save the result if output path is provided
+    if output_path:
+        cv2.imwrite(output_path, result)
+    
+    return result
+
+def create_side_rotation(image_path, angle_degrees, output_path=None, perspective=2000):
+    """
+    Create a 3D rotation effect around the Y-axis with proper perspective.
+    
+    Parameters:
+    - image_path: Path to input image
+    - angle_degrees: Rotation angle in degrees
+    - perspective: Perspective distance (similar to CSS perspective)
+    """
+    # Read image with alpha channel
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    if img is None:
+        raise ValueError("Could not read the image")
+    
+    # If image doesn't have an alpha channel, add one
+    if img.shape[2] == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+    
+    height, width = img.shape[:2]
+    
+    # Convert angle to radians
+    angle_rad = np.deg2rad(angle_degrees)
+    
+    # Create projection matrix
+    projection = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, -1/perspective, 1]
+    ])
+    
+    # Create rotation matrix around Y axis
+    rotation = np.array([
+        [np.cos(angle_rad), 0, np.sin(angle_rad), 0],
+        [0, 1, 0, 0],
+        [-np.sin(angle_rad), 0, np.cos(angle_rad), 0],
+        [0, 0, 0, 1]
+    ])
+    
+    # Create vertices of the image corners in 3D space
+    z = 0  # Z-coordinate of the image plane
+    vertices = np.array([
+        [-width/2, -height/2, z, 1],  # Top-left
+        [width/2, -height/2, z, 1],   # Top-right
+        [-width/2, height/2, z, 1],   # Bottom-left
+        [width/2, height/2, z, 1]     # Bottom-right
+    ])
+    
+    # Apply rotation then perspective
+    transform = projection @ rotation
+    transformed_vertices = vertices @ transform.T
+    
+    # Normalize by w component (perspective division)
+    transformed_vertices = transformed_vertices[:, :2] / transformed_vertices[:, 3:]
+    
+    # Shift back to image coordinates
+    transformed_vertices[:, 0] += width/2
+    transformed_vertices[:, 1] += height/2
+    
+    # Calculate scaling factor to ensure image fits
+    x_coords = transformed_vertices[:, 0]
+    y_coords = transformed_vertices[:, 1]
+    x_min, x_max = x_coords.min(), x_coords.max()
+    y_min, y_max = y_coords.min(), y_coords.max()
+    
+    # Calculate required scaling
+    scale_x = width / (x_max - x_min)
+    scale_y = height / (y_max - y_min)
+    scale = min(scale_x, scale_y)
+    
+    # Apply scaling to the transformed vertices
+    center_x = width / 2
+    center_y = height / 2
+    transformed_vertices = (transformed_vertices - [center_x, center_y]) * scale + [center_x, center_y]
+    
+    # Create source and destination point arrays for perspective transform
+    src_points = np.float32([
+        [0, 0],
+        [width, 0],
+        [0, height],
+        [width, height]
+    ])
+    
+    dst_points = np.float32(transformed_vertices)
+    
+    # Apply perspective transform
+    matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+    result = cv2.warpPerspective(
+        img, 
+        matrix, 
+        (width, height),
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(0, 0, 0, 0)  # Transparent background
+    )
+    
+    # Save the result if output path is provided
+    if output_path:
+        cv2.imwrite(output_path, result)
+
+    return result
