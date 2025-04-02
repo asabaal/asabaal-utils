@@ -66,4 +66,17 @@ npm start
 - Category-based spending tracking
 - Import/export functionality
 
-For detailed usage instructions, see the [Budget Utility Usage Guide](budget-utility/USAGE.md).
+### Data Privacy and Storage
+
+All data is stored locally on your machine and is not committed to the repository. The application uses the following techniques to protect your data:
+
+- `.gitignore` rules to exclude data files from Git
+- Local file storage only (no cloud or remote storage)
+- Backup functionality for data protection
+
+For detailed information on data handling, see the [Data Handling Guidelines](budget-utility/DATA_HANDLING.md).
+
+### Documentation
+
+- [Budget Utility Usage Guide](budget-utility/USAGE.md)
+- [Data Handling Guidelines](budget-utility/DATA_HANDLING.md)
