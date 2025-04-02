@@ -33,11 +33,29 @@ npm run budget
 # Generate sample data
 npm run sample
 
+# Load sample data into the application
+npm run load-sample
+
 # Backup your data
 npm run backup
 
 # Clean/reset your data
 npm run clean
+```
+
+### Quick Start with Sample Data
+
+To quickly get started with sample data:
+
+```bash
+# Generate sample data
+npm run sample
+
+# Load the sample data into the application
+npm run load-sample
+
+# Run the application
+npm start
 ```
 
 ### Features
