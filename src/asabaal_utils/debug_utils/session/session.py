@@ -48,10 +48,6 @@ class DebugSession:
         # Use dataclasses.asdict for the conversion
         session_dict = asdict(self)
         
-        # Convert datetime objects to ISO format strings
-        session_dict['created_at'] = self.created_at.isoformat()
-        session_dict['updated_at'] = self.updated_at.isoformat()
-        
         return session_dict
 
     @classmethod
@@ -64,16 +60,35 @@ class DebugSession:
         Returns:
             A new DebugSession instance
         """
-        # Convert ISO format strings back to datetime objects
-        if isinstance(data.get('created_at'), str):
-            data['created_at'] = datetime.fromisoformat(data['created_at'])
-        if isinstance(data.get('updated_at'), str):
-            data['updated_at'] = datetime.fromisoformat(data['updated_at'])
-            
-        # Create diagnostics and fixes objects if they exist
-        # Note: This will be expanded once DiagnosticRun and AppliedFix classes are implemented
+        # Create a copy of the data so we can modify it
+        data_copy = data.copy()
         
-        return cls(**data)
+        # Convert ISO format strings back to datetime objects
+        if isinstance(data_copy.get('created_at'), str):
+            data_copy['created_at'] = datetime.fromisoformat(data_copy['created_at'])
+        if isinstance(data_copy.get('updated_at'), str):
+            data_copy['updated_at'] = datetime.fromisoformat(data_copy['updated_at'])
+            
+        # Extract diagnostics and fixes before creating the session
+        diagnostics_data = data_copy.pop('diagnostics', [])
+        fixes_data = data_copy.pop('fixes', [])
+        
+        # Create the session without diagnostics and fixes
+        session = cls(**data_copy, diagnostics=[], fixes=[])
+        
+        # Add diagnostics
+        if diagnostics_data:
+            from ..tracking.diagnostics import DiagnosticRun
+            for diag_data in diagnostics_data:
+                session.diagnostics.append(DiagnosticRun.from_dict(diag_data))
+        
+        # Add fixes
+        if fixes_data:
+            from ..tracking.fixes import AppliedFix
+            for fix_data in fixes_data:
+                session.fixes.append(AppliedFix.from_dict(fix_data))
+        
+        return session
 
     def add_diagnostic(self, diagnostic):
         """Add a diagnostic run to the session.
