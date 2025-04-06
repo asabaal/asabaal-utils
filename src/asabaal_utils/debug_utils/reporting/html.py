@@ -257,6 +257,14 @@ class HTMLReport:
                     
                     html.append(formatted_line)
             
+            # Close any open list
+            if in_list:
+                html.append('</ul>' if html[-1].startswith('<li>') else '</ol>')
+            
+            # Close any open code block
+            if in_code_block:
+                html.append('</code></pre>')
+            
             return '\n'.join(html)
 
     def _add_severity_classes(self, line: str) -> str:
