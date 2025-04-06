@@ -7,10 +7,21 @@ saving and loading debug sessions from disk.
 import os
 import json
 import glob
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union
 
 from .session import DebugSession
+
+
+# Custom JSON encoder to handle datetime objects
+class DateTimeEncoder(json.JSONEncoder):
+    """JSON encoder that converts datetime objects to ISO format strings."""
+    
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 class SessionStorage:
@@ -61,10 +72,10 @@ class SessionStorage:
             # Convert the session to a dictionary
             session_dict = session.to_dict()
             
-            # Write the session to disk as JSON
+            # Write the session to disk as JSON using the custom encoder
             session_path = self._get_session_path(session.id)
             with open(session_path, 'w') as f:
-                json.dump(session_dict, f, indent=2)
+                json.dump(session_dict, f, indent=2, cls=DateTimeEncoder)
                 
             return True
         except Exception as e:
