@@ -4,9 +4,11 @@ This module provides classes for generating Markdown reports from debug sessions
 """
 
 from datetime import datetime
-from typing import Dict, List, Any, Optional, TextIO
+from typing import Dict, List, Any, Optional, TextIO, Union
 
 from ..session.session import DebugSession
+from ..tracking.diagnostics import DiagnosticRun, Issue
+from ..tracking.fixes import AppliedFix
 
 
 class MarkdownReport:
@@ -75,10 +77,33 @@ class MarkdownReport:
         
         # Count diagnostics, issues, and fixes
         total_diagnostics = len(self.session.diagnostics)
-        total_issues = sum(len(d.issues_found) for d in self.session.diagnostics)
-        fixed_issues = sum(len(f.resolved_issues) for f in self.session.fixes)
+        
+        # Safely count issues
+        total_issues = 0
+        fixed_issues = 0
+        
+        for diag in self.session.diagnostics:
+            # Handle both DiagnosticRun objects and dictionaries
+            if isinstance(diag, DiagnosticRun):
+                total_issues += len(diag.issues_found)
+            elif isinstance(diag, dict) and 'issues_found' in diag:
+                total_issues += len(diag['issues_found'])
+            
+        # Safely count fixed issues
         total_fixes = len(self.session.fixes)
-        successful_fixes = sum(1 for f in self.session.fixes if f.successful)
+        successful_fixes = 0
+        
+        for fix in self.session.fixes:
+            # Handle both AppliedFix objects and dictionaries
+            if isinstance(fix, AppliedFix):
+                fixed_issues += len(fix.resolved_issues)
+                if fix.successful:
+                    successful_fixes += 1
+            elif isinstance(fix, dict):
+                if 'resolved_issues' in fix:
+                    fixed_issues += len(fix['resolved_issues'])
+                if fix.get('successful', False):
+                    successful_fixes += 1
         
         summary = [
             "## Summary\n",
@@ -112,6 +137,67 @@ class MarkdownReport:
         diagnostics = ["## Diagnostics\n"]
         
         for i, diagnostic in enumerate(self.session.diagnostics):
+            # Handle both DiagnosticRun objects and dictionaries
+            if isinstance(diagnostic, dict):
+                # Create a DiagnosticRun from the dictionary
+                from ..tracking.diagnostics import DiagnosticRun
+                try:
+                    diagnostic = DiagnosticRun.from_dict(diagnostic)
+                except Exception as e:
+                    # If conversion fails, work with the dictionary directly
+                    start_time = diagnostic.get('start_time')
+                    if isinstance(start_time, str):
+                        try:
+                            start_time = datetime.fromisoformat(start_time)
+                        except:
+                            start_time = datetime.now()
+                    
+                    end_time = diagnostic.get('end_time')
+                    if isinstance(end_time, str):
+                        try:
+                            end_time = datetime.fromisoformat(end_time)
+                        except:
+                            end_time = start_time
+                    
+                    # Calculate duration
+                    if start_time and end_time:
+                        duration = (end_time - start_time).total_seconds()
+                        duration_str = f"{duration:.2f}s"
+                    else:
+                        duration_str = "N/A"
+                    
+                    # Count issues
+                    issues_found = diagnostic.get('issues_found', [])
+                    num_issues = len(issues_found)
+                    
+                    diagnostics.extend([
+                        f"### {i+1}. {diagnostic.get('tool', 'Unknown Tool')} on {diagnostic.get('target', 'Unknown Target')}\n",
+                        f"- **ID:** {diagnostic.get('id', 'Unknown ID')}",
+                        f"- **Time:** {start_time.strftime('%Y-%m-%d %H:%M:%S') if isinstance(start_time, datetime) else 'Unknown'}",
+                        f"- **Duration:** {duration_str}",
+                        f"- **Issues Found:** {num_issues}"
+                    ])
+                    
+                    # Add a sample of issues if any
+                    if issues_found:
+                        diagnostics.append("\n#### Sample Issues\n")
+                        
+                        # Show up to 5 issues
+                        for j, issue in enumerate(issues_found[:5]):
+                            if isinstance(issue, dict):
+                                severity = issue.get('severity', 'unknown').capitalize()
+                                description = issue.get('description', 'Unknown issue')
+                                location = issue.get('location', 'Unknown location')
+                                diagnostics.append(f"1. **{severity}:** {description} ({location})")
+                            else:
+                                diagnostics.append(f"1. Issue {j+1}")
+                        
+                        # Indicate if there are more issues
+                        if len(issues_found) > 5:
+                            diagnostics.append(f"\n*{len(issues_found) - 5} more issues not shown.*")
+                    
+                    continue
+            
             # Calculate duration
             duration = diagnostic.duration()
             duration_str = f"{duration:.2f}s" if duration is not None else "N/A"
@@ -163,7 +249,34 @@ class MarkdownReport:
         # Collect all issues from all diagnostics
         all_issues = []
         for diagnostic in self.session.diagnostics:
-            all_issues.extend(diagnostic.issues_found)
+            # Handle both DiagnosticRun objects and dictionaries
+            if isinstance(diagnostic, DiagnosticRun):
+                all_issues.extend(diagnostic.issues_found)
+            elif isinstance(diagnostic, dict) and 'issues_found' in diagnostic:
+                # Convert dictionaries to Issue objects
+                from ..tracking.diagnostics import Issue
+                for issue_data in diagnostic['issues_found']:
+                    if isinstance(issue_data, dict):
+                        try:
+                            issue = Issue.from_dict(issue_data)
+                            all_issues.append(issue)
+                        except Exception as e:
+                            # If conversion fails, create a simple representation
+                            severity = issue_data.get('severity', 'unknown')
+                            description = issue_data.get('description', 'Unknown issue')
+                            location = issue_data.get('location', 'Unknown location')
+                            fixed_by = issue_data.get('fixed_by')
+                            
+                            # Create a minimal issue object
+                            issue = Issue(
+                                id=issue_data.get('id', 'unknown_id'),
+                                type=issue_data.get('type', 'unknown'),
+                                severity=severity,
+                                location=location,
+                                description=description,
+                                fixed_by=fixed_by
+                            )
+                            all_issues.append(issue)
             
         if not all_issues:
             return "## Issues\n\nNo issues were found in this session."
@@ -213,6 +326,68 @@ class MarkdownReport:
         fixes = ["## Fixes\n"]
         
         for i, fix in enumerate(self.session.fixes):
+            # Handle both AppliedFix objects and dictionaries
+            if isinstance(fix, dict):
+                # Create an AppliedFix from the dictionary
+                from ..tracking.fixes import AppliedFix
+                try:
+                    fix = AppliedFix.from_dict(fix)
+                except Exception as e:
+                    # If conversion fails, work with the dictionary directly
+                    timestamp = fix.get('timestamp')
+                    if isinstance(timestamp, str):
+                        try:
+                            timestamp = datetime.fromisoformat(timestamp)
+                        except:
+                            timestamp = datetime.now()
+                    
+                    status = "Successful" if fix.get('successful', False) else "Failed"
+                    script = fix.get('script', 'Unknown script')
+                    target = fix.get('target', 'Unknown target')
+                    fix_id = fix.get('id', 'Unknown ID')
+                    resolved_issues = fix.get('resolved_issues', [])
+                    changes = fix.get('changes', [])
+                    
+                    fixes.extend([
+                        f"### {i+1}. {script} on {target} ({status})\n",
+                        f"- **ID:** {fix_id}",
+                        f"- **Time:** {timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(timestamp, datetime) else 'Unknown'}",
+                        f"- **Status:** {status}",
+                        f"- **Issues Resolved:** {len(resolved_issues)}"
+                    ])
+                    
+                    # Add parameters if any
+                    if 'parameters' in fix and fix['parameters']:
+                        fixes.append("- **Parameters:**")
+                        for key, value in fix['parameters'].items():
+                            fixes.append(f"  - {key}: {value}")
+                    
+                    # Add resolved issues if any
+                    if resolved_issues:
+                        fixes.append("\n#### Resolved Issues\n")
+                        
+                        for issue_id in resolved_issues:
+                            fixes.append(f"- {issue_id}")
+                    
+                    # Add file changes if any
+                    if changes:
+                        fixes.append("\n#### File Changes\n")
+                        
+                        for change in changes:
+                            if isinstance(change, dict):
+                                file_path = change.get('file_path', 'Unknown file')
+                                fixes.append(f"- **{file_path}**")
+                                
+                                # Add change details if available
+                                if 'before_state' in change and 'after_state' in change:
+                                    before_lines = len(change['before_state'].splitlines()) if isinstance(change['before_state'], str) else 0
+                                    after_lines = len(change['after_state'].splitlines()) if isinstance(change['after_state'], str) else 0
+                                    fixes.append(f"  - Lines before: {before_lines}, after: {after_lines}")
+                            else:
+                                fixes.append(f"- File change {i+1}")
+                    
+                    continue
+            
             status = "Successful" if fix.successful else "Failed"
             fixes.extend([
                 f"### {i+1}. {fix.script} on {fix.target} ({status})\n",
@@ -269,18 +444,35 @@ class MarkdownReport:
         issues_by_tool = {}
         
         for diagnostic in self.session.diagnostics:
-            tool = diagnostic.tool
+            # Handle both DiagnosticRun objects and dictionaries
+            if isinstance(diagnostic, DiagnosticRun):
+                tool = diagnostic.tool
+                issues_count = len(diagnostic.issues_found)
+            elif isinstance(diagnostic, dict):
+                tool = diagnostic.get('tool', 'Unknown')
+                issues_count = len(diagnostic.get('issues_found', []))
+            else:
+                continue
             
             if tool not in diagnostics_by_tool:
                 diagnostics_by_tool[tool] = 0
                 issues_by_tool[tool] = 0
                 
             diagnostics_by_tool[tool] += 1
-            issues_by_tool[tool] += len(diagnostic.issues_found)
+            issues_by_tool[tool] += issues_count
             
         # Count fixes and success rate
         total_fixes = len(self.session.fixes)
-        successful_fixes = sum(1 for f in self.session.fixes if f.successful)
+        successful_fixes = 0
+        for fix in self.session.fixes:
+            # Handle both AppliedFix objects and dictionaries
+            if isinstance(fix, AppliedFix):
+                if fix.successful:
+                    successful_fixes += 1
+            elif isinstance(fix, dict):
+                if fix.get('successful', False):
+                    successful_fixes += 1
+        
         success_rate = (successful_fixes / total_fixes * 100) if total_fixes > 0 else 0
         
         # Generate the metrics section
@@ -288,7 +480,7 @@ class MarkdownReport:
             "## Metrics\n",
             "### Session Metrics",
             f"- **Total Duration:** {int(duration_seconds)} seconds",
-            f"- **Issues per Diagnostic:** {sum(len(d.issues_found) for d in self.session.diagnostics) / len(self.session.diagnostics):.2f}" if self.session.diagnostics else "- **Issues per Diagnostic:** N/A",
+            f"- **Issues per Diagnostic:** {sum(issues_by_tool.values()) / sum(diagnostics_by_tool.values()):.2f}" if sum(diagnostics_by_tool.values()) > 0 else "- **Issues per Diagnostic:** N/A",
             f"- **Fix Success Rate:** {success_rate:.1f}%"
         ]
         
