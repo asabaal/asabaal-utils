@@ -494,10 +494,12 @@ class TestYoutubeDownloader:
         mock_instance: MagicMock = mock_ytdl.return_value.__enter__.return_value
 
         for resolution in test_resolutions:
-            mock_instance.extract_info.return_value = {"title": f"test_video_{resolution}"}
+            mock_instance.extract_info.return_value = {
+                "title": f"test_video_{resolution}"}
             mock_instance.prepare_filename.return_value = f"test_video_{resolution}.mp4"
 
-            result: str = download_youtube_video(self.valid_url, resolution=resolution)
+            result: str = download_youtube_video(
+                self.valid_url, resolution=resolution)
             assert f"test_video_{resolution}.mp4" in result
 
     @patch('yt_dlp.YoutubeDL')
@@ -603,7 +605,8 @@ class TestYoutubeDownloader:
         """
         self: TestYoutubeDownloader
         mock_instance: MagicMock = mock_ytdl.return_value.__enter__.return_value
-        mock_instance.extract_info.side_effect = PermissionError("Permission denied")
+        mock_instance.extract_info.side_effect = PermissionError(
+            "Permission denied")
 
         with pytest.raises(Exception) as exc_info:
             download_youtube_video(self.valid_url, output_path="/root/protected")
