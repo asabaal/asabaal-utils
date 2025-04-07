@@ -23,24 +23,37 @@ class DebugSessionManager:
     _sessions: Dict[str, DebugSession] = {}  # In-memory session cache
     _storage = None  # Storage backend
 
-    def __new__(cls):
-        """Create a new singleton instance of DebugSessionManager."""
+    def __new__(cls, storage_dir: Optional[str] = None):
+        """Create a new singleton instance of DebugSessionManager.
+        
+        Args:
+            storage_dir: Optional directory path for session storage
+        """
         if cls._instance is None:
             cls._instance = super(DebugSessionManager, cls).__new__(cls)
             # Initialize the storage backend
             from .storage import SessionStorage
-            cls._storage = SessionStorage()
+            cls._storage = SessionStorage(storage_dir=storage_dir)
+        elif storage_dir is not None and cls._storage is not None:
+            # If a storage directory is specified and we already have an instance,
+            # update the storage directory
+            cls._storage.storage_dir = storage_dir
         return cls._instance
 
     @classmethod
-    def get_storage(cls):
+    def get_storage(cls, storage_dir: Optional[str] = None):
         """Get the storage instance, creating it if necessary.
         
+        Args:
+            storage_dir: Optional directory path for session storage
+            
         Returns:
             The singleton DebugSessionManager instance
         """
         if cls._instance is None:
-            return cls()
+            return cls(storage_dir=storage_dir)
+        elif storage_dir is not None and cls._storage is not None:
+            cls._storage.storage_dir = storage_dir
         return cls._instance
 
     @classmethod
@@ -77,7 +90,8 @@ class DebugSessionManager:
         
         # Store the session
         cls._sessions[session_id] = session
-        manager._storage.save_session(session)
+        if cls._storage:
+            cls._storage.save_session(session)
         
         return session
 
@@ -99,11 +113,13 @@ class DebugSessionManager:
             return cls._sessions[session_id]
         
         # If not in cache, try to load from storage
-        session = manager._storage.load_session(session_id)
-        if session:
-            cls._sessions[session_id] = session
+        if cls._storage:
+            session = cls._storage.load_session(session_id)
+            if session:
+                cls._sessions[session_id] = session
+                return session
         
-        return session
+        return None
 
     @classmethod
     def get_active_sessions(cls) -> List[DebugSession]:
@@ -116,7 +132,9 @@ class DebugSessionManager:
         manager = cls.get_storage()
         
         # Load all sessions from storage
-        sessions = manager._storage.list_sessions(status="active")
+        sessions = []
+        if cls._storage:
+            sessions = cls._storage.list_sessions(status="active")
         
         # Update cache with loaded sessions
         for session in sessions:
@@ -135,7 +153,9 @@ class DebugSessionManager:
         manager = cls.get_storage()
         
         # Load all sessions from storage
-        sessions = manager._storage.list_sessions()
+        sessions = []
+        if cls._storage:
+            sessions = cls._storage.list_sessions()
         
         # Update cache with loaded sessions
         for session in sessions:
@@ -158,7 +178,8 @@ class DebugSessionManager:
         
         # Update the session in the cache and storage
         cls._sessions[session.id] = session
-        manager._storage.save_session(session)
+        if cls._storage:
+            cls._storage.save_session(session)
 
     @classmethod
     def delete_session(cls, session_id: str) -> bool:
@@ -178,7 +199,9 @@ class DebugSessionManager:
             del cls._sessions[session_id]
         
         # Delete from storage
-        return manager._storage.delete_session(session_id)
+        if cls._storage:
+            return cls._storage.delete_session(session_id)
+        return False
 
     @classmethod
     def complete_session(cls, session_id: str, summary: Optional[str] = None) -> Optional[DebugSession]:
