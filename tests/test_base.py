@@ -73,6 +73,14 @@ class TestWebScraper:
         </body>
         </html>
         """
+        
+        # Initialize temp_db attribute to avoid AttributeError in teardown
+        self.temp_db = Mock()
+        self.temp_db.name = "mock_temp_db"
+        
+        # Setup db_path attribute on scraper.db to prevent AttributeError
+        if hasattr(self.scraper, 'db'):
+            self.scraper.db.db_path = "mock_db_path"
 
     def teardown_method(self: "TestWebScraper", method: callable) -> None:
         """Clean up test environment after each test.
@@ -83,12 +91,17 @@ class TestWebScraper:
             The test method being run
         """
         self: TestWebScraper
-        # Close and remove temporary database
-        self.temp_db.close()
-        os.unlink(self.temp_db.name)
+        # Close and remove temporary database - handle missing attribute
+        if hasattr(self, 'temp_db'):
+            self.temp_db.close()
+            # Only try to remove the file if it exists and has a name attribute
+            if hasattr(self.temp_db, 'name') and os.path.exists(self.temp_db.name):
+                try:
+                    os.unlink(self.temp_db.name)
+                except (FileNotFoundError, PermissionError):
+                    pass  # Ignore file deletion errors
 
-    @patch('requests.Session')
-
+    # IMPORTANT: Only ONE decorator, not two!
     @patch('requests.Session')
     def test_successful_album_extraction(self: "TestWebScraper", mock_session: MagicMock) -> None:
         """Test successful parsing of album information from Wikipedia."""
