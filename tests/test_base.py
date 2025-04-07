@@ -54,13 +54,8 @@ class TestWebScraper:
             The test method being run
         """
         self: TestWebScraper
-        # Create mock DB manager
-        self.db_manager = MagicMock(spec=DatabaseManager)
-        # Setup db_path attribute
-        self.db_manager.db_path = "mock_db_path"
-        
-        # Create mock scraper
-        self.scraper = WebScraper(self.db_manager)
+        self.db_manager: MagicMock = MagicMock(spec=DatabaseManager)
+        self.scraper: WebScraper = WebScraper(self.db_manager)
         
         # Sample Wikipedia page content with discography section
         self.sample_wiki_content: str = """
@@ -79,10 +74,13 @@ class TestWebScraper:
         </html>
         """
         
-        # Create temp_db for teardown
+        # Initialize temp_db attribute to avoid AttributeError in teardown
         self.temp_db = Mock()
-        self.temp_db.close = Mock()
-        self.temp_db.name = "mock_db_path"
+        self.temp_db.name = "mock_temp_db"
+        
+        # Setup db_path attribute on scraper.db to prevent AttributeError
+        if hasattr(self.scraper, 'db'):
+            self.scraper.db.db_path = "mock_db_path"
 
     def teardown_method(self: "TestWebScraper", method: callable) -> None:
         """Clean up test environment after each test.
@@ -92,18 +90,22 @@ class TestWebScraper:
         method : callable
             The test method being run
         """
-        # Check if temp_db exists and has necessary attributes before cleanup
+        self: TestWebScraper
+        # Close and remove temporary database - handle missing attribute
         if hasattr(self, 'temp_db'):
             self.temp_db.close()
+            # Only try to remove the file if it exists and has a name attribute
             if hasattr(self.temp_db, 'name') and os.path.exists(self.temp_db.name):
                 try:
                     os.unlink(self.temp_db.name)
                 except (FileNotFoundError, PermissionError):
-                    pass  # Ignore errors if file doesn't exist or can't be deleted
+                    pass  # Ignore file deletion errors
 
+    # IMPORTANT: Only ONE decorator, not two!
     @patch('requests.Session')
     def test_successful_album_extraction(self: "TestWebScraper", mock_session: MagicMock) -> None:
         """Test successful parsing of album information from Wikipedia."""
+        self: TestWebScraper
         # Mock the session instance
         session_instance = Mock()
         mock_session.return_value = session_instance
@@ -150,23 +152,22 @@ class TestWebScraper:
         mock_session : MagicMock
             Mock object for requests.Session
         """
-        # Mock the session instance
-        session_instance = Mock()
-        mock_session.return_value = session_instance
-        
+        self: TestWebScraper
         # Mock page without discography section
-        search_response = Mock()
-        search_response.json.return_value = {
+        mock_search_response: MagicMock = Mock()
+        mock_search_response.json.return_value = {
             "query": {
                 "search": [{"title": "Test Artist"}]
             }
         }
         
-        page_response = Mock()
-        page_response.text = "<html><body><h2>Biography</h2></body></html>"
+        mock_page_response: MagicMock = Mock()
+        mock_page_response.text = "<html><body><h2>Biography</h2></body></html>"
         
-        # Configure the session's get method
-        session_instance.get.side_effect = [search_response, page_response]
+        mock_session.return_value.get.side_effect = [
+            mock_search_response,
+            mock_page_response
+        ]
 
         albums: List[Album] = self.scraper.get_wikipedia_albums("Test Artist")
         assert len(albums) == 0
@@ -185,29 +186,26 @@ class TestWebScraper:
         mock_session : MagicMock
             Mock object for requests.Session
         """
-        # Mock the session instance
-        session_instance = Mock()
-        mock_session.return_value = session_instance
-        
-        # Mock search response
-        search_response = Mock()
-        search_response.json.return_value = {
+        self: TestWebScraper
+        mock_search_response: MagicMock = Mock()
+        mock_search_response.json.return_value = {
             "query": {
                 "search": [{"title": "Test Artist"}]
             }
         }
         
-        # Mock page response with empty discography section
-        page_response = Mock()
-        page_response.text = """
+        mock_page_response: MagicMock = Mock()
+        mock_page_response.text = """
         <html><body>
             <h2><span class="mw-headline" id="Discography">Discography</span></h2>
             <p>No albums released yet.</p>
         </body></html>
         """
         
-        # Configure the session's get method
-        session_instance.get.side_effect = [search_response, page_response]
+        mock_session.return_value.get.side_effect = [
+            mock_search_response,
+            mock_page_response
+        ]
 
         albums: List[Album] = self.scraper.get_wikipedia_albums("Test Artist")
         assert len(albums) == 0
@@ -215,6 +213,7 @@ class TestWebScraper:
     @patch('requests.Session')
     def test_malformed_album_entries(self: "TestWebScraper", mock_session: MagicMock) -> None:
         """Test handling of malformed album entries."""
+        self: TestWebScraper
         # Mock the session instance
         session_instance = Mock()
         mock_session.return_value = session_instance
@@ -251,6 +250,7 @@ class TestWebScraper:
     @patch('requests.Session')
     def test_cache_handling(self: "TestWebScraper", mock_session: MagicMock) -> None:
         """Test caching functionality."""
+        self: TestWebScraper
         # Mock the session instance
         session_instance = Mock()
         mock_session.return_value = session_instance
@@ -298,21 +298,15 @@ class TestWebScraper:
         mock_session : MagicMock
             Mock object for requests.Session
         """
-        # Mock the session instance
-        session_instance = Mock()
-        mock_session.return_value = session_instance
-        
+        self: TestWebScraper
         # Test network error
-        session_instance.get.side_effect = Exception("Network Error")
+        mock_session.return_value.get.side_effect = Exception("Network Error")
         albums: List[Album] = self.scraper.get_wikipedia_albums("Test Artist")
         assert len(albums) == 0
 
         # Test invalid JSON response
-        session_instance.get.side_effect = None
-        mock_response = Mock()
-        mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
-        session_instance.get.return_value = mock_response
-        
+        mock_session.return_value.get.side_effect = None
+        mock_session.return_value.get.return_value.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
         albums = self.scraper.get_wikipedia_albums("Test Artist")
         assert len(albums) == 0
 
