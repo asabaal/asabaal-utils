@@ -21,6 +21,10 @@ The Debug Session Tracker solves these problems by creating a structured approac
 - **Visualization**: Generate timeline views of the debugging process and visualize the progress with success/failure indicators.
 - **Reporting**: Generate markdown/HTML reports of debugging sessions for team sharing and documentation.
 
+## Coming Soon
+
+- **Web Interface**: A browser-based visualization and management interface for debugging sessions is planned for a future release.
+
 ## Installation
 
 ```bash
