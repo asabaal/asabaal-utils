@@ -73,6 +73,14 @@ class TestWebScraper:
         </body>
         </html>
         """
+        
+        # Initialize temp_db to prevent AttributeError in teardown
+        self.temp_db = Mock()
+        self.temp_db.name = "mock_db_path"
+        
+        # Setup db_path attribute on scraper.db to prevent AttributeError
+        if hasattr(self.scraper, 'db'):
+            self.scraper.db.db_path = "mock_db_path"
 
     def teardown_method(self: "TestWebScraper", method: callable) -> None:
         """Clean up test environment after each test.
@@ -84,10 +92,15 @@ class TestWebScraper:
         """
         self: TestWebScraper
         # Close and remove temporary database
-        self.temp_db.close()
-        os.unlink(self.temp_db.name)
-
-    @patch('requests.Session')
+        # Check if temp_db exists before trying to close it
+        if hasattr(self, 'temp_db'):
+            self.temp_db.close()
+            # Only try to remove the file if it exists
+            if hasattr(self.temp_db, 'name') and os.path.exists(self.temp_db.name):
+                try:
+                    os.unlink(self.temp_db.name)
+                except (FileNotFoundError, PermissionError):
+                    pass  # Ignore errors if file doesn't exist or can't be deleted
 
     @patch('requests.Session')
     def test_successful_album_extraction(self: "TestWebScraper", mock_session: MagicMock) -> None:
@@ -494,10 +507,12 @@ class TestYoutubeDownloader:
         mock_instance: MagicMock = mock_ytdl.return_value.__enter__.return_value
 
         for resolution in test_resolutions:
-            mock_instance.extract_info.return_value = {"title": f"test_video_{resolution}"}
+            mock_instance.extract_info.return_value = {
+                "title": f"test_video_{resolution}"}
             mock_instance.prepare_filename.return_value = f"test_video_{resolution}.mp4"
 
-            result: str = download_youtube_video(self.valid_url, resolution=resolution)
+            result: str = download_youtube_video(
+                self.valid_url, resolution=resolution)
             assert f"test_video_{resolution}.mp4" in result
 
     @patch('yt_dlp.YoutubeDL')
@@ -603,7 +618,8 @@ class TestYoutubeDownloader:
         """
         self: TestYoutubeDownloader
         mock_instance: MagicMock = mock_ytdl.return_value.__enter__.return_value
-        mock_instance.extract_info.side_effect = PermissionError("Permission denied")
+        mock_instance.extract_info.side_effect = PermissionError(
+            "Permission denied")
 
         with pytest.raises(Exception) as exc_info:
             download_youtube_video(self.valid_url, output_path="/root/protected")
