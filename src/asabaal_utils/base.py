@@ -21,7 +21,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from urllib.parse import quote, urljoin
 
 @dataclass
@@ -607,7 +607,7 @@ def download_youtube_video(url, output_path=None, resolution="best"):
     except Exception as e:
         raise Exception(f"Error downloading video: {str(e)}")
 
-def find_package_location(package_name_or_module: str | types.ModuleType) -> str:
+def find_package_location(package_name_or_module: Union[str, types.ModuleType]) -> str:
     """
     Find the location of a package, whether it's already imported or not.
 
