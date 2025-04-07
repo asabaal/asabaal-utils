@@ -48,9 +48,6 @@ Examples:
   
   # Complete the debugging session
   asabaal debug complete --summary="Fixed forecast display issues"
-
-  # Start the web visualization server
-  asabaal debug serve --port=8000
         """
     )
     
@@ -121,11 +118,6 @@ Examples:
     # Import command
     import_parser = subparsers.add_parser('import', help='Import a debugging session')
     import_parser.add_argument('input', help='Input directory or file')
-    
-    # Serve command
-    serve_parser = subparsers.add_parser('serve', help='Start the web visualization server')
-    serve_parser.add_argument('--port', '-p', type=int, default=8000, help='Port to listen on')
-    serve_parser.add_argument('--no-browser', action='store_true', help='Do not open a browser window')
     
     return parser.parse_args()
 
@@ -572,22 +564,6 @@ def command_import(args):
                 print(f"Error importing session from {session_file}: {e}")
 
 
-def command_serve(args):
-    """Handle the 'serve' command.
-
-    Args:
-        args: Command-line arguments
-    """
-    print(f"Starting debug visualization server on port {args.port}...")
-    print("Press Ctrl+C to stop the server.")
-    
-    # Import the server module
-    from .visualization.server import start_server
-    
-    # Start the server
-    start_server(port=args.port, open_browser=not args.no_browser)
-
-
 def main():
     """Main entry point for the Debug Session Tracker CLI."""
     # Parse command-line arguments
@@ -619,8 +595,6 @@ def main():
             command_export(args)
         elif args.command == 'import':
             command_import(args)
-        elif args.command == 'serve':
-            command_serve(args)
         else:
             print(f"Unknown command: {args.command}")
             sys.exit(1)
