@@ -29,17 +29,18 @@ class TestDebugSessionTracker(unittest.TestCase):
         # Create a temporary directory for session storage
         self.temp_dir = tempfile.mkdtemp()
         
-        # Initialize the DebugSessionManager with the temporary directory
-        DebugSessionManager._storage = None  # Reset the singleton
-        self.session_manager = DebugSessionManager()
-        self.session_manager._storage.storage_dir = self.temp_dir
+        # Reset the singleton and initialize with the temporary directory
+        DebugSessionManager._instance = None
+        DebugSessionManager._storage = None
+        self.session_manager = DebugSessionManager(storage_dir=self.temp_dir)
 
     def tearDown(self):
         """Tear down test fixtures."""
         # Clean up temporary files
-        for filename in os.listdir(self.temp_dir):
-            os.unlink(os.path.join(self.temp_dir, filename))
-        os.rmdir(self.temp_dir)
+        if os.path.exists(self.temp_dir):
+            for filename in os.listdir(self.temp_dir):
+                os.unlink(os.path.join(self.temp_dir, filename))
+            os.rmdir(self.temp_dir)
 
     def test_create_session(self):
         """Test creating a debug session."""
