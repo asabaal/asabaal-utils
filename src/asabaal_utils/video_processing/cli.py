@@ -14,6 +14,7 @@ from .silence_detector import remove_silence
 from .transcript_analyzer import analyze_transcript
 from .thumbnail_generator import generate_thumbnails
 from .color_analyzer import analyze_video_colors
+from .jump_cut_detector import detect_jump_cuts, smooth_jump_cuts
 
 # Configure logging
 logging.basicConfig(
@@ -308,6 +309,103 @@ def analyze_colors_cli():
         return 0
     except Exception as e:
         logger.error(f"Error analyzing video colors: {e}", exc_info=True)
+        return 1
+
+
+def detect_jump_cuts_cli():
+    """CLI entry point for jump cut detection."""
+    parser = argparse.ArgumentParser(description="Detect jump cuts in videos")
+    parser.add_argument("video_file", help="Path to input video file")
+    parser.add_argument("--output-dir", help="Directory to save detection outputs (default: creates a temp dir)")
+    parser.add_argument("--sensitivity", type=float, default=0.5,
+                        help="Detection sensitivity (0.0-1.0, default: 0.5)")
+    parser.add_argument("--min-interval", type=float, default=0.5,
+                        help="Minimum interval between detected cuts in seconds (default: 0.5)")
+    parser.add_argument("--sample-rate", type=float, default=10.0,
+                        help="Frames per second to analyze (default: 10.0)")
+    parser.add_argument("--skip-start", type=float, default=0.0,
+                        help="Percentage of video to skip from start (default: 0.0)")
+    parser.add_argument("--skip-end", type=float, default=0.0,
+                        help="Percentage of video to skip from end (default: 0.0)")
+    parser.add_argument("--no-save-frames", action="store_true",
+                        help="Skip saving frames before and after jump cuts")
+    parser.add_argument("--metadata-file", 
+                        help="Path to save jump cut metadata as JSON (default: <output_dir>/jump_cuts.json)")
+    parser.add_argument("--smooth-output", 
+                        help="Path to save a new video with smoothed transitions (optional)")
+    parser.add_argument("--high-confidence-only", action="store_true",
+                        help="Apply transitions only to high-confidence jump cuts")
+    parser.add_argument("--log-level", default="INFO",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Set the logging level")
+    
+    args = parser.parse_args()
+    
+    # Set log level
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    
+    try:
+        # Create default output directory based on video file name if not specified
+        if not args.output_dir:
+            video_path = Path(args.video_file)
+            args.output_dir = str(video_path.with_suffix('_jump_cuts'))
+        
+        # Create output directory
+        os.makedirs(args.output_dir, exist_ok=True)
+        
+        # Create default metadata file if not specified
+        if not args.metadata_file:
+            metadata_path = os.path.join(args.output_dir, "jump_cuts.json")
+            args.metadata_file = metadata_path
+        
+        # Detect jump cuts
+        jump_cuts = detect_jump_cuts(
+            video_path=args.video_file,
+            output_dir=args.output_dir,
+            sensitivity=args.sensitivity,
+            min_jump_interval=args.min_interval,
+            frame_sample_rate=args.sample_rate,
+            save_frames=not args.no_save_frames,
+            metadata_file=args.metadata_file
+        )
+        
+        print(f"\nJump cut detection complete:")
+        print(f"- Analyzed: {os.path.basename(args.video_file)}")
+        print(f"- Found {len(jump_cuts)} jump cuts")
+        print(f"- Results saved to: {os.path.abspath(args.output_dir)}")
+        print(f"- Metadata: {os.path.abspath(args.metadata_file)}")
+        
+        # Print jump cut information
+        if jump_cuts:
+            print("\nDetected jump cuts:")
+            # Sort by confidence
+            sorted_cuts = sorted(jump_cuts, key=lambda x: x['confidence'], reverse=True)
+            
+            for i, cut in enumerate(sorted_cuts):
+                print(f"\n{i+1}. At {cut['timestamp_str']} - "
+                      f"Confidence: {cut['confidence']:.2f}")
+                print(f"   Suggested transition: {cut['suggested_transition']} ({cut['transition_duration']:.1f}s)")
+                
+                if not args.no_save_frames and cut['frame_before'] and cut['frame_after']:
+                    print(f"   Frames: {os.path.basename(cut['frame_before'])} → "
+                          f"{os.path.basename(cut['frame_after'])}")
+        
+        # Apply smoothing if requested
+        if args.smooth_output:
+            print(f"\nApplying transitions to create smoothed video...")
+            
+            smooth_jump_cuts(
+                video_path=args.video_file,
+                output_path=args.smooth_output,
+                jump_cuts_data=jump_cuts,
+                apply_all_transitions=not args.high_confidence_only
+            )
+            
+            print(f"- Smoothed video saved to: {os.path.abspath(args.smooth_output)}")
+        
+        return 0
+    except Exception as e:
+        logger.error(f"Error detecting jump cuts: {e}", exc_info=True)
         return 1
 
 
