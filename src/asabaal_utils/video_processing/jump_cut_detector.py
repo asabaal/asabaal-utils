@@ -16,24 +16,13 @@ import math
 
 import numpy as np
 from tqdm import tqdm
-# Updated for MoviePy 2.1.x
-from moviepy import VideoFileClip
-from moviepy import concatenate_videoclips
-from moviepy import AudioFileClip
-# Also import as needed:
-# from moviepy import fadein
-from moviepy import fadeout
-from moviepy import CompositeVideoClip, ColorClip, TextClip VideoFileClip, CompositeVideoClip, TransformMixin
-# Updated for MoviePy 2.1.x
-from moviepy import VideoFileClip
-from moviepy import concatenate_videoclips
-from moviepy import AudioFileClip
-# Also import as needed:
-# from moviepy import fadein
-from moviepy import fadeout
-from moviepy import CompositeVideoClip, ColorClip, TextClip vfx, VideoClip, concatenate_videoclips, ColorClip, TextClip
-from moviepy import crossfadein, fadein, fadeout
-from PIL import Image, ImageChops, ImageStat, ImageFilter
+
+from moviepy.editor import concatenate_videoclips, VideoFileClip, CompositeVideoClip
+from moviepy.video.VideoClip import VideoClip, ColorClip
+from moviepy.video.compositing.transitions import crossfadein
+from moviepy.video.fx.fadein import fadein
+from moviepy.video.fx.fadeout import fadeout
+from PIL import Image, ImageChops, ImageFilter
 from scipy.ndimage import gaussian_filter
 from skimage.metrics import structural_similarity as ssim
 
