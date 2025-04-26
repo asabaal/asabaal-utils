@@ -18,17 +18,6 @@ Automatically detects and removes silent/near-silent portions of videos to creat
 - Supports large video files (multiple GB)
 - Advanced audio analysis with aggressive silence detection option
 
-#### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/asabaal/asabaal-utils.git
-cd asabaal-utils
-
-# Install with development dependencies
-pip install -e .
-```
-
 #### Usage
 
 ```bash
@@ -113,20 +102,61 @@ best_thumbnail = max(thumbnails, key=lambda x: x['quality_score'])
 print(f"Best thumbnail at {best_thumbnail['timestamp_str']}: {best_thumbnail['frame_path']}")
 ```
 
-## Budget Utility
+### Video Color Theme Analysis
 
-A command-line utility to help manage monthly budgets and projections.
+Extracts and analyzes color themes and palettes from your videos to help maintain visual consistency.
 
-### Installation
+#### Features:
+
+- Identifies dominant colors and their proportions
+- Creates color palette images for reference
+- Identifies color theme types (monochromatic, complementary, etc.)
+- Suggests complementary colors for graphics and titles
+- Provides color emotion and mood analysis
+- Tracks color changes throughout the video in segments
+
+#### Usage
+
+```bash
+# Command-line usage
+analyze-colors video.mp4 --output-dir video_colors --palette-size 6
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import analyze_video_colors
+
+color_data = analyze_video_colors(
+    "video.mp4",
+    output_dir="video_colors",
+    palette_size=5,
+    create_palette_image=True,
+    create_segments=True
+)
+
+# Access the color theme information
+theme = color_data["theme"]
+print(f"Video color theme: {theme['theme_type']}")
+print(f"Dominant colors: {', '.join(theme['color_names'])}")
+print(f"Emotional associations: {', '.join(theme['emotions'])}")
+
+# Use complementary colors for graphics
+for color_hex in theme["complementary_hex"]:
+    print(f"Complementary color: {color_hex}")
+```
+
+## Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/asabaal/asabaal-utils.git
 cd asabaal-utils
 
-# Install dependencies
-npm install
+# Install with development dependencies
+pip install -e .
 ```
+
+## Budget Utility
+
+A command-line utility to help manage monthly budgets and projections.
 
 ### Usage
 
