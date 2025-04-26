@@ -13,7 +13,9 @@ from pathlib import Path
 import logging
 from tqdm import tqdm
 
-from moviepy.editor import VideoFileClip, concatenate_videoclips, AudioFileClip
+from moviepy import VideoFileClip
+from moviepy import concatenate_videoclips
+from moviepy import AudioFileClip
 import librosa
 
 logger = logging.getLogger(__name__)
