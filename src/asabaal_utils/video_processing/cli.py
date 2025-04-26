@@ -13,6 +13,7 @@ from pathlib import Path
 from .silence_detector import remove_silence
 from .transcript_analyzer import analyze_transcript
 from .thumbnail_generator import generate_thumbnails
+from .color_analyzer import analyze_video_colors
 
 # Configure logging
 logging.basicConfig(
@@ -213,6 +214,100 @@ def generate_thumbnails_cli():
         return 0
     except Exception as e:
         logger.error(f"Error generating thumbnails: {e}", exc_info=True)
+        return 1
+
+
+def analyze_colors_cli():
+    """CLI entry point for video color analysis."""
+    parser = argparse.ArgumentParser(description="Analyze color themes and palettes in videos")
+    parser.add_argument("video_file", help="Path to input video file")
+    parser.add_argument("--output-dir", help="Directory to save color analysis outputs (default: creates a temp dir)")
+    parser.add_argument("--palette-size", type=int, default=5,
+                        help="Number of colors to extract for the palette (default: 5)")
+    parser.add_argument("--sample-rate", type=float, default=1.0,
+                        help="Frames per second to sample (default: 1.0)")
+    parser.add_argument("--segment-duration", type=float, default=10.0,
+                        help="Duration of each segment in seconds (default: 10.0)")
+    parser.add_argument("--skip-start", type=float, default=0.05,
+                        help="Percentage of video to skip from start (default: 0.05, i.e., 5%%)")
+    parser.add_argument("--skip-end", type=float, default=0.05,
+                        help="Percentage of video to skip from end (default: 0.05, i.e., 5%%)")
+    parser.add_argument("--no-palette-image", action="store_true",
+                        help="Skip creation of palette image")
+    parser.add_argument("--no-segments", action="store_true",
+                        help="Skip segment-by-segment analysis")
+    parser.add_argument("--segment-images", action="store_true",
+                        help="Create palette images for each segment")
+    parser.add_argument("--metadata-file", 
+                        help="Path to save color analysis as JSON (default: <output_dir>/color_analysis.json)")
+    parser.add_argument("--log-level", default="INFO",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Set the logging level")
+    
+    args = parser.parse_args()
+    
+    # Set log level
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    
+    try:
+        # Create default output directory based on video file name if not specified
+        if not args.output_dir:
+            video_path = Path(args.video_file)
+            args.output_dir = str(video_path.with_suffix('_colors'))
+        
+        # Create output directory
+        os.makedirs(args.output_dir, exist_ok=True)
+        
+        # Create default metadata file if not specified
+        if not args.metadata_file:
+            metadata_path = os.path.join(args.output_dir, "color_analysis.json")
+            args.metadata_file = metadata_path
+        
+        # Analyze colors
+        results = analyze_video_colors(
+            video_path=args.video_file,
+            output_dir=args.output_dir,
+            palette_size=args.palette_size,
+            frame_sample_rate=args.sample_rate,
+            segment_duration=args.segment_duration,
+            create_palette_image=not args.no_palette_image,
+            create_segments=not args.no_segments,
+            segment_palette_images=args.segment_images,
+            metadata_file=args.metadata_file
+        )
+        
+        theme = results["theme"]
+        segments = results.get("segments", [])
+        
+        print(f"\nVideo color analysis complete:")
+        print(f"- Analyzed: {os.path.basename(args.video_file)}")
+        print(f"- Color theme type: {theme['theme_type']}")
+        print(f"- Dominant colors: {', '.join(theme['color_names'])}")
+        print(f"- Emotional associations: {', '.join(theme['emotions'])}")
+        print(f"- Results saved to: {os.path.abspath(args.output_dir)}")
+        
+        if theme["color_palette_path"]:
+            print(f"- Color palette image: {os.path.abspath(theme['color_palette_path'])}")
+        
+        print(f"- Metadata: {os.path.abspath(args.metadata_file)}")
+        
+        # Print color information
+        print("\nDominant colors:")
+        for i, (name, hex_code, pct) in enumerate(zip(
+            theme["color_names"], 
+            theme["color_hex"], 
+            theme["color_percentages"]
+        )):
+            print(f"  {i+1}. {name} ({hex_code}) - {pct*100:.1f}%")
+        
+        if segments:
+            print(f"\nSegment analysis: {len(segments)} segments")
+            print(f"  Use --no-segments to skip segment analysis")
+            print(f"  See the metadata JSON for detailed segment information")
+        
+        return 0
+    except Exception as e:
+        logger.error(f"Error analyzing video colors: {e}", exc_info=True)
         return 1
 
 
