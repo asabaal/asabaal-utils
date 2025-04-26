@@ -15,6 +15,7 @@ from .transcript_analyzer import analyze_transcript
 from .thumbnail_generator import generate_thumbnails
 from .color_analyzer import analyze_video_colors
 from .jump_cut_detector import detect_jump_cuts, smooth_jump_cuts
+from .video_summarizer import create_video_summary, SummaryStyle
 
 # Configure logging
 logging.basicConfig(
@@ -406,6 +407,86 @@ def detect_jump_cuts_cli():
         return 0
     except Exception as e:
         logger.error(f"Error detecting jump cuts: {e}", exc_info=True)
+        return 1
+
+
+def create_summary_cli():
+    """CLI entry point for content-aware video summarization."""
+    parser = argparse.ArgumentParser(description="Create content-aware video summaries")
+    parser.add_argument("video_file", help="Path to input video file")
+    parser.add_argument("output_file", help="Path to output summary video file")
+    parser.add_argument("--target-duration", type=float, default=60.0,
+                       help="Target duration in seconds for the summary (default: 60.0)")
+    parser.add_argument("--style", default="overview", 
+                        choices=[s.value for s in SummaryStyle],
+                        help="Style of summary to create (default: overview)")
+    parser.add_argument("--segment-length", type=float, default=3.0,
+                       help="Base length of segments to consider in seconds (default: 3.0)")
+    parser.add_argument("--skip-start", type=float, default=0.05,
+                        help="Percentage of video to skip from start (default: 0.05, i.e., 5%%)")
+    parser.add_argument("--skip-end", type=float, default=0.05,
+                        help="Percentage of video to skip from end (default: 0.05, i.e., 5%%)")
+    parser.add_argument("--no-favor-beginning", action="store_true",
+                        help="Don't give preference to content from the beginning of the video")
+    parser.add_argument("--no-favor-ending", action="store_true",
+                        help="Don't give preference to content from the end of the video")
+    parser.add_argument("--metadata-file", 
+                        help="Path to save summary metadata as JSON (default: <output_dir>/summary.json)")
+    parser.add_argument("--log-level", default="INFO",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Set the logging level")
+    
+    args = parser.parse_args()
+    
+    # Set log level
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    
+    try:
+        # Create output directory if it doesn't exist
+        output_path = Path(args.output_file)
+        output_dir = output_path.parent
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Create default metadata file if not specified
+        if not args.metadata_file:
+            metadata_file = output_path.with_suffix('.json')
+            args.metadata_file = str(metadata_file)
+        
+        # Create video summary
+        segments = create_video_summary(
+            video_path=args.video_file,
+            output_path=args.output_file,
+            target_duration=args.target_duration,
+            summary_style=args.style,
+            segment_length=args.segment_length,
+            favor_beginning=not args.no_favor_beginning,
+            favor_ending=not args.no_favor_ending,
+            metadata_file=args.metadata_file
+        )
+        
+        print(f"\nVideo summarization complete:")
+        print(f"- Analyzed: {os.path.basename(args.video_file)}")
+        print(f"- Created summary with {len(segments)} segments")
+        print(f"- Summary style: {args.style}")
+        print(f"- Target duration: {args.target_duration:.1f}s")
+        print(f"- Actual duration: {sum(s['duration'] for s in segments):.1f}s")
+        print(f"- Summary saved to: {os.path.abspath(args.output_file)}")
+        print(f"- Metadata: {os.path.abspath(args.metadata_file)}")
+        
+        # Print segments
+        print("\nIncluded segments:")
+        for i, segment in enumerate(segments):
+            print(f"\n{i+1}. {segment['timestamp_str']} ({segment['duration']:.1f}s)")
+            print(f"   Category: {segment['category']}")
+            print(f"   Score: {segment['score']:.3f}")
+            if segment['is_peak']:
+                print(f"   Peak moment")
+            if segment['is_representative']:
+                print(f"   Representative section")
+        
+        return 0
+    except Exception as e:
+        logger.error(f"Error creating video summary: {e}", exc_info=True)
         return 1
 
 
