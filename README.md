@@ -143,6 +143,51 @@ for color_hex in theme["complementary_hex"]:
     print(f"Complementary color: {color_hex}")
 ```
 
+### Jump Cut Detection and Smoothing
+
+Detects abrupt transitions (jump cuts) in videos and can automatically apply smooth transitions to improve flow.
+
+#### Features:
+
+- Identifies jump cuts using multiple detection metrics (similarity, motion, color change)
+- Suggests appropriate transitions based on content analysis
+- Supports various transition types (crossfade, fade to black/white, wipes, zooms)
+- Can save frames before and after each jump cut for manual review
+- Option to automatically create a new video with smoothed transitions
+
+#### Usage
+
+```bash
+# Command-line usage for detection only
+detect-jump-cuts video.mp4 --output-dir video_jump_cuts --sensitivity 0.6
+
+# With automatic smoothing
+detect-jump-cuts video.mp4 --smooth-output smoothed_video.mp4 --sensitivity 0.6
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import detect_jump_cuts, smooth_jump_cuts
+
+# First detect jump cuts
+jump_cuts = detect_jump_cuts(
+    "video.mp4", 
+    output_dir="video_jump_cuts",
+    sensitivity=0.6,
+    save_frames=True
+)
+
+# Review the detected jump cuts
+for cut in jump_cuts:
+    print(f"Jump cut at {cut['timestamp_str']} - Suggested transition: {cut['suggested_transition']}")
+
+# Then apply smoothing transitions
+smooth_jump_cuts(
+    "video.mp4",
+    "smoothed_video.mp4",
+    jump_cuts,
+    apply_all_transitions=True
+)
+```
+
 ## Installation
 
 ```bash
