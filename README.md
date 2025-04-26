@@ -78,6 +78,41 @@ suggestions = analyze_transcript(
 )
 ```
 
+### Automatic Thumbnail Generation
+
+Analyzes videos to extract high-quality frames that make excellent thumbnails or preview images.
+
+#### Features:
+
+- Extracts frames based on image quality metrics (brightness, contrast, colorfulness, sharpness)
+- Avoids blurry or motion-heavy frames
+- Intelligently spaces thumbnails throughout the video
+- Options to customize number of candidates and placement
+- Generates detailed metadata about each thumbnail candidate
+
+#### Usage
+
+```bash
+# Command-line usage
+generate-thumbnails video.mp4 --output-dir video_thumbs --count 15 --format jpg
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import generate_thumbnails
+
+thumbnails = generate_thumbnails(
+    "video.mp4",
+    output_dir="video_thumbs",
+    frames_to_extract=10,
+    skip_start_percent=0.05,
+    skip_end_percent=0.05,
+    output_format="jpg"
+)
+
+# Print the best thumbnail candidate
+best_thumbnail = max(thumbnails, key=lambda x: x['quality_score'])
+print(f"Best thumbnail at {best_thumbnail['timestamp_str']}: {best_thumbnail['frame_path']}")
+```
+
 ## Budget Utility
 
 A command-line utility to help manage monthly budgets and projections.
