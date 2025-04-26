@@ -20,11 +20,10 @@ import numpy as np
 from tqdm import tqdm
 from moviepy.video.io import VideoFileClip
 from moviepy import concatenate_videoclips
-from moviepy import AudioFileClip
 # Also import as needed:
 # from moviepy import fadein
 from moviepy import fadeout
-from moviepy import CompositeVideoClip, ColorClip, TextClip VideoFileClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip
+from moviepy import concatenate_videoclips, CompositeVideoClip
 from moviepy import fadein
 from moviepy import fadeout
 import librosa
