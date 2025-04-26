@@ -188,6 +188,44 @@ smooth_jump_cuts(
 )
 ```
 
+### Content-Aware Video Summarization
+
+Automatically analyzes videos to create shorter summaries or highlight reels by extracting the most interesting segments.
+
+#### Features:
+
+- Intelligently identifies the most engaging parts of your videos
+- Multiple summary styles (highlights, trailer, overview, teaser, condensed)
+- Analyzes visual quality, audio interest, motion, and speech presence
+- Detects peak moments and representative segments
+- Automatically creates a condensed version with smooth transitions between segments
+
+#### Usage
+
+```bash
+# Command-line usage
+create-summary input.mp4 summary.mp4 --target-duration 90 --style trailer
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import create_video_summary, SummaryStyle
+
+# Create a 60-second highlight reel
+segments = create_video_summary(
+    "long_video.mp4",
+    "highlight_reel.mp4",
+    target_duration=60.0,
+    summary_style="highlights",
+    favor_beginning=True,
+    favor_ending=True
+)
+
+# Print information about the selected segments
+for segment in segments:
+    print(f"Included segment from {segment['timestamp_str']} - {segment['category']}")
+    print(f"Metrics: Visual={segment['metrics']['visual_interest']}, " 
+          f"Audio={segment['metrics']['audio_interest']}")
+```
+
 ## Installation
 
 ```bash
