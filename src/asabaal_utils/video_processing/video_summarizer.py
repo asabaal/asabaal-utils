@@ -18,14 +18,10 @@ import heapq
 
 import numpy as np
 from tqdm import tqdm
-from moviepy.video.io import VideoFileClip
-from moviepy import concatenate_videoclips
-# Also import as needed:
-# from moviepy import fadein
-from moviepy import fadeout
-from moviepy import concatenate_videoclips, CompositeVideoClip
-from moviepy import fadein
-from moviepy import fadeout
+from moviepy.editor import VideoFileClip
+from moviepy.editor import concatenate_videoclips
+from moviepy.video.fx.fadein import fadein
+from moviepy.video.fx.fadeout import fadeout
 import librosa
 from scipy.signal import find_peaks
 from scipy import stats
