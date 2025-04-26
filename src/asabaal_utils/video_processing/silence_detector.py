@@ -15,7 +15,6 @@ from tqdm import tqdm
 
 from moviepy import VideoFileClip
 from moviepy import concatenate_videoclips
-from moviepy import AudioFileClip
 import librosa
 
 logger = logging.getLogger(__name__)

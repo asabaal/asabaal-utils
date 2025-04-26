@@ -21,18 +21,18 @@ from moviepy import VideoFileClip
 from moviepy import concatenate_videoclips
 from moviepy import AudioFileClip
 # Also import as needed:
-# from moviepy.video.fx.fadein import fadein
-from moviepy.video.fx.fadeout import fadeout
-# from moviepy import CompositeVideoClip, ColorClip, TextClip VideoFileClip, CompositeVideoClip, TransformMixin
+# from moviepy import fadein
+from moviepy import fadeout
+from moviepy import CompositeVideoClip, ColorClip, TextClip VideoFileClip, CompositeVideoClip, TransformMixin
 # Updated for MoviePy 2.1.x
 from moviepy import VideoFileClip
 from moviepy import concatenate_videoclips
 from moviepy import AudioFileClip
 # Also import as needed:
-# from moviepy.video.fx.fadein import fadein
-from moviepy.video.fx.fadeout import fadeout
-# from moviepy import CompositeVideoClip, ColorClip, TextClip vfx, VideoClip, concatenate_videoclips, ColorClip, TextClip
-from moviepy.video.fx.crossfadein import crossfadein, fadein, fadeout
+# from moviepy import fadein
+from moviepy import fadeout
+from moviepy import CompositeVideoClip, ColorClip, TextClip vfx, VideoClip, concatenate_videoclips, ColorClip, TextClip
+from moviepy import crossfadein, fadein, fadeout
 from PIL import Image, ImageChops, ImageStat, ImageFilter
 from scipy.ndimage import gaussian_filter
 from skimage.metrics import structural_similarity as ssim

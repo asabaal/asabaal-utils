@@ -17,14 +17,9 @@ import colorsys
 
 import numpy as np
 from tqdm import tqdm
-# Updated for MoviePy 2.1.x
-from moviepy import VideoFileClip
-from moviepy import concatenate_videoclips
-from moviepy import AudioFileClip
 # Also import as needed:
-# from moviepy.video.fx.fadein import fadein
-from moviepy.video.fx.fadeout import fadeout
-# from moviepy import CompositeVideoClip, ColorClip, TextClip VideoFileClip
+# from moviepy import fadein
+from moviepy.video.io import VideoFileClip
 from PIL import Image, ImageDraw
 from sklearn.cluster import KMeans
 
