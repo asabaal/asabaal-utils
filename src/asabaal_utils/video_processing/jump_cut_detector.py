@@ -525,7 +525,7 @@ class JumpCutDetector:
         
         if transition_type == TransitionType.CROSSFADE:
             # Simple crossfade transition
-            clip2 = clip2.set_start(clip1.end - duration)
+            clip2 = clip2.with_start(clip1.end - duration)
             clip2 = crossfadein(clip2, duration)
             return CompositeVideoClip([clip1, clip2])
         
@@ -533,7 +533,7 @@ class JumpCutDetector:
             # Fade to black transition
             clip1 = clip1.fx(fadeout, duration)
             clip2 = clip2.fx(fadein, duration)
-            clip2 = clip2.set_start(clip1.end)
+            clip2 = clip2.with_start(clip1.end)
             return concatenate_videoclips([clip1, clip2])
         
         elif transition_type == TransitionType.FADE_WHITE:
@@ -544,20 +544,20 @@ class JumpCutDetector:
                 color=(255, 255, 255),
                 duration=duration / 2
             )
-            white_clip = white_clip.set_start(clip1.end - duration / 2)
+            white_clip = white_clip.with_start(clip1.end - duration / 2)
             
             # Fade out clip1 to white
             clip1 = clip1.fx(fadeout, duration)
             
             # Fade in clip2 from white
             clip2 = clip2.fx(fadein, duration)
-            clip2 = clip2.set_start(clip1.end)
+            clip2 = clip2.with_start(clip1.end)
             
             return CompositeVideoClip([clip1, white_clip, clip2])
         
         elif transition_type == TransitionType.DISSOLVE:
             # Similar to crossfade but with a slight brightness increase
-            clip2 = clip2.set_start(clip1.end - duration)
+            clip2 = clip2.with_start(clip1.end - duration)
             
             # Add slight brightness increase during transition
             def brightness_increase(gf, t):
@@ -582,7 +582,7 @@ class JumpCutDetector:
         elif transition_type in [TransitionType.WIPE_LEFT, TransitionType.WIPE_RIGHT, 
                                 TransitionType.WIPE_UP, TransitionType.WIPE_DOWN]:
             # Directional wipe transitions
-            clip2 = clip2.set_start(clip1.end - duration)
+            clip2 = clip2.with_start(clip1.end - duration)
             
             # Create a mask clip for the wipe
             w, h = clip1.size
@@ -626,13 +626,13 @@ class JumpCutDetector:
             )
             
             # Apply the mask to clip2
-            clip2 = clip2.set_mask(mask_clip)
+            clip2 = clip2.with_mask(mask_clip)
             
             return CompositeVideoClip([clip1, clip2])
         
         elif transition_type == TransitionType.ZOOM_IN:
             # Zoom in transition
-            clip2 = clip2.set_start(clip1.end - duration)
+            clip2 = clip2.with_start(clip1.end - duration)
             
             # Create zoom effect on clip1
             def zoom_in_transform(t):
@@ -654,7 +654,7 @@ class JumpCutDetector:
         
         elif transition_type == TransitionType.ZOOM_OUT:
             # Zoom out transition
-            clip2 = clip2.set_start(clip1.end - duration)
+            clip2 = clip2.with_start(clip1.end - duration)
             
             # Create zoom effect on clip2
             def zoom_out_transform(t):
