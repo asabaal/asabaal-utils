@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .silence_detector import remove_silence
 from .transcript_analyzer import analyze_transcript
+from .thumbnail_generator import generate_thumbnails
 
 # Configure logging
 logging.basicConfig(
@@ -137,6 +138,81 @@ def analyze_transcript_cli():
         return 0
     except Exception as e:
         logger.error(f"Error analyzing transcript: {e}", exc_info=True)
+        return 1
+
+
+def generate_thumbnails_cli():
+    """CLI entry point for thumbnail generation."""
+    parser = argparse.ArgumentParser(description="Generate thumbnail candidates from video files")
+    parser.add_argument("video_file", help="Path to input video file")
+    parser.add_argument("--output-dir", help="Directory to save thumbnail images (default: creates a temp dir)")
+    parser.add_argument("--count", type=int, default=10,
+                        help="Number of thumbnail candidates to generate (default: 10)")
+    parser.add_argument("--min-interval", type=float, default=1.0,
+                        help="Minimum interval between thumbnails in seconds (default: 1.0)")
+    parser.add_argument("--skip-start", type=float, default=0.05,
+                        help="Percentage of video to skip from start (default: 0.05, i.e., 5%%)")
+    parser.add_argument("--skip-end", type=float, default=0.05,
+                        help="Percentage of video to skip from end (default: 0.05, i.e., 5%%)")
+    parser.add_argument("--format", default="jpg", choices=["jpg", "png"],
+                        help="Output image format (default: jpg)")
+    parser.add_argument("--quality", type=int, default=90,
+                        help="JPEG quality (1-100, default: 90)")
+    parser.add_argument("--metadata-file", 
+                        help="Path to save thumbnail metadata as JSON (default: <output_dir>/thumbnails.json)")
+    parser.add_argument("--log-level", default="INFO",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Set the logging level")
+    
+    args = parser.parse_args()
+    
+    # Set log level
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    
+    try:
+        # Create default output directory based on video file name if not specified
+        if not args.output_dir:
+            video_path = Path(args.video_file)
+            args.output_dir = str(video_path.with_suffix('_thumbnails'))
+        
+        # Create default metadata file if not specified
+        if not args.metadata_file:
+            metadata_path = os.path.join(args.output_dir, "thumbnails.json")
+            args.metadata_file = metadata_path
+        
+        # Generate thumbnails
+        thumbnails = generate_thumbnails(
+            video_path=args.video_file,
+            output_dir=args.output_dir,
+            frames_to_extract=args.count,
+            min_frame_interval=args.min_interval,
+            skip_start_percent=args.skip_start,
+            skip_end_percent=args.skip_end,
+            output_format=args.format,
+            output_quality=args.quality,
+            metadata_file=args.metadata_file
+        )
+        
+        print(f"\nThumbnail generation complete:")
+        print(f"- Generated {len(thumbnails)} thumbnail candidates")
+        print(f"- Saved to: {os.path.abspath(args.output_dir)}")
+        print(f"- Metadata: {os.path.abspath(args.metadata_file)}")
+        
+        # Print thumbnail information
+        print("\nThumbnail candidates (sorted by quality):")
+        sorted_thumbnails = sorted(thumbnails, key=lambda x: x['quality_score'], reverse=True)
+        
+        for i, thumb in enumerate(sorted_thumbnails):
+            print(f"\n{i+1}. {os.path.basename(thumb['frame_path'])}")
+            print(f"   Time: {thumb['timestamp_str']} - "
+                  f"Quality: {thumb['quality_score']:.3f}")
+            print(f"   Brightness: {thumb['metrics']['brightness']:.2f}, "
+                  f"Contrast: {thumb['metrics']['contrast']:.2f}, "
+                  f"Colorfulness: {thumb['metrics']['colorfulness']:.2f}")
+        
+        return 0
+    except Exception as e:
+        logger.error(f"Error generating thumbnails: {e}", exc_info=True)
         return 1
 
 
