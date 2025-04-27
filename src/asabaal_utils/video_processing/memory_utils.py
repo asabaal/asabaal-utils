@@ -48,7 +48,7 @@ class MemoryState:
     available_memory: int
     estimated_required: int
     video_properties: Dict[str, Any]
-    safe_threshold: float = 0.7  # Maximum percentage of available memory to use
+    safe_threshold: float = 0.5  # Maximum percentage of available memory to use (more conservative)
     
     @property
     def is_sufficient(self) -> bool:
@@ -64,13 +64,13 @@ class MemoryState:
         """Recommend appropriate processing strategy based on memory state."""
         ratio = self.memory_ratio
         
-        if ratio <= 0.7:
+        if ratio <= 0.5:  # More conservative threshold
             return ProcessingStrategy.FULL_QUALITY
-        elif ratio <= 1.2:
+        elif ratio <= 0.8:  # More conservative threshold
             return ProcessingStrategy.REDUCED_RESOLUTION
-        elif ratio <= 2.0:
+        elif ratio <= 1.5:  # More conservative threshold
             return ProcessingStrategy.CHUNKED
-        elif ratio <= 3.5:
+        elif ratio <= 2.5:  # More conservative threshold
             return ProcessingStrategy.SEGMENT
         else:
             return ProcessingStrategy.STREAMING
@@ -222,7 +222,7 @@ class MemoryMonitor:
 def estimate_memory_requirement(
     video_path: Union[str, Path],
     operation_type: str = "generic",
-    safety_factor: float = 1.5
+    safety_factor: float = 2.5  # Higher safety factor for more conservative estimates
 ) -> Dict[str, Any]:
     """
     Estimate memory requirements for processing a video.
@@ -287,7 +287,7 @@ def estimate_memory_requirement(
 def get_memory_state(
     video_path: Union[str, Path],
     operation_type: str = "generic",
-    safety_factor: float = 1.5
+    safety_factor: float = 2.5  # Higher safety factor for more conservative estimates
 ) -> MemoryState:
     """
     Get current memory state including video requirements.
@@ -898,10 +898,10 @@ def adaptive_memory_wrapper(func):
                 # For longer videos, adjust chunk size based on available memory
                 if memory_state.video_properties["duration"] > 300:  # 5+ minutes
                     ratio = memory_state.memory_ratio
-                    chunk_duration = 120.0 / ratio  # Smaller chunks for less memory
-                    chunk_duration = max(30.0, min(120.0, chunk_duration))
+                    chunk_duration = 60.0 / ratio  # Much smaller chunks for less memory
+                    chunk_duration = max(20.0, min(60.0, chunk_duration))
                 else:
-                    chunk_duration = 60.0
+                    chunk_duration = 30.0  # Smaller chunks even for shorter videos
                 
                 return process_in_chunks(
                     input_file, output_file, func, 
@@ -909,9 +909,9 @@ def adaptive_memory_wrapper(func):
                 )
             
             elif strategy == ProcessingStrategy.SEGMENT:
-                # Adjust segment count based on memory ratio and video length
+                # Adjust segment count based on memory ratio and video length - more segments for less memory
                 ratio = memory_state.memory_ratio
-                segment_count = max(2, min(8, int(ratio * 2)))
+                segment_count = max(8, min(20, int(ratio * 4)))
                 
                 return process_in_segments(
                     input_file, output_file, func,
@@ -922,8 +922,8 @@ def adaptive_memory_wrapper(func):
                 # For extreme cases, combine reduced resolution with chunking
                 return process_in_chunks(
                     input_file, output_file,
-                    lambda i, o, **kw: process_in_reduced_resolution(i, o, func, scale_factor=0.4, **kw),
-                    chunk_duration=30.0, *args, **kwargs
+                    lambda i, o, **kw: process_in_reduced_resolution(i, o, func, scale_factor=0.25, **kw),
+                    chunk_duration=15.0, *args, **kwargs  # Even smaller chunks with lower resolution
                 )
                 
         except MemoryError:
@@ -998,10 +998,10 @@ def memory_adaptive_processing(
         # For longer videos, adjust chunk size based on available memory
         if memory_state.video_properties["duration"] > 300:  # 5+ minutes
             ratio = memory_state.memory_ratio
-            chunk_duration = 120.0 / ratio  # Smaller chunks for less memory
-            chunk_duration = max(30.0, min(120.0, chunk_duration))
+            chunk_duration = 60.0 / ratio  # Much smaller chunks for less memory
+            chunk_duration = max(20.0, min(60.0, chunk_duration))
         else:
-            chunk_duration = 60.0
+            chunk_duration = 30.0  # Smaller chunks even for shorter videos
         
         return process_in_chunks(
             input_file, output_file, process_function, 
@@ -1009,9 +1009,9 @@ def memory_adaptive_processing(
         )
     
     elif strategy == ProcessingStrategy.SEGMENT:
-        # Adjust segment count based on memory ratio and video length
+        # Adjust segment count based on memory ratio and video length - more segments for less memory
         ratio = memory_state.memory_ratio
-        segment_count = max(2, min(8, int(ratio * 2)))
+        segment_count = max(8, min(20, int(ratio * 4)))
         
         return process_in_segments(
             input_file, output_file, process_function,
@@ -1022,6 +1022,6 @@ def memory_adaptive_processing(
         # For extreme cases, combine reduced resolution with chunking
         return process_in_chunks(
             input_file, output_file,
-            lambda i, o, **kw: process_in_reduced_resolution(i, o, process_function, scale_factor=0.4, **kw),
-            chunk_duration=30.0, **process_kwargs
+            lambda i, o, **kw: process_in_reduced_resolution(i, o, process_function, scale_factor=0.25, **kw),
+            chunk_duration=15.0, **process_kwargs  # Even smaller chunks with lower resolution
         )
