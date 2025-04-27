@@ -300,6 +300,7 @@ def remove_silence(
     # Create subclips from the original video and concatenate them
     with VideoFileClip(input_file) as video:
         original_duration = video.duration
+        original_size = video.size  # Store the original video dimensions
         
         subclips = []
         for segment in active_segments:
@@ -318,8 +319,12 @@ def remove_silence(
             video.write_videofile(output_file, logger=None)
             return original_duration, original_duration, 0
         
-        # Concatenate subclips
-        final_clip = concatenate_videoclips(subclips)
+        # Concatenate subclips, preserving the original size
+        final_clip = concatenate_videoclips(subclips, method="compose")
+        # Ensure the final clip has the same size as the original
+        if final_clip.size != original_size:
+            final_clip = final_clip.resize(width=original_size[0], height=original_size[1])
+            
         output_duration = final_clip.duration
         time_saved = original_duration - output_duration
         
@@ -327,7 +332,7 @@ def remove_silence(
         logger.info(f"Output duration: {output_duration:.2f}s")
         logger.info(f"Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
         
-        # Write output file
+        # Write output file with original size
         final_clip.write_videofile(output_file, logger=None)
         final_clip.close()
         
