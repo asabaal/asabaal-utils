@@ -50,12 +50,41 @@ def remove_silence_cli():
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the logging level")
     
+    # Memory management options
+    memory_group = parser.add_argument_group('Memory Management Options')
+    memory_group.add_argument("--strategy", 
+                        choices=["auto", "full_quality", "reduced_resolution", "chunked", "segment", "streaming"],
+                        default="auto",
+                        help="Processing strategy to use (default: auto)")
+    memory_group.add_argument("--segment-count", type=int, default=None,
+                        help="Number of segments to split video into when using segment strategy")
+    memory_group.add_argument("--chunk-duration", type=float, default=None,
+                        help="Duration of each chunk in seconds when using chunked strategy")
+    memory_group.add_argument("--resolution-scale", type=float, default=None,
+                        help="Scale factor for resolution when using reduced_resolution strategy (0.25-0.75)")
+    memory_group.add_argument("--disable-memory-adaptation", action="store_true",
+                        help="Disable memory-adaptive processing entirely")
+    
     args = parser.parse_args()
     
     # Set log level
     logging.getLogger().setLevel(getattr(logging, args.log_level))
     
     try:
+        # Determine whether to use memory adaptation
+        use_memory_adaptation = not args.disable_memory_adaptation
+
+        # Prepare memory management options
+        memory_options = {}
+        if args.strategy != "auto":
+            memory_options["strategy"] = args.strategy
+        if args.segment_count is not None:
+            memory_options["segment_count"] = args.segment_count
+        if args.chunk_duration is not None:
+            memory_options["chunk_duration"] = args.chunk_duration
+        if args.resolution_scale is not None:
+            memory_options["resolution_scale"] = args.resolution_scale
+        
         result = remove_silence(
             input_file=args.input_file,
             output_file=args.output_file,
@@ -65,6 +94,8 @@ def remove_silence_cli():
             padding=args.padding,
             chunk_size=args.chunk_size,
             aggressive_silence_rejection=args.aggressive,
+            use_memory_adaptation=use_memory_adaptation,
+            **memory_options,
         )
         
         # Handle both direct return values and dictionary result from memory adaptation
@@ -459,6 +490,21 @@ def create_summary_cli():
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the logging level")
     
+    # Memory management options
+    memory_group = parser.add_argument_group('Memory Management Options')
+    memory_group.add_argument("--strategy", 
+                        choices=["auto", "full_quality", "reduced_resolution", "chunked", "segment", "streaming"],
+                        default="auto",
+                        help="Processing strategy to use (default: auto)")
+    memory_group.add_argument("--segment-count", type=int, default=None,
+                        help="Number of segments to split video into when using segment strategy")
+    memory_group.add_argument("--chunk-duration", type=float, default=None,
+                        help="Duration of each chunk in seconds when using chunked strategy")
+    memory_group.add_argument("--resolution-scale", type=float, default=None,
+                        help="Scale factor for resolution when using reduced_resolution strategy (0.25-0.75)")
+    memory_group.add_argument("--disable-memory-adaptation", action="store_true",
+                        help="Disable memory-adaptive processing entirely")
+    
     args = parser.parse_args()
     
     # Set log level
@@ -475,6 +521,20 @@ def create_summary_cli():
             metadata_file = output_path.with_suffix('.json')
             args.metadata_file = str(metadata_file)
         
+        # Determine whether to use memory adaptation
+        use_memory_adaptation = not args.disable_memory_adaptation
+
+        # Prepare memory management options
+        memory_options = {}
+        if args.strategy != "auto":
+            memory_options["strategy"] = args.strategy
+        if args.segment_count is not None:
+            memory_options["segment_count"] = args.segment_count
+        if args.chunk_duration is not None:
+            memory_options["chunk_duration"] = args.chunk_duration
+        if args.resolution_scale is not None:
+            memory_options["resolution_scale"] = args.resolution_scale
+            
         # Create video summary
         segments = create_video_summary(
             video_path=args.video_file,
@@ -484,7 +544,9 @@ def create_summary_cli():
             segment_length=args.segment_length,
             favor_beginning=not args.no_favor_beginning,
             favor_ending=not args.no_favor_ending,
-            metadata_file=args.metadata_file
+            metadata_file=args.metadata_file,
+            use_memory_adaptation=use_memory_adaptation,
+            **memory_options
         )
         
         print(f"\nVideo summarization complete:")
