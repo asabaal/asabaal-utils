@@ -19,7 +19,7 @@ import heapq
 import numpy as np
 from tqdm import tqdm
 from moviepy.editor import VideoFileClip
-from moviepy.editor import concatenate_videoclips
+from moviepy.editor import concatenate_videoclips, CompositeVideoClip
 from moviepy.video.fx.fadein import fadein
 from moviepy.video.fx.fadeout import fadeout
 import librosa
@@ -29,6 +29,7 @@ from PIL import Image, ImageStat
 
 from .silence_detector import SilenceDetector
 from .thumbnail_generator import ThumbnailGenerator
+from .memory_utils import memory_adaptive_processing
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,7 @@ class VideoSummarizer:
         favor_ending: bool = True,      # Include more content from ending
         transition_duration: float = 0.5,
         summary_style: SummaryStyle = SummaryStyle.OVERVIEW,
+        use_memory_adaptation: bool = True,
     ):
         """
         Initialize the video summarizer.
@@ -107,6 +109,7 @@ class VideoSummarizer:
             favor_ending: Whether to favor segments at the ending
             transition_duration: Duration for transitions between segments
             summary_style: Style of the summary to create
+            use_memory_adaptation: Whether to use memory-adaptive processing
         """
         self.target_duration = target_duration
         self.segment_length = segment_length
@@ -123,6 +126,7 @@ class VideoSummarizer:
         self.favor_ending = favor_ending
         self.transition_duration = transition_duration
         self.summary_style = summary_style
+        self.use_memory_adaptation = use_memory_adaptation
         
         # Silence detector for finding speech segments
         self.silence_detector = SilenceDetector(
@@ -882,7 +886,8 @@ class VideoSummarizer:
             
             # Write output file
             logger.info(f"Writing summary video to {output_path}")
-            final_video.write_videofile(output_path)
+            # Use threads=1 to reduce memory usage
+            final_video.write_videofile(output_path, threads=1)
             
             # Close clips
             final_video.close()
@@ -899,14 +904,14 @@ class VideoSummarizer:
                 except:
                     pass
     
-    def create_video_summary(
-        self, 
+    def _create_video_summary_impl(
+        self,
         video_path: Union[str, Path],
         output_path: Union[str, Path],
         metadata_file: Optional[Union[str, Path]] = None
     ) -> List[Dict[str, Any]]:
         """
-        Create a content-aware summary of a video.
+        Implementation of video summary creation (without memory adaptation).
         
         Args:
             video_path: Path to the input video file
@@ -1034,6 +1039,42 @@ class VideoSummarizer:
         logger.info(f"Summary duration: {total_duration:.2f}s")
         
         return segment_info
+    
+    def create_video_summary(
+        self, 
+        video_path: Union[str, Path],
+        output_path: Union[str, Path],
+        metadata_file: Optional[Union[str, Path]] = None
+    ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+        """
+        Create a content-aware summary of a video with memory adaptation.
+        
+        Args:
+            video_path: Path to the input video file
+            output_path: Path to save the summary video
+            metadata_file: Optional path to save segment metadata as JSON
+            
+        Returns:
+            List of dictionaries with segment information or
+            Dict with processing results if memory adaptation is used
+        """
+        if not self.use_memory_adaptation:
+            # Use the direct implementation without memory adaptation
+            return self._create_video_summary_impl(
+                video_path=video_path,
+                output_path=output_path,
+                metadata_file=metadata_file
+            )
+        
+        # Use memory-adaptive processing
+        result = memory_adaptive_processing(
+            input_file=video_path,
+            output_file=output_path,
+            process_function=self._create_video_summary_impl,
+            metadata_file=metadata_file
+        )
+        
+        return result
 
 
 def create_video_summary(
@@ -1044,8 +1085,9 @@ def create_video_summary(
     segment_length: float = 3.0,
     favor_beginning: bool = True,
     favor_ending: bool = True,
-    metadata_file: Optional[Union[str, Path]] = None
-) -> List[Dict[str, Any]]:
+    metadata_file: Optional[Union[str, Path]] = None,
+    use_memory_adaptation: bool = True,
+) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
     """
     Create a content-aware summary of a video.
     
@@ -1058,9 +1100,11 @@ def create_video_summary(
         favor_beginning: Whether to favor segments at the beginning
         favor_ending: Whether to favor segments at the ending
         metadata_file: Optional path to save segment metadata as JSON
+        use_memory_adaptation: Whether to use memory-adaptive processing
         
     Returns:
-        List of dictionaries with segment information
+        List of dictionaries with segment information or
+        Dict with processing results if memory adaptation is used
     """
     # Convert style string to enum
     try:
@@ -1075,7 +1119,8 @@ def create_video_summary(
         segment_length=segment_length,
         favor_beginning=favor_beginning,
         favor_ending=favor_ending,
-        summary_style=style
+        summary_style=style,
+        use_memory_adaptation=use_memory_adaptation
     )
     
     # Create summary
