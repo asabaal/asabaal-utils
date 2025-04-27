@@ -64,6 +64,8 @@ def remove_silence_cli():
                         help="Scale factor for resolution when using reduced_resolution strategy (0.25-0.75)")
     memory_group.add_argument("--disable-memory-adaptation", action="store_true",
                         help="Disable memory-adaptive processing entirely")
+    memory_group.add_argument("--disable-ffmpeg", action="store_true",
+                        help="Disable direct FFmpeg implementation and use MoviePy instead")
     
     args = parser.parse_args()
     
@@ -73,6 +75,9 @@ def remove_silence_cli():
     try:
         # Determine whether to use memory adaptation
         use_memory_adaptation = not args.disable_memory_adaptation
+        
+        # Determine whether to use FFmpeg implementation
+        use_ffmpeg = not args.disable_ffmpeg
 
         # Prepare memory management options
         memory_options = {}
@@ -95,6 +100,7 @@ def remove_silence_cli():
             chunk_size=args.chunk_size,
             aggressive_silence_rejection=args.aggressive,
             use_memory_adaptation=use_memory_adaptation,
+            use_ffmpeg=use_ffmpeg,
             **memory_options,
         )
         

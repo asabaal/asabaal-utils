@@ -720,6 +720,7 @@ def process_in_segments(
                 segment_output = os.path.join(temp_dir, f"segment_{i:03d}_output.mp4")
                 
                 try:
+                    breakpoint()
                     # Extract segment with retry logic
                     segment = clip.subclip(start, end)
                     
@@ -732,7 +733,6 @@ def process_in_segments(
                         logger=None, 
                         ffmpeg_params=['-strict', '-2']
                     )
-                    segment.close()
                     
                     temp_input_segments.append(segment_input)
                     temp_output_segments.append(segment_output)
@@ -744,6 +744,8 @@ def process_in_segments(
                     logger.error(f"Error processing segment {i}: {e}")
                     # Continue with next segment rather than failing completely
                     continue
+                finally:
+                    segment.close()
         
         # Process each segment
         segment_results = []

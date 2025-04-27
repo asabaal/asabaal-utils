@@ -7,6 +7,9 @@ This module provides utilities for detecting and removing silence from videos.
 import os
 import numpy as np
 import tempfile
+import json
+import subprocess
+import shutil
 from typing import List, Tuple, Optional, Union, Dict, Any
 from dataclasses import dataclass
 from pathlib import Path
@@ -345,6 +348,226 @@ def _remove_silence_impl(
     return original_duration, output_duration, time_saved
 
 
+def _remove_silence_ffmpeg(
+    input_file: Union[str, Path],
+    output_file: Union[str, Path],
+    threshold_db: float = -40.0,
+    min_silence_duration: float = 0.5,
+    min_sound_duration: float = 0.3,
+    padding: float = 0.1,
+) -> Tuple[float, float, float]:
+    """
+    Remove silence from a video file using direct FFmpeg implementation.
+    
+    This implementation uses FFmpeg's silencedetect filter and a filter complex
+    to remove silent segments, which is significantly more memory-efficient
+    than the MoviePy approach.
+    
+    Args:
+        input_file: Path to the input video file
+        output_file: Path to save the output video file
+        threshold_db: Threshold in decibels below which audio is considered silence
+        min_silence_duration: Minimum duration in seconds for a segment to be considered silence
+        min_sound_duration: Minimum duration in seconds for a segment to be considered sound
+        padding: Padding in seconds to add before and after non-silent segments
+        
+    Returns:
+        Tuple of (original_duration, output_duration, time_saved)
+    """
+    input_file = str(input_file)
+    output_file = str(output_file)
+    
+    # Create temporary directory for intermediary files
+    temp_dir = tempfile.mkdtemp(prefix="silence_removal_")
+    
+    try:
+        # Step 1: Get video duration
+        duration_cmd = [
+            "ffprobe", 
+            "-v", "error", 
+            "-show_entries", "format=duration",
+            "-of", "json",
+            input_file
+        ]
+        
+        duration_result = subprocess.run(
+            duration_cmd, 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        
+        duration_data = json.loads(duration_result.stdout)
+        original_duration = float(duration_data["format"]["duration"])
+        
+        logger.info(f"Original video duration: {original_duration:.2f}s")
+        
+        # Step 2: Detect silent parts
+        silence_file = os.path.join(temp_dir, "silence_timestamps.txt")
+        
+        # Convert threshold_db to silence detection noise value (negative dB value)
+        noise = threshold_db
+        
+        # Detect silence using ffmpeg's silencedetect filter
+        detect_cmd = [
+            "ffmpeg",
+            "-i", input_file,
+            "-af", f"silencedetect=noise={noise}dB:d={min_silence_duration}",
+            "-f", "null",
+            "-"
+        ]
+        
+        logger.info("Detecting silence segments...")
+        detect_process = subprocess.run(
+            detect_cmd,
+            capture_output=True,
+            text=True
+        )
+        
+        # Process the stderr output to extract silence start/end times
+        stderr_lines = detect_process.stderr.split("\n")
+        
+        silence_starts = []
+        silence_ends = []
+        
+        for line in stderr_lines:
+            if "silence_start" in line:
+                try:
+                    timestamp = float(line.split("silence_start: ")[1].split()[0])
+                    silence_starts.append(timestamp)
+                except (IndexError, ValueError):
+                    continue
+            elif "silence_end" in line:
+                try:
+                    timestamp = float(line.split("silence_end: ")[1].split()[0])
+                    silence_ends.append(timestamp)
+                except (IndexError, ValueError):
+                    continue
+        
+        # If we didn't find any silence starts but have ends, assume silence at the beginning
+        if len(silence_ends) > len(silence_starts):
+            silence_starts.insert(0, 0)
+        
+        # If we have more starts than ends, assume silence continues to the end
+        if len(silence_starts) > len(silence_ends):
+            silence_ends.append(original_duration)
+        
+        # Create list of silent segments
+        silent_segments = list(zip(silence_starts, silence_ends))
+        
+        logger.info(f"Detected {len(silent_segments)} silent segments")
+        
+        # No silent segments or minimal silence - just copy the file
+        if not silent_segments or sum(end - start for start, end in silent_segments) < 1.0:
+            logger.info("No significant silence detected, copying original file")
+            shutil.copy2(input_file, output_file)
+            return original_duration, original_duration, 0.0
+        
+        # Step 3: Create non-silent segments (inverse of silent segments)
+        non_silent_segments = []
+        current_time = 0.0
+        
+        for start, end in sorted(silent_segments):
+            # Adjust for minimum sound duration
+            if start > current_time and start - current_time >= min_sound_duration:
+                # Apply padding but don't go below 0
+                segment_start = max(0, current_time - padding)
+                # Apply padding but don't overlap with the next segment
+                segment_end = min(start + padding, original_duration)
+                non_silent_segments.append((segment_start, segment_end))
+            current_time = end
+        
+        # Add final segment if needed
+        if current_time < original_duration and original_duration - current_time >= min_sound_duration:
+            non_silent_segments.append((
+                max(0, current_time - padding),
+                original_duration
+            ))
+        
+        # No valid non-silent segments - just return original file
+        if not non_silent_segments:
+            logger.warning("No valid non-silent segments found, copying original file")
+            shutil.copy2(input_file, output_file)
+            return original_duration, original_duration, 0.0
+        
+        # Step 4: Generate a complex filter to extract and concatenate non-silent segments
+        segments_file = os.path.join(temp_dir, "segments.txt")
+        
+        # Create a segments file for the concat demuxer
+        with open(segments_file, 'w') as f:
+            for i, (start, end) in enumerate(non_silent_segments):
+                segment_file = os.path.join(temp_dir, f"segment_{i:03d}.mp4")
+                duration = end - start
+                
+                # Extract segment
+                extract_cmd = [
+                    "ffmpeg",
+                    "-y",  # Overwrite output files
+                    "-i", input_file,
+                    "-ss", str(start),
+                    "-t", str(duration),
+                    "-c", "copy",  # Copy streams without re-encoding
+                    segment_file
+                ]
+                
+                subprocess.run(extract_cmd, check=True, capture_output=True)
+                
+                # Write to concat file
+                f.write(f"file '{segment_file}'\n")
+        
+        # Step 5: Concatenate all segments
+        concat_cmd = [
+            "ffmpeg",
+            "-y",  # Overwrite output files
+            "-f", "concat",
+            "-safe", "0",
+            "-i", segments_file,
+            "-c", "copy",  # Copy streams without re-encoding
+            output_file
+        ]
+        
+        logger.info("Concatenating non-silent segments...")
+        subprocess.run(concat_cmd, check=True, capture_output=True)
+        
+        # Step 6: Get output duration
+        output_duration_cmd = [
+            "ffprobe", 
+            "-v", "error", 
+            "-show_entries", "format=duration",
+            "-of", "json",
+            output_file
+        ]
+        
+        output_duration_result = subprocess.run(
+            output_duration_cmd, 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        
+        output_duration_data = json.loads(output_duration_result.stdout)
+        output_duration = float(output_duration_data["format"]["duration"])
+        
+        # Calculate time saved
+        time_saved = original_duration - output_duration
+        
+        return original_duration, output_duration, time_saved
+        
+    except subprocess.CalledProcessError as e:
+        logger.error(f"FFmpeg error: {e}")
+        logger.error(f"Error output: {e.stderr if hasattr(e, 'stderr') else 'No error output'}")
+        raise
+    except Exception as e:
+        logger.error(f"Error in FFmpeg silence removal: {e}")
+        raise
+    finally:
+        # Clean up temporary directory
+        try:
+            shutil.rmtree(temp_dir)
+        except Exception as e:
+            logger.warning(f"Failed to remove temporary directory {temp_dir}: {e}")
+
+
 def remove_silence(
     input_file: Union[str, Path],
     output_file: Union[str, Path],
@@ -356,9 +579,14 @@ def remove_silence(
     aggressive_silence_rejection: bool = False,
     metadata: Optional[Dict[str, str]] = None,
     use_memory_adaptation: bool = True,
+    strategy: Optional[str] = None,
+    segment_count: Optional[int] = None,
+    chunk_duration: Optional[float] = None,
+    resolution_scale: Optional[float] = None,
+    use_ffmpeg: bool = True,  # New parameter to choose the implementation
 ) -> Union[Tuple[float, float, float], Dict[str, Any]]:
     """
-    Remove silence from a video file with memory adaptation.
+    Remove silence from a video file.
     
     Args:
         input_file: Path to the input video file.
@@ -372,11 +600,29 @@ def remove_silence(
             silences even in the presence of background noise.
         metadata: Optional dictionary of metadata to add to the output file.
         use_memory_adaptation: Whether to use memory-adaptive processing
+        strategy: Processing strategy to use (auto, full_quality, reduced_resolution, chunked, segment, streaming)
+        segment_count: Number of segments to split video into when using segment strategy
+        chunk_duration: Duration of each chunk in seconds when using chunked strategy
+        resolution_scale: Scale factor for resolution when using reduced_resolution strategy
+        use_ffmpeg: Whether to use the direct FFmpeg implementation (more memory efficient)
         
     Returns:
         Tuple of (original_duration, output_duration, time_saved) or
         Dict with processing results if memory adaptation is used
     """
+    # Use the direct FFmpeg implementation if specified
+    if use_ffmpeg:
+        logger.info("Using direct FFmpeg implementation for silence removal")
+        return _remove_silence_ffmpeg(
+            input_file=input_file,
+            output_file=output_file,
+            threshold_db=threshold_db,
+            min_silence_duration=min_silence_duration,
+            min_sound_duration=min_sound_duration,
+            padding=padding,
+        )
+    
+    # Otherwise use the MoviePy-based implementation
     if not use_memory_adaptation:
         # Use the direct implementation without memory adaptation
         return _remove_silence_impl(
@@ -391,6 +637,17 @@ def remove_silence(
             metadata=metadata,
         )
     
+    # Prepare memory management options
+    memory_options = {}
+    if strategy:
+        memory_options["strategy"] = strategy
+    if segment_count is not None:
+        memory_options["segment_count"] = segment_count
+    if chunk_duration is not None:
+        memory_options["chunk_duration"] = chunk_duration
+    if resolution_scale is not None:
+        memory_options["resolution_scale"] = resolution_scale
+    
     # Use improved memory-adaptive processing
     return memory_adaptive_processing(
         input_file=input_file,
@@ -404,4 +661,5 @@ def remove_silence(
         chunk_size=chunk_size,
         aggressive_silence_rejection=aggressive_silence_rejection,
         metadata=metadata,
+        **memory_options,
     )
