@@ -1044,7 +1044,11 @@ class VideoSummarizer:
         self, 
         video_path: Union[str, Path],
         output_path: Union[str, Path],
-        metadata_file: Optional[Union[str, Path]] = None
+        metadata_file: Optional[Union[str, Path]] = None,
+        strategy: Optional[str] = None,
+        segment_count: Optional[int] = None,
+        chunk_duration: Optional[float] = None,
+        resolution_scale: Optional[float] = None
     ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """
         Create a content-aware summary of a video with memory adaptation.
@@ -1053,6 +1057,10 @@ class VideoSummarizer:
             video_path: Path to the input video file
             output_path: Path to save the summary video
             metadata_file: Optional path to save segment metadata as JSON
+            strategy: Manual strategy selection (auto, full_quality, reduced_resolution, chunked, segment, streaming)
+            segment_count: Number of segments to split video into when using segment strategy
+            chunk_duration: Duration of each chunk in seconds when using chunked strategy
+            resolution_scale: Scale factor for resolution when using reduced_resolution strategy
             
         Returns:
             List of dictionaries with segment information or
@@ -1066,13 +1074,25 @@ class VideoSummarizer:
                 metadata_file=metadata_file
             )
         
+        # Prepare memory management options
+        memory_options = {}
+        if strategy:
+            memory_options["strategy"] = strategy
+        if segment_count is not None:
+            memory_options["segment_count"] = segment_count
+        if chunk_duration is not None:
+            memory_options["chunk_duration"] = chunk_duration
+        if resolution_scale is not None:
+            memory_options["resolution_scale"] = resolution_scale
+        
         # Use memory-adaptive processing with specific operation type
         result = memory_adaptive_processing(
             input_file=video_path,
             output_file=output_path,
             process_function=self._create_video_summary_impl,
             _operation_type='video_summary',  # Specify operation type for better memory estimation
-            metadata_file=metadata_file
+            metadata_file=metadata_file,
+            **memory_options
         )
         
         return result
@@ -1088,6 +1108,10 @@ def create_video_summary(
     favor_ending: bool = True,
     metadata_file: Optional[Union[str, Path]] = None,
     use_memory_adaptation: bool = True,
+    strategy: Optional[str] = None,
+    segment_count: Optional[int] = None,
+    chunk_duration: Optional[float] = None,
+    resolution_scale: Optional[float] = None,
 ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
     """
     Create a content-aware summary of a video.
@@ -1102,6 +1126,10 @@ def create_video_summary(
         favor_ending: Whether to favor segments at the ending
         metadata_file: Optional path to save segment metadata as JSON
         use_memory_adaptation: Whether to use memory-adaptive processing
+        strategy: Manual strategy selection (auto, full_quality, reduced_resolution, chunked, segment, streaming)
+        segment_count: Number of segments to split video into when using segment strategy
+        chunk_duration: Duration of each chunk in seconds when using chunked strategy
+        resolution_scale: Scale factor for resolution when using reduced_resolution strategy
         
     Returns:
         List of dictionaries with segment information or
@@ -1128,7 +1156,11 @@ def create_video_summary(
     result = summarizer.create_video_summary(
         video_path=video_path,
         output_path=output_path,
-        metadata_file=metadata_file
+        metadata_file=metadata_file,
+        strategy=strategy,
+        segment_count=segment_count,
+        chunk_duration=chunk_duration,
+        resolution_scale=resolution_scale
     )
     
     return result

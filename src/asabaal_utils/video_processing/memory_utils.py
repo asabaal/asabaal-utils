@@ -958,6 +958,10 @@ def memory_adaptive_processing(
     input_file: Union[str, Path],
     output_file: Union[str, Path],
     process_function: Callable,
+    strategy: Optional[str] = None,
+    segment_count: Optional[int] = None,
+    chunk_duration: Optional[float] = None,
+    resolution_scale: Optional[float] = None,
     **process_kwargs
 ) -> Dict[str, Any]:
     """
@@ -967,61 +971,96 @@ def memory_adaptive_processing(
         input_file: Path to input video file
         output_file: Path to output video file
         process_function: Function that processes video segments
+        strategy: Manual strategy selection (auto, full_quality, reduced_resolution, chunked, segment, streaming)
+        segment_count: Number of segments to split video into when using segment strategy
+        chunk_duration: Duration of each chunk in seconds when using chunked strategy
+        resolution_scale: Scale factor for resolution when using reduced_resolution strategy
         process_kwargs: Additional arguments for the process function
         
     Returns:
         Dict with success status and processing info
     """
-    # This is now just a thin wrapper around our decorator pattern
     # Extract operation type from function name or kwargs
     operation_type = process_kwargs.pop('_operation_type', process_function.__name__)
     
     # Check memory requirements
     memory_state = get_memory_state(input_file, operation_type)
-    strategy = memory_state.recommended_strategy()
     
+    # Determine strategy - either from explicit parameter or from memory analysis
+    if strategy and strategy.lower() != "auto":
+        # Use manually specified strategy
+        try:
+            requested_strategy = ProcessingStrategy(strategy.lower())
+            logger.info(f"Using manually specified strategy: {requested_strategy.value}")
+        except ValueError:
+            logger.warning(f"Invalid strategy '{strategy}', using auto-detection")
+            requested_strategy = memory_state.recommended_strategy()
+    else:
+        # Auto-detect strategy based on memory
+        requested_strategy = memory_state.recommended_strategy()
+        
     logger.info(f"Memory analysis - Required: {memory_state.estimated_required / (1024**3):.2f} GB, "
                f"Available: {memory_state.available_memory / (1024**3):.2f} GB")
-    logger.info(f"Using processing strategy: {strategy.value}")
+    logger.info(f"Using processing strategy: {requested_strategy.value}")
     
-    # Choose strategy based on memory analysis
-    if strategy == ProcessingStrategy.FULL_QUALITY:
+    # Choose strategy based on selected strategy
+    if requested_strategy == ProcessingStrategy.FULL_QUALITY:
         result = process_function(input_file, output_file, **process_kwargs)
         return {"status": "success", "processing_mode": "full", "result": result}
     
-    elif strategy == ProcessingStrategy.REDUCED_RESOLUTION:
+    elif requested_strategy == ProcessingStrategy.REDUCED_RESOLUTION:
+        # Use the specified resolution scale if provided
+        scale_factor = resolution_scale if resolution_scale is not None else None
         return process_in_reduced_resolution(
-            input_file, output_file, process_function, **process_kwargs
+            input_file, output_file, process_function, 
+            scale_factor=scale_factor, 
+            **process_kwargs
         )
     
-    elif strategy == ProcessingStrategy.CHUNKED:
-        # For longer videos, adjust chunk size based on available memory
-        if memory_state.video_properties["duration"] > 300:  # 5+ minutes
-            ratio = memory_state.memory_ratio
-            chunk_duration = 60.0 / ratio  # Much smaller chunks for less memory
-            chunk_duration = max(20.0, min(60.0, chunk_duration))
+    elif requested_strategy == ProcessingStrategy.CHUNKED:
+        # Use the specified chunk duration if provided, otherwise calculate based on memory
+        if chunk_duration is not None:
+            # Use specified chunk duration
+            specified_chunk_duration = float(chunk_duration)
+            logger.info(f"Using specified chunk duration: {specified_chunk_duration}s")
         else:
-            chunk_duration = 30.0  # Smaller chunks even for shorter videos
+            # Calculate chunk duration based on memory
+            if memory_state.video_properties["duration"] > 300:  # 5+ minutes
+                ratio = memory_state.memory_ratio
+                specified_chunk_duration = 60.0 / ratio  # Much smaller chunks for less memory
+                specified_chunk_duration = max(20.0, min(60.0, specified_chunk_duration))
+            else:
+                specified_chunk_duration = 30.0  # Smaller chunks even for shorter videos
         
         return process_in_chunks(
             input_file, output_file, process_function, 
-            chunk_duration=chunk_duration, **process_kwargs
+            chunk_duration=specified_chunk_duration, **process_kwargs
         )
     
-    elif strategy == ProcessingStrategy.SEGMENT:
-        # Adjust segment count based on memory ratio and video length - more segments for less memory
-        ratio = memory_state.memory_ratio
-        segment_count = max(8, min(20, int(ratio * 4)))
+    elif requested_strategy == ProcessingStrategy.SEGMENT:
+        # Use the specified segment count if provided, otherwise calculate based on memory
+        if segment_count is not None:
+            # Use specified segment count
+            specified_segment_count = int(segment_count)
+            logger.info(f"Using specified segment count: {specified_segment_count}")
+        else:
+            # Calculate segment count based on memory and video length
+            ratio = memory_state.memory_ratio
+            specified_segment_count = max(8, min(20, int(ratio * 4)))
         
         return process_in_segments(
             input_file, output_file, process_function,
-            segment_count=segment_count, **process_kwargs
+            segment_count=specified_segment_count, **process_kwargs
         )
     
     else:  # STREAMING strategy
         # For extreme cases, combine reduced resolution with chunking
+        # Use specified parameters if provided
+        scale = resolution_scale if resolution_scale is not None else 0.25
+        duration = chunk_duration if chunk_duration is not None else 15.0
+        
         return process_in_chunks(
             input_file, output_file,
-            lambda i, o, **kw: process_in_reduced_resolution(i, o, process_function, scale_factor=0.25, **kw),
-            chunk_duration=15.0, **process_kwargs  # Even smaller chunks with lower resolution
+            lambda i, o, **kw: process_in_reduced_resolution(i, o, process_function, scale_factor=scale, **kw),
+            chunk_duration=duration, **process_kwargs
         )
