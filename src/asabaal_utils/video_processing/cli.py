@@ -605,6 +605,23 @@ def extract_clips_cli():
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the logging level")
     
+    # Transcript enhancement options
+    enhancement_group = parser.add_argument_group('Transcript Enhancement Options')
+    enhancement_group.add_argument("--enhance-transcript", action="store_true",
+                        help="Apply transcript enhancement before extracting clips")
+    enhancement_group.add_argument("--remove-fillers", action="store_true",
+                        help="Remove filler words like 'um', 'uh', etc.")
+    enhancement_group.add_argument("--handle-repetitions", action="store_true",
+                        help="Remove or consolidate repeated phrases")
+    enhancement_group.add_argument("--respect-sentences", action="store_true",
+                        help="Optimize clip boundaries to respect sentence boundaries")
+    enhancement_group.add_argument("--preserve-semantic-units", action="store_true",
+                        help="Preserve semantic units like explanations and lists")
+    enhancement_group.add_argument("--filler-policy", choices=["remove_all", "keep_all", "context_sensitive"],
+                        default="remove_all", help="Policy for handling filler words (default: remove_all)")
+    enhancement_group.add_argument("--repetition-strategy", choices=["first_instance", "cleanest_instance", "combine"],
+                        default="first_instance", help="Strategy for handling repetitions (default: first_instance)")
+    
     args = parser.parse_args()
     
     # Set log level
@@ -614,19 +631,71 @@ def extract_clips_cli():
         # Determine whether to use FFmpeg implementation
         use_ffmpeg = not args.disable_ffmpeg
         
-        # Extract the clips
-        clips = extract_clips_from_json(
-            video_file=args.video_file,
-            json_file=args.json_file,
-            output_dir=args.output_dir,
-            clip_prefix=args.clip_prefix,
-            top_n=args.top_n,
-            min_score=args.min_score,
-            min_duration=args.min_duration,
-            max_duration=args.max_duration,
-            add_padding=args.padding,
-            use_ffmpeg=use_ffmpeg,
-        )
+        # Check if we should use transcript enhancement
+        if args.enhance_transcript:
+            from .transcript_processors import extract_enhanced_clips
+            
+            # Create enhancement configuration based on flags
+            config = {}
+            
+            # Configure which processors to use
+            processors = []
+            if args.remove_fillers:
+                from .transcript_processors import FillerWordsProcessor
+                processors.append(FillerWordsProcessor({
+                    "policy": args.filler_policy
+                }))
+            
+            if args.handle_repetitions:
+                from .transcript_processors import RepetitionHandler
+                processors.append(RepetitionHandler({
+                    "strategy": args.repetition_strategy
+                }))
+            
+            if args.respect_sentences:
+                from .transcript_processors import SentenceBoundaryDetector
+                processors.append(SentenceBoundaryDetector())
+            
+            if args.preserve_semantic_units:
+                from .transcript_processors import SemanticUnitPreserver
+                processors.append(SemanticUnitPreserver())
+            
+            # If no specific processors were selected but enhancement is on,
+            # use all processors with default settings
+            if not processors and args.enhance_transcript:
+                from .transcript_processors import TranscriptEnhancementPipeline
+                config = None  # Use defaults
+            else:
+                config = {'processors': processors}
+            
+            logger.info("Applying transcript enhancement before clip extraction")
+            clips = extract_enhanced_clips(
+                video_file=args.video_file,
+                transcript_file=args.json_file,
+                output_dir=args.output_dir,
+                config=config,
+                clip_prefix=args.clip_prefix,
+                top_n=args.top_n,
+                min_score=args.min_score,
+                min_duration=args.min_duration,
+                max_duration=args.max_duration,
+                add_padding=args.padding,
+                use_ffmpeg=use_ffmpeg
+            )
+        else:
+            # Extract clips directly without enhancement
+            clips = extract_clips_from_json(
+                video_file=args.video_file,
+                json_file=args.json_file,
+                output_dir=args.output_dir,
+                clip_prefix=args.clip_prefix,
+                top_n=args.top_n,
+                min_score=args.min_score,
+                min_duration=args.min_duration,
+                max_duration=args.max_duration,
+                add_padding=args.padding,
+                use_ffmpeg=use_ffmpeg,
+            )
         
         print(f"\nClip extraction complete:")
         print(f"- Extracted {len(clips)} clips from {os.path.basename(args.video_file)}")
@@ -654,5 +723,33 @@ def extract_clips_cli():
         logger.error(f"Error extracting clips: {e}", exc_info=True)
         return 1
 
+def main():
+    """Main entry point for CLI commands."""
+    if len(sys.argv) < 2:
+        print("Error: Please specify a command")
+        print("Available commands: remove-silence, analyze-transcript, extract-clips, etc.")
+        sys.exit(1)
+        
+    command = sys.argv[0] if '/' not in sys.argv[0] else sys.argv[0].split('/')[-1]
+    
+    if command == "remove-silence" or "remove_silence" in command:
+        sys.exit(remove_silence_cli())
+    elif command == "analyze-transcript" or "analyze_transcript" in command:
+        sys.exit(analyze_transcript_cli())
+    elif command == "generate-thumbnails" or "generate_thumbnails" in command:
+        sys.exit(generate_thumbnails_cli())
+    elif command == "analyze-colors" or "analyze_colors" in command:
+        sys.exit(analyze_colors_cli())
+    elif command == "detect-jump-cuts" or "detect_jump_cuts" in command:
+        sys.exit(detect_jump_cuts_cli())
+    elif command == "create-summary" or "create_summary" in command:
+        sys.exit(create_summary_cli())
+    elif command == "extract-clips" or "extract_clips" in command:
+        sys.exit(extract_clips_cli())
+    else:
+        print(f"Error: Unknown command: {command}")
+        print("Available commands: remove-silence, analyze-transcript, extract-clips, etc.")
+        sys.exit(1)
+
 if __name__ == "__main__":
-    sys.exit(remove_silence_cli())
+    main()
