@@ -144,7 +144,7 @@ def analyze_transcript_cli():
     parser = argparse.ArgumentParser(description="Analyze video transcripts for optimal clip splits")
     parser.add_argument("transcript_file", help="Path to transcript file")
     parser.add_argument("--output-file", help="Path to output JSON file with suggestions")
-    parser.add_argument("--format", default="capcut", choices=["capcut", "json"],
+    parser.add_argument("--format", default="capcut", choices=["capcut", "json", "srt"],
                         help="Format of the transcript file (default: capcut)")
     parser.add_argument("--min-clip-duration", type=float, default=10.0,
                         help="Minimum clip duration in seconds (default: 10.0)")

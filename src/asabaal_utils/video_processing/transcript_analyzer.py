@@ -206,7 +206,93 @@ class TranscriptAnalyzer:
                 segments.append(segment)
         
         return segments
-    
+
+    def parse_srt_transcript(self, transcript_file: str) -> List[TranscriptSegment]:
+        """
+        Parse a transcript file in SRT format.
+        
+        Args:
+            transcript_file: Path to the transcript file.
+            
+        Returns:
+            List of TranscriptSegment objects.
+        """
+        logger.info(f"Parsing SRT transcript from {transcript_file}")
+        
+        with open(transcript_file, 'r', encoding='utf-8') as f:
+            transcript_text = f.read()
+        
+        # Split by double newline which separates entries in SRT
+        entries = transcript_text.strip().split('\n\n')
+        segments = []
+        
+        for entry in entries:
+            lines = entry.strip().split('\n')
+            
+            if len(lines) < 3:
+                continue  # Skip invalid entries
+                
+            # First line is the index number
+            # Second line contains timestamps "00:00:00,000 --> 00:00:00,983"
+            # Remaining lines are the text content
+            
+            try:
+                # Parse timestamps
+                timestamp_line = lines[1]
+                timestamps = timestamp_line.split(' --> ')
+                if len(timestamps) != 2:
+                    logger.warning(f"Invalid timestamp format: {timestamp_line}")
+                    continue
+                    
+                start_time_str, end_time_str = timestamps
+                
+                # Convert timestamp from HH:MM:SS,MS to seconds
+                start_time = self._srt_timestamp_to_seconds(start_time_str)
+                end_time = self._srt_timestamp_to_seconds(end_time_str)
+                
+                # Get text content (could be multiple lines)
+                text = ' '.join(lines[2:])
+                
+                segment = TranscriptSegment(
+                    text=text,
+                    start_time=start_time,
+                    end_time=end_time,
+                    speaker=None,
+                    confidence=1.0
+                )
+                segments.append(segment)
+                
+            except Exception as e:
+                logger.warning(f"Error parsing SRT entry: {e}")
+                continue
+        
+        return segments
+
+    def _srt_timestamp_to_seconds(self, timestamp: str) -> float:
+        """
+        Convert SRT timestamp format (HH:MM:SS,MS) to seconds.
+        
+        Args:
+            timestamp: SRT format timestamp
+            
+        Returns:
+            Time in seconds (float)
+        """
+        # Replace comma with period for milliseconds
+        timestamp = timestamp.replace(',', '.')
+        
+        # Split into hours, minutes, seconds (with milliseconds)
+        parts = timestamp.split(':')
+        if len(parts) != 3:
+            raise ValueError(f"Invalid timestamp format: {timestamp}")
+            
+        hours = int(parts[0])
+        minutes = int(parts[1])
+        seconds = float(parts[2])
+        
+        # Convert to seconds
+        return hours * 3600 + minutes * 60 + seconds
+
     def detect_topic_changes(self, segments: List[TranscriptSegment]) -> List[int]:
         """
         Detect significant topic changes in the transcript.
@@ -491,7 +577,7 @@ def analyze_transcript(
     Args:
         transcript_file: Path to the transcript file.
         output_file: Optional path to save the suggestions as JSON.
-        transcript_format: Format of the transcript file ('capcut' or 'json').
+        transcript_format: Format of the transcript file ('capcut', 'json', or 'srt').
         min_clip_duration: Minimum duration in seconds for a suggested clip.
         max_clip_duration: Maximum duration in seconds for a suggested clip.
         topic_change_threshold: Similarity threshold to detect topic changes.
@@ -510,6 +596,8 @@ def analyze_transcript(
         segments = analyzer.parse_capcut_transcript(transcript_file)
     elif transcript_format.lower() == 'json':
         segments = analyzer.parse_json_transcript(transcript_file)
+    elif transcript_format.lower() == 'srt':
+        segments = analyzer.parse_srt_transcript(transcript_file)
     else:
         raise ValueError(f"Unsupported transcript format: {transcript_format}")
     
