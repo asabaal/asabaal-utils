@@ -7,7 +7,7 @@ This module provides utilities for detecting and removing silence from videos.
 import os
 import numpy as np
 import tempfile
-from typing import List, Tuple, Optional, Union, Dict
+from typing import List, Tuple, Optional, Union, Dict, Any
 from dataclasses import dataclass
 from pathlib import Path
 import logging
@@ -16,6 +16,8 @@ from tqdm import tqdm
 from moviepy.editor import VideoFileClip
 from moviepy.editor import concatenate_videoclips
 import librosa
+
+from .memory_utils import memory_adaptive_processing
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +246,7 @@ class SilenceDetector:
         return []
 
 
-def remove_silence(
+def _remove_silence_impl(
     input_file: Union[str, Path],
     output_file: Union[str, Path],
     threshold_db: float = -40.0,
@@ -256,7 +258,7 @@ def remove_silence(
     metadata: Optional[Dict[str, str]] = None,
 ) -> Tuple[float, float, float]:
     """
-    Remove silence from a video file.
+    Implementation of silence removal (without memory adaptation).
     
     Args:
         input_file: Path to the input video file.
@@ -319,7 +321,7 @@ def remove_silence(
             video.write_videofile(output_file, logger=None)
             return original_duration, original_duration, 0
         
-        # Concatenate subclips, preserving the original size
+        # Concatenate subclips, explicitly preserving the original size
         final_clip = concatenate_videoclips(subclips, method="compose")
         # Ensure the final clip has the same size as the original
         if final_clip.size != original_size:
@@ -341,3 +343,64 @@ def remove_silence(
             clip.close()
     
     return original_duration, output_duration, time_saved
+
+
+def remove_silence(
+    input_file: Union[str, Path],
+    output_file: Union[str, Path],
+    threshold_db: float = -40.0,
+    min_silence_duration: float = 0.5,
+    min_sound_duration: float = 0.3,
+    padding: float = 0.1,
+    chunk_size: float = 0.05,
+    aggressive_silence_rejection: bool = False,
+    metadata: Optional[Dict[str, str]] = None,
+    use_memory_adaptation: bool = True,
+) -> Union[Tuple[float, float, float], Dict[str, Any]]:
+    """
+    Remove silence from a video file with memory adaptation.
+    
+    Args:
+        input_file: Path to the input video file.
+        output_file: Path to save the output video file.
+        threshold_db: Threshold in decibels below which audio is considered silence.
+        min_silence_duration: Minimum duration in seconds for a segment to be considered silence.
+        min_sound_duration: Minimum duration in seconds for a segment to be considered sound.
+        padding: Padding in seconds to add before and after non-silent segments.
+        chunk_size: Size of audio chunks for analysis in seconds.
+        aggressive_silence_rejection: If True, uses additional algorithms to detect
+            silences even in the presence of background noise.
+        metadata: Optional dictionary of metadata to add to the output file.
+        use_memory_adaptation: Whether to use memory-adaptive processing
+        
+    Returns:
+        Tuple of (original_duration, output_duration, time_saved) or
+        Dict with processing results if memory adaptation is used
+    """
+    if not use_memory_adaptation:
+        # Use the direct implementation without memory adaptation
+        return _remove_silence_impl(
+            input_file=input_file,
+            output_file=output_file,
+            threshold_db=threshold_db,
+            min_silence_duration=min_silence_duration,
+            min_sound_duration=min_sound_duration,
+            padding=padding,
+            chunk_size=chunk_size,
+            aggressive_silence_rejection=aggressive_silence_rejection,
+            metadata=metadata,
+        )
+    
+    # Use memory-adaptive processing
+    return memory_adaptive_processing(
+        input_file=input_file,
+        output_file=output_file,
+        process_function=_remove_silence_impl,
+        threshold_db=threshold_db,
+        min_silence_duration=min_silence_duration,
+        min_sound_duration=min_sound_duration,
+        padding=padding,
+        chunk_size=chunk_size,
+        aggressive_silence_rejection=aggressive_silence_rejection,
+        metadata=metadata,
+    )
