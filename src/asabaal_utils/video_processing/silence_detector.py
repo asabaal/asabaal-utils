@@ -414,6 +414,7 @@ def _remove_silence_ffmpeg(
             "-i", input_file,
             "-af", f"silencedetect=noise={noise}dB:d={min_silence_duration}",
             "-f", "null",
+            '-progress', 'pipe:1',  # Output progress to stdout
             "-"
         ]
         
@@ -507,6 +508,7 @@ def _remove_silence_ffmpeg(
                     "-ss", str(start),
                     "-t", str(duration),
                     "-c", "copy",  # Copy streams without re-encoding
+                    '-progress', 'pipe:1',
                     segment_file
                 ]
                 
@@ -523,6 +525,7 @@ def _remove_silence_ffmpeg(
             "-safe", "0",
             "-i", segments_file,
             "-c", "copy",  # Copy streams without re-encoding
+            '-progress', 'pipe:1',
             output_file
         ]
         
