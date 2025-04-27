@@ -56,7 +56,7 @@ def remove_silence_cli():
     logging.getLogger().setLevel(getattr(logging, args.log_level))
     
     try:
-        original_duration, output_duration, time_saved = remove_silence(
+        result = remove_silence(
             input_file=args.input_file,
             output_file=args.output_file,
             threshold_db=args.threshold_db,
@@ -67,11 +67,34 @@ def remove_silence_cli():
             aggressive_silence_rejection=args.aggressive,
         )
         
-        print(f"\nSilence removal complete:")
-        print(f"- Original duration: {original_duration:.2f}s")
-        print(f"- Output duration: {output_duration:.2f}s")
-        print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
-        print(f"- Output file: {os.path.abspath(args.output_file)}")
+        # Handle both direct return values and dictionary result from memory adaptation
+        if isinstance(result, tuple) and len(result) == 3:
+            # Direct implementation return value
+            original_duration, output_duration, time_saved = result
+            print(f"\nSilence removal complete:")
+            print(f"- Original duration: {original_duration:.2f}s")
+            print(f"- Output duration: {output_duration:.2f}s")
+            print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
+            print(f"- Output file: {os.path.abspath(args.output_file)}")
+        elif isinstance(result, dict):
+            # Memory adaptation result
+            if result.get("status") == "success":
+                print(f"\nSilence removal complete (using {result.get('processing_mode', 'adaptive')} mode):")
+                inner_result = result.get("result")
+                if isinstance(inner_result, tuple) and len(inner_result) == 3:
+                    original_duration, output_duration, time_saved = inner_result
+                    print(f"- Original duration: {original_duration:.2f}s")
+                    print(f"- Output duration: {output_duration:.2f}s")
+                    print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
+                print(f"- Output file: {os.path.abspath(args.output_file)}")
+            else:
+                # Processing failed
+                logger.error(f"Processing failed: {result.get('message', 'Unknown error')}")
+                return 1
+        else:
+            # Unexpected return value
+            logger.error(f"Unexpected result from silence removal: {result}")
+            return 1
         
         return 0
     except Exception as e:

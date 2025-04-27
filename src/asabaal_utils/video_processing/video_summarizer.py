@@ -1066,11 +1066,12 @@ class VideoSummarizer:
                 metadata_file=metadata_file
             )
         
-        # Use memory-adaptive processing
+        # Use memory-adaptive processing with specific operation type
         result = memory_adaptive_processing(
             input_file=video_path,
             output_file=output_path,
             process_function=self._create_video_summary_impl,
+            _operation_type='video_summary',  # Specify operation type for better memory estimation
             metadata_file=metadata_file
         )
         

@@ -391,11 +391,12 @@ def remove_silence(
             metadata=metadata,
         )
     
-    # Use memory-adaptive processing
+    # Use improved memory-adaptive processing
     return memory_adaptive_processing(
         input_file=input_file,
         output_file=output_file,
         process_function=_remove_silence_impl,
+        _operation_type='silence_removal',  # Specify operation type for better memory estimation
         threshold_db=threshold_db,
         min_silence_duration=min_silence_duration,
         min_sound_duration=min_sound_duration,

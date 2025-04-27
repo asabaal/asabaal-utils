@@ -780,7 +780,8 @@ def detect_jump_cuts(
     min_jump_interval: float = 0.5,
     frame_sample_rate: float = 10.0,
     save_frames: bool = True,
-    metadata_file: Optional[Union[str, Path]] = None
+    metadata_file: Optional[Union[str, Path]] = None,
+    use_memory_adaptation: bool = True
 ) -> List[Dict[str, Any]]:
     """
     Detect jump cuts in a video.
@@ -793,6 +794,7 @@ def detect_jump_cuts(
         frame_sample_rate: Frames per second to analyze
         save_frames: Whether to save frames before and after jump cuts
         metadata_file: Optional path to save jump cut metadata as JSON
+        use_memory_adaptation: Whether to use memory-adaptive processing
         
     Returns:
         List of dictionaries with jump cut information
@@ -805,12 +807,53 @@ def detect_jump_cuts(
         save_frames=save_frames
     )
     
-    # Detect jump cuts
-    jump_cuts = detector.detect_jump_cuts(
-        video_path=video_path,
-        output_dir=output_dir,
-        metadata_file=metadata_file
-    )
+    if use_memory_adaptation:
+        # Import here to avoid circular imports
+        from .memory_utils import memory_adaptive_processing, adaptive_memory_wrapper
+        
+        # Create a wrapper function that matches the signature expected by memory_adaptive_processing
+        def _detect_jump_cuts_impl(input_file, output_file, **kwargs):
+            # Extract parameters from kwargs
+            _output_dir = kwargs.get('output_dir', output_dir)
+            _metadata_file = kwargs.get('metadata_file', metadata_file)
+            
+            # Detect jump cuts
+            jump_cuts = detector.detect_jump_cuts(
+                video_path=input_file,
+                output_dir=_output_dir,
+                metadata_file=_metadata_file
+            )
+            
+            # Return the jump cuts directly (we'll convert to dict format outside)
+            return jump_cuts
+        
+        # Use memory-adaptive processing
+        result = memory_adaptive_processing(
+            input_file=video_path,
+            output_file=output_dir or tempfile.mkdtemp(prefix="jump_cuts_"),  # Dummy output
+            process_function=_detect_jump_cuts_impl,
+            _operation_type='jump_cut_detection',
+            output_dir=output_dir,
+            metadata_file=metadata_file
+        )
+        
+        # If memory adaptation succeeded, extract the jump cuts
+        if isinstance(result, dict) and result.get("status") == "success":
+            jump_cuts = result.get("result", [])
+        else:
+            # Fallback to direct processing if memory adaptation failed
+            jump_cuts = detector.detect_jump_cuts(
+                video_path=video_path,
+                output_dir=output_dir,
+                metadata_file=metadata_file
+            )
+    else:
+        # Direct processing without memory adaptation
+        jump_cuts = detector.detect_jump_cuts(
+            video_path=video_path,
+            output_dir=output_dir,
+            metadata_file=metadata_file
+        )
     
     # Convert to list of dictionaries
     result = []
