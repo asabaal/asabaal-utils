@@ -818,6 +818,9 @@ class VideoSummarizer:
             logger.warning("No segments selected for summary")
             return
         
+        # Store the original video size
+        original_size = video.size
+        
         # Extract subclips for each segment
         subclips = []
         
@@ -867,7 +870,11 @@ class VideoSummarizer:
         
         # Concatenate subclips
         try:
-            final_video = concatenate_videoclips(subclips)
+            final_video = concatenate_videoclips(subclips, method="compose")
+            
+            # Ensure the final video has the same size as the original
+            if final_video.size != original_size:
+                final_video = final_video.resize(width=original_size[0], height=original_size[1])
             
             # Add fade in/out to entire video
             final_video = final_video.fx(fadein, 0.5)
