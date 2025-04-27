@@ -10,6 +10,7 @@ import os
 import sys
 from pathlib import Path
 
+from .clip_extractor import extract_clips_from_json
 from .silence_detector import remove_silence
 from .transcript_analyzer import analyze_transcript
 from .thumbnail_generator import generate_thumbnails
@@ -580,6 +581,78 @@ def create_summary_cli():
         logger.error(f"Error creating video summary: {e}", exc_info=True)
         return 1
 
+def extract_clips_cli():
+    """CLI entry point for clip extraction from transcript analysis."""
+    parser = argparse.ArgumentParser(description="Extract video clips based on transcript analysis")
+    parser.add_argument("video_file", help="Path to source video file")
+    parser.add_argument("json_file", help="Path to JSON file with clip suggestions")
+    parser.add_argument("--output-dir", help="Directory to save extracted clips")
+    parser.add_argument("--clip-prefix", default="clip",
+                        help="Prefix for output clip filenames (default: 'clip')")
+    parser.add_argument("--top-n", type=int, default=None,
+                        help="Only extract the top N clips by importance score")
+    parser.add_argument("--min-score", type=float, default=None,
+                        help="Only extract clips with importance score above this value")
+    parser.add_argument("--min-duration", type=float, default=None,
+                        help="Only extract clips longer than this duration in seconds")
+    parser.add_argument("--max-duration", type=float, default=None,
+                        help="Only extract clips shorter than this duration in seconds")
+    parser.add_argument("--padding", type=float, default=0.5,
+                        help="Add padding in seconds before/after each clip (default: 0.5)")
+    parser.add_argument("--disable-ffmpeg", action="store_true",
+                        help="Disable direct FFmpeg implementation and use MoviePy instead")
+    parser.add_argument("--log-level", default="INFO",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Set the logging level")
+    
+    args = parser.parse_args()
+    
+    # Set log level
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    
+    try:
+        # Determine whether to use FFmpeg implementation
+        use_ffmpeg = not args.disable_ffmpeg
+        
+        # Extract the clips
+        clips = extract_clips_from_json(
+            video_file=args.video_file,
+            json_file=args.json_file,
+            output_dir=args.output_dir,
+            clip_prefix=args.clip_prefix,
+            top_n=args.top_n,
+            min_score=args.min_score,
+            min_duration=args.min_duration,
+            max_duration=args.max_duration,
+            add_padding=args.padding,
+            use_ffmpeg=use_ffmpeg,
+        )
+        
+        print(f"\nClip extraction complete:")
+        print(f"- Extracted {len(clips)} clips from {os.path.basename(args.video_file)}")
+        
+        if clips:
+            output_dir = os.path.dirname(clips[0]['output_file'])
+            print(f"- Clips saved to: {os.path.abspath(output_dir)}")
+            
+            # Print information about each clip
+            print("\nExtracted clips:")
+            for clip in clips:
+                start_min = int(clip['extracted_start'] // 60)
+                start_sec = int(clip['extracted_start'] % 60)
+                end_min = int(clip['extracted_end'] // 60)
+                end_sec = int(clip['extracted_end'] % 60)
+                
+                print(f"\nClip {clip['clip_id']}: {clip['topic']}")
+                print(f"- Time: {start_min:02d}:{start_sec:02d} - {end_min:02d}:{end_sec:02d} "
+                      f"({clip['duration']:.1f}s)")
+                print(f"- File: {os.path.basename(clip['output_file'])}")
+                print(f"- Score: {clip['importance_score']:.2f}")
+        
+        return 0
+    except Exception as e:
+        logger.error(f"Error extracting clips: {e}", exc_info=True)
+        return 1
 
 if __name__ == "__main__":
     sys.exit(remove_silence_cli())
