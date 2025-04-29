@@ -1438,20 +1438,34 @@ class TranscriptEnhancementPipeline:
 
 # Helper functions
 
-def enhance_transcript(transcript, config=None):
+def enhance_transcript(transcript, config=None, output_file=None):
     """
     Apply transcript enhancement pipeline with default settings.
     
     Args:
         transcript: Transcript to enhance (text or structured data)
         config: Optional configuration override
+        output_file: Optional path to save enhanced transcript
         
     Returns:
         Enhanced transcript
     """
     pipeline = TranscriptEnhancementPipeline(config=config)
-    return pipeline.process(transcript)
-
+    enhanced_transcript = pipeline.process(transcript)
+    
+    # Save to file if output_file is provided
+    if output_file:
+        if isinstance(enhanced_transcript, str):
+            # Save simple text
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(enhanced_transcript)
+        elif isinstance(enhanced_transcript, (dict, list)):
+            # Save structured data as JSON
+            import json
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(enhanced_transcript, f, indent=2)
+    
+    return enhanced_transcript
 
 def extract_enhanced_clips(
     video_file, 
@@ -1464,7 +1478,8 @@ def extract_enhanced_clips(
     min_duration=None,
     max_duration=None,
     add_padding=0.5,
-    use_ffmpeg=True
+    use_ffmpeg=True,
+    save_enhanced_transcript=True
 ):
     """
     Process transcript and extract enhanced clips.
@@ -1481,6 +1496,7 @@ def extract_enhanced_clips(
         max_duration: Only extract clips shorter than this duration in seconds
         add_padding: Add padding in seconds before/after each clip
         use_ffmpeg: Use direct FFmpeg calls instead of MoviePy
+        save_enhanced_transcript: Whether to save the enhanced transcript to a file
         
     Returns:
         List of extracted clip information
@@ -1488,6 +1504,7 @@ def extract_enhanced_clips(
     from .clip_extractor import extract_clips_from_json
     import json
     import logging
+    from pathlib import Path
     
     logger = logging.getLogger(__name__)
     logger.info("Enhancing transcript before clip extraction")
@@ -1504,20 +1521,37 @@ def extract_enhanced_clips(
         pipeline = TranscriptEnhancementPipeline()
         logger.info("Using all transcript processors with default settings")
     
-    enhanced_transcript = pipeline.process(transcript_data, generate_report=True)
+    enhanced_transcript, report = pipeline.process(transcript_data, generate_report=True)
     
-    # If generate_report is True, enhanced_transcript will be a tuple (transcript, report)
-    if isinstance(enhanced_transcript, tuple):
-        enhanced_transcript, report = enhanced_transcript
-        logger.info("Transcript enhancement complete")
+    logger.info("Transcript enhancement complete")
+    
+    # Log some details about the enhancement
+    if isinstance(report, dict) and 'summary' in report:
+        summary = report['summary']
+        if 'filler_words_removed' in summary:
+            logger.info(f"Removed {summary['filler_words_removed']} filler words")
+        if 'repetitions_handled' in summary:
+            logger.info(f"Handled {summary['repetitions_handled']} repetitions")
+    
+    # Create output directory if not provided
+    if output_dir is None:
+        video_path = Path(video_file)
+        output_dir = str(video_path.with_suffix('_clips'))
+    
+    # Create the directory if it doesn't exist
+    Path(output_dir).mkdir(exist_ok=True)
+    
+    # Save enhanced transcript if requested
+    if save_enhanced_transcript:
+        # Use the transcript filename as a base
+        transcript_path = Path(transcript_file)
+        enhanced_transcript_filename = transcript_path.stem + "_enhanced" + transcript_path.suffix
+        enhanced_transcript_path = str(Path(output_dir) / enhanced_transcript_filename)
         
-        # Log some details about the enhancement
-        if isinstance(report, dict) and 'summary' in report:
-            summary = report['summary']
-            if 'filler_words_removed' in summary:
-                logger.info(f"Removed {summary['filler_words_removed']} filler words")
-            if 'repetitions_handled' in summary:
-                logger.info(f"Handled {summary['repetitions_handled']} repetitions")
+        with open(enhanced_transcript_path, 'w', encoding='utf-8') as f:
+            json.dump(enhanced_transcript, f, indent=2)
+        
+        logger.info(f"Saved enhanced transcript to: {enhanced_transcript_path}")
     
     # Create temporary file for enhanced transcript
     import tempfile
