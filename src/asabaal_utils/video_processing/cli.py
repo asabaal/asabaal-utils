@@ -188,7 +188,7 @@ def analyze_transcript_cli():
             output_path = input_path.with_suffix('.clips.json')
             args.output_file = str(output_path)
         
-        # If enhancement is requested, apply it before analysis
+        # Configure processors for enhancement if requested
         if args.enhance_transcript:
             from .transcript_processors import TranscriptEnhancementPipeline, FillerWordsProcessor, RepetitionHandler, SentenceBoundaryDetector, SemanticUnitPreserver
             
@@ -214,50 +214,72 @@ def analyze_transcript_cli():
             # use all processors with default settings
             if not processors and args.enhance_transcript:
                 pipeline = TranscriptEnhancementPipeline()
+                processors = None
+            
+            # Special handling for SRT format
+            if args.format.lower() == "srt":
+                # For SRT format, use specialized timestamp-aware enhancement
+                from .srt_utils import enhance_srt_with_timestamp_mapping, create_analysis_json_from_enhanced_srt
+                import tempfile
+                
+                # Use our specialized SRT enhancement function that preserves timestamp mappings
+                enhanced_data = enhance_srt_with_timestamp_mapping(
+                    args.transcript_file, 
+                    processors
+                )
+                
+                # Create a temporary JSON file for analysis that preserves the timestamp mappings
+                temp_json_path = tempfile.mktemp(suffix='.json')
+                analysis_data = create_analysis_json_from_enhanced_srt(enhanced_data, temp_json_path)
+                
+                print(f"Applied timestamp-aware enhancement to {len(enhanced_data['enhanced_entries'])} SRT entries")
+                transcript_file_to_analyze = temp_json_path
+                
+                # Override format to tell the analyzer this is a special JSON format
+                transcript_format = "enhanced_srt_json"
             else:
+                # For other formats, use standard enhancement
                 pipeline = TranscriptEnhancementPipeline(processors=processors)
-            
-            # Read the transcript
-            with open(args.transcript_file, 'r', encoding='utf-8') as f:
-                transcript_content = f.read()
-            
-            # Process the transcript
-            enhanced_transcript = pipeline.process(transcript_content)
-            
-            # Create a temporary file with the correct extension for the format
-            suffix_map = {"srt": ".srt", "capcut": ".json", "json": ".json", "txt": ".txt"}
-            suffix = suffix_map.get(args.format, ".txt")
-            
-            import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=suffix, encoding='utf-8') as f:
-                f.write(enhanced_transcript)
-                enhanced_transcript_path = f.name
-            
-            try:
-                # Use the enhanced transcript for analysis
+                
+                # Read the transcript
+                with open(args.transcript_file, 'r', encoding='utf-8') as f:
+                    transcript_content = f.read()
+                
+                # Process the transcript
+                enhanced_transcript = pipeline.process(transcript_content)
+                
+                # Create a temporary file with the correct extension for the format
+                suffix_map = {"capcut": ".json", "json": ".json", "txt": ".txt"}
+                suffix = suffix_map.get(args.format, ".txt")
+                
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=suffix, encoding='utf-8') as f:
+                    f.write(enhanced_transcript)
+                    enhanced_transcript_path = f.name
+                
                 transcript_file_to_analyze = enhanced_transcript_path
+                transcript_format = args.format
                 print(f"Applied transcript enhancement before analysis")
-            except Exception as e:
-                logger.error(f"Error enhancing transcript: {e}")
-                transcript_file_to_analyze = args.transcript_file
         else:
+            # No enhancement, use original file and format
             transcript_file_to_analyze = args.transcript_file
+            transcript_format = args.format
         
-        # Perform the transcript analysis with the possibly enhanced transcript
+        # Perform the transcript analysis
         suggestions = analyze_transcript(
             transcript_file=transcript_file_to_analyze,
             output_file=args.output_file,
-            transcript_format=args.format,
+            transcript_format=transcript_format,
             min_clip_duration=args.min_clip_duration,
             max_clip_duration=args.max_clip_duration,
             topic_change_threshold=args.topic_change_threshold,
         )
         
         # Clean up temporary file if created
-        if args.enhance_transcript and 'enhanced_transcript_path' in locals():
+        if args.enhance_transcript and 'transcript_file_to_analyze' in locals() and transcript_file_to_analyze != args.transcript_file:
             import os
             try:
-                os.unlink(enhanced_transcript_path)
+                os.unlink(transcript_file_to_analyze)
             except:
                 pass
         
