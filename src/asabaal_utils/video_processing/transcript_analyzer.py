@@ -7,7 +7,7 @@ suggesting optimal clip splits for better content flow.
 
 import re
 import json
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
 import logging
 from pathlib import Path
@@ -49,8 +49,14 @@ class ClipSuggestion:
     @property
     def text(self) -> str:
         """Get the full text of this clip."""
-        return " ".join(segment.text for segment in self.segments)
-
+        texts = []
+        for segment in self.segments:
+            if isinstance(segment, dict):
+                if 'text' in segment:
+                    texts.append(segment['text'])
+            else:
+                texts.append(segment.text)
+        return " ".join(texts)
 
 class TranscriptAnalyzer:
     """
@@ -207,6 +213,40 @@ class TranscriptAnalyzer:
         
         return segments
 
+    def parse_enhanced_srt_json_transcript(self, json_file):
+        """
+        Parse a JSON file created from enhanced SRT data.
+        
+        Args:
+            json_file: Path to enhanced SRT JSON
+            
+        Returns:
+            List of transcript segments
+        """
+        import json
+        
+        with open(json_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Extract segments directly from the enhanced JSON
+        if "segments" in data:
+            segments = []
+            for segment in data["segments"]:
+                segments.append({
+                    "text": segment["text"],
+                    "start_time": segment.get("start_time", 0),
+                    "end_time": segment.get("end_time", 0),
+                    "duration": segment.get("end_time", 0) - segment.get("start_time", 0),
+                    # Include any other helpful metadata
+                    "enhanced": True,
+                    "original_text": segment.get("original_text")
+                })
+            return segments
+        
+        # Fallback for legacy enhanced format
+        logger.warning("Enhanced SRT JSON format not recognized, trying alternative parsing")
+        return self.parse_json_transcript(json_file)
+
     def parse_srt_transcript(self, transcript_file: str) -> List[TranscriptSegment]:
         """
         Parse a transcript file in SRT format.
@@ -293,6 +333,24 @@ class TranscriptAnalyzer:
         # Convert to seconds
         return hours * 3600 + minutes * 60 + seconds
 
+    # Add this method to TranscriptAnalyzer class
+    def _get_segment_attr(self, segment, attr, default=None):
+        """
+        Safely get an attribute from a segment, whether it's a TranscriptSegment object or a dictionary.
+        
+        Args:
+            segment: TranscriptSegment object or dictionary
+            attr: Attribute or key to access
+            default: Default value if attribute is not found
+            
+        Returns:
+            The attribute value or default
+        """
+        if isinstance(segment, dict):
+            return segment.get(attr, default)
+        else:
+            return getattr(segment, attr, default)
+
     def detect_topic_changes(self, segments: List[TranscriptSegment]) -> List[int]:
         """
         Detect significant topic changes in the transcript.
@@ -303,11 +361,12 @@ class TranscriptAnalyzer:
         Returns:
             List of indices where topics change.
         """
+
         if len(segments) < 3:
             return []
         
         # Extract text from segments
-        texts = [segment.text for segment in segments]
+        texts = [self._get_segment_attr(segment, 'text', '') for segment in segments]
         
         # Create windows of text for analysis
         window_size = 3
@@ -348,16 +407,12 @@ class TranscriptAnalyzer:
             logger.warning("Failed to vectorize transcript windows, possibly due to empty text")
             return []
     
-    def score_split_points(
-        self, 
-        segments: List[TranscriptSegment],
-        topic_changes: List[int]
-    ) -> Dict[int, float]:
+    def score_split_points(self, segments, topic_changes):
         """
         Score potential split points in the transcript.
         
         Args:
-            segments: List of TranscriptSegment objects.
+            segments: List of TranscriptSegment objects or dictionaries.
             topic_changes: List of indices where topics change.
             
         Returns:
@@ -374,24 +429,29 @@ class TranscriptAnalyzer:
             
             # Sentence end score
             prev_segment = segments[i-1]
-            if self.sentence_end_pattern.search(prev_segment.text):
+            prev_text = self._get_segment_attr(prev_segment, 'text', '')
+            if self.sentence_end_pattern.search(prev_text):
                 score += self.sentence_end_weight
             
             # Keyword score
+            current_text = self._get_segment_attr(segments[i], 'text', '')
             for keyword in self.keywords:
-                if prev_segment.text.lower().endswith(keyword.lower()):
+                if prev_text.lower().endswith(keyword.lower()):
                     score += self.keyword_weight
-                if segments[i].text.lower().startswith(keyword.lower()):
+                if current_text.lower().startswith(keyword.lower()):
                     score += self.keyword_weight
             
             # Pause score
-            time_diff = segments[i].start_time - prev_segment.end_time
+            prev_end_time = self._get_segment_attr(prev_segment, 'end_time', 0.0)
+            current_start_time = self._get_segment_attr(segments[i], 'start_time', 0.0)
+            time_diff = current_start_time - prev_end_time
             if time_diff > 0.5:  # Significant pause
                 score += self.pause_weight * min(3.0, time_diff)
             
             # Speaker change score
-            if (prev_segment.speaker and segments[i].speaker and 
-                prev_segment.speaker != segments[i].speaker):
+            prev_speaker = self._get_segment_attr(prev_segment, 'speaker')
+            current_speaker = self._get_segment_attr(segments[i], 'speaker')
+            if (prev_speaker and current_speaker and prev_speaker != current_speaker):
                 score += self.speaker_change_weight
             
             scores[i] = score
@@ -400,13 +460,13 @@ class TranscriptAnalyzer:
     
     def generate_clip_suggestions(
         self, 
-        segments: List[TranscriptSegment]
+        segments: List[Union[TranscriptSegment, Dict]]
     ) -> List[ClipSuggestion]:
         """
         Generate suggested clips from transcript segments.
         
         Args:
-            segments: List of TranscriptSegment objects.
+            segments: List of TranscriptSegment objects or dictionaries.
             
         Returns:
             List of ClipSuggestion objects.
@@ -425,8 +485,8 @@ class TranscriptAnalyzer:
         
         # Start with the full video as one clip
         clips = [ClipSuggestion(
-            start_time=segments[0].start_time,
-            end_time=segments[-1].end_time,
+            start_time=self._get_segment_attr(segments[0], 'start_time', 0.0),
+            end_time=self._get_segment_attr(segments[-1], 'end_time', 0.0),
             topic="Full Video",
             segments=segments.copy(),
             importance_score=0.0
@@ -450,31 +510,41 @@ class TranscriptAnalyzer:
                     part1 = clip.segments[:split_pos]
                     part2 = clip.segments[split_pos:]
                     
-                    part1_duration = part1[-1].end_time - part1[0].start_time
-                    part2_duration = part2[-1].end_time - part2[0].start_time
-                    
-                    if part1_duration >= self.min_clip_duration and part2_duration >= self.min_clip_duration:
-                        # Extract topics from each part
-                        topic1 = self._extract_topic(part1)
-                        topic2 = self._extract_topic(part2)
+                    # Calculate durations for parts
+                    if part1 and part2:
+                        part1_start = self._get_segment_attr(part1[0], 'start_time', 0.0)
+                        part1_end = self._get_segment_attr(part1[-1], 'end_time', 0.0)
+                        part1_duration = part1_end - part1_start
                         
-                        # Create two new clips
-                        new_clips.append(ClipSuggestion(
-                            start_time=part1[0].start_time,
-                            end_time=part1[-1].end_time,
-                            topic=topic1,
-                            segments=part1,
-                            importance_score=score
-                        ))
-                        new_clips.append(ClipSuggestion(
-                            start_time=part2[0].start_time,
-                            end_time=part2[-1].end_time,
-                            topic=topic2,
-                            segments=part2,
-                            importance_score=score
-                        ))
+                        part2_start = self._get_segment_attr(part2[0], 'start_time', 0.0)
+                        part2_end = self._get_segment_attr(part2[-1], 'end_time', 0.0)
+                        part2_duration = part2_end - part2_start
+                        
+                        if part1_duration >= self.min_clip_duration and part2_duration >= self.min_clip_duration:
+                            # Extract topics from each part
+                            topic1 = self._extract_topic(part1)
+                            topic2 = self._extract_topic(part2)
+                            
+                            # Create two new clips
+                            new_clips.append(ClipSuggestion(
+                                start_time=part1_start,
+                                end_time=part1_end,
+                                topic=topic1,
+                                segments=part1,
+                                importance_score=score
+                            ))
+                            new_clips.append(ClipSuggestion(
+                                start_time=part2_start,
+                                end_time=part2_end,
+                                topic=topic2,
+                                segments=part2,
+                                importance_score=score
+                            ))
+                        else:
+                            # Can't split at this point, keep the original clip
+                            new_clips.append(clip)
                     else:
-                        # Can't split at this point, keep the original clip
+                        # One of the parts is empty, keep the original clip
                         new_clips.append(clip)
                 else:
                     # Split point not in this clip
@@ -494,11 +564,12 @@ class TranscriptAnalyzer:
             new_clips = []
             current_segments = []
             current_duration = 0.0
-            current_start = segments[0].start_time
+            current_start = self._get_segment_attr(segments[0], 'start_time', 0.0)
             
             for segment in segments:
                 current_segments.append(segment)
-                current_duration += segment.duration
+                segment_duration = self._get_segment_attr(segment, 'end_time', 0.0) - self._get_segment_attr(segment, 'start_time', 0.0)
+                current_duration += segment_duration
                 
                 if current_duration >= target_duration and len(current_segments) > 1:
                     # Extract topic
@@ -507,7 +578,7 @@ class TranscriptAnalyzer:
                     # Create a new clip
                     new_clips.append(ClipSuggestion(
                         start_time=current_start,
-                        end_time=current_segments[-1].end_time,
+                        end_time=self._get_segment_attr(current_segments[-1], 'end_time', 0.0),
                         topic=topic,
                         segments=current_segments.copy(),
                         importance_score=5.0  # Medium importance
@@ -516,14 +587,14 @@ class TranscriptAnalyzer:
                     # Reset for the next clip
                     current_segments = []
                     current_duration = 0.0
-                    current_start = segment.end_time
+                    current_start = self._get_segment_attr(segment, 'end_time', 0.0)
             
             # Add the last clip if there are segments left
             if current_segments:
                 topic = self._extract_topic(current_segments)
                 new_clips.append(ClipSuggestion(
                     start_time=current_start,
-                    end_time=current_segments[-1].end_time,
+                    end_time=self._get_segment_attr(current_segments[-1], 'end_time', 0.0),
                     topic=topic,
                     segments=current_segments,
                     importance_score=5.0
@@ -533,12 +604,12 @@ class TranscriptAnalyzer:
         
         return sorted(clips, key=lambda x: x.start_time)
     
-    def _extract_topic(self, segments: List[TranscriptSegment]) -> str:
+    def _extract_topic(self, segments):
         """
         Extract a topic description from a list of segments.
         
         Args:
-            segments: List of TranscriptSegment objects.
+            segments: List of TranscriptSegment objects or dictionaries.
             
         Returns:
             A string describing the topic.
@@ -547,17 +618,17 @@ class TranscriptAnalyzer:
             return "Unknown"
         
         # Simple approach: use the first few words of the first segment
-        first_segment = segments[0].text
+        first_segment_text = self._get_segment_attr(segments[0], 'text', '')
         
         # Remove any leading transition words
         for keyword in sorted(self.keywords, key=len, reverse=True):
-            if first_segment.lower().startswith(keyword.lower()):
-                first_segment = first_segment[len(keyword):].strip()
+            if first_segment_text.lower().startswith(keyword.lower()):
+                first_segment_text = first_segment_text[len(keyword):].strip()
                 break
         
         # Limit to first 30 characters for a brief topic
-        topic = first_segment[:30].strip()
-        if len(first_segment) > 30:
+        topic = first_segment_text[:30].strip()
+        if len(first_segment_text) > 30:
             topic += "..."
         
         return topic
@@ -596,6 +667,8 @@ def analyze_transcript(
         segments = analyzer.parse_capcut_transcript(transcript_file)
     elif transcript_format.lower() == 'json':
         segments = analyzer.parse_json_transcript(transcript_file)
+    elif transcript_format == "enhanced_srt_json":
+        segments = analyzer.parse_enhanced_srt_json_transcript(transcript_file)
     elif transcript_format.lower() == 'srt':
         segments = analyzer.parse_srt_transcript(transcript_file)
     else:

@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 def enhance_srt_with_timestamp_mapping(input_file, processors=None):
     """
     Enhance an SRT transcript while preserving timestamp mappings.
