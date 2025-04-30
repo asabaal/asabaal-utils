@@ -2,20 +2,244 @@
 
 A collection of personal utilities for asabaal.
 
-## Budget Utility
+## Video Processing Utilities
 
-A command-line utility to help manage monthly budgets and projections.
+Tools to speed up video editing workflows by automating common tasks.
 
-### Installation
+### Silence Detection and Removal
+
+Automatically detects and removes silent/near-silent portions of videos to create tighter, more engaging content.
+
+#### Features:
+
+- Adjustable silence threshold to accommodate different recording environments
+- Customizable minimum silence duration to avoid choppy editing
+- Padding controls to ensure smooth transitions
+- Supports large video files (multiple GB)
+- Advanced audio analysis with aggressive silence detection option
+
+#### Usage
+
+```bash
+# Command-line usage
+remove-silence input.mp4 output.mp4 --threshold-db -45 --min-silence 0.7
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import remove_silence
+
+remove_silence(
+    "input.mp4",
+    "output.mp4",
+    threshold_db=-40.0,
+    min_silence_duration=0.5,
+    min_sound_duration=0.3,
+    padding=0.1
+)
+```
+
+### Transcript Analysis for Intelligent Clip Splitting
+
+Analyzes video transcripts (such as those from CapCut) to suggest optimal points to split your videos into coherent clips.
+
+#### Features:
+
+- Topic change detection using NLP techniques
+- Speaker change detection
+- Identifies natural break points in speech
+- Handles CapCut and custom JSON transcript formats
+- Configurable minimum and maximum clip durations
+
+#### Usage
+
+```bash
+# Command-line usage
+analyze-transcript transcript.txt --output-file suggestions.json --min-clip-duration 15 --max-clip-duration 90
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import analyze_transcript
+
+suggestions = analyze_transcript(
+    "transcript.txt",
+    output_file="suggestions.json",
+    transcript_format="capcut",
+    min_clip_duration=10.0,
+    max_clip_duration=60.0
+)
+```
+
+### Automatic Thumbnail Generation
+
+Analyzes videos to extract high-quality frames that make excellent thumbnails or preview images.
+
+#### Features:
+
+- Extracts frames based on image quality metrics (brightness, contrast, colorfulness, sharpness)
+- Avoids blurry or motion-heavy frames
+- Intelligently spaces thumbnails throughout the video
+- Options to customize number of candidates and placement
+- Generates detailed metadata about each thumbnail candidate
+
+#### Usage
+
+```bash
+# Command-line usage
+generate-thumbnails video.mp4 --output-dir video_thumbs --count 15 --format jpg
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import generate_thumbnails
+
+thumbnails = generate_thumbnails(
+    "video.mp4",
+    output_dir="video_thumbs",
+    frames_to_extract=10,
+    skip_start_percent=0.05,
+    skip_end_percent=0.05,
+    output_format="jpg"
+)
+
+# Print the best thumbnail candidate
+best_thumbnail = max(thumbnails, key=lambda x: x['quality_score'])
+print(f"Best thumbnail at {best_thumbnail['timestamp_str']}: {best_thumbnail['frame_path']}")
+```
+
+### Video Color Theme Analysis
+
+Extracts and analyzes color themes and palettes from your videos to help maintain visual consistency.
+
+#### Features:
+
+- Identifies dominant colors and their proportions
+- Creates color palette images for reference
+- Identifies color theme types (monochromatic, complementary, etc.)
+- Suggests complementary colors for graphics and titles
+- Provides color emotion and mood analysis
+- Tracks color changes throughout the video in segments
+
+#### Usage
+
+```bash
+# Command-line usage
+analyze-colors video.mp4 --output-dir video_colors --palette-size 6
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import analyze_video_colors
+
+color_data = analyze_video_colors(
+    "video.mp4",
+    output_dir="video_colors",
+    palette_size=5,
+    create_palette_image=True,
+    create_segments=True
+)
+
+# Access the color theme information
+theme = color_data["theme"]
+print(f"Video color theme: {theme['theme_type']}")
+print(f"Dominant colors: {', '.join(theme['color_names'])}")
+print(f"Emotional associations: {', '.join(theme['emotions'])}")
+
+# Use complementary colors for graphics
+for color_hex in theme["complementary_hex"]:
+    print(f"Complementary color: {color_hex}")
+```
+
+### Jump Cut Detection and Smoothing
+
+Detects abrupt transitions (jump cuts) in videos and can automatically apply smooth transitions to improve flow.
+
+#### Features:
+
+- Identifies jump cuts using multiple detection metrics (similarity, motion, color change)
+- Suggests appropriate transitions based on content analysis
+- Supports various transition types (crossfade, fade to black/white, wipes, zooms)
+- Can save frames before and after each jump cut for manual review
+- Option to automatically create a new video with smoothed transitions
+
+#### Usage
+
+```bash
+# Command-line usage for detection only
+detect-jump-cuts video.mp4 --output-dir video_jump_cuts --sensitivity 0.6
+
+# With automatic smoothing
+detect-jump-cuts video.mp4 --smooth-output smoothed_video.mp4 --sensitivity 0.6
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import detect_jump_cuts, smooth_jump_cuts
+
+# First detect jump cuts
+jump_cuts = detect_jump_cuts(
+    "video.mp4", 
+    output_dir="video_jump_cuts",
+    sensitivity=0.6,
+    save_frames=True
+)
+
+# Review the detected jump cuts
+for cut in jump_cuts:
+    print(f"Jump cut at {cut['timestamp_str']} - Suggested transition: {cut['suggested_transition']}")
+
+# Then apply smoothing transitions
+smooth_jump_cuts(
+    "video.mp4",
+    "smoothed_video.mp4",
+    jump_cuts,
+    apply_all_transitions=True
+)
+```
+
+### Content-Aware Video Summarization
+
+Automatically analyzes videos to create shorter summaries or highlight reels by extracting the most interesting segments.
+
+#### Features:
+
+- Intelligently identifies the most engaging parts of your videos
+- Multiple summary styles (highlights, trailer, overview, teaser, condensed)
+- Analyzes visual quality, audio interest, motion, and speech presence
+- Detects peak moments and representative segments
+- Automatically creates a condensed version with smooth transitions between segments
+
+#### Usage
+
+```bash
+# Command-line usage
+create-summary input.mp4 summary.mp4 --target-duration 90 --style trailer
+
+# Import and use in your own Python scripts
+from asabaal_utils.video_processing import create_video_summary, SummaryStyle
+
+# Create a 60-second highlight reel
+segments = create_video_summary(
+    "long_video.mp4",
+    "highlight_reel.mp4",
+    target_duration=60.0,
+    summary_style="highlights",
+    favor_beginning=True,
+    favor_ending=True
+)
+
+# Print information about the selected segments
+for segment in segments:
+    print(f"Included segment from {segment['timestamp_str']} - {segment['category']}")
+    print(f"Metrics: Visual={segment['metrics']['visual_interest']}, " 
+          f"Audio={segment['metrics']['audio_interest']}")
+```
+
+## Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/asabaal/asabaal-utils.git
 cd asabaal-utils
 
-# Install dependencies
-npm install
+# Install with development dependencies
+pip install -e .
 ```
+
+## Budget Utility
+
+A command-line utility to help manage monthly budgets and projections.
 
 ### Usage
 
