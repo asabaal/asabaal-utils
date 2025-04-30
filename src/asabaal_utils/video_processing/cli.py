@@ -175,6 +175,9 @@ def analyze_transcript_cli():
     enhancement_group.add_argument("--repetition-strategy", 
                     choices=["first_instance", "cleanest_instance", "combine"],
                     default="first_instance", help="Strategy for handling repetitions")
+    # Add option to save enhanced transcript
+    enhancement_group.add_argument("--save-enhanced-transcript", action="store_true",
+                    help="Save the enhanced transcript as a plain text file")
     
     args = parser.parse_args()
     
@@ -237,6 +240,24 @@ def analyze_transcript_cli():
                 
                 # Override format to tell the analyzer this is a special JSON format
                 transcript_format = "enhanced_srt_json"
+                
+                # Save enhanced transcript as plain text if requested
+                if args.save_enhanced_transcript:
+                    # Determine path for enhanced transcript
+                    output_dir = Path(args.output_file).parent
+                    enhanced_transcript_filename = Path(args.transcript_file).stem + "_enhanced.txt"
+                    enhanced_transcript_path = str(output_dir / enhanced_transcript_filename)
+                    
+                    # Extract plain text from the enhanced SRT data
+                    enhanced_text = ""
+                    for entry in enhanced_data['enhanced_entries']:
+                        enhanced_text += entry['text'] + " "
+                    
+                    # Save the enhanced text
+                    with open(enhanced_transcript_path, 'w', encoding='utf-8') as f:
+                        f.write(enhanced_text)
+                    
+                    print(f"Saved enhanced transcript text to: {enhanced_transcript_path}")
             else:
                 # For other formats, use standard enhancement
                 pipeline = TranscriptEnhancementPipeline(processors=processors)
@@ -247,6 +268,52 @@ def analyze_transcript_cli():
                 
                 # Process the transcript
                 enhanced_transcript = pipeline.process(transcript_content)
+                
+                # Save enhanced transcript as plain text if requested
+                if args.save_enhanced_transcript:
+                    # Determine path for enhanced transcript
+                    output_dir = Path(args.output_file).parent
+                    # Always use .txt extension
+                    enhanced_transcript_filename = Path(args.transcript_file).stem + "_enhanced.txt"
+                    enhanced_transcript_path = str(output_dir / enhanced_transcript_filename)
+                    
+                    # Save the enhanced transcript as plain text
+                    with open(enhanced_transcript_path, 'w', encoding='utf-8') as f:
+                        # For JSON format inputs, we need to extract the plain text
+                        if args.format.lower() == "json" or args.format.lower() == "capcut":
+                            import json
+                            try:
+                                # Try to parse as JSON
+                                json_data = json.loads(enhanced_transcript)
+                                # Extract text from the structure based on common patterns
+                                plain_text = ""
+                                if isinstance(json_data, list):
+                                    for item in json_data:
+                                        if isinstance(item, dict) and 'text' in item:
+                                            plain_text += item['text'] + " "
+                                elif isinstance(json_data, dict):
+                                    # Try to find text fields
+                                    if 'text' in json_data:
+                                        plain_text = json_data['text']
+                                    elif 'segments' in json_data and isinstance(json_data['segments'], list):
+                                        for segment in json_data['segments']:
+                                            if isinstance(segment, dict) and 'text' in segment:
+                                                plain_text += segment['text'] + " "
+                                
+                                # If we successfully extracted text, use it
+                                if plain_text:
+                                    f.write(plain_text)
+                                else:
+                                    # If we couldn't extract text, fall back to the full enhanced transcript
+                                    f.write(enhanced_transcript)
+                            except json.JSONDecodeError:
+                                # If not valid JSON, just write it as is
+                                f.write(enhanced_transcript)
+                        else:
+                            # For TXT and other formats, write as is
+                            f.write(enhanced_transcript)
+                    
+                    print(f"Saved enhanced transcript text to: {enhanced_transcript_path}")
                 
                 # Create a temporary file with the correct extension for the format
                 suffix_map = {"capcut": ".json", "json": ".json", "txt": ".txt"}
