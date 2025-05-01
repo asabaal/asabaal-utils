@@ -900,7 +900,6 @@ def extract_clips_cli():
         
         # Clean up temporary files
         if args.transcript_file and 'json_output_path' in locals():
-            import os
             try:
                 os.unlink(json_output_path)
             except:
