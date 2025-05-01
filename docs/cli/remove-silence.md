@@ -21,38 +21,29 @@ remove-silence INPUT_FILE OUTPUT_FILE [options]
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--threshold THRESHOLD` | float | -30.0 | Silence detection threshold in dB. Lower values (e.g., -40) will consider more audio as silence |
-| `--duration MIN_DURATION` | float | 0.5 | Minimum duration of silence to detect in seconds |
+| `--threshold-db THRESHOLD` | float | -40.0 | Silence detection threshold in dB. Lower values (e.g., -40) will consider more audio as silence |
+| `--min-silence DURATION` | float | 0.5 | Minimum duration of silence to remove in seconds |
+| `--min-sound DURATION` | float | 0.3 | Minimum duration of sound to keep in seconds |
 | `--padding PADDING` | float | 0.1 | Amount of padding to keep around non-silent segments in seconds |
-| `--min-segment MIN_SEGMENT` | float | 0.5 | Minimum duration of a non-silent segment to keep in seconds |
+| `--chunk-size SIZE` | float | 0.05 | Size of audio chunks for analysis in seconds |
+| `--aggressive` | flag | False | Use aggressive silence rejection algorithms |
 
-### Processing Options
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `--chunk-size SIZE` | int | 20 | Process video in chunks of SIZE MB for memory efficiency |
-| `--max-memory SIZE` | int | None | Limit memory usage to SIZE MB (default: 75% of system RAM) |
-| `--temp-dir DIR` | string | None | Directory for temporary files (default: system temp) |
-| `--keep-temp` | flag | False | Don't delete temporary files after processing |
-| `--audio-only` | flag | False | Process only the audio track, keep video unchanged |
-
-### Output Options
+### Memory Management Options
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--format FORMAT` | string | None | Output video format (default: same as input) |
-| `--quality QUALITY` | int | None | Output video quality (0-100, higher is better) |
-| `--dry-run` | flag | False | Analyze but don't create output file |
-| `--report` | flag | False | Save a JSON report of detected silence |
-| `--report-file FILE` | string | None | Path for the JSON silence report |
+| `--strategy STRATEGY` | string | "auto" | Processing strategy to use: "auto", "full_quality", "reduced_resolution", "chunked", "segment", "streaming" |
+| `--segment-count COUNT` | int | None | Number of segments to split video into when using segment strategy |
+| `--chunk-duration DURATION` | float | None | Duration of each chunk in seconds when using chunked strategy |
+| `--resolution-scale SCALE` | float | None | Scale factor for resolution when using reduced_resolution strategy (0.25-0.75) |
+| `--disable-memory-adaptation` | flag | False | Disable memory-adaptive processing entirely |
+| `--disable-ffmpeg` | flag | False | Disable direct FFmpeg implementation and use MoviePy instead |
 
 ### General Options
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--verbose` | flag | False | Increase output verbosity |
-| `--quiet` | flag | False | Suppress all output except errors |
-| `--log-file FILE` | string | None | Log output to specified file |
+| `--log-level LEVEL` | string | "INFO" | Set the logging level: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL" |
 
 ## Examples
 
@@ -69,7 +60,7 @@ remove-silence input.mp4 output.mp4
 Adjust the silence threshold and minimum duration:
 
 ```bash
-remove-silence input.mp4 output.mp4 --threshold -40 --duration 1.0
+remove-silence input.mp4 output.mp4 --threshold-db -40 --min-silence 1.0
 ```
 
 ### Memory-Efficient Processing
@@ -77,57 +68,48 @@ remove-silence input.mp4 output.mp4 --threshold -40 --duration 1.0
 Process a large video file with memory optimization:
 
 ```bash
-remove-silence large_video.mp4 output.mp4 --chunk-size 10 --max-memory 1000
+remove-silence large_video.mp4 output.mp4 --strategy chunked --chunk-duration 60
 ```
 
-### Generate Silence Report
+### Using Aggressive Mode
 
-Analyze the video and generate a report without creating an output file:
+Use aggressive silence detection for more silence removal:
 
 ```bash
-remove-silence input.mp4 output.mp4 --dry-run --report --report-file silence_report.json
+remove-silence input.mp4 output.mp4 --aggressive --threshold-db -35
 ```
 
-### Process Only Audio
+### Customizing Audio Analysis
 
-Remove silence from the audio track while keeping the video unchanged:
+Fine-tune audio analysis parameters:
 
 ```bash
-remove-silence interview.mp4 output.mp4 --audio-only
+remove-silence input.mp4 output.mp4 --min-silence 0.8 --min-sound 0.5 --padding 0.2
 ```
 
 ## Output
 
-The command produces:
+The command produces a processed video file with silent segments removed and reports:
 
-1. A processed video file with silent segments removed
-2. (Optional) A JSON report with detailed information about detected silent segments
+- Original duration of the video
+- Output duration of the processed video
+- Time saved by removing silent segments
+- Percentage of time saved
 
-Example report format:
-```json
-{
-  "input_file": "input.mp4",
-  "output_file": "output.mp4",
-  "total_duration": 120.5,
-  "output_duration": 95.2,
-  "time_saved": 25.3,
-  "silence_segments": [
-    {"start": 10.2, "end": 15.5, "duration": 5.3},
-    {"start": 45.7, "end": 55.1, "duration": 9.4},
-    {"start": 100.3, "end": 110.9, "duration": 10.6}
-  ],
-  "settings": {
-    "threshold": -30.0,
-    "min_silence_duration": 0.5,
-    "padding": 0.1
-  }
-}
+Example output:
+```
+Silence removal complete:
+- Original duration: 120.50s
+- Output duration: 95.20s
+- Time saved: 25.30s (21.0%)
+- Output file: /path/to/output.mp4
 ```
 
 ## Related Commands
 
 - [`create-summary`](create-summary.md) - Create content-aware video summaries
 - [`extract-clips`](extract-clips.md) - Extract specific segments from videos
+- [`analyze-transcript`](analyze-transcript.md) - Analyze video transcripts
 
 ## Related API
 

@@ -13,27 +13,30 @@ Asabaal Video Utilities provides several command-line tools to process videos wi
 remove-silence input.mp4 output.mp4
 
 # Customize silence detection thresholds
-remove-silence input.mp4 output.mp4 --threshold -30 --duration 1.0
+remove-silence input.mp4 output.mp4 --threshold-db -30 --min-silence 1.0
 ```
 
 ### Analyze a Video Transcript
 
 ```bash
 # Analyze transcript to find optimal clip points
-analyze-transcript input.mp4 --output analysis.json
+analyze-transcript subtitles.srt --format srt --output-file analysis.json
 
 # Analyze with custom parameters
-analyze-transcript input.mp4 --min-clip-length 3 --output analysis.json
+analyze-transcript subtitles.srt --format srt --min-clip-duration 3 --output-file analysis.json
+
+# Enhance transcript during analysis
+analyze-transcript subtitles.srt --format srt --enhance-transcript --save-enhanced-transcript
 ```
 
 ### Generate Thumbnails
 
 ```bash
 # Generate thumbnail candidates
-generate-thumbnails input.mp4 --output thumbnails/
+generate-thumbnails input.mp4 --output-dir thumbnails/
 
 # Generate a specific number of thumbnails
-generate-thumbnails input.mp4 --count 10 --output thumbnails/
+generate-thumbnails input.mp4 --count 10 --output-dir thumbnails/
 ```
 
 ### Create a Video Summary
@@ -43,17 +46,17 @@ generate-thumbnails input.mp4 --count 10 --output thumbnails/
 create-summary input.mp4 summary.mp4 --style highlights
 
 # Create a summary with a specific duration
-create-summary input.mp4 summary.mp4 --duration 60 --style trailer
+create-summary input.mp4 summary.mp4 --target-duration 60 --style trailer
 ```
 
 ### Extract Clips Based on Content
 
 ```bash
 # Extract clips based on transcript analysis
-extract-clips input.mp4 clips/ --transcript transcript.srt
+extract-clips input.mp4 suggestions.json --output-dir clips/
 
 # Extract clips with custom parameters
-extract-clips input.mp4 clips/ --min-length 5 --max-length 30 --transcript transcript.srt
+extract-clips input.mp4 suggestions.json --output-dir clips/ --min-duration 5 --max-duration 30
 ```
 
 ## Basic Python API Usage
@@ -72,7 +75,7 @@ remove_silence("input.mp4", "output.mp4")
 remove_silence(
     "input.mp4", 
     "output.mp4", 
-    threshold=-30,  # dB
+    threshold_db=-30,  # dB
     min_silence_duration=1.0,  # seconds
     chunk_size=10  # MB, for memory optimization
 )
@@ -84,11 +87,11 @@ remove_silence(
 from asabaal_utils.video_processing import analyze_transcript
 
 # Analyze transcript
-results = analyze_transcript("input.mp4")
+results = analyze_transcript("transcript_file.srt", transcript_format="srt")
 
 # Print optimal clip points
-for clip in results['clips']:
-    print(f"Clip from {clip['start']} to {clip['end']}: {clip['topic']}")
+for clip in results:
+    print(f"Clip from {clip['start_time']} to {clip['end_time']}: {clip['topic']}")
     
 # Save analysis results
 import json
@@ -102,7 +105,7 @@ with open("analysis.json", "w") as f:
 from asabaal_utils.video_processing import generate_thumbnails
 
 # Generate thumbnails
-thumbnails = generate_thumbnails("input.mp4", count=5)
+thumbnails = generate_thumbnails("input.mp4", frames_to_extract=5)
 
 # Print thumbnail information
 for i, thumb in enumerate(thumbnails):
@@ -110,20 +113,21 @@ for i, thumb in enumerate(thumbnails):
     
 # Save thumbnails
 for i, thumb in enumerate(thumbnails):
-    thumb['image'].save(f"thumbnail_{i+1}.jpg")
+    print(f"Thumbnail saved to: {thumb['frame_path']}")
 ```
 
 ### Create a Video Summary
 
 ```python
-from asabaal_utils.video_processing import create_summary
+from asabaal_utils.video_processing import create_video_summary
+from asabaal_utils.video_processing.video_summarizer import SummaryStyle
 
 # Create a summary video
-create_summary(
+create_video_summary(
     "input.mp4", 
     "summary.mp4", 
-    style="highlights",
-    duration=90  # seconds
+    summary_style=SummaryStyle.HIGHLIGHTS.value,
+    target_duration=90  # seconds
 )
 ```
 
