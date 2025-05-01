@@ -1,11 +1,11 @@
 # analyze-transcript
 
-The `analyze-transcript` command analyzes video transcripts to identify topics, key points, and optimal clip segments. This tool is useful for content creators who want to extract the most important parts of a video or understand its structure.
+The `analyze-transcript` command analyzes transcripts to identify topics, key points, and optimal clip segments. This tool is useful for content creators who want to extract the most important parts of a video or understand its structure.
 
 ## Usage
 
 ```bash
-analyze-transcript INPUT_FILE [options]
+analyze-transcript TRANSCRIPT_FILE [options]
 ```
 
 ## Parameters
@@ -14,75 +14,58 @@ analyze-transcript INPUT_FILE [options]
 
 | Parameter | Description |
 |-----------|-------------|
-| `INPUT_FILE` | Path to the input video file or transcript file |
+| `TRANSCRIPT_FILE` | Path to the transcript file (SRT, JSON, or CapCut format) |
 
 ### Transcript Options
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--transcript FILE` | string | None | Path to transcript file (SRT, JSON, or TXT). If not provided, will attempt to extract from video |
-| `--format FORMAT` | string | 'auto' | Transcript format: 'srt', 'json', 'txt', or 'auto' to detect automatically |
-| `--language LANG` | string | 'en' | Transcript language code (e.g., 'en', 'es', 'fr') |
-| `--generate-transcript` | flag | False | Generate transcript if none is provided or found in the video |
+| `--format FORMAT` | string | 'capcut' | Transcript format: 'srt', 'json', or 'capcut' |
 | `--enhance-transcript` | flag | False | Enhance transcript by removing filler words and handling repetitions |
-| `--save-transcript FILE` | string | None | Save the processed transcript to the specified file |
+| `--save-enhanced-transcript` | flag | False | Save the enhanced transcript as a plain text file |
+
+### Enhancement Options
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--remove-fillers` | flag | False | Remove filler words like 'um', 'uh', etc. |
+| `--handle-repetitions` | flag | False | Remove or consolidate repeated phrases |
+| `--respect-sentences` | flag | False | Optimize clip boundaries to respect sentence boundaries |
+| `--preserve-semantic-units` | flag | False | Preserve semantic units like explanations and lists |
+| `--filler-policy POLICY` | string | 'remove_all' | Policy for handling filler words: 'remove_all', 'keep_all', or 'context_sensitive' |
+| `--repetition-strategy STRATEGY` | string | 'first_instance' | Strategy for handling repetitions: 'first_instance', 'cleanest_instance', or 'combine' |
 
 ### Analysis Options
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--min-clip-length MIN` | float | 3.0 | Minimum clip length in seconds |
-| `--max-clip-length MAX` | float | 60.0 | Maximum clip length in seconds |
-| `--topic-change-threshold THR` | float | 0.7 | Threshold for detecting topic changes (0.0-1.0) |
-| `--keywords LIST` | string | None | Comma-separated list of keywords to highlight in analysis |
-| `--nlp-model MODEL` | string | 'default' | NLP model to use for analysis (default, basic, advanced) |
-| `--sentiment-analysis` | flag | False | Include sentiment analysis in the results |
-| `--summarize` | flag | False | Generate text summaries for each detected topic |
-| `--max-topics NUM` | int | 0 | Maximum number of topics to detect (0 for automatic) |
+| `--min-clip-duration MIN` | float | 10.0 | Minimum clip duration in seconds |
+| `--max-clip-duration MAX` | float | 60.0 | Maximum clip duration in seconds |
+| `--topic-change-threshold THR` | float | 0.3 | Threshold for detecting topic changes (0.0-1.0) |
 
 ### Output Options
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--output FILE` | string | None | Path to save analysis results (JSON format) |
-| `--visualize` | flag | False | Generate visualization of the analysis |
-| `--visualization-file FILE` | string | None | Path to save visualization |
-| `--export-clips` | flag | False | Export suggested clip points to an EDL file |
-| `--export-clips-file FILE` | string | None | Path to save EDL file with clip points |
-| `--timeline-format FORMAT` | string | 'edl' | Timeline export format: 'edl', 'fcpxml', or 'csv' |
-
-### General Options
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `--verbose` | flag | False | Increase output verbosity |
-| `--quiet` | flag | False | Suppress all output except errors |
-| `--log-file FILE` | string | None | Log output to specified file |
+| `--output-file FILE` | string | [TRANSCRIPT].clips.json | Path to save analysis results (JSON format) |
+| `--log-level LEVEL` | string | 'INFO' | Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) |
 
 ## Examples
 
 ### Basic Usage
 
-Analyze a video transcript with default settings:
+Analyze a transcript file with default settings:
 
 ```bash
-analyze-transcript interview.mp4 --output analysis.json
+analyze-transcript subtitles.srt --format srt --output-file analysis.json
 ```
 
-### Provide External Transcript
+### Enhance Transcript
 
-Use an existing transcript file:
-
-```bash
-analyze-transcript video.mp4 --transcript subtitles.srt --output analysis.json
-```
-
-### Generate and Enhance Transcript
-
-Generate a transcript from the video and enhance it by removing filler words:
+Analyze a transcript and enhance it by removing filler words:
 
 ```bash
-analyze-transcript interview.mp4 --generate-transcript --enhance-transcript --save-transcript enhanced.srt
+analyze-transcript subtitles.srt --format srt --enhance-transcript --save-enhanced-transcript
 ```
 
 ### Custom Analysis Parameters
@@ -90,23 +73,15 @@ analyze-transcript interview.mp4 --generate-transcript --enhance-transcript --sa
 Adjust analysis parameters to find shorter clips with more topic segmentation:
 
 ```bash
-analyze-transcript presentation.mp4 --min-clip-length 2 --max-clip-length 30 --topic-change-threshold 0.6 --output analysis.json
+analyze-transcript presentation.json --format json --min-clip-duration 5 --max-clip-duration 30 --topic-change-threshold 0.4
 ```
 
-### Generate Visualization and Export Clips
+### Advanced Enhancement Options
 
-Analyze the transcript, visualize the results, and export clip points:
-
-```bash
-analyze-transcript lecture.mp4 --visualize --visualization-file timeline.png --export-clips --export-clips-file clips.edl
-```
-
-### Advanced Analysis with Sentiment
-
-Perform advanced analysis including sentiment analysis and topic summarization:
+Use advanced transcript enhancement options:
 
 ```bash
-analyze-transcript interview.mp4 --nlp-model advanced --sentiment-analysis --summarize --output detailed_analysis.json
+analyze-transcript interview.srt --format srt --enhance-transcript --remove-fillers --handle-repetitions --filler-policy context_sensitive --repetition-strategy cleanest_instance
 ```
 
 ## Output
@@ -115,53 +90,24 @@ The command produces a JSON file containing detailed analysis of the transcript,
 
 1. Detected topics and their timestamps
 2. Suggested clip segments
-3. Key points and keywords
-4. (Optional) Sentiment analysis
-5. (Optional) Topic summaries
+3. Key points and timestamps
 
 Example output format:
 ```json
 {
-  "video_file": "interview.mp4",
-  "duration": 1825.4,
-  "topics": [
-    {
-      "id": 1,
-      "name": "Introduction and Background",
-      "start_time": 0.0,
-      "end_time": 120.5,
-      "keywords": ["background", "experience", "introduction"],
-      "sentiment": "neutral",
-      "summary": "The speaker introduces themselves and discusses their background in the field."
-    },
-    // Additional topics...
-  ],
+  "file": "subtitles.srt",
   "suggested_clips": [
     {
       "id": 1,
-      "topic_id": 1,
+      "topic": "Introduction and Background",
       "start_time": 45.2,
       "end_time": 95.7,
-      "quality_score": 0.85,
-      "keywords": ["key experience", "major project"]
+      "duration": 50.5,
+      "text": "The speaker introduces themselves and discusses their background in the field.",
+      "importance_score": 0.85
     },
     // Additional clips...
-  ],
-  "key_points": [
-    {
-      "text": "The most important discovery was made in 2018",
-      "time": 350.2,
-      "topic_id": 3,
-      "importance_score": 0.92
-    },
-    // Additional key points...
-  ],
-  "settings": {
-    "min_clip_length": 3.0,
-    "max_clip_length": 60.0,
-    "topic_change_threshold": 0.7,
-    "nlp_model": "default"
-  }
+  ]
 }
 ```
 
