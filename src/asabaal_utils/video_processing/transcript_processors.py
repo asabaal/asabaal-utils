@@ -92,27 +92,49 @@ class FillerWordsProcessor:
             raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
-            return self._process_text(transcript)
+            # Normalize line breaks and create continuous text for processing
+            normalized_text = self._normalize_text(transcript)
+            processed_text = self._process_text(normalized_text)
+            # Preserve original line breaks
+            return self._restore_line_breaks(transcript, processed_text)
         elif isinstance(transcript, list):
             # Handle list of segments (e.g., from JSON)
             for segment in transcript:
                 if 'text' in segment:
-                    segment['text'] = self._process_text(segment['text'])
+                    # Normalize and process each segment's text
+                    normalized_text = self._normalize_text(segment['text'])
+                    segment['text'] = self._process_text(normalized_text)
             return transcript
         elif isinstance(transcript, dict):
             # Handle dictionary with text field
             if 'text' in transcript:
-                transcript['text'] = self._process_text(transcript['text'])
+                normalized_text = self._normalize_text(transcript['text'])
+                transcript['text'] = self._process_text(normalized_text)
             # Process segments if present
             if 'segments' in transcript and isinstance(transcript['segments'], list):
                 for segment in transcript['segments']:
                     if 'text' in segment:
-                        segment['text'] = self._process_text(segment['text'])
+                        normalized_text = self._normalize_text(segment['text'])
+                        segment['text'] = self._process_text(normalized_text)
             return transcript
         
         # Return unchanged if unknown format
         logger.warning("Unknown transcript format for filler word processing")
         return transcript
+    
+    def _normalize_text(self, text):
+        """Normalize text by standardizing line breaks."""
+        # Normalize line endings
+        normalized = text.replace('\r\n', '\n')
+        # Replace consecutive line breaks with a special marker
+        normalized = re.sub(r'\n+', ' <LINEBREAK> ', normalized)
+        return normalized
+    
+    def _restore_line_breaks(self, original_text, processed_text):
+        """Restore original line break pattern after processing."""
+        # Replace markers with line breaks
+        result = processed_text.replace(' <LINEBREAK> ', '\n')
+        return result
     
     def _process_text(self, text):
         """Process a text string to handle filler words."""
@@ -230,34 +252,56 @@ class RepetitionHandler:
             raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
-            return self._process_text(transcript)
+            # Normalize and create continuous text for processing
+            normalized_text = self._normalize_text(transcript)
+            processed_text = self._process_text(normalized_text)
+            # Preserve original line break structure
+            return self._restore_line_breaks(transcript, processed_text)
         elif isinstance(transcript, list):
             # Handle list of segments (e.g., from JSON)
             for segment in transcript:
                 if 'text' in segment:
-                    segment['text'] = self._process_text(segment['text'])
+                    # Normalize line breaks for processing
+                    normalized_text = self._normalize_text(segment['text'])
+                    segment['text'] = self._process_text(normalized_text)
             return transcript
         elif isinstance(transcript, dict):
             # Handle dictionary with text field
             if 'text' in transcript:
-                transcript['text'] = self._process_text(transcript['text'])
+                normalized_text = self._normalize_text(transcript['text'])
+                transcript['text'] = self._process_text(normalized_text)
             # Process segments if present
             if 'segments' in transcript and isinstance(transcript['segments'], list):
                 for segment in transcript['segments']:
                     if 'text' in segment:
-                        segment['text'] = self._process_text(segment['text'])
+                        normalized_text = self._normalize_text(segment['text'])
+                        segment['text'] = self._process_text(normalized_text)
             return transcript
         
         # Return unchanged if unknown format
         logger.warning("Unknown transcript format for repetition handling")
         return transcript
     
+    def _normalize_text(self, text):
+        """Normalize text to handle cross-line boundaries."""
+        # Normalize line endings
+        normalized = text.replace('\r\n', '\n')
+        # Replace line breaks with a special marker for processing
+        normalized = re.sub(r'\n+', ' <LINEBREAK> ', normalized)
+        return normalized
+    
+    def _restore_line_breaks(self, original_text, processed_text):
+        """Restore original line break pattern."""
+        # Replace markers with line breaks
+        result = processed_text.replace(' <LINEBREAK> ', '\n')
+        return result
+    
     def _process_text(self, text):
         """Process a text string to handle repetitions."""
-        # Tokenize the text
+        # Tokenize the text (treating it as continuous)
         tokens = text.split()
         
-        # Identify repetitions
+        # Identify repetitions across the entire text
         repetitions = self._identify_repetitions(tokens)
         
         # Apply the configured strategy
@@ -292,19 +336,18 @@ class RepetitionHandler:
                     continue
                 
                 if phrase in phrases:
-                    # Check if this instance is within range of the previous one
-                    if i - phrases[phrase][-1] <= max_distance:
-                        phrases[phrase].append(i)
+                    # Check if this instance is within range of any previous one
+                    phrases[phrase].append(i)
                 else:
                     phrases[phrase] = [i]
             
-            # Filter to phrases that occur multiple times
+            # Filter to phrases that occur multiple times within proximity
             for phrase, positions in phrases.items():
                 if len(positions) > 1:
                     # Group positions that are close together
                     groups = self._group_positions(positions)
                     
-                    # Only consider phrases with multiple groups
+                    # Only consider phrases with multiple groups (actual repetitions)
                     if len(groups) > 1:
                         repetitions.append({
                             'phrase': phrase,
@@ -328,10 +371,12 @@ class RepetitionHandler:
         if not positions:
             return []
             
-        groups = [[positions[0]]]
+        # Sort positions
+        sorted_positions = sorted(positions)
+        groups = [[sorted_positions[0]]]
         max_gap = self.config["max_gap"]
         
-        for pos in positions[1:]:
+        for pos in sorted_positions[1:]:
             # Check if this position is close to the last group
             if pos - groups[-1][-1] <= max_gap:
                 groups[-1].append(pos)
@@ -581,48 +626,62 @@ class SentenceBoundaryDetector:
             raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
-            boundaries = self._identify_boundaries(transcript)
-            return self._mark_boundaries(transcript, boundaries)
+            # Normalize the text for processing
+            normalized_text = self._normalize_text(transcript)
+            boundaries = self._identify_boundaries(normalized_text)
+            return self._mark_boundaries(normalized_text, boundaries)
         elif isinstance(transcript, list):
             # Handle list of segments (e.g., from JSON)
             for segment in transcript:
                 if 'text' in segment:
-                    boundaries = self._identify_boundaries(segment['text'])
+                    # Normalize for processing
+                    normalized_text = self._normalize_text(segment['text'])
+                    boundaries = self._identify_boundaries(normalized_text)
                     segment['sentence_boundaries'] = boundaries
                     # Optionally set clip boundaries if segment has start/end times
                     if 'start_time' in segment and 'end_time' in segment:
                         segment['clip_boundaries'] = self._optimize_clip_boundaries(
-                            segment['text'], boundaries, segment['start_time'], segment['end_time']
+                            normalized_text, boundaries, segment['start_time'], segment['end_time']
                         )
             return transcript
         elif isinstance(transcript, dict):
             # Handle dictionary with text field
             if 'text' in transcript:
-                boundaries = self._identify_boundaries(transcript['text'])
+                normalized_text = self._normalize_text(transcript['text'])
+                boundaries = self._identify_boundaries(normalized_text)
                 transcript['sentence_boundaries'] = boundaries
                 
                 # Optionally set clip boundaries if transcript has timing info
                 if 'start_time' in transcript and 'end_time' in transcript:
                     transcript['clip_boundaries'] = self._optimize_clip_boundaries(
-                        transcript['text'], boundaries, transcript['start_time'], transcript['end_time']
+                        normalized_text, boundaries, transcript['start_time'], transcript['end_time']
                     )
             
             # Process segments if present
             if 'segments' in transcript and isinstance(transcript['segments'], list):
                 for segment in transcript['segments']:
                     if 'text' in segment:
-                        boundaries = self._identify_boundaries(segment['text'])
+                        normalized_text = self._normalize_text(segment['text'])
+                        boundaries = self._identify_boundaries(normalized_text)
                         segment['sentence_boundaries'] = boundaries
                         # Optionally set clip boundaries if segment has start/end times
                         if 'start_time' in segment and 'end_time' in segment:
                             segment['clip_boundaries'] = self._optimize_clip_boundaries(
-                                segment['text'], boundaries, segment['start_time'], segment['end_time']
+                                normalized_text, boundaries, segment['start_time'], segment['end_time']
                             )
             return transcript
         
         # Return unchanged if unknown format
         logger.warning("Unknown transcript format for sentence boundary detection")
         return transcript
+    
+    def _normalize_text(self, text):
+        """Normalize text for processing."""
+        # Normalize line endings
+        normalized = text.replace('\r\n', '\n')
+        # Replace line breaks with spaces for continuous processing
+        normalized = re.sub(r'\n+', ' ', normalized)
+        return normalized
     
     def _identify_boundaries(self, text):
         """
@@ -903,17 +962,20 @@ class SemanticUnitPreserver:
             raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
-            semantic_units = self._identify_semantic_units(transcript)
+            # Normalize text for processing
+            normalized_text = self._normalize_text(transcript)
+            semantic_units = self._identify_semantic_units(normalized_text)
             if proposed_boundaries:
                 adjusted_boundaries = self._adjust_boundaries(proposed_boundaries, semantic_units)
-                return self._mark_adjusted_boundaries(transcript, adjusted_boundaries)
+                return self._mark_adjusted_boundaries(normalized_text, adjusted_boundaries)
             else:
-                return self._mark_semantic_units(transcript, semantic_units)
+                return self._mark_semantic_units(normalized_text, semantic_units)
         elif isinstance(transcript, list):
             # Handle list of segments (e.g., from JSON)
             for segment in transcript:
                 if 'text' in segment:
-                    semantic_units = self._identify_semantic_units(segment['text'])
+                    normalized_text = self._normalize_text(segment['text'])
+                    semantic_units = self._identify_semantic_units(normalized_text)
                     segment['semantic_units'] = semantic_units
                     
                     # Adjust clip boundaries if provided
@@ -925,7 +987,8 @@ class SemanticUnitPreserver:
         elif isinstance(transcript, dict):
             # Handle dictionary with text field
             if 'text' in transcript:
-                semantic_units = self._identify_semantic_units(transcript['text'])
+                normalized_text = self._normalize_text(transcript['text'])
+                semantic_units = self._identify_semantic_units(normalized_text)
                 transcript['semantic_units'] = semantic_units
                 
                 # Adjust clip boundaries if provided
@@ -938,7 +1001,8 @@ class SemanticUnitPreserver:
             if 'segments' in transcript and isinstance(transcript['segments'], list):
                 for segment in transcript['segments']:
                     if 'text' in segment:
-                        semantic_units = self._identify_semantic_units(segment['text'])
+                        normalized_text = self._normalize_text(segment['text'])
+                        semantic_units = self._identify_semantic_units(normalized_text)
                         segment['semantic_units'] = semantic_units
                         
                         # Adjust clip boundaries if provided
@@ -951,6 +1015,14 @@ class SemanticUnitPreserver:
         # Return unchanged if unknown format
         logger.warning("Unknown transcript format for semantic unit preservation")
         return transcript
+    
+    def _normalize_text(self, text):
+        """Normalize text to handle cross-line boundaries."""
+        # Normalize line endings
+        normalized = text.replace('\r\n', '\n')
+        # Replace line breaks with spaces for continuous processing
+        normalized = re.sub(r'\n+', ' ', normalized)
+        return normalized
     
     def _identify_semantic_units(self, text):
         """
