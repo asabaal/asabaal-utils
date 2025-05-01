@@ -88,6 +88,8 @@ class FillerWordsProcessor:
         Returns:
             Processed transcript with filler words handled
         """
+        if transcript is None:
+            raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
             return self._process_text(transcript)
@@ -204,10 +206,9 @@ class RepetitionHandler:
             "window_size": 50,  # Number of words to check for repetitions
             "strategy": "first_instance",  # Options: first_instance, cleanest_instance, combine
             "min_phrase_length": 3,  # Minimum number of words to consider a repetition
-            "max_gap": 15,  # Maximum gap between repetitions to consider them related
+            "max_gap": 7,  # Maximum gap between repetitions to consider them related
             "max_distance": 100,  # Maximum distance between repetitions to consider them
         }
-        
         # Merge provided config with defaults
         if config is None:
             self.config = default_config
@@ -225,6 +226,8 @@ class RepetitionHandler:
         Returns:
             Processed transcript with repetitions handled
         """
+        if transcript is None:
+            raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
             return self._process_text(transcript)
@@ -574,6 +577,8 @@ class SentenceBoundaryDetector:
         Returns:
             Processed transcript with sentence boundaries identified
         """
+        if transcript is None:
+            raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
             boundaries = self._identify_boundaries(transcript)
@@ -894,6 +899,8 @@ class SemanticUnitPreserver:
         Returns:
             Processed transcript with semantic units preserved
         """
+        if transcript is None:
+            raise ValueError("Cannot process None transcript")        
         # Handle different input formats
         if isinstance(transcript, str):
             semantic_units = self._identify_semantic_units(transcript)
@@ -1328,9 +1335,10 @@ class TranscriptEnhancementPipeline:
         Returns:
             Enhanced transcript, with optional report if requested
         """
+        if transcript is None:
+            raise ValueError("Cannot process None transcript")        
         # Keep original for reporting
         original_transcript = transcript
-        
         # Process through each processor in sequence
         enhanced_transcript = transcript
         results = []

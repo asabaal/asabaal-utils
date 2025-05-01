@@ -72,6 +72,7 @@ class TestRepetitionHandler(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
+        breakpoint()
         self.processor = RepetitionHandler()
         self.transcript_with_repetition = "so I'm here today to tell you that I have so I'm here today not only to give you an update on the only permits blessing um I'm also here to tell you that in I'm also here to tell you that I'm starting another project"
         
@@ -87,7 +88,8 @@ class TestRepetitionHandler(unittest.TestCase):
         
     def test_cleanest_instance_strategy(self):
         """Test the cleanest instance strategy for handling repetitions."""
-        self.processor.config = {"strategy": "cleanest_instance"}
+        breakpoint()
+        self.processor.config.update({"strategy": "cleanest_instance"})
         processed = self.processor.process(self.transcript_with_repetition)
         # Should retain one instance of the repeated phrase
         self.assertIn("I'm also here to tell you that", processed)
@@ -279,8 +281,9 @@ class TestTranscriptEnhancementPipeline(unittest.TestCase):
         
     def test_pipeline_processing(self):
         """Test the entire pipeline processing."""
+        breakpoint()
         processed = self.pipeline.process(self.complex_transcript)
-        
+        breakpoint()
         # Verify filler words removed
         self.assertNotIn(" um ", processed)
         
