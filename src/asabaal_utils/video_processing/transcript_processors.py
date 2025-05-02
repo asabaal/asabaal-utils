@@ -94,7 +94,7 @@ class FillerWordsProcessor:
         if isinstance(transcript, str):
             # Normalize line breaks and create continuous text for processing
             normalized_text = self._normalize_text(transcript)
-            processed_text = self._process_text(normalized_text)
+            processed_text, enhancements = self._process_text(normalized_text, return_enhancements=False)
             # Preserve original line breaks
             return self._restore_line_breaks(transcript, processed_text)
         elif isinstance(transcript, list):
@@ -103,19 +103,25 @@ class FillerWordsProcessor:
                 if 'text' in segment:
                     # Normalize and process each segment's text
                     normalized_text = self._normalize_text(segment['text'])
-                    segment['text'] = self._process_text(normalized_text)
+                    segment['text'], enhancements = self._process_text(normalized_text, return_enhancements=False)
+                    if enhancements:
+                        segment['enhancements'] = enhancements
             return transcript
         elif isinstance(transcript, dict):
             # Handle dictionary with text field
             if 'text' in transcript:
                 normalized_text = self._normalize_text(transcript['text'])
-                transcript['text'] = self._process_text(normalized_text)
+                transcript['text'], enhancements = self._process_text(normalized_text, return_enhancements=False)
+                if enhancements:
+                    transcript['enhancements'] = enhancements
             # Process segments if present
             if 'segments' in transcript and isinstance(transcript['segments'], list):
                 for segment in transcript['segments']:
                     if 'text' in segment:
                         normalized_text = self._normalize_text(segment['text'])
-                        segment['text'] = self._process_text(normalized_text)
+                        segment['text'], enhancements = self._process_text(normalized_text, return_enhancements=False)
+                        if enhancements:
+                            segment['enhancements'] = enhancements
             return transcript
         
         # Return unchanged if unknown format
@@ -136,27 +142,93 @@ class FillerWordsProcessor:
         result = processed_text.replace(' <LINEBREAK> ', '\n')
         return result
     
-    def _process_text(self, text):
-        """Process a text string to handle filler words."""
+    def _map_position_to_original(self, normalized_text, position):
+        """Map a position in normalized text back to the original text."""
+        # Count markers before this position
+        markers_before = normalized_text[:position].count('<LINEBREAK>')
+        # Calculate offset (each marker adds chars)
+        marker_offset = markers_before * (len('<LINEBREAK>') - 1)  # -1 for the space already counted
+        # Adjust position
+        return position - marker_offset
+    
+    def _process_text(self, text, return_enhancements=False):
+        """
+        Process a text string to handle filler words.
+        
+        Args:
+            text: The normalized text to process
+            return_enhancements: Whether to return information about identified enhancements
+            
+        Returns:
+            If return_enhancements is False: 
+                Processed text with filler words handled
+            If return_enhancements is True:
+                Tuple of (processed_text, enhancements)
+        """
+        # Identify fillers
+        fillers = self._identify_fillers(text)
+        
+        # Create enhancement info if requested
+        enhancements = None
+        if return_enhancements:
+            enhancements = self._create_enhancement_info(text, fillers)
+        
         # Apply the configured policy
         if self.config["policy"] == "keep_all":
-            return text
-        
-        if self.config["policy"] == "remove_all":
-            # Simply remove all fillers
-            result = self.pattern.sub('', text)
+            processed_text = text
+        elif self.config["policy"] == "remove_all":
+            # Remove all fillers
+            processed_text = self.pattern.sub('', text)
             # Clean up multiple spaces
-            result = re.sub(r'\s+', ' ', result).strip()
-            return result
-        
-        if self.config["policy"] == "context_sensitive":
-            # Identify fillers
-            fillers = self._identify_fillers(text)
+            processed_text = re.sub(r'\s+', ' ', processed_text).strip()
+        elif self.config["policy"] == "context_sensitive":
             # Apply context-sensitive rules
-            return self._apply_context_rules(text, fillers)
+            processed_text = self._apply_context_rules(text, fillers)
+        else:
+            # Default fallback
+            processed_text = text
         
-        # Default fallback
-        return text
+        if return_enhancements:
+            return processed_text, enhancements
+        return processed_text, None
+    
+    def _create_enhancement_info(self, text, fillers):
+        """
+        Create detailed information about identified filler words for visualization.
+        
+        Args:
+            text: The normalized text
+            fillers: Identified filler words
+            
+        Returns:
+            List of enhancement objects with position and context information
+        """
+        enhancements = []
+        
+        for filler in fillers:
+            # Get context
+            context_start = max(0, filler['start'] - 30)
+            context_end = min(len(text), filler['end'] + 30)
+            context = text[context_start:context_end]
+            
+            # Map positions back to original text
+            orig_start = self._map_position_to_original(text, filler['start'])
+            orig_end = self._map_position_to_original(text, filler['end'])
+            
+            # Calculate line number (approximate)
+            line_number = text[:filler['start']].count('<LINEBREAK>') + 1
+            
+            enhancements.append({
+                'category': 'filler_words',
+                'match': filler['word'],
+                'start': orig_start,
+                'end': orig_end,
+                'context': context,
+                'line_number': line_number,
+                'keep': filler['keep']
+            })
+        
+        return enhancements
     
     def _identify_fillers(self, text):
         """Identify filler words in the given text."""
@@ -202,6 +274,20 @@ class FillerWordsProcessor:
         result = re.sub(r'\s+', ' ', result).strip()
         
         return result
+    
+    def find_filler_words(self, text):
+        """
+        Find filler words in text for visualization purposes.
+        
+        Args:
+            text: Text to analyze
+            
+        Returns:
+            List of filler word enhancement objects with position and context information
+        """
+        normalized_text = self._normalize_text(text)
+        _, enhancements = self._process_text(normalized_text, return_enhancements=True)
+        return enhancements
 
 
 class RepetitionHandler:
@@ -222,6 +308,7 @@ class RepetitionHandler:
                 - strategy: How to handle repetitions - "first_instance", "cleanest_instance", "combine"
                 - min_phrase_length: Minimum length of phrase to consider a repetition
                 - max_gap: Maximum gap between repetitions to consider them related
+                - max_distance: Maximum distance between repetitions to consider them
         """
         # Default configuration
         default_config = {
@@ -254,7 +341,7 @@ class RepetitionHandler:
         if isinstance(transcript, str):
             # Normalize and create continuous text for processing
             normalized_text = self._normalize_text(transcript)
-            processed_text = self._process_text(normalized_text)
+            processed_text, enhancements = self._process_text(normalized_text, return_enhancements=False)
             # Preserve original line break structure
             return self._restore_line_breaks(transcript, processed_text)
         elif isinstance(transcript, list):
@@ -263,19 +350,25 @@ class RepetitionHandler:
                 if 'text' in segment:
                     # Normalize line breaks for processing
                     normalized_text = self._normalize_text(segment['text'])
-                    segment['text'] = self._process_text(normalized_text)
+                    segment['text'], enhancements = self._process_text(normalized_text, return_enhancements=False)
+                    if enhancements:
+                        segment['enhancements'] = enhancements
             return transcript
         elif isinstance(transcript, dict):
             # Handle dictionary with text field
             if 'text' in transcript:
                 normalized_text = self._normalize_text(transcript['text'])
-                transcript['text'] = self._process_text(normalized_text)
+                transcript['text'], enhancements = self._process_text(normalized_text, return_enhancements=False)
+                if enhancements:
+                    transcript['enhancements'] = enhancements
             # Process segments if present
             if 'segments' in transcript and isinstance(transcript['segments'], list):
                 for segment in transcript['segments']:
                     if 'text' in segment:
                         normalized_text = self._normalize_text(segment['text'])
-                        segment['text'] = self._process_text(normalized_text)
+                        segment['text'], enhancements = self._process_text(normalized_text, return_enhancements=False)
+                        if enhancements:
+                            segment['enhancements'] = enhancements
             return transcript
         
         # Return unchanged if unknown format
@@ -296,20 +389,133 @@ class RepetitionHandler:
         result = processed_text.replace(' <LINEBREAK> ', '\n')
         return result
     
-    def _process_text(self, text):
-        """Process a text string to handle repetitions."""
-        # Tokenize the text (treating it as continuous)
+    def _map_position_to_original(self, normalized_text, position):
+        """Map a position in normalized text back to the original text."""
+        # Count markers before this position
+        markers_before = normalized_text[:position].count('<LINEBREAK>')
+        # Calculate offset (each marker adds chars)
+        marker_offset = markers_before * (len('<LINEBREAK>') - 1)  # -1 for the space already counted
+        # Adjust position
+        return position - marker_offset
+    
+    def _process_text(self, text, return_enhancements=False):
+        """
+        Process a text string to handle repetitions.
+        
+        Args:
+            text: The normalized text to process (with <LINEBREAK> markers)
+            return_enhancements: Whether to return information about identified enhancements
+            
+        Returns:
+            If return_enhancements is False: 
+                Processed text with repetitions handled
+            If return_enhancements is True:
+                Tuple of (processed_text, enhancements)
+        """
+        # Tokenize the text (treating it as continuous across line breaks)
         tokens = text.split()
         
-        # Identify repetitions across the entire text
+        # Identify repetitions across the entire text, respecting proximity constraints
         repetitions = self._identify_repetitions(tokens)
         
-        # Apply the configured strategy
+        # If requested, create detailed enhancement information
+        enhancements = None
+        if return_enhancements:
+            enhancements = self._create_enhancement_info(text, tokens, repetitions)
+        
+        # Apply the configured strategy to remove repetitions
         processed_tokens = self._apply_strategy(tokens, repetitions)
         
-        # Join tokens back into text
-        return ' '.join(processed_tokens)
+        # Join tokens back into text, preserving the special line break markers
+        processed_text = ' '.join(processed_tokens)
+        
+        if return_enhancements:
+            return processed_text, enhancements
+        return processed_text, None
+
+    def _create_enhancement_info(self, text, tokens, repetitions):
+        """
+        Create detailed information about identified repetitions for visualization.
+        
+        Args:
+            text: The normalized text
+            tokens: List of tokens
+            repetitions: Identified repetitions
+            
+        Returns:
+            List of enhancement objects with position and context information
+        """
+        enhancements = []
+        
+        for rep in repetitions:
+            phrase = ' '.join(rep['phrase'])
+            phrase_length = len(rep['phrase'])
+            
+            # For each group of repetitions
+            for group_idx, group in enumerate(rep['groups']):
+                for pos in group:
+                    # Find the exact character position in the normalized text
+                    char_pos = self._find_token_position(tokens, text, pos)
+                    if char_pos == -1:
+                        continue
+                        
+                    # End position
+                    end_pos = char_pos + len(phrase)
+                    
+                    # Get context
+                    context_start = max(0, char_pos - 30)
+                    context_end = min(len(text), end_pos + 30)
+                    context = text[context_start:context_end]
+                    
+                    # Map positions back to original text
+                    orig_start = self._map_position_to_original(text, char_pos)
+                    orig_end = self._map_position_to_original(text, end_pos)
+                    
+                    # Calculate line number (approximate)
+                    line_number = text[:char_pos].count('<LINEBREAK>') + 1
+                    
+                    enhancements.append({
+                        'category': 'repetition',
+                        'match': phrase,
+                        'start': orig_start,
+                        'end': orig_end,
+                        'context': context,
+                        'line_number': line_number,
+                        'group': group_idx,
+                        'group_size': len(group)
+                    })
+        
+        return enhancements
     
+    def _find_token_position(self, tokens, text, token_index):
+        """Find the character position of a token in the text."""
+        if token_index >= len(tokens):
+            return -1
+            
+        # Get the token
+        token = tokens[token_index]
+        
+        # Count characters before this token
+        chars_before = 0
+        for i in range(token_index):
+            chars_before += len(tokens[i]) + 1  # +1 for space
+            
+        # Check if the token is at the expected position
+        if text[chars_before:chars_before + len(token)] == token:
+            return chars_before
+            
+        # If not found at the expected position, try searching nearby
+        # This handles potential whitespace variations
+        search_range = 10  # Look within 10 chars before and after expected position
+        start = max(0, chars_before - search_range)
+        end = min(len(text), chars_before + len(token) + search_range)
+        
+        pos = text[start:end].find(token)
+        if pos != -1:
+            return start + pos
+            
+        return -1
+        
     def _identify_repetitions(self, tokens):
         """
         Identify repeated phrases in the token sequence.
@@ -317,7 +523,7 @@ class RepetitionHandler:
         Returns:
             List of repetition objects, each containing:
             - phrase: The repeated phrase (list of tokens)
-            - instances: List of positions where the phrase occurs
+            - groups: List of groups, each containing positions where the phrase occurs
         """
         repetitions = []
         min_length = self.config["min_phrase_length"]
@@ -335,24 +541,53 @@ class RepetitionHandler:
                 if self._is_low_information_phrase(phrase):
                     continue
                 
+                # Check if we've seen this phrase before
                 if phrase in phrases:
-                    # Check if this instance is within range of any previous one
-                    phrases[phrase].append(i)
+                    # Get the last seen position of this phrase
+                    last_pos = phrases[phrase][-1]
+                    
+                    # Check if this instance is within maximum distance of the previous one
+                    # This ensures we only consider repetitions that are close enough
+                    if i - last_pos <= max_distance:
+                        phrases[phrase].append(i)
                 else:
+                    # First time seeing this phrase
                     phrases[phrase] = [i]
             
             # Filter to phrases that occur multiple times within proximity
             for phrase, positions in phrases.items():
                 if len(positions) > 1:
-                    # Group positions that are close together
+                    # Group positions that are close together based on max_gap
                     groups = self._group_positions(positions)
                     
                     # Only consider phrases with multiple groups (actual repetitions)
                     if len(groups) > 1:
-                        repetitions.append({
-                            'phrase': phrase,
-                            'groups': groups
-                        })
+                        # Ensure all groups are within max_distance of at least one other group
+                        valid_groups = []
+                        for i, group in enumerate(groups):
+                            # Check if this group is within max_distance of any other group
+                            has_close_group = False
+                            for j, other_group in enumerate(groups):
+                                if i == j:  # Skip comparing to itself
+                                    continue
+                                    
+                                # Use median position of each group for distance calculation
+                                group_pos = group[len(group)//2]
+                                other_pos = other_group[len(other_group)//2]
+                                
+                                if abs(group_pos - other_pos) <= max_distance:
+                                    has_close_group = True
+                                    break
+                                    
+                            if has_close_group:
+                                valid_groups.append(group)
+                        
+                        # Only add repetition if there are at least 2 valid groups
+                        if len(valid_groups) >= 2:
+                            repetitions.append({
+                                'phrase': phrase,
+                                'groups': valid_groups
+                            })
         
         # Sort repetitions by length (longer phrases first)
         repetitions.sort(key=lambda x: len(x['phrase']), reverse=True)
@@ -367,7 +602,16 @@ class RepetitionHandler:
         return short_word_count > len(phrase) * 0.6
     
     def _group_positions(self, positions):
-        """Group positions that are close together."""
+        """
+        Group positions that are close together based on max_gap constraint.
+        
+        Args:
+            positions: List of positions (indices in the token list)
+            
+        Returns:
+            List of groups, where each group is a list of positions that are
+            close to each other (within max_gap tokens)
+        """
         if not positions:
             return []
             
@@ -377,14 +621,19 @@ class RepetitionHandler:
         max_gap = self.config["max_gap"]
         
         for pos in sorted_positions[1:]:
-            # Check if this position is close to the last group
+            # Check if this position is close to the last position in the last group
+            # The max_gap parameter controls how close positions need to be to be considered
+            # part of the same group (i.e., part of the same continuous repetition)
             if pos - groups[-1][-1] <= max_gap:
+                # This position is within max_gap of the last position, add to current group
                 groups[-1].append(pos)
             else:
-                # Start a new group
+                # This position is too far from the last position in the current group
+                # Start a new group for this position
                 groups.append([pos])
         
-        return groups
+        # Only return groups that have at least one position
+        return [group for group in groups if group]
     
     def _remove_overlapping_repetitions(self, repetitions):
         """
@@ -554,6 +803,20 @@ class RepetitionHandler:
                        self._calculate_cleanliness_score(first_group[0], phrase_length, tokens):
                         # We could do a more sophisticated merging here if needed
                         pass
+    
+    def find_repetitions(self, text):
+        """
+        Find repetitions in text for visualization purposes.
+        
+        Args:
+            text: Text to analyze
+            
+        Returns:
+            List of repetition enhancement objects with position and context information
+        """
+        normalized_text = self._normalize_text(text)
+        _, enhancements = self._process_text(normalized_text, return_enhancements=True)
+        return enhancements
 
 
 class SentenceBoundaryDetector:
@@ -1396,16 +1659,17 @@ class TranscriptEnhancementPipeline:
             SemanticUnitPreserver()
         ]
     
-    def process(self, transcript, generate_report=False):
+    def process(self, transcript, generate_report=False, return_enhancements=False):
         """
         Run the transcript through the enhancement pipeline.
         
         Args:
             transcript: Transcript to process (text or structured data)
             generate_report: Whether to generate a report of changes
+            return_enhancements: Whether to return information about identified enhancements
             
         Returns:
-            Enhanced transcript, with optional report if requested
+            Enhanced transcript, with optional report and enhancements if requested
         """
         if transcript is None:
             raise ValueError("Cannot process None transcript")        
@@ -1414,20 +1678,76 @@ class TranscriptEnhancementPipeline:
         # Process through each processor in sequence
         enhanced_transcript = transcript
         results = []
+        all_enhancements = []
         
         for processor in self.processors:
-            enhanced_transcript = processor.process(enhanced_transcript)
+            # Check if the processor has the ability to return enhancement info
+            if hasattr(processor, 'find_repetitions') or hasattr(processor, 'find_filler_words'):
+                # Process and collect enhancements if needed
+                if isinstance(transcript, str) and return_enhancements:
+                    # Process text and get enhancements
+                    if hasattr(processor, 'find_repetitions'):
+                        enhancements = processor.find_repetitions(enhanced_transcript)
+                        if enhancements:
+                            all_enhancements.extend(enhancements)
+                    elif hasattr(processor, 'find_filler_words'):
+                        enhancements = processor.find_filler_words(enhanced_transcript)
+                        if enhancements:
+                            all_enhancements.extend(enhancements)
+                    
+                # Process the transcript normally
+                enhanced_transcript = processor.process(enhanced_transcript)
+            else:
+                # Process normally for processors without enhancement info
+                enhanced_transcript = processor.process(enhanced_transcript)
+            
             results.append({
                 'processor': processor.__class__.__name__,
                 'result': enhanced_transcript
             })
         
-        # Generate report if requested
-        if generate_report:
+        # Prepare return values
+        if generate_report and return_enhancements:
+            report = self.generate_report(original_transcript, enhanced_transcript, results)
+            return enhanced_transcript, report, all_enhancements
+        elif generate_report:
             report = self.generate_report(original_transcript, enhanced_transcript, results)
             return enhanced_transcript, report
+        elif return_enhancements:
+            return enhanced_transcript, all_enhancements
         
         return enhanced_transcript
+    
+    def analyze_enhancements(self, text):
+        """
+        Analyze a transcript to find enhancement opportunities without modifying it.
+        
+        Args:
+            text: Text to analyze
+            
+        Returns:
+            List of enhancement objects with position and context information
+        """
+        if text is None:
+            raise ValueError("Cannot analyze None text")
+            
+        all_enhancements = []
+        
+        # Use each processor that has enhancement detection capability
+        for processor in self.processors:
+            if hasattr(processor, 'find_repetitions'):
+                enhancements = processor.find_repetitions(text)
+                if enhancements:
+                    all_enhancements.extend(enhancements)
+            elif hasattr(processor, 'find_filler_words'):
+                enhancements = processor.find_filler_words(text)
+                if enhancements:
+                    all_enhancements.extend(enhancements)
+        
+        # Sort by position in text
+        all_enhancements.sort(key=lambda x: x['start'])
+        
+        return all_enhancements
     
     def generate_report(self, original, enhanced, processing_steps):
         """
@@ -1461,6 +1781,41 @@ class TranscriptEnhancementPipeline:
             except:
                 # Skip readability calculation if it fails
                 pass
+            
+            # Add enhancement analysis
+            if hasattr(self, 'analyze_enhancements'):
+                original_enhancements = self.analyze_enhancements(original)
+                enhanced_enhancements = self.analyze_enhancements(enhanced)
+                
+                report['enhancements'] = {
+                    'original_count': len(original_enhancements),
+                    'enhanced_count': len(enhanced_enhancements),
+                    'reduction': len(original_enhancements) - len(enhanced_enhancements),
+                    'reduction_pct': (1 - len(enhanced_enhancements) / max(1, len(original_enhancements))) * 100
+                }
+                
+                # Count by category
+                categories = {}
+                for e in original_enhancements:
+                    cat = e['category']
+                    if cat not in categories:
+                        categories[cat] = {'original': 0, 'enhanced': 0}
+                    categories[cat]['original'] += 1
+                
+                for e in enhanced_enhancements:
+                    cat = e['category']
+                    if cat not in categories:
+                        categories[cat] = {'original': 0, 'enhanced': 0}
+                    categories[cat]['enhanced'] += 1
+                
+                # Calculate reductions by category
+                for cat, counts in categories.items():
+                    orig = counts['original']
+                    enh = counts['enhanced']
+                    counts['reduction'] = orig - enh
+                    counts['reduction_pct'] = (1 - enh / max(1, orig)) * 100
+                
+                report['enhancements']['categories'] = categories
         
         return report
     
