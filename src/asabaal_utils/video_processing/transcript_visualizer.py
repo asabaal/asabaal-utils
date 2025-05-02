@@ -61,6 +61,26 @@ class TranscriptEnhancementVisualizer:
             }
         }
         
+        # Initialize pipeline
+        self._initialize_pipeline()
+        
+    def _initialize_pipeline(self):
+        """Initialize the transcript enhancement pipeline."""
+        from . import transcript_processors
+        
+        # Create a pipeline with default processors
+        self.pipeline = transcript_processors.TranscriptEnhancementPipeline()
+        
+        # Access individual processors if needed for specific enhancement detection
+        self.repetition_handler = None
+        self.filler_processor = None
+        
+        for processor in self.pipeline.processors:
+            if isinstance(processor, transcript_processors.RepetitionHandler):
+                self.repetition_handler = processor
+            elif isinstance(processor, transcript_processors.FillerWordsProcessor):
+                self.filler_processor = processor
+        
     def load_transcripts(self, original_path, enhanced_path=None):
         """Load transcripts from files."""
         with open(original_path, 'r', encoding='utf-8') as f:
@@ -115,111 +135,91 @@ class TranscriptEnhancementVisualizer:
             
         return "\n".join(processed_lines)
     
+    def find_enhancements(self, text, category=None):
+        """
+        Find all instances of enhancement opportunities in the text.
+        
+        Args:
+            text: The text to analyze
+            category: Optional category to filter by
+            
+        Returns:
+            List of enhancement objects with position and context information
+        """
+        if not text:
+            return []
+            
+        # Use the pipeline's analyze_enhancements method
+        all_enhancements = self.pipeline.analyze_enhancements(text)
+        
+        # If no category specified, return all enhancements
+        if not category:
+            # Add color and description information
+            for e in all_enhancements:
+                cat = e['category']
+                if cat in self.enhancement_categories:
+                    e['color'] = self.enhancement_categories[cat]['color']
+                    e['description'] = self.enhancement_categories[cat]['description']
+            
+            return all_enhancements
+        
+        # Filter by category
+        filtered_enhancements = [e for e in all_enhancements if e['category'] == category]
+        
+        # Add color and description information
+        for e in filtered_enhancements:
+            cat = e['category']
+            if cat in self.enhancement_categories:
+                e['color'] = self.enhancement_categories[cat]['color']
+                e['description'] = self.enhancement_categories[cat]['description']
+        
+        return filtered_enhancements
+    
     def find_repetitions(self, text):
-        """Find repeated phrases across the entire text, not just within lines."""
-        # Replace line breaks with spaces for continuous processing
-        continuous_text = text.replace('\n', ' ').lower()
-        
-        # Tokenize into words
-        words = re.findall(r'\b\w+\b', continuous_text)
-        
-        results = []
-        min_phrase_length = 3  # Minimum words in a phrase to consider
-        max_phrase_length = 7  # Maximum words in a phrase to check
-        
-        # For each phrase length
-        for phrase_length in range(min_phrase_length, min(max_phrase_length + 1, len(words) // 2 + 1)):
-            # Track phrases and their positions
-            phrases = {}
-            
-            # Generate all phrases of current length
-            for i in range(len(words) - phrase_length + 1):
-                phrase = ' '.join(words[i:i+phrase_length])
+        """Find repeated phrases using the RepetitionHandler processor."""
+        if not self.repetition_handler:
+            # If no handler available, initialize pipeline again
+            self._initialize_pipeline()
+            if not self.repetition_handler:
+                return []
                 
-                # Skip very short phrases or mostly stopwords
-                if len(phrase) < 10 or self._is_low_information_phrase(phrase.split()):
-                    continue
-                
-                # Record position
-                if phrase in phrases:
-                    phrases[phrase].append(i)
-                else:
-                    phrases[phrase] = [i]
-            
-            # Find phrases that repeat and are close together
-            for phrase, positions in phrases.items():
-                if len(positions) > 1:
-                    # Check if positions are close enough (within 20 words)
-                    for i in range(len(positions) - 1):
-                        if positions[i+1] - positions[i] < 20:
-                            # Find the actual positions in the original text
-                            first_pos = self._find_phrase_position(text, phrase, positions[i], positions[i+1])
-                            if first_pos != -1:
-                                second_pos = text.lower().find(phrase, first_pos + 1)
-                                if second_pos != -1:
-                                    start = min(first_pos, second_pos)
-                                    end = start + len(phrase)
-                                    
-                                    # Get line number
-                                    line_number = text[:start].count('\n') + 1
-                                    
-                                    # Get context
-                                    context_start = max(0, start - 30)
-                                    context_end = min(len(text), end + 30)
-                                    context = text[context_start:context_end]
-                                    
-                                    results.append({
-                                        'category': 'repetition',
-                                        'match': phrase,
-                                        'start': start,
-                                        'end': end,
-                                        'context': context,
-                                        'line_number': line_number,
-                                        'color': self.enhancement_categories['repetition']['color'],
-                                        'description': self.enhancement_categories['repetition']['description']
-                                    })
+        # Use the handler's find_repetitions method
+        repetitions = self.repetition_handler.find_repetitions(text)
         
-        return results
+        # Add color and description information
+        for rep in repetitions:
+            rep['color'] = self.enhancement_categories['repetition']['color']
+            rep['description'] = self.enhancement_categories['repetition']['description']
+        
+        return repetitions
     
-    def _find_phrase_position(self, text, phrase, approx_pos, next_pos=None):
-        """Find the actual position of a phrase in the text."""
-        # Convert to lowercase for matching
-        lower_text = text.lower()
-        lower_phrase = phrase.lower()
-        
-        # First try direct search
-        start_pos = lower_text.find(lower_phrase)
-        if start_pos != -1:
-            return start_pos
-            
-        # If not found, try more aggressive search (ignoring line breaks)
-        continuous_text = lower_text.replace('\n', ' ')
-        start_pos = continuous_text.find(lower_phrase)
-        if start_pos != -1:
-            # Map back to original text position (approximate)
-            count = 0
-            char_pos = 0
-            
-            for i, char in enumerate(text):
-                if count >= start_pos:
-                    return char_pos
+    def find_filler_words(self, text):
+        """Find filler words using the FillerWordsProcessor processor."""
+        if not self.filler_processor:
+            # If no processor available, initialize pipeline again
+            self._initialize_pipeline()
+            if not self.filler_processor:
+                return []
                 
-                if char.lower() == continuous_text[count]:
-                    count += 1
-                    char_pos = i
+        # Use the processor's find_filler_words method
+        fillers = self.filler_processor.find_filler_words(text)
         
-        return -1
-    
-    def _is_low_information_phrase(self, phrase_tokens):
-        """Determine if a phrase is mostly stopwords or very short words."""
-        stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'if', 'of', 'at', 'by', 'for', 'to', 'in', 'with'}
-        short_word_count = sum(1 for word in phrase_tokens if len(word) < 3 or word.lower() in stopwords)
-        return short_word_count > len(phrase_tokens) * 0.6
+        # Add color and description information
+        for filler in fillers:
+            filler['color'] = self.enhancement_categories['filler_words']['color']
+            filler['description'] = self.enhancement_categories['filler_words']['description']
+        
+        return fillers
     
     def find_false_starts(self, text):
-        """Find false starts and abandoned phrases."""
-        # Replace line breaks with spaces for continuous processing
-        continuous_text = text.replace('\n', ' ')
+        """Find false starts and abandoned phrases using a custom implementation."""
+        # This functionality is not yet implemented in the transcript processors,
+        # but rather than duplicating code here, we'll create a custom processor
+        # in the future when needed. For now, we keep a minimal implementation
+        # that can be replaced once a proper processor is available.
+        
+        # Create a normalized version of the text for processing
+        normalized_text = text.replace('\r\n', '\n').replace('\n', ' ')
         
         results = []
         
@@ -232,7 +232,7 @@ class TranscriptEnhancementVisualizer:
         ]
         
         for pattern in patterns:
-            for match in re.finditer(pattern, continuous_text, re.IGNORECASE):
+            for match in re.finditer(pattern, normalized_text, re.IGNORECASE):
                 start, end = match.span()
                 
                 # Get the line number
@@ -241,7 +241,7 @@ class TranscriptEnhancementVisualizer:
                 # Get context
                 context_start = max(0, start - 30)
                 context_end = min(len(text), end + 30)
-                context = text[context_start:context_end]
+                context = normalized_text[context_start:context_end]
                 
                 results.append({
                     'category': 'false_starts',
@@ -256,47 +256,19 @@ class TranscriptEnhancementVisualizer:
         
         return results
     
-    def find_filler_words(self, text):
-        """Find filler words across the entire text."""
-        # Replace line breaks with spaces for continuous processing
-        continuous_text = text.replace('\n', ' ')
-        
-        results = []
-        pattern = self.enhancement_categories['filler_words']['pattern']
-        
-        for match in re.finditer(pattern, continuous_text, re.IGNORECASE):
-            start, end = match.span()
-            
-            # Get the line number
-            line_number = text[:start].count('\n') + 1
-            
-            # Get context
-            context_start = max(0, start - 30)
-            context_end = min(len(text), end + 30)
-            context = text[context_start:context_end]
-            
-            results.append({
-                'category': 'filler_words',
-                'match': match.group(0),
-                'start': start,
-                'end': end,
-                'context': context,
-                'line_number': line_number,
-                'color': self.enhancement_categories['filler_words']['color'],
-                'description': self.enhancement_categories['filler_words']['description']
-            })
-        
-        return results
-    
     def find_run_on_sentences(self, text):
-        """Find run-on sentences that could benefit from splitting."""
-        # Replace line breaks with spaces for continuous processing
-        continuous_text = text.replace('\n', ' ')
+        """Find run-on sentences using a custom implementation."""
+        # This functionality is not yet implemented in the transcript processors,
+        # but could be added to SentenceBoundaryDetector in the future.
+        # For now, we keep a simplified implementation.
+        
+        # Create a normalized version of the text for processing
+        normalized_text = text.replace('\r\n', '\n').replace('\n', ' ')
         
         results = []
         
         # Look for long sentences with multiple conjunctions
-        sentences = re.split(r'[.!?]', continuous_text)
+        sentences = re.split(r'[.!?]', normalized_text)
         
         for sentence in sentences:
             if len(sentence.split()) > 20:  # Long sentence
@@ -305,42 +277,44 @@ class TranscriptEnhancementVisualizer:
                                              sentence, re.IGNORECASE))
                 
                 if conjunctions > 2 or len(sentence.split()) > 35:  # Too many conjunctions or very long
-                    start = continuous_text.find(sentence)
+                    start = normalized_text.find(sentence)
                     if start != -1:
                         end = start + len(sentence)
                         
-                        # Map back to original text position
-                        if text.replace('\n', ' ')[start:end] == sentence:
-                            # Get the line number
-                            line_number = text[:start].count('\n') + 1
-                            
-                            # Get context
-                            context_start = max(0, start - 30)
-                            context_end = min(len(text), end + 30)
-                            context = text[context_start:context_end]
-                            
-                            results.append({
-                                'category': 'run_on',
-                                'match': sentence,
-                                'start': start,
-                                'end': end,
-                                'context': context,
-                                'line_number': line_number,
-                                'color': self.enhancement_categories['run_on']['color'],
-                                'description': self.enhancement_categories['run_on']['description']
-                            })
+                        # Get the line number
+                        line_number = text[:start].count('\n') + 1
+                        
+                        # Get context
+                        context_start = max(0, start - 30)
+                        context_end = min(len(normalized_text), end + 30)
+                        context = normalized_text[context_start:context_end]
+                        
+                        results.append({
+                            'category': 'run_on',
+                            'match': sentence,
+                            'start': start,
+                            'end': end,
+                            'context': context,
+                            'line_number': line_number,
+                            'color': self.enhancement_categories['run_on']['color'],
+                            'description': self.enhancement_categories['run_on']['description']
+                        })
         
         return results
     
     def find_low_information(self, text):
-        """Find low-information content like repeated filler phrases."""
-        # Replace line breaks with spaces for continuous processing
-        continuous_text = text.replace('\n', ' ')
+        """Find low-information content using a custom implementation."""
+        # This functionality could be added to the processors in the future.
+        # For now, we keep a minimal implementation that follows the same
+        # pattern as the processor-based enhancement detectors.
+        
+        # Create a normalized version of the text for processing
+        normalized_text = text.replace('\r\n', '\n').replace('\n', ' ')
         
         results = []
         pattern = self.enhancement_categories['low_information']['pattern']
         
-        for match in re.finditer(pattern, continuous_text, re.IGNORECASE):
+        for match in re.finditer(pattern, normalized_text, re.IGNORECASE):
             start, end = match.span()
             
             # Get the line number
@@ -348,8 +322,8 @@ class TranscriptEnhancementVisualizer:
             
             # Get context
             context_start = max(0, start - 30)
-            context_end = min(len(text), end + 30)
-            context = text[context_start:context_end]
+            context_end = min(len(normalized_text), end + 30)
+            context = normalized_text[context_start:context_end]
             
             results.append({
                 'category': 'low_information',
@@ -364,54 +338,47 @@ class TranscriptEnhancementVisualizer:
         
         return results
     
-    def find_enhancements(self, text, category=None):
-        """Find all instances of enhancement opportunities in the text."""
-        if not text:
-            return []
-            
-        results = []
-        
-        categories = [category] if category else self.enhancement_categories.keys()
-        
-        # Find each type of enhancement
-        for cat in categories:
-            if cat == 'repetition':
-                results.extend(self.find_repetitions(text))
-            elif cat == 'filler_words':
-                results.extend(self.find_filler_words(text))
-            elif cat == 'false_starts':
-                results.extend(self.find_false_starts(text))
-            elif cat == 'run_on':
-                results.extend(self.find_run_on_sentences(text))
-            elif cat == 'low_information':
-                results.extend(self.find_low_information(text))
-        
-        # Sort by position in text
-        results.sort(key=lambda x: x['start'])
-        return results
-    
     def identify_enhancement_chunks(self, max_distance=50):
-        """Identify chunks of text that need enhancement."""
+        """
+        Identify chunks of text that need enhancement by grouping nearby enhancements.
+        
+        Args:
+            max_distance: Maximum distance (in characters) between enhancements to consider 
+                          them part of the same chunk
+            
+        Returns:
+            List of chunks, each with start/end positions, text, and enhancement information
+        """
         if not self.original_text:
             return "Original text must be loaded."
             
+        # Use the pipeline to analyze all enhancements in the text
         enhancements = self.find_enhancements(self.original_text)
         
-        # Group enhancements that are close together
+        # Sort enhancements by position in text
+        sorted_enhancements = sorted(enhancements, key=lambda e: e['start'])
+        
+        # Group enhancements that are close together into chunks
         chunks = []
         current_chunk = []
         
-        for e in enhancements:
+        for e in sorted_enhancements:
+            # If this is the first enhancement or it's close to the previous one,
+            # add it to the current chunk
             if not current_chunk or e['start'] - current_chunk[-1]['end'] <= max_distance:
                 current_chunk.append(e)
             else:
-                # Find the text range for the chunk
+                # This enhancement is too far from the previous one.
+                # Finish the current chunk and start a new one.
+                
+                # Find the text range for the current chunk
                 chunk_start = min(e['start'] for e in current_chunk)
                 chunk_end = max(e['end'] for e in current_chunk)
                 
-                # Get the original text for this chunk
+                # Extract the chunk text from the original text
                 chunk_text = self.original_text[chunk_start:chunk_end]
                 
+                # Create a chunk object with all the relevant information
                 chunks.append({
                     'start': chunk_start,
                     'end': chunk_end,
@@ -420,9 +387,10 @@ class TranscriptEnhancementVisualizer:
                     'categories': set(e['category'] for e in current_chunk)
                 })
                 
+                # Start a new chunk with the current enhancement
                 current_chunk = [e]
         
-        # Don't forget the last chunk
+        # Don't forget to process the last chunk
         if current_chunk:
             chunk_start = min(e['start'] for e in current_chunk)
             chunk_end = max(e['end'] for e in current_chunk)
@@ -559,15 +527,24 @@ class TranscriptEnhancementVisualizer:
             display(HTML(f"<p>... and {len(chunks) - 20} more chunks</p>"))
     
     def compare_enhancement_effectiveness(self):
-        """Compare the effectiveness of the enhancement pipeline."""
+        """
+        Compare the effectiveness of the enhancement pipeline.
+        
+        This method analyzes both the original and enhanced texts using the
+        enhancement pipeline and compares the counts of enhancement opportunities
+        to evaluate the pipeline's effectiveness.
+        
+        Returns:
+            Comparative data showing reduction in enhancement opportunities by category
+        """
         if not self.original_text or not self.enhanced_text:
             return "Both original and enhanced texts must be loaded."
         
-        # Find enhancement opportunities in both texts
+        # Use the pipeline to find enhancement opportunities in both texts
         original_enhancements = self.find_enhancements(self.original_text)
         enhanced_enhancements = self.find_enhancements(self.enhanced_text)
         
-        # Count by category
+        # Count by category for both original and enhanced texts
         original_counts = {}
         enhanced_counts = {}
         
@@ -583,7 +560,7 @@ class TranscriptEnhancementVisualizer:
                 enhanced_counts[cat] = 0
             enhanced_counts[cat] += 1
         
-        # Create comparative data
+        # Create comparative data for all categories found in either text
         all_categories = set(list(original_counts.keys()) + list(enhanced_counts.keys()))
         comparison_data = []
         
@@ -591,6 +568,7 @@ class TranscriptEnhancementVisualizer:
             orig_count = original_counts.get(cat, 0)
             enh_count = enhanced_counts.get(cat, 0)
             
+            # Calculate reduction metrics
             reduction = orig_count - enh_count
             reduction_pct = 0 if orig_count == 0 else (reduction / orig_count) * 100
             
@@ -602,10 +580,10 @@ class TranscriptEnhancementVisualizer:
                 'Reduction %': reduction_pct
             })
         
-        # Sort by reduction percentage
+        # Sort by reduction percentage (highest first)
         comparison_data.sort(key=lambda x: x['Reduction %'], reverse=True)
         
-        # Create a visualization of the comparison
+        # Create a visualization of the comparison if matplotlib is available
         if plt:
             plt.figure(figsize=(12, 6))
             
@@ -616,6 +594,7 @@ class TranscriptEnhancementVisualizer:
             x = range(len(categories))
             width = 0.35
             
+            # Create a grouped bar chart showing original vs enhanced counts
             plt.bar([i - width/2 for i in x], orig_counts, width, label='Original', color='red', alpha=0.7)
             plt.bar([i + width/2 for i in x], enh_counts, width, label='Enhanced', color='green', alpha=0.7)
             
@@ -625,7 +604,7 @@ class TranscriptEnhancementVisualizer:
             plt.xticks(x, categories)
             plt.legend()
             
-            # Add percentage labels
+            # Add percentage reduction labels above the bars
             for i, item in enumerate(comparison_data):
                 reduction_pct = item['Reduction %']
                 if reduction_pct > 0:
@@ -761,13 +740,24 @@ class TranscriptEnhancementVisualizer:
                 plt.show()
 
     def create_enhancement_report(self):
-        """Create a detailed report of enhancement opportunities."""
+        """
+        Create a detailed report of enhancement opportunities.
+        
+        This method analyzes the original text using the enhancement pipeline
+        and creates a report of all enhancement opportunities found, grouped
+        by category with examples.
+        
+        Returns:
+            List of report items, each containing category information,
+            counts, and examples
+        """
         if not self.original_text:
             return "Original text must be loaded."
         
+        # Use the pipeline to find all enhancements
         enhancements = self.find_enhancements(self.original_text)
         
-        # Group by category
+        # Group enhancements by category
         category_counts = {}
         category_examples = {}
         
@@ -778,16 +768,17 @@ class TranscriptEnhancementVisualizer:
                 category_examples[cat] = []
             category_counts[cat] += 1
             
-            # Store a limited number of examples per category
+            # Store a limited number of examples per category (to avoid overwhelming the report)
             if len(category_examples[cat]) < 5:
                 category_examples[cat].append(e)
         
-        # Create a list for the report
+        # Create structured report data
         report_data = []
         
         for cat, count in category_counts.items():
-            color = self.enhancement_categories[cat]['color']
-            description = self.enhancement_categories[cat]['description']
+            # Get category metadata
+            color = self.enhancement_categories.get(cat, {}).get('color', 'black')
+            description = self.enhancement_categories.get(cat, {}).get('description', cat)
             
             report_data.append({
                 'Category': cat,
@@ -797,7 +788,7 @@ class TranscriptEnhancementVisualizer:
                 'Examples': category_examples[cat]
             })
         
-        # Sort by count
+        # Sort by count (highest first)
         report_data.sort(key=lambda x: x['Count'], reverse=True)
         
         return report_data
@@ -864,15 +855,26 @@ class TranscriptEnhancementVisualizer:
             display(HTML(examples_html))
     
     def evaluate_enhancement_pipeline(self):
-        """Evaluate the enhancement pipeline by comparing original and enhanced texts."""
+        """
+        Evaluate the enhancement pipeline by comparing original and enhanced texts.
+        
+        This method provides a comprehensive evaluation of the enhancement pipeline's
+        effectiveness by comparing:
+        - Text length reduction
+        - Enhancement opportunity reduction
+        - Category-specific reductions
+        
+        Returns:
+            Dictionary containing evaluation metrics
+        """
         if not self.original_text or not self.enhanced_text:
             return "Both original and enhanced texts must be loaded."
         
-        # Find enhancement opportunities in both texts
+        # Use the pipeline to analyze enhancement opportunities in both texts
         original_enhancements = self.find_enhancements(self.original_text)
         enhanced_enhancements = self.find_enhancements(self.enhanced_text)
         
-        # Calculate statistics
+        # Calculate text length statistics
         original_length = len(self.original_text)
         enhanced_length = len(self.enhanced_text)
         
@@ -889,7 +891,7 @@ class TranscriptEnhancementVisualizer:
         for e in enhanced_enhancements:
             enhanced_counts[e['category']] += 1
         
-        # Calculate reduction by category
+        # Calculate reduction metrics by category
         categories = set(original_counts.keys()) | set(enhanced_counts.keys())
         category_reductions = {}
         
@@ -906,13 +908,13 @@ class TranscriptEnhancementVisualizer:
                 'reduction_pct': reduction_pct
             }
         
-        # Calculate overall effectiveness
+        # Calculate overall effectiveness metrics
         total_original = sum(original_counts.values())
         total_enhanced = sum(enhanced_counts.values())
         total_reduction = total_original - total_enhanced
         total_reduction_pct = 0 if total_original == 0 else (total_reduction / total_original) * 100
         
-        # Compile results
+        # Compile results into a structured format
         results = {
             'text_length': {
                 'original': original_length,
