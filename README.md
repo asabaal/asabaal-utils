@@ -270,6 +270,72 @@ clips = extract_clips_from_json(
 )
 ```
 
+## Presentation Generator
+
+Convert structured JSON data into interactive HTML presentations that can be viewed in any web browser.
+
+### Features:
+
+- Generate professional-looking presentations from JSON data
+- Interactive navigation with arrow keys and buttons
+- Multiple themes: professional blue, dark, and minimal
+- Support for title slides, content slides with bullet points, and closing slides
+- Support for markdown-style formatting (bold text)
+- Integrated export to PDF functionality
+- "Copy HTML" button for easy saving
+- Responsive design that works on all screen sizes
+
+### Usage
+
+```bash
+# Command-line usage
+generate-presentation presentation_data.json --output-file presentation.html --theme professional_blue
+
+# Import and use in your own Python scripts
+from asabaal_utils.presentation_generator import generate_presentation_html, save_presentation_html
+
+# Define your presentation data
+presentation_data = {
+    "title": "Market Intelligence Report",
+    "theme": "professional_blue",
+    "slides": [
+        {
+            "type": "title",
+            "content": {
+                "title": "Market Intelligence Report",
+                "subtitle": "Latest Insights Across Key Domains"
+            }
+        },
+        {
+            "type": "content",
+            "content": {
+                "title": "Executive Summary",
+                "bullets": [
+                    "**Growing focus on sustainability**: New developments...",
+                    "**Advancements in technology**: Major breakthroughs...",
+                    "**Shifting global politics**: Recent events..."
+                ]
+            },
+            "image": {
+                "type": "description",
+                "description": "An infographic showing market trends..."
+            }
+        },
+        {
+            "type": "closing",
+            "content": {
+                "title": "Thank You",
+                "subtitle": "Questions?"
+            }
+        }
+    ]
+}
+
+# Generate and save the HTML presentation
+html_content = generate_presentation_html(presentation_data)
+save_presentation_html(presentation_data, "presentation.html")
+```
+
 ## Installation
 
 ### Dependencies
@@ -307,6 +373,7 @@ After installation, the following command-line tools will be available:
 - `detect-jump-cuts` - Detect and smooth jump cuts in videos
 - `create-summary` - Create content-aware video summaries
 - `extract-clips` - Extract clips based on transcript analysis
+- `generate-presentation` - Generate HTML presentations from JSON data
 
 Run any command with `--help` to see all available options.
 
