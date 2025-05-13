@@ -76,10 +76,12 @@ def generate_presentation_html(presentation_data: Dict[str, Any]) -> str:
                     display: none !important;
                 }}
                 .slide {{
-                    display: flex !important;
+                    position: relative !important;
                     page-break-after: always;
                     height: 100vh;
-                    position: relative !important;
+                }}
+                .slide:not(.active) {{
+                    display: flex !important;
                 }}
                 .slide:last-child {{
                     page-break-after: avoid;
@@ -90,6 +92,9 @@ def generate_presentation_html(presentation_data: Dict[str, Any]) -> str:
                 }}
                 .slides-container {{
                     position: static;
+                    height: auto;
+                }}
+                .presentation-container {{
                     height: auto;
                 }}
             }}
@@ -104,52 +109,12 @@ def generate_presentation_html(presentation_data: Dict[str, Any]) -> str:
                 <button id="prev-button">Previous</button>
                 <span id="slide-counter" class="slide-number">1 / {len(slides)}</span>
                 <button id="next-button">Next</button>
-                <button onclick="exportToPDF()">Export to PDF</button>
+                <button id="export-pdf-button">Export to PDF</button>
                 <button id="copy-html-button">Copy HTML</button>
             </div>
         </div>
         <script>
             {javascript}
-            
-            // Add export to PDF function
-            function exportToPDF() {{
-                // Before printing, remove absolute positioning and active class handling
-                document.querySelectorAll('.slide').forEach(slide => {{
-                    slide.classList.add('print-mode');
-                }});
-                
-                // Trigger print dialog
-                window.print();
-                
-                // After printing, restore original state
-                setTimeout(() => {{
-                    document.querySelectorAll('.slide').forEach(slide => {{
-                        slide.classList.remove('print-mode');
-                    }});
-                    updateSlideVisibility();
-                }}, 1000);
-            }}
-            
-            // Add copy HTML function
-            document.getElementById('copy-html-button').addEventListener('click', function() {{
-                // Create a temporary textarea element to hold the HTML
-                const textarea = document.createElement('textarea');
-                textarea.value = document.documentElement.outerHTML;
-                document.body.appendChild(textarea);
-                textarea.select();
-                
-                try {{
-                    // Execute copy command
-                    document.execCommand('copy');
-                    alert('HTML copied to clipboard! Now you can paste it into a text editor and save it as an .html file.');
-                }} catch (err) {{
-                    console.error('Failed to copy HTML: ', err);
-                    alert('Failed to copy HTML to clipboard. Please try again or save manually.');
-                }} finally {{
-                    // Remove the temporary textarea
-                    document.body.removeChild(textarea);
-                }}
-            }});
         </script>
     </body>
     </html>
@@ -250,12 +215,6 @@ def _get_general_styles() -> str:
     
     .slide.active {
         display: flex;
-    }
-    
-    .slide.print-mode {
-        display: flex;
-        position: relative !important;
-        page-break-after: always;
     }
     
     .slide-content {
@@ -415,40 +374,12 @@ def _get_navigation_javascript() -> str:
         const prevButton = document.getElementById('prev-button');
         const nextButton = document.getElementById('next-button');
         const slideCounter = document.getElementById('slide-counter');
+        const exportPdfButton = document.getElementById('export-pdf-button');
+        const copyHtmlButton = document.getElementById('copy-html-button');
         let currentSlide = 0;
         
-        // Initialize
-        updateSlideVisibility();
-        
-        // Event listeners
-        prevButton.addEventListener('click', showPreviousSlide);
-        nextButton.addEventListener('click', showNextSlide);
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft') {
-                showPreviousSlide();
-            } else if (e.key === 'ArrowRight') {
-                showNextSlide();
-            }
-        });
-        
-        function showPreviousSlide() {
-            if (currentSlide > 0) {
-                currentSlide--;
-                updateSlideVisibility();
-            }
-        }
-        
-        function showNextSlide() {
-            if (currentSlide < slides.length - 1) {
-                currentSlide++;
-                updateSlideVisibility();
-            }
-        }
-        
-        // Make updateSlideVisibility global so it can be called from exportToPDF
-        window.updateSlideVisibility = function() {
+        // Function to update slide visibility
+        function updateSlideVisibility() {
             // Hide all slides
             slides.forEach(slide => {
                 slide.classList.remove('active');
@@ -463,10 +394,66 @@ def _get_navigation_javascript() -> str:
             // Update button states
             prevButton.disabled = currentSlide === 0;
             nextButton.disabled = currentSlide === slides.length - 1;
-        };
+        }
         
-        // Call the now-global function
+        // Initialize
         updateSlideVisibility();
+        
+        // Event listeners for navigation
+        prevButton.addEventListener('click', function() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideVisibility();
+            }
+        });
+        
+        nextButton.addEventListener('click', function() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlideVisibility();
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlideVisibility();
+                }
+            } else if (e.key === 'ArrowRight') {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    updateSlideVisibility();
+                }
+            }
+        });
+        
+        // Export to PDF functionality
+        exportPdfButton.addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Copy HTML functionality
+        copyHtmlButton.addEventListener('click', function() {
+            // Create a temporary textarea element to hold the HTML
+            const textarea = document.createElement('textarea');
+            textarea.value = document.documentElement.outerHTML;
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                // Execute copy command
+                document.execCommand('copy');
+                alert('HTML copied to clipboard! Now you can paste it into a text editor and save it as an .html file.');
+            } catch (err) {
+                console.error('Failed to copy HTML: ', err);
+                alert('Failed to copy HTML to clipboard. Please try again or save manually.');
+            } finally {
+                // Remove the temporary textarea
+                document.body.removeChild(textarea);
+            }
+        });
     });
     """
 
