@@ -72,16 +72,25 @@ def generate_presentation_html(presentation_data: Dict[str, Any]) -> str:
             {styles}
             /* Print styles for PDF export */
             @media print {{
-                .controls, .slide:not(.active) {{
+                .controls {{
                     display: none !important;
                 }}
-                .slide.active {{
+                .slide {{
                     display: flex !important;
                     page-break-after: always;
                     height: 100vh;
+                    position: relative !important;
+                }}
+                .slide:last-child {{
+                    page-break-after: avoid;
                 }}
                 body, html {{
                     overflow: visible;
+                    height: auto;
+                }}
+                .slides-container {{
+                    position: static;
+                    height: auto;
                 }}
             }}
         </style>
@@ -104,7 +113,21 @@ def generate_presentation_html(presentation_data: Dict[str, Any]) -> str:
             
             // Add export to PDF function
             function exportToPDF() {{
+                // Before printing, remove absolute positioning and active class handling
+                document.querySelectorAll('.slide').forEach(slide => {{
+                    slide.classList.add('print-mode');
+                }});
+                
+                // Trigger print dialog
                 window.print();
+                
+                // After printing, restore original state
+                setTimeout(() => {{
+                    document.querySelectorAll('.slide').forEach(slide => {{
+                        slide.classList.remove('print-mode');
+                    }});
+                    updateSlideVisibility();
+                }}, 1000);
             }}
             
             // Add copy HTML function
@@ -227,6 +250,12 @@ def _get_general_styles() -> str:
     
     .slide.active {
         display: flex;
+    }
+    
+    .slide.print-mode {
+        display: flex;
+        position: relative !important;
+        page-break-after: always;
     }
     
     .slide-content {
@@ -418,7 +447,8 @@ def _get_navigation_javascript() -> str:
             }
         }
         
-        function updateSlideVisibility() {
+        // Make updateSlideVisibility global so it can be called from exportToPDF
+        window.updateSlideVisibility = function() {
             // Hide all slides
             slides.forEach(slide => {
                 slide.classList.remove('active');
@@ -433,7 +463,10 @@ def _get_navigation_javascript() -> str:
             // Update button states
             prevButton.disabled = currentSlide === 0;
             nextButton.disabled = currentSlide === slides.length - 1;
-        }
+        };
+        
+        // Call the now-global function
+        updateSlideVisibility();
     });
     """
 
