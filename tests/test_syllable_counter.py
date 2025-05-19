@@ -39,7 +39,7 @@ class TestSyllableCounter(unittest.TestCase):
         test_cases = [
             ("Do you see it?", 4),
             ("Have you opened your eyes?", 6),
-            ("Vision. Vision. This my vision, vision", 11),
+            ("Vision. Vision. This my vision, vision", 10),
             ("A house divided will not stand, its foundation fractured", 14),
         ]
         
