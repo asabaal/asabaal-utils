@@ -62,7 +62,12 @@ def count_syllables_fallback(word):
 def count_line_syllables(line):
     """
     Count syllables in a line of text.
+    Excludes section markers in square brackets.
     """
+    # Check if line is a section marker (e.g., [Verse], [Chorus])
+    if re.match(r'^\s*\[.*\]\s*$', line):
+        return 0
+    
     # Remove punctuation and split into words
     words = re.findall(r'\b[a-zA-Z\']+\b', line)
     return sum(count_syllables(word) for word in words)
