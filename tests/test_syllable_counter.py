@@ -1,7 +1,7 @@
 import unittest
 import tempfile
 import os
-from asabaal_utils.text_analysis.syllable_counter import (
+from src.asabaal_utils.text_analysis.syllable_counter import (
     count_syllables,
     count_line_syllables,
     analyze_lyrics_file
@@ -23,9 +23,16 @@ class TestSyllableCounter(unittest.TestCase):
             ("environment", 4),
         ]
         
+        # Collect all errors instead of failing on first error
+        errors = []
         for word, expected in test_cases:
-            with self.subTest(word=word):
-                self.assertEqual(count_syllables(word), expected)
+            actual = count_syllables(word)
+            if actual != expected:
+                errors.append(f"Word '{word}': Expected {expected} syllables, got {actual}")
+        
+        # Report all errors at once
+        if errors:
+            self.fail("\n".join(["Syllable counting errors:"]+errors))
     
     def test_count_line_syllables(self):
         # Test complete lines
@@ -36,9 +43,16 @@ class TestSyllableCounter(unittest.TestCase):
             ("A house divided will not stand, its foundation fractured", 16),
         ]
         
+        # Collect all errors instead of failing on first error
+        errors = []
         for line, expected in test_cases:
-            with self.subTest(line=line):
-                self.assertEqual(count_line_syllables(line), expected)
+            actual = count_line_syllables(line)
+            if actual != expected:
+                errors.append(f"Line '{line}': Expected {expected} syllables, got {actual}")
+        
+        # Report all errors at once
+        if errors:
+            self.fail("\n".join(["Line syllable counting errors:"]+errors))
     
     def test_analyze_lyrics_file(self):
         # Create a temporary file with test lyrics
@@ -59,21 +73,54 @@ class TestSyllableCounter(unittest.TestCase):
             # Analyze the temporary file
             results = analyze_lyrics_file(temp_file_path)
             
+            # Collect all errors instead of failing on first error
+            errors = []
+            
             # Check if the correct number of lines were processed
-            self.assertEqual(len(results), 7)  # 6 lines + 1 empty line
+            if len(results) != 7:  # 6 lines + 1 empty line
+                errors.append(f"Expected 7 lines in results, got {len(results)}")
             
             # Check specific line counts
-            self.assertEqual(results[0][1], 0)  # [Verse] (section marker)
-            self.assertEqual(results[1][1], 5)  # Mourning, death, crying, pain
-            self.assertEqual(results[2][1], 9)  # Passed away is the order of old
-            self.assertEqual(results[3][1], 0)  # Empty line
-            self.assertEqual(results[4][1], 0)  # [Chorus] (section marker)
-            self.assertEqual(results[5][1], 3)  # Do you see it?
-            self.assertEqual(results[6][1], 6)  # Have you opened your eyes?
+            expected_counts = [
+                (0, 0),  # [Verse] (section marker)
+                (1, 5),  # Mourning, death, crying, pain
+                (2, 9),  # Passed away is the order of old
+                (3, 0),  # Empty line
+                (4, 0),  # [Chorus] (section marker)
+                (5, 3),  # Do you see it?
+                (6, 6),  # Have you opened your eyes?
+            ]
+            
+            for i, expected_count in expected_counts:
+                if i < len(results):
+                    actual_count = results[i][1]
+                    if actual_count != expected_count:
+                        line_text = results[i][0] if results[i][0] else "[Empty line]"
+                        errors.append(f"Line {i} ('{line_text}'): Expected {expected_count} syllables, got {actual_count}")
+                else:
+                    errors.append(f"Missing line {i} in results")
+            
+            # Report all errors at once
+            if errors:
+                self.fail("\n".join(["Lyrics file analysis errors:"]+errors))
         finally:
             # Clean up the temporary file
             os.unlink(temp_file_path)
 
 
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == "__main__":
+    # Add extra verbosity to show more details when running directly
+    def run_test_with_report(test_method):
+        try:
+            test_method()
+            print(f"✅ {test_method.__name__} passed!")
+        except AssertionError as e:
+            print(f"❌ {test_method.__name__} failed:")
+            print(str(e))
+    
+    tester = TestSyllableCounter()
+    print("Running syllable counter tests...\n")
+    run_test_with_report(tester.test_count_syllables)
+    run_test_with_report(tester.test_count_line_syllables)
+    run_test_with_report(tester.test_analyze_lyrics_file)
+    print("\nTest run completed.")
