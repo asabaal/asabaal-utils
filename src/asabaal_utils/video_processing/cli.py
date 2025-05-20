@@ -17,6 +17,8 @@ from .thumbnail_generator import generate_thumbnails
 from .color_analyzer import analyze_video_colors
 from .jump_cut_detector import detect_jump_cuts, smooth_jump_cuts
 from .video_summarizer import create_video_summary, SummaryStyle
+from .capcut_srt_integration import VideoTimelineAnalyzer
+from .timeline_visualizer import visualize_video_coverage, generate_uncovered_regions_report, generate_clip_details_report
 
 # Configure logging
 logging.basicConfig(
@@ -936,11 +938,163 @@ def extract_clips_cli():
         logger.error(f"Error extracting clips: {e}", exc_info=True)
         return 1
 
+def capcut_timeline_cli():
+    """CLI entry point for CapCut Video Timeline Tool."""
+    parser = argparse.ArgumentParser(description="Analyze CapCut projects for video timeline coverage")
+    subparsers = parser.add_subparsers(dest="subcommand", help="Subcommand to run")
+    
+    # Analyze subcommand
+    analyze_parser = subparsers.add_parser("analyze", help="Analyze a CapCut project for video coverage")
+    analyze_parser.add_argument("--capcut", required=True, help="Path to CapCut draft_content.json file")
+    analyze_parser.add_argument("--srt", required=False, help="Optional path to SRT file for timestamp reference")
+    analyze_parser.add_argument("--output", help="Output file for analysis report (default: stdout)")
+    analyze_parser.add_argument("--debug", action="store_true", help="Enable debug logging for detailed analysis information")
+    
+    # Visualize subcommand
+    visualize_parser = subparsers.add_parser("visualize", help="Visualize the video coverage from an analysis report")
+    visualize_parser.add_argument("--report", required=True, help="Path to analysis report JSON file")
+    visualize_parser.add_argument("--output", help="Output image file path (PNG)")
+    visualize_parser.add_argument("--uncovered-report", help="Generate and save a detailed report of uncovered regions")
+    visualize_parser.add_argument("--clip-details", help="Generate and save a detailed report of all video clips")
+    visualize_parser.add_argument("--dpi", type=int, default=300, help="DPI for output image")
+    visualize_parser.add_argument("--no-clip-labels", action="store_true", help="Hide clip labels on the timeline")
+    
+    # All-in-one subcommand
+    all_parser = subparsers.add_parser("all", help="Run analyze and visualize in one step")
+    all_parser.add_argument("--capcut", required=True, help="Path to CapCut draft_content.json file")
+    all_parser.add_argument("--srt", required=False, help="Optional path to SRT file for timestamp reference")
+    all_parser.add_argument("--output-dir", required=True, help="Directory to save all output files")
+    all_parser.add_argument("--debug", action="store_true", help="Enable debug logging for detailed analysis information")
+    all_parser.add_argument("--dpi", type=int, default=300, help="DPI for output images")
+    all_parser.add_argument("--figsize", default="14,10", help="Figure size in inches, comma-separated (width,height)")
+    all_parser.add_argument("--no-clip-labels", action="store_true", help="Hide clip labels on the timeline visualization")
+    
+    # Add common options
+    for subparser in [analyze_parser, visualize_parser, all_parser]:
+        subparser.add_argument("--log-level", default="INFO",
+                            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                            help="Set the logging level")
+    
+    args = parser.parse_args()
+    
+    # Set log level
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    
+    try:
+        if not args.subcommand:
+            parser.print_help()
+            return 1
+        
+        if args.subcommand == "analyze":
+            # Analyze CapCut project for video coverage
+            analyzer = VideoTimelineAnalyzer(args.capcut, args.srt, debug=args.debug)
+            report = analyzer.analyze_timeline()
+            
+            if args.output:
+                with open(args.output, 'w', encoding='utf-8') as f:
+                    import json
+                    json.dump(report, f, indent=2)
+                print(f"Analysis report saved to {args.output}")
+            else:
+                import json
+                print(json.dumps(report, indent=2))
+                
+        elif args.subcommand == "visualize":
+            # Visualize timeline from report
+            import json
+            with open(args.report, 'r', encoding='utf-8') as f:
+                report = json.load(f)
+                
+            visualize_video_coverage(
+                report, 
+                args.output, 
+                dpi=args.dpi,
+                show_clip_labels=not args.no_clip_labels
+            )
+            print(f"Timeline visualization saved to {args.output}")
+            
+            # Generate uncovered regions report if requested
+            if args.uncovered_report:
+                generate_uncovered_regions_report(report, args.uncovered_report)
+                print(f"Uncovered regions report saved to {args.uncovered_report}")
+            
+            # Generate clip details report if requested
+            if args.clip_details:
+                generate_clip_details_report(report, args.clip_details)
+                print(f"Clip details report saved to {args.clip_details}")
+            
+        elif args.subcommand == "all":
+            # Create output directory if it doesn't exist
+            os.makedirs(args.output_dir, exist_ok=True)
+            
+            # Set up paths for output files
+            report_path = os.path.join(args.output_dir, "video_coverage_analysis.json")
+            visualization_path = os.path.join(args.output_dir, "video_coverage_timeline.png")
+            uncovered_report_path = os.path.join(args.output_dir, "uncovered_regions_report.md")
+            clip_details_path = os.path.join(args.output_dir, "clip_details_report.md")
+            
+            # Step 1: Analyze
+            analyzer = VideoTimelineAnalyzer(args.capcut, args.srt, debug=args.debug)
+            report = analyzer.analyze_timeline()
+            
+            # Save full report
+            with open(report_path, 'w', encoding='utf-8') as f:
+                import json
+                json.dump(report, f, indent=2)
+            print(f"Analysis report saved to {report_path}")
+            
+            # Step 2: Parse figsize if provided
+            figsize = (14, 10)  # Default
+            if args.figsize:
+                try:
+                    width, height = map(float, args.figsize.split(','))
+                    figsize = (width, height)
+                except:
+                    print(f"Warning: Could not parse figsize '{args.figsize}', using default (14,10)")
+            
+            # Step 3: Visualize
+            visualize_video_coverage(
+                report, 
+                visualization_path,
+                dpi=args.dpi,
+                figsize=figsize,
+                show_clip_labels=not args.no_clip_labels
+            )
+            print(f"Timeline visualization saved to {visualization_path}")
+            
+            # Step 4: Generate uncovered regions report
+            generate_uncovered_regions_report(report, uncovered_report_path)
+            print(f"Uncovered regions report saved to {uncovered_report_path}")
+            
+            # Step 5: Generate clip details report
+            generate_clip_details_report(report, clip_details_path)
+            print(f"Clip details report saved to {clip_details_path}")
+            
+            # Print summary
+            timeline_duration = report['duration']
+            covered_duration = sum([segment['duration'] for segment in report['covered_segments']])
+            uncovered_duration = sum([segment['duration'] for segment in report['uncovered_segments']])
+            coverage_percentage = (covered_duration / timeline_duration) * 100 if timeline_duration > 0 else 0
+            
+            print(f"\nVideo Timeline Coverage Analysis Summary:")
+            print(f"- Total duration: {int(timeline_duration // 60):02d}:{int(timeline_duration % 60):02d} ({timeline_duration:.1f}s)")
+            print(f"- Video coverage: {coverage_percentage:.1f}% of timeline has video clips")
+            print(f"- Video clip count: {len(report['video_clips'])} clips across {report['track_count']} tracks")
+            print(f"- Uncovered regions: {len(report['uncovered_segments'])} regions ({uncovered_duration:.1f}s total)")
+            print(f"- All outputs saved to: {os.path.abspath(args.output_dir)}")
+            
+        return 0
+        
+    except Exception as e:
+        logger.error(f"Error processing CapCut Video Timeline Tool command: {e}", exc_info=True)
+        return 1
+
+
 def main():
     """Main entry point for CLI commands."""
     if len(sys.argv) < 2:
         print("Error: Please specify a command")
-        print("Available commands: remove-silence, analyze-transcript, extract-clips, etc.")
+        print("Available commands: remove-silence, analyze-transcript, extract-clips, capcut-timeline, etc.")
         sys.exit(1)
         
     command = sys.argv[0] if '/' not in sys.argv[0] else sys.argv[0].split('/')[-1]
@@ -959,9 +1113,11 @@ def main():
         sys.exit(create_summary_cli())
     elif command == "extract-clips" or "extract_clips" in command:
         sys.exit(extract_clips_cli())
+    elif command == "capcut-timeline" or "capcut_timeline" in command:
+        sys.exit(capcut_timeline_cli())
     else:
         print(f"Error: Unknown command: {command}")
-        print("Available commands: remove-silence, analyze-transcript, extract-clips, etc.")
+        print("Available commands: remove-silence, analyze-transcript, extract-clips, capcut-timeline, etc.")
         sys.exit(1)
 
 if __name__ == "__main__":
