@@ -45,8 +45,9 @@ class ClipPreviewGenerator:
         thumbnail_height: int = 180,
         output_format: str = "jpg",
         output_quality: int = 85,
-        similarity_threshold: float = 0.85,
+        similarity_threshold: float = None,  # No longer used - kept for backward compatibility
         ffmpeg_path: str = "ffmpeg",
+        frame_extraction_method: str = "one_third_point",
     ):
         """
         Initialize the clip preview generator.
@@ -63,7 +64,6 @@ class ClipPreviewGenerator:
         self.thumbnail_height = thumbnail_height
         self.output_format = output_format.lower()
         self.output_quality = output_quality
-        self.similarity_threshold = similarity_threshold
         self.ffmpeg_path = ffmpeg_path
         
         # Create output directory if needed
@@ -74,6 +74,9 @@ class ClipPreviewGenerator:
             self.output_dir = output_dir
             os.makedirs(self.output_dir, exist_ok=True)
             logger.info(f"Saving thumbnails to: {self.output_dir}")
+        
+        # Frame extraction method to use (controls which part of the clip is sampled)
+        self.frame_extraction_method = frame_extraction_method
         
         # Initialize frame extractor
         self.frame_extractor = FrameExtractor(
@@ -117,14 +120,26 @@ class ClipPreviewGenerator:
         # Determine frame timestamp (prefer 1/3 into the clip for a representative frame)
         frame_time = start_time + (duration / 3)
         
-        # Use frame extractor to extract the frame
-        extraction_result = self.frame_extractor.extract_frame(
+        # Use frame extractor to extract the frame, using the specified method
+        extraction_result = self.frame_extractor.extract_frame_with_method(
             video_path=video_path,
             timestamp=frame_time,
+            method_id=self.frame_extraction_method,
             frame_id=f"clip_{clip_id.replace(':', '_')}",
             duration=duration,
             wsl_path_prefix=wsl_path_prefix
         )
+        
+        # If the specified method fails, try with default fallback behavior
+        if not extraction_result['success']:
+            logger.info(f"Specific method '{self.frame_extraction_method}' failed, trying fallback methods")
+            extraction_result = self.frame_extractor.extract_frame(
+                video_path=video_path,
+                timestamp=frame_time,
+                frame_id=f"clip_{clip_id.replace(':', '_')}",
+                duration=duration,
+                wsl_path_prefix=wsl_path_prefix
+            )
         
         # Check if extraction was successful
         if extraction_result['success']:
@@ -238,41 +253,38 @@ class ClipPreviewGenerator:
     
     def _find_duplicate_clips(self) -> List[List[int]]:
         """
-        Find groups of duplicate clips based on image similarity.
+        Find groups of duplicate clips based on media filename.
+        
+        This identifies duplicates by checking for the same source video file,
+        rather than analyzing image content similarity.
         
         Returns:
-            List of lists, where each inner list contains indices of similar clips
+            List of lists, where each inner list contains indices of clips with the same source file
         """
-        n_clips = len(self.clip_features)
-        if n_clips == 0:
-            return []
+        # Group clips by their material path (source video file)
+        path_to_indices = {}
         
-        # Create a feature matrix
-        feature_matrix = np.vstack(self.clip_features)
-        
-        # Calculate similarity matrix
-        similarity_matrix = cosine_similarity(feature_matrix)
-        
-        # Find duplicates (clips with similarity above threshold)
-        duplicates = []
-        processed = set()
-        
-        for i in range(n_clips):
-            if i in processed:
+        for i, clip in enumerate(self.clips):
+            # Get the original material path (source video file)
+            material_path = clip.get('material_path', '')
+            if not material_path:
                 continue
                 
-            # Find clips similar to clip i
-            similar_indices = [i]
-            for j in range(i+1, n_clips):
-                if j not in processed and similarity_matrix[i, j] >= self.similarity_threshold:
-                    similar_indices.append(j)
+            # Get just the filename without path
+            material_filename = os.path.basename(material_path)
             
-            # If we found duplicates, add them to the result
-            if len(similar_indices) > 1:
-                duplicates.append(similar_indices)
-                processed.update(similar_indices)
-            else:
-                processed.add(i)
+            # Add to the appropriate group
+            if material_filename not in path_to_indices:
+                path_to_indices[material_filename] = []
+            path_to_indices[material_filename].append(i)
+        
+        # Create list of duplicate groups (only include groups with more than one clip)
+        duplicates = [indices for filename, indices in path_to_indices.items() if len(indices) > 1]
+        
+        # Log duplicate findings
+        for i, group in enumerate(duplicates):
+            filenames = [os.path.basename(self.clips[idx].get('material_path', 'unknown')) for idx in group]
+            logger.info(f"Duplicate group {i+1}: Found {len(group)} instances of {filenames[0]}")
         
         return duplicates
     
@@ -440,23 +452,94 @@ class ClipPreviewGenerator:
     <title>Video Clip Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {{ padding: 20px; }}
+        :root {{  
+            --bg-color: #fff;
+            --text-color: #333;
+            --card-bg: #fff;
+            --card-border: #ddd;
+            --track-bg: #f8f9fa;
+            --group-bg: #f8f9fa;
+            --unique-border: #28a745;
+            --duplicate-border: #dc3545;
+            --primary-color: #0d6efd;
+            --tooltip-color: #212529;
+        }}
+        
+        [data-bs-theme="dark"] {{  
+            --bg-color: #222;
+            --text-color: #eee;
+            --card-bg: #333;
+            --card-border: #444;
+            --track-bg: #444;
+            --group-bg: #383838;
+            --unique-border: #198754;
+            --duplicate-border: #dc3545;
+            --primary-color: #0d6efd;
+            --tooltip-color: #f8f9fa;
+        }}
+        
+        body {{ 
+            padding: 20px; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+        }}
+        .navbar {{ margin-bottom: 20px; background-color: var(--primary-color); }}
         .clip-card {{ margin-bottom: 20px; }}
+        .card {{ background-color: var(--card-bg); border-color: var(--card-border); }}
+        .card-body {{ color: var(--text-color); }}
+        .list-group-item {{ background-color: var(--card-bg); color: var(--text-color); border-color: var(--card-border); }}
         .thumbnail {{ width: 100%; height: auto; object-fit: contain; }}
         .stats-card {{ margin-bottom: 20px; }}
-        .duplicate-group {{ background-color: #f8f9fa; padding: 10px; margin-bottom: 20px; border-radius: 5px; }}
-        .clip-card.is-duplicate {{ border: 2px solid #dc3545; }}
+        .duplicate-group {{ background-color: var(--group-bg); padding: 10px; margin-bottom: 20px; border-radius: 5px; }}
+        .clip-card.is-duplicate {{ border: 2px solid var(--duplicate-border); }}
         .filters {{ margin-bottom: 20px; }}
         .timeline-visualization {{ margin-top: 30px; margin-bottom: 30px; overflow-x: auto; }}
-        .timeline-track {{ height: 40px; position: relative; background-color: #f8f9fa; margin-bottom: 5px; }}
-        .timeline-clip {{ position: absolute; height: 100%; background-color: #0d6efd; opacity: 0.7; overflow: hidden; font-size: 10px; color: white; }}
-        .timeline-clip.is-duplicate {{ background-color: #dc3545; }}
+        .timeline-track {{ height: 80px; position: relative; background-color: var(--track-bg); margin-bottom: 10px; border-radius: 4px; }}
+        .timeline-clip {{ 
+            position: absolute; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.3); 
+            overflow: hidden; 
+            border-radius: 4px;
+            border: 2px solid var(--primary-color); 
+        }}
+        .timeline-clip.is-duplicate {{ border-color: var(--duplicate-border); }}
+        .timeline-clip img {{ 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            opacity: 0.85; 
+        }}
+        .timeline-clip-marker {{ 
+            position: absolute; 
+            top: -15px; 
+            width: 30px; 
+            height: 15px; 
+            border-radius: 3px 3px 0 0; 
+            text-align: center; 
+            font-weight: bold; 
+            color: white; 
+            font-size: 10px; 
+            line-height: 15px; 
+        }}
         .clip-label {{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10px; color: white; }}
+        .theme-toggle {{ cursor: pointer; }}
+        .highlight {{ box-shadow: 0 0 15px 5px var(--primary-color) !important; }}
     </style>
 </head>
-<body>
+<body data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand">Video Clip Dashboard</span>
+            <div class="d-flex">
+                <div class="form-check form-switch">
+                    <input class="form-check-input theme-toggle" type="checkbox" id="themeToggle">
+                    <label class="form-check-label text-light" for="themeToggle">Dark Mode</label>
+                </div>
+            </div>
+        </div>
+    </nav>
     <div class="container-fluid">
-        <h1 class="mb-4">Video Clip Dashboard</h1>
 """
         
         # Add statistics card
@@ -623,8 +706,43 @@ class ClipPreviewGenerator:
                 clip_id = clip.get('clip_id', 'unknown')
                 material_name = clip.get('material_name', 'Unknown')
                 
+                # Get the thumbnail path for this clip
+                thumbnail_path = clip.get('thumbnail_path', '')
+                thumbnail_exists = thumbnail_path and os.path.exists(thumbnail_path)
+                
+                # Determine if this clip is part of a duplicate group and which group
+                duplicate_group_id = -1
+                duplicate_marker = ''
+                if clip.get('is_duplicate', False):
+                    # Find which duplicate group this clip belongs to
+                    for i, group in enumerate(self.duplicate_groups):
+                        group_clip_ids = [c.get('clip_id') for c in group]
+                        if clip_id in group_clip_ids:
+                            duplicate_group_id = i
+                            duplicate_marker = chr(65 + (i % 26))  # A, B, C, etc.
+                            break
+                
+                # Generate a unique color for this duplicate group
+                marker_style = ''
+                if duplicate_group_id >= 0:
+                    # Use hue rotation to generate distinct colors
+                    hue = (duplicate_group_id * 137) % 360  # Golden angle to distribute colors
+                    marker_style = f'background-color: hsl({hue}, 80%, 45%);'
+                
                 html += f'                <div class="timeline-clip {is_duplicate_class}" style="left: {start_percent}%; width: {width_percent}%;" title="{material_name} ({clip.get("start_time", 0):.2f}s - {clip.get("start_time", 0) + clip.get("duration", 0):.2f}s)" data-clip-id="{clip_id}">\n'
-                html += f'                    <div class="clip-label">{material_name}</div>\n'
+                
+                # Add marker for duplicate group
+                if duplicate_marker:
+                    html += f'                    <div class="timeline-clip-marker" style="{marker_style}">{duplicate_marker}</div>\n'
+                
+                # Add thumbnail if available
+                if thumbnail_exists:
+                    # Get relative path for the thumbnail
+                    rel_path = os.path.relpath(thumbnail_path, os.path.dirname(self.output_dir))
+                    html += f'                    <img src="{rel_path}" alt="{material_name}" />\n'
+                else:
+                    html += f'                    <div class="clip-label">{material_name}</div>\n'
+                
                 html += f'                </div>\n'
             
             html += '            </div>\n'
@@ -665,6 +783,30 @@ class ClipPreviewGenerator:
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('change', function() {
+            if (this.checked) {
+                document.body.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Load saved theme preference or use dark mode by default
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.getElementById('themeToggle').checked = false;
+                document.body.setAttribute('data-bs-theme', 'light');
+            } else {
+                // Dark mode is default
+                document.getElementById('themeToggle').checked = true;
+                document.body.setAttribute('data-bs-theme', 'dark');
+            }
+        });
+        
         // Current filter state
         let currentDuplicateFilter = 'all';
         let currentExtractionFilter = 'all';
@@ -970,9 +1112,10 @@ def generate_clip_preview_dashboard(
     include_base64: bool = False,
     thumbnail_width: int = 320,
     thumbnail_height: int = 180,
-    similarity_threshold: float = 0.85,
+    similarity_threshold: float = None,  # No longer used - kept for backward compatibility
     wsl_path_prefix: Optional[str] = None,  # Kept for backward compatibility but no longer needed
-    ffmpeg_path: str = "ffmpeg"
+    ffmpeg_path: str = "ffmpeg",
+    frame_extraction_method: str = "one_third_point"  # Control which part of the clip is sampled
 ) -> str:
     """
     Generate a visual dashboard of video clips with thumbnails and duplicate detection.
@@ -1020,8 +1163,8 @@ def generate_clip_preview_dashboard(
         output_dir=thumbnails_dir,  # Store thumbnails in a subdirectory
         thumbnail_width=thumbnail_width,
         thumbnail_height=thumbnail_height,
-        similarity_threshold=similarity_threshold,
-        ffmpeg_path=ffmpeg_path
+        ffmpeg_path=ffmpeg_path,
+        frame_extraction_method=frame_extraction_method
     )
     
     # Process clips and generate dashboard
