@@ -493,8 +493,10 @@ class ClipPreviewGenerator:
         .duplicate-group {{ background-color: var(--group-bg); padding: 10px; margin-bottom: 20px; border-radius: 5px; }}
         .clip-card.is-duplicate {{ border: 2px solid var(--duplicate-border); }}
         .filters {{ margin-bottom: 20px; }}
-        .timeline-visualization {{ margin-top: 30px; margin-bottom: 30px; overflow-x: auto; }}
+        .timeline-container {{ margin-bottom: 50px; }}
+        .timeline-visualization {{ margin-top: 15px; margin-bottom: 15px; overflow-x: auto; }}
         .timeline-track {{ height: 80px; position: relative; background-color: var(--track-bg); margin-bottom: 10px; border-radius: 4px; }}
+        .timeline-track-simple {{ height: 40px; position: relative; background-color: var(--track-bg); margin-bottom: 5px; border-radius: 4px; }}
         .timeline-clip {{ 
             position: absolute; 
             height: 100%; 
@@ -503,7 +505,48 @@ class ClipPreviewGenerator:
             border-radius: 4px;
             border: 2px solid var(--primary-color); 
         }}
-        .timeline-clip.is-duplicate {{ border-color: var(--duplicate-border); }}
+        .timeline-clip.is-duplicate {{ 
+            border-width: 3px;
+        }}
+        .timeline-clip-simple {{ 
+            position: absolute; 
+            height: 100%; 
+            border-radius: 4px;
+            opacity: 0.85; 
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-shadow: 0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black;
+            transition: all 0.2s ease;
+        }}
+        .timeline-clip-simple:hover {{
+            opacity: 1;
+            transform: scaleY(1.1);
+            z-index: 100;
+            box-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }}
+        .duplicate-legend {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }}
+        .legend-item {{
+            display: flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }}
+        .legend-item:hover {{
+            transform: scale(1.05);
+        }}
         .timeline-clip img {{ 
             width: 100%; 
             height: 100%; 
@@ -525,6 +568,7 @@ class ClipPreviewGenerator:
         .clip-label {{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10px; color: white; }}
         .theme-toggle {{ cursor: pointer; }}
         .highlight {{ box-shadow: 0 0 15px 5px var(--primary-color) !important; }}
+        .hover-highlight {{ box-shadow: 0 0 10px 3px rgba(255,255,255,0.7) !important; }}
     </style>
 </head>
 <body data-bs-theme="dark">
@@ -686,11 +730,13 @@ class ClipPreviewGenerator:
             </div>
         </div>
         
-        <div class="timeline-visualization">
+        <div class="timeline-container">
             <h3>Timeline Visualization</h3>
+            <p class="text-muted">Thumbnail view with colored markers for duplicate groups</p>
+            <div class="timeline-visualization">
 """
 
-        # Add timeline visualization
+        # Add thumbnail timeline visualization
         max_track_index = max(clip.get('track_index', 0) for clip in self.clips) if self.clips else 0
         for track in range(max_track_index + 1):
             html += f'            <div class="timeline-track" id="track-{track}">\n'
@@ -724,12 +770,20 @@ class ClipPreviewGenerator:
                 
                 # Generate a unique color for this duplicate group
                 marker_style = ''
+                border_style = ''
                 if duplicate_group_id >= 0:
                     # Use hue rotation to generate distinct colors
                     hue = (duplicate_group_id * 137) % 360  # Golden angle to distribute colors
-                    marker_style = f'background-color: hsl({hue}, 80%, 45%);'
+                    color = f'hsl({hue}, 80%, 45%)'
+                    marker_style = f'background-color: {color};'
+                    border_style = f'border-color: {color};'
                 
-                html += f'                <div class="timeline-clip {is_duplicate_class}" style="left: {start_percent}%; width: {width_percent}%;" title="{material_name} ({clip.get("start_time", 0):.2f}s - {clip.get("start_time", 0) + clip.get("duration", 0):.2f}s)" data-clip-id="{clip_id}">\n'
+                # Set clip style with custom border color for duplicates
+                clip_style = f'left: {start_percent}%; width: {width_percent}%;'
+                if border_style and is_duplicate_class:
+                    clip_style += border_style
+                    
+                html += f'                <div class="timeline-clip {is_duplicate_class}" style="{clip_style}" title="{material_name} ({clip.get("start_time", 0):.2f}s - {clip.get("start_time", 0) + clip.get("duration", 0):.2f}s)" data-clip-id="{clip_id}">\n'
                 
                 # Add marker for duplicate group
                 if duplicate_marker:
@@ -748,6 +802,61 @@ class ClipPreviewGenerator:
             html += '            </div>\n'
 
         html += """
+            </div>
+        </div>
+        
+        <div class="timeline-container">
+            <h3>Color-Coded Timeline</h3>
+            <p class="text-muted">Simplified view with each duplicate group shown in a unique color</p>
+            <div class="duplicate-legend"></div>
+            <div class="timeline-visualization">
+"""
+
+        # Add color-coded timeline visualization
+        for track in range(max_track_index + 1):
+            html += f'            <div class="timeline-track-simple" id="simple-track-{track}">\n'
+            track_clips = [clip for clip in self.clips if clip.get('track_index', 0) == track]
+            
+            for clip in track_clips:
+                start_percent = (clip.get('start_time', 0) / max_end_time) * 100 if max_end_time > 0 else 0
+                width_percent = (clip.get('duration', 0) / max_end_time) * 100 if max_end_time > 0 else 0
+                clip_id = clip.get('clip_id', 'unknown')
+                material_name = clip.get('material_name', 'Unknown')
+                
+                # Determine color and label based on duplicate group
+                bg_color = "var(--primary-color)"
+                label = ""
+                duplicate_group_id = -1
+                
+                if clip.get('is_duplicate', False):
+                    # Find which duplicate group this clip belongs to
+                    for i, group in enumerate(self.duplicate_groups):
+                        group_clip_ids = [c.get('clip_id') for c in group]
+                        if clip_id in group_clip_ids:
+                            duplicate_group_id = i
+                            label = chr(65 + (i % 26))  # A, B, C, etc.
+                            break
+                    
+                    if duplicate_group_id >= 0:
+                        # Use hue rotation to generate distinct colors
+                        hue = (duplicate_group_id * 137) % 360  # Golden angle to distribute colors
+                        bg_color = f"hsl({hue}, 80%, 45%)"
+                
+                # Create the color-coded clip
+                # Add data-duplicate-group attribute for easier group identification
+                duplicate_group_label = label if label else ""
+                html += f'                <div class="timeline-clip-simple" style="left: {start_percent}%; width: {width_percent}%; background-color: {bg_color};" title="{material_name} ({clip.get("start_time", 0):.2f}s - {clip.get("start_time", 0) + clip.get("duration", 0):.2f}s)" data-clip-id="{clip_id}" data-duplicate-group="{duplicate_group_label}">\n'
+                
+                # Add label if it's a duplicate
+                if label:
+                    html += f'                    {label}\n'
+                
+                html += f'                </div>\n'
+            
+            html += '            </div>\n'
+
+        html += """
+            </div>
         </div>
         
         <h3>Duplicate Clip Groups</h3>
@@ -978,18 +1087,148 @@ class ClipPreviewGenerator:
         }
         
         // Timeline interactivity
-        document.querySelectorAll('.timeline-clip').forEach(clip => {
+        function handleClipClick(element) {
+            const clipId = element.getAttribute('data-clip-id');
+            
+            // Highlight corresponding clip on other timeline
+            document.querySelectorAll(`.timeline-clip[data-clip-id="${clipId}"], .timeline-clip-simple[data-clip-id="${clipId}"]`).forEach(item => {
+                item.classList.add('highlight');
+                setTimeout(() => {
+                    item.classList.remove('highlight');
+                }, 2000);
+            });
+            
+            // Scroll to clip card
+            const clipCard = document.querySelector(`.clip-card[data-clip-id="${clipId}"]`);
+            if (clipCard) {
+                clipCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                clipCard.classList.add('highlight');
+                setTimeout(() => {
+                    clipCard.classList.remove('highlight');
+                }, 2000);
+            }
+        }
+        
+        // Add click handlers to all timeline clips
+        document.querySelectorAll('.timeline-clip, .timeline-clip-simple').forEach(clip => {
             clip.addEventListener('click', function() {
-                const clipId = this.getAttribute('data-clip-id');
-                const clipCard = document.querySelector(`.clip-card[data-clip-id="${clipId}"]`);
-                if (clipCard) {
-                    clipCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    clipCard.classList.add('highlight');
-                    setTimeout(() => {
-                        clipCard.classList.remove('highlight');
-                    }, 2000);
+                handleClipClick(this);
+            });
+        });
+        
+        // Create legend for duplicate groups
+        function createDuplicateLegend() {
+            const legendContainer = document.querySelector('.duplicate-legend');
+            if (!legendContainer) return;
+            
+            // Get all unique duplicate groups
+            const groupMarkers = {};
+            document.querySelectorAll('.timeline-clip-marker').forEach(marker => {
+                const groupId = marker.textContent;
+                const color = marker.style.backgroundColor;
+                if (groupId && color && !groupMarkers[groupId]) {
+                    groupMarkers[groupId] = color;
                 }
             });
+            
+            // Sort by group ID
+            const sortedGroups = Object.keys(groupMarkers).sort();
+            
+            // Create legend items
+            sortedGroups.forEach(groupId => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.style.backgroundColor = groupMarkers[groupId];
+                legendItem.textContent = `Group ${groupId}`;
+                legendItem.setAttribute('data-group', groupId);
+                legendContainer.appendChild(legendItem);
+                
+                // Add click handler to highlight all clips in this group
+                legendItem.addEventListener('click', function() {
+                    highlightGroupClips(groupId);
+                });
+            });
+        }
+        
+        // Highlight all clips in a group
+        function highlightGroupClips(groupId) {
+            // Clear any existing highlights
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.classList.remove('highlight');
+            });
+            
+            // Find all clips with this group marker
+            document.querySelectorAll(`.timeline-clip-marker`).forEach(marker => {
+                if (marker.textContent === groupId) {
+                    // Get the parent clip
+                    const clip = marker.closest('.timeline-clip');
+                    if (clip) {
+                        const clipId = clip.getAttribute('data-clip-id');
+                        
+                        // Highlight this clip in both timelines
+                        document.querySelectorAll(`.timeline-clip[data-clip-id="${clipId}"], .timeline-clip-simple[data-clip-id="${clipId}"]`).forEach(el => {
+                            el.classList.add('highlight');
+                        });
+                        
+                        // Also highlight the clip card
+                        const clipCard = document.querySelector(`.clip-card[data-clip-id="${clipId}"]`);
+                        if (clipCard) {
+                            clipCard.classList.add('highlight');
+                            clipCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                }
+            });
+            
+            // Keep the highlight for a longer time
+            setTimeout(() => {
+                document.querySelectorAll('.highlight').forEach(el => {
+                    el.classList.remove('highlight');
+                });
+            }, 5000);
+        }
+        
+        // Highlight all clips from same duplicate group when hovering
+        document.querySelectorAll('.timeline-clip.is-duplicate, .timeline-clip-simple').forEach(clip => {
+            clip.addEventListener('mouseenter', function() {
+                const clipId = this.getAttribute('data-clip-id');
+                const allClips = Array.from(document.querySelectorAll('.clip-card'));
+                
+                // Find which duplicate group this belongs to
+                let duplicateGroupClips = [];
+                let groupId = null;
+                for (const card of allClips) {
+                    if (card.classList.contains('is-duplicate') && 
+                        (card.getAttribute('data-clip-id') === clipId || 
+                         card.querySelector('.timeline-clip-marker')?.textContent === this.querySelector('.timeline-clip-marker')?.textContent)) {
+                        duplicateGroupClips.push(card.getAttribute('data-clip-id'));
+                        if (!groupId && this.querySelector('.timeline-clip-marker')) {
+                            groupId = this.querySelector('.timeline-clip-marker').textContent;
+                        }
+                    }
+                }
+                
+                // Highlight all clips in this group
+                duplicateGroupClips.forEach(id => {
+                    document.querySelectorAll(`.timeline-clip[data-clip-id="${id}"], .timeline-clip-simple[data-clip-id="${id}"]`)
+                        .forEach(el => el.classList.add('hover-highlight'));
+                });
+                
+                // Highlight the legend item if we found a group ID
+                if (groupId) {
+                    document.querySelector(`.legend-item[data-group="${groupId}"]`)?.classList.add('hover-highlight');
+                }
+            });
+            
+            clip.addEventListener('mouseleave', function() {
+                document.querySelectorAll('.hover-highlight').forEach(el => {
+                    el.classList.remove('hover-highlight');
+                });
+            });
+        });
+        // Initialize legend on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            createDuplicateLegend();
         });
     </script>
 </body>
