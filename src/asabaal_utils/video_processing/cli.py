@@ -19,17 +19,52 @@ from .jump_cut_detector import detect_jump_cuts, smooth_jump_cuts
 from .video_summarizer import create_video_summary, SummaryStyle
 from .capcut_srt_integration import VideoTimelineAnalyzer
 from .timeline_visualizer import visualize_video_coverage, generate_uncovered_regions_report, generate_clip_details_report
+from .clip_preview_generator import generate_clip_preview_dashboard
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+# Configure logging with separate handlers for console and file
+def setup_logging(console_level=logging.ERROR, file_level=logging.INFO, log_file=None):
+    """
+    Set up logging with different levels for console and file output.
+    
+    Args:
+        console_level: Log level for console output (default: ERROR)
+        file_level: Log level for file output (default: INFO)
+        log_file: Path to log file (default: None, no file logging)
+    """
+    # Create root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(min(console_level, file_level))  # Set to lowest level
+    
+    # Remove any existing handlers
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    
+    # Create formatters
+    console_formatter = logging.Formatter('%(levelname)s: %(message)s')
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # Set up console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(console_level)
+    console_handler.setFormatter(console_formatter)
+    root_logger.addHandler(console_handler)
+    
+    # Set up file handler if log_file is provided
+    if log_file:
+        # Create directory for log file if it doesn't exist
+        log_dir = os.path.dirname(log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+            
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler.setLevel(file_level)
+        file_handler.setFormatter(file_formatter)
+        root_logger.addHandler(file_handler)
+    
+    return root_logger
 
-logger = logging.getLogger(__name__)
+# Set default logging configuration (can be overridden by command line args)
+logger = setup_logging(console_level=logging.ERROR, file_level=logging.INFO)
 
 
 def remove_silence_cli():
@@ -940,7 +975,25 @@ def extract_clips_cli():
 
 def capcut_timeline_cli():
     """CLI entry point for CapCut Video Timeline Tool."""
-    parser = argparse.ArgumentParser(description="Analyze CapCut projects for video timeline coverage")
+    parser = argparse.ArgumentParser(
+        description="Analyze CapCut projects for video timeline coverage",
+        epilog="""
+Logging Configuration:
+  By default, only error messages are shown on the console, while INFO and higher
+  log messages are written to the log file. You can control these levels separately
+  with --console-log-level and --file-log-level options.
+  
+  Examples:
+    # Show only errors on console, write INFO and above to log
+    capcut-timeline all --capcut project.json --output-dir output
+    
+    # Show more details on console
+    capcut-timeline all --capcut project.json --console-log-level INFO
+    
+    # Debug logging to both console and file
+    capcut-timeline all --capcut project.json --log-level DEBUG
+    """
+    )
     subparsers = parser.add_subparsers(dest="subcommand", help="Subcommand to run")
     
     # Analyze subcommand
@@ -956,6 +1009,12 @@ def capcut_timeline_cli():
     visualize_parser.add_argument("--output", help="Output image file path (PNG)")
     visualize_parser.add_argument("--uncovered-report", help="Generate and save a detailed report of uncovered regions")
     visualize_parser.add_argument("--clip-details", help="Generate and save a detailed report of all video clips")
+    visualize_parser.add_argument("--clip-dashboard", help="Generate an interactive HTML dashboard with clip previews and duplicate detection")
+    visualize_parser.add_argument("--dashboard-dir", help="Directory to store dashboard and thumbnails (auto-created if not specified)")
+    visualize_parser.add_argument("--similarity-threshold", type=float, default=0.85, help="Threshold for considering clips as duplicates (0.0-1.0)")
+    # WSL path prefix is now auto-detected, but we keep the argument for backward compatibility
+    visualize_parser.add_argument("--wsl-path-prefix", help=argparse.SUPPRESS)
+    visualize_parser.add_argument("--ffmpeg-path", default="ffmpeg", help="Path to the ffmpeg executable")
     visualize_parser.add_argument("--dpi", type=int, default=300, help="DPI for output image")
     visualize_parser.add_argument("--no-clip-labels", action="store_true", help="Hide clip labels on the timeline")
     
@@ -963,22 +1022,60 @@ def capcut_timeline_cli():
     all_parser = subparsers.add_parser("all", help="Run analyze and visualize in one step")
     all_parser.add_argument("--capcut", required=True, help="Path to CapCut draft_content.json file")
     all_parser.add_argument("--srt", required=False, help="Optional path to SRT file for timestamp reference")
-    all_parser.add_argument("--output-dir", required=True, help="Directory to save all output files")
+    all_parser.add_argument("--output-dir", help="Directory to save all output files (auto-created if not specified)")
     all_parser.add_argument("--debug", action="store_true", help="Enable debug logging for detailed analysis information")
     all_parser.add_argument("--dpi", type=int, default=300, help="DPI for output images")
     all_parser.add_argument("--figsize", default="14,10", help="Figure size in inches, comma-separated (width,height)")
     all_parser.add_argument("--no-clip-labels", action="store_true", help="Hide clip labels on the timeline visualization")
+    all_parser.add_argument("--generate-dashboard", action="store_true", help="Generate an interactive clip dashboard")
+    all_parser.add_argument("--similarity-threshold", type=float, default=0.85, help="Threshold for considering clips as duplicates (0.0-1.0)")
+    # WSL path prefix is now auto-detected, but we keep the argument for backward compatibility
+    all_parser.add_argument("--wsl-path-prefix", help=argparse.SUPPRESS)
+    all_parser.add_argument("--ffmpeg-path", default="ffmpeg", help="Path to the ffmpeg executable")
     
     # Add common options
     for subparser in [analyze_parser, visualize_parser, all_parser]:
-        subparser.add_argument("--log-level", default="INFO",
+        subparser.add_argument("--console-log-level", default="ERROR",
                             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-                            help="Set the logging level")
+                            help="Set the console logging level")
+        subparser.add_argument("--file-log-level", default="INFO",
+                            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                            help="Set the file logging level")
+        subparser.add_argument("--log-file", default=None,
+                            help="Path to log file (default: output_dir/capcut_timeline.log for 'all' subcommand, none otherwise)")
+        # Keep --log-level for backward compatibility
+        subparser.add_argument("--log-level", default=None,
+                            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                            help="Set both console and file logging level (overrides --console-log-level and --file-log-level)")
     
     args = parser.parse_args()
     
-    # Set log level
-    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    # Set up logging with appropriate levels
+    console_level = getattr(logging, args.console_log_level)
+    file_level = getattr(logging, args.file_log_level)
+    
+    # If --log-level is set, it overrides both console and file levels
+    if args.log_level:
+        console_level = file_level = getattr(logging, args.log_level)
+    
+    # Set log file for 'all' subcommand if not specified
+    log_file = args.log_file
+    if args.subcommand == "all" and log_file is None and args.output_dir:
+        log_file = os.path.join(args.output_dir, "capcut_timeline.log")
+        
+    # Set up logging
+    logger = setup_logging(console_level=console_level, file_level=file_level, log_file=log_file)
+    
+    # Log basic info (to file only)
+    if log_file:
+        logger.info(f"Command: capcut-timeline {args.subcommand}")
+        logger.info(f"Console log level: {logging.getLevelName(console_level)}")
+        logger.info(f"File log level: {logging.getLevelName(file_level)}")
+        logger.info(f"Log file: {log_file}")
+        
+        # Only log to terminal if we're in DEBUG mode
+        if console_level <= logging.DEBUG:
+            logger.debug(f"Logging configured: console={logging.getLevelName(console_level)}, file={logging.getLevelName(file_level)}, log_file={log_file}")
     
     try:
         if not args.subcommand:
@@ -1005,13 +1102,14 @@ def capcut_timeline_cli():
             with open(args.report, 'r', encoding='utf-8') as f:
                 report = json.load(f)
                 
-            visualize_video_coverage(
-                report, 
-                args.output, 
-                dpi=args.dpi,
-                show_clip_labels=not args.no_clip_labels
-            )
-            print(f"Timeline visualization saved to {args.output}")
+            if args.output:
+                visualize_video_coverage(
+                    report, 
+                    args.output, 
+                    dpi=args.dpi,
+                    show_clip_labels=not args.no_clip_labels
+                )
+                print(f"Timeline visualization saved to {args.output}")
             
             # Generate uncovered regions report if requested
             if args.uncovered_report:
@@ -1023,6 +1121,35 @@ def capcut_timeline_cli():
                 generate_clip_details_report(report, args.clip_details)
                 print(f"Clip details report saved to {args.clip_details}")
             
+            # Generate clip dashboard if requested
+            if args.clip_dashboard:
+                # Will auto-create dashboard directory if not specified
+                dashboard_dir = args.dashboard_dir  # Can be None
+                
+                # Generate the dashboard
+                dashboard_path = generate_clip_preview_dashboard(
+                    timeline_data=report,
+                    output_dir=dashboard_dir,
+                    dashboard_file=os.path.basename(args.clip_dashboard),
+                    similarity_threshold=args.similarity_threshold,
+                    wsl_path_prefix=args.wsl_path_prefix,
+                    ffmpeg_path=args.ffmpeg_path
+                )
+                
+                # Extract the actual thumbnails directory
+                thumbnails_dir = os.path.join(os.path.dirname(dashboard_path), "thumbnails")
+                
+                print(f"Clip preview dashboard saved to {dashboard_path}")
+                print(f"Clip thumbnails saved to {thumbnails_dir}")
+                
+                # If we're in WSL, show some path debugging info to help users
+                if os.path.exists('/proc/version') and 'microsoft' in open('/proc/version').read().lower():
+                    from .path_utils import get_available_wsl_mounts
+                    mounts = get_available_wsl_mounts()
+                    print(f"\nWSL Environment Detected:")
+                    print(f"- Auto-detected WSL mount points: {', '.join(mounts)}")
+                    print(f"- Path conversion is handled automatically")
+            
         elif args.subcommand == "all":
             # Create output directory if it doesn't exist
             os.makedirs(args.output_dir, exist_ok=True)
@@ -1032,6 +1159,8 @@ def capcut_timeline_cli():
             visualization_path = os.path.join(args.output_dir, "video_coverage_timeline.png")
             uncovered_report_path = os.path.join(args.output_dir, "uncovered_regions_report.md")
             clip_details_path = os.path.join(args.output_dir, "clip_details_report.md")
+            dashboard_path = os.path.join(args.output_dir, "clip_dashboard.html")
+            dashboard_dir = os.path.join(args.output_dir, "clip_previews")
             
             # Step 1: Analyze
             analyzer = VideoTimelineAnalyzer(args.capcut, args.srt, debug=args.debug)
@@ -1070,17 +1199,70 @@ def capcut_timeline_cli():
             generate_clip_details_report(report, clip_details_path)
             print(f"Clip details report saved to {clip_details_path}")
             
+            # Step 6: Generate clip dashboard if requested
+            if args.generate_dashboard:
+                dashboard_path = generate_clip_preview_dashboard(
+                    timeline_data=report,
+                    output_dir=dashboard_dir,
+                    dashboard_file="clip_dashboard.html",
+                    similarity_threshold=args.similarity_threshold,
+                    wsl_path_prefix=args.wsl_path_prefix,
+                    ffmpeg_path=args.ffmpeg_path
+                )
+                
+                # Extract the actual thumbnails directory
+                thumbnails_dir = os.path.join(os.path.dirname(dashboard_path), "thumbnails")
+                
+                print(f"Clip preview dashboard saved to {dashboard_path}")
+                print(f"Clip thumbnails saved to {thumbnails_dir}")
+                
+                # If we're in WSL, show some path debugging info to help users
+                if os.path.exists('/proc/version') and 'microsoft' in open('/proc/version').read().lower():
+                    from .path_utils import get_available_wsl_mounts
+                    mounts = get_available_wsl_mounts()
+                    print(f"\nWSL Environment Detected:")
+                    print(f"- Auto-detected WSL mount points: {', '.join(mounts)}")
+                    print(f"- Path conversion is handled automatically")
+            
             # Print summary
-            timeline_duration = report['duration']
-            covered_duration = sum([segment['duration'] for segment in report['covered_segments']])
-            uncovered_duration = sum([segment['duration'] for segment in report['uncovered_segments']])
+            # Handle potentially missing keys with defaults
+            timeline_duration = report.get('duration', 0)
+            covered_segments = report.get('covered_segments', [])
+            uncovered_segments = report.get('uncovered_segments', [])
+            video_clips = report.get('video_clips', [])
+            track_count = report.get('track_count', 0)
+            
+            # Try to calculate duration if it's missing
+            if timeline_duration == 0 and ('video_clips' in report or 'covered_segments' in report):
+                # Try to calculate from segments or clips
+                if covered_segments:
+                    # Get max end time from covered segments
+                    end_times = [seg.get('end_time', 0) for seg in covered_segments]
+                    if end_times:
+                        timeline_duration = max(end_times)
+                elif video_clips:
+                    # Get max end time from video clips
+                    end_times = [clip.get('start_time', 0) + clip.get('duration', 0) for clip in video_clips]
+                    if end_times:
+                        timeline_duration = max(end_times)
+            
+            # Calculate durations
+            covered_duration = sum([segment.get('duration', 0) for segment in covered_segments])
+            uncovered_duration = sum([segment.get('duration', 0) for segment in uncovered_segments])
             coverage_percentage = (covered_duration / timeline_duration) * 100 if timeline_duration > 0 else 0
+            
+            # If track count is missing, try to calculate from clips
+            if track_count == 0 and video_clips:
+                track_indices = set(clip.get('track_index', 0) for clip in video_clips)
+                track_count = len(track_indices)
             
             print(f"\nVideo Timeline Coverage Analysis Summary:")
             print(f"- Total duration: {int(timeline_duration // 60):02d}:{int(timeline_duration % 60):02d} ({timeline_duration:.1f}s)")
             print(f"- Video coverage: {coverage_percentage:.1f}% of timeline has video clips")
-            print(f"- Video clip count: {len(report['video_clips'])} clips across {report['track_count']} tracks")
-            print(f"- Uncovered regions: {len(report['uncovered_segments'])} regions ({uncovered_duration:.1f}s total)")
+            print(f"- Video clip count: {len(video_clips)} clips across {track_count} tracks")
+            print(f"- Uncovered regions: {len(uncovered_segments)} regions ({uncovered_duration:.1f}s total)")
+            if args.generate_dashboard:
+                print(f"- Clip dashboard: {os.path.abspath(dashboard_path)}")
             print(f"- All outputs saved to: {os.path.abspath(args.output_dir)}")
             
         return 0
