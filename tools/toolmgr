@@ -583,7 +583,7 @@ COMMANDS:
     setup                       Set up tool manager environment
     scan <directory>            Show available tools in directory
     install-dir <directory>     Install all tools from directory
-    install <file>              Install specific tool file
+    install <file> [--force]    Install specific tool file
     list [category] [search]    List installed tools
     remove <tool>               Remove installed tool
     info <tool>                 Show tool information
@@ -594,7 +594,7 @@ EXAMPLES:
     toolmgr setup                           # Initial setup
     toolmgr scan ./tools                    # Show tools in ./tools directory
     toolmgr install-dir ./tools             # Install all tools from ./tools
-    toolmgr install ./my-script.sh         # Install specific script
+    toolmgr install ./my-script.sh --force # Install specific script (overwrite if exists)
     toolmgr list development                # List development tools
     toolmgr info repo-analyze               # Show tool details
     toolmgr remove old-tool                 # Remove a tool
@@ -641,10 +641,18 @@ case "${1:-help}" in
     
     install)
         if [ -z "$2" ]; then
-            print_error "Usage: toolmgr install <file>"
+            print_error "Usage: toolmgr install <file> [--force]"
             exit 1
         fi
         setup_environment
+        
+        # Check if the force flag is provided
+        force_flag="false"
+        if [[ "$3" == "--force" ]]; then
+            force_flag="true"
+            debug_print "Force flag detected, will overwrite existing tools"
+        fi
+        
         metadata=$(detect_tool_metadata "$2")
         # Encode the metadata for safe passing
         encoded_metadata=$(echo "$metadata" | python3 -c "
@@ -655,7 +663,7 @@ try:
 except Exception as e:
     print('')
 ")
-        install_tool "$2" "$encoded_metadata" "false"
+        install_tool "$2" "$encoded_metadata" "$force_flag"
         ;;
     
     list|ls)
@@ -761,7 +769,7 @@ EOF
         ;;
     
     debug)
-        DEBUG=true
+        export DEBUG=true
         print_info "Debug mode enabled"
         shift
         if [ -z "$1" ]; then
@@ -769,7 +777,7 @@ EOF
             exit 1
         fi
         # Execute the command with debug mode enabled
-        "$0" "$@"
+        bash "$0" "$@"
         ;;
     
     help|--help|-h)
