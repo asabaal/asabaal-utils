@@ -1,0 +1,784 @@
+#!/bin/bash
+# toolmgr - Smart tool manager with auto-detection
+# version="2.0.0"
+
+set -e
+
+# Configuration
+TOOLS_DIR="$HOME/.local/bin"
+TOOLS_REGISTRY="$HOME/.local/share/custom-tools"
+REGISTRY_FILE="$TOOLS_REGISTRY/registry.json"
+TOOLMGR_VERSION="2.0.0"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Icons and formatting
+print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_header() { echo -e "${PURPLE}▶${NC} $1"; }
+
+# Debug mode
+DEBUG=false
+debug_print() {
+    if [ "$DEBUG" = "true" ]; then
+        echo -e "${CYAN}[DEBUG]${NC} $1" >&2
+    fi
+}
+
+# Ensure directories exist
+setup_environment() {
+    mkdir -p "$TOOLS_DIR"
+    mkdir -p "$TOOLS_REGISTRY"
+    
+    if [ ! -f "$REGISTRY_FILE" ]; then
+        cat > "$REGISTRY_FILE" << EOF
+{
+  "tools": [],
+  "version": "$TOOLMGR_VERSION",
+  "last_updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "auto_detected_dirs": []
+}
+EOF
+    fi
+}
+
+# Check and setup PATH
+check_path() {
+    if [[ ":$PATH:" != *":$TOOLS_DIR:"* ]]; then
+        print_warning "Tools directory ($TOOLS_DIR) is not in your PATH"
+        print_info "I can add it automatically to your shell config."
+        echo ""
+        read -p "Add $TOOLS_DIR to PATH? (y/n): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            add_to_path
+        else
+            print_warning "You'll need to add it manually or tools won't work globally"
+        fi
+    else
+        print_success "Tools directory is already in PATH"
+    fi
+}
+
+# Add to PATH
+add_to_path() {
+    local shell_config=""
+    case "$SHELL" in
+        */bash) shell_config="$HOME/.bashrc" ;;
+        */zsh) shell_config="$HOME/.zshrc" ;;
+        */fish) shell_config="$HOME/.config/fish/config.fish" ;;
+        *) shell_config="$HOME/.profile" ;;
+    esac
+    
+    if [ -f "$shell_config" ]; then
+        echo "" >> "$shell_config"
+        echo "# Custom tools directory (added by toolmgr)" >> "$shell_config"
+        echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$shell_config"
+        print_success "Added to $shell_config"
+        print_info "Restart terminal or run: source $shell_config"
+    else
+        print_error "Could not detect shell config. Add manually: export PATH=\"\$HOME/.local/bin:\$PATH\""
+    fi
+}
+
+# Detect tool metadata from file
+detect_tool_metadata() {
+    local file="$1"
+    local filename=$(basename "$file")
+    local extension="${filename##*.}"
+    local name="${filename%.*}"
+    
+    # Use Python for reliable metadata extraction and JSON generation
+    python3 << EOF
+import json
+import sys
+import re
+import os
+
+try:
+    file_path = "$file"
+    filename = os.path.basename(file_path)
+    name, ext = os.path.splitext(filename)
+    
+    # Remove the dot from extension
+    ext = ext[1:] if ext.startswith('.') else ext
+    
+    # Default values
+    metadata = {
+        "name": name,
+        "description": "Auto-detected tool",
+        "version": "1.0.0",
+        "category": "utility",
+        "usage": ""
+    }
+    
+    # Check if file exists and is readable
+    if not os.path.isfile(file_path) or not os.access(file_path, os.R_OK):
+        print(json.dumps(metadata))
+        sys.exit(0)
+    
+    # Read first 30 lines of file (increased from 20)
+    try:
+        with open(file_path, 'r', errors='replace') as f:
+            lines = []
+            for _ in range(30):
+                try:
+                    lines.append(next(f))
+                except StopIteration:
+                    break
+            content = ''.join(lines)
+    except Exception:
+        # Handle any file reading errors
+        with open(file_path, 'rb') as f:
+            try:
+                content = f.read(1024).decode('utf-8', errors='replace')
+            except:
+                content = ""
+    
+    # Language-specific detection
+    if ext in ['sh', 'bash', '']:
+        # Bash script patterns
+        desc_match = re.search(r'^#\s*description:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+        if desc_match:
+            metadata["description"] = desc_match.group(1).strip()
+        
+        # Try version patterns: version="X.Y.Z" or # version: X.Y.Z
+        ver_match = re.search(r'version=["\'](.*?)["\']|^#\s*version:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+        if ver_match:
+            metadata["version"] = (ver_match.group(1) or ver_match.group(2) or metadata["version"]).strip()
+        
+        cat_match = re.search(r'^#\s*category:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+        if cat_match:
+            metadata["category"] = cat_match.group(1).strip()
+        
+        # Extract usage info
+        usage_matches = re.findall(r'^#\s*usage:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+        if usage_matches:
+            metadata["usage"] = ' '.join(usage_matches)
+    
+    elif ext in ['py', 'python']:
+        # Python script patterns
+        
+        # Look for triple-quoted docstring
+        docstring_match = re.search(r'^\s*["\']{3}(.*?)["\']{3}', content, re.DOTALL)
+        if docstring_match:
+            metadata["description"] = docstring_match.group(1).strip()
+        else:
+            # Try # description format
+            desc_match = re.search(r'^#\s*description:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+            if desc_match:
+                metadata["description"] = desc_match.group(1).strip()
+        
+        # Look for version
+        ver_match = re.search(r'^\s*__version__\s*=\s*["\']([^"\']*)["\']|^#\s*version:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+        if ver_match:
+            metadata["version"] = (ver_match.group(1) or ver_match.group(2) or metadata["version"]).strip()
+        
+        # Look for category
+        cat_match = re.search(r'^#\s*category:\s*(.*?)\s*$', content, re.MULTILINE | re.IGNORECASE)
+        if cat_match:
+            metadata["category"] = cat_match.group(1).strip()
+        
+        # Check if it's a CLI tool
+        if re.search(r'argparse|click|sys\.argv', content):
+            if metadata["category"] == "utility":  # Only update if not already set
+                metadata["category"] = "cli"
+    
+    # Smart category detection based on filename
+    filename_lower = name.lower()
+    if any(term in filename_lower for term in ['git', 'repo', 'diff', 'commit']):
+        metadata["category"] = "development"
+    elif any(term in filename_lower for term in ['test', 'spec', 'lint']):
+        metadata["category"] = "testing"
+    elif any(term in filename_lower for term in ['deploy', 'build', 'ci', 'cd']):
+        metadata["category"] = "deployment"
+    elif any(term in filename_lower for term in ['monitor', 'log', 'stat', 'perf']):
+        metadata["category"] = "monitoring"
+    elif any(term in filename_lower for term in ['backup', 'sync', 'clean']):
+        metadata["category"] = "automation"
+    elif any(term in filename_lower for term in ['analyze', 'report', 'audit']):
+        metadata["category"] = "analysis"
+    
+    # Clean up values and ensure no empty values
+    for key in metadata:
+        if not metadata[key] or metadata[key].strip() == "":
+            if key == "name":
+                metadata[key] = name
+            elif key == "description":
+                metadata[key] = "Auto-detected tool"
+            elif key == "version":
+                metadata[key] = "1.0.0"
+            elif key == "category":
+                metadata[key] = "utility"
+            else:
+                metadata[key] = ""
+    
+    # Output the metadata as properly escaped JSON
+    print(json.dumps(metadata))
+except Exception as e:
+    # Fallback metadata in case of any errors
+    fallback = {
+        "name": "$name",
+        "description": f"Auto-detected tool (error: {str(e)[:50]})",
+        "version": "1.0.0",
+        "category": "utility",
+        "usage": ""
+    }
+    print(json.dumps(fallback))
+EOF
+}
+
+# Scan directory for tools
+scan_directory() {
+    local scan_dir="$1"
+    local tools_found=()
+    
+    if [ ! -d "$scan_dir" ]; then
+        print_error "Directory not found: $scan_dir"
+        return 1
+    fi
+    
+    print_info "Scanning $scan_dir for tools..."
+    
+    # Find executable files
+    while IFS= read -r -d '' file; do
+        if [ -f "$file" ] && [ -x "$file" ]; then
+            local basename_file=$(basename "$file")
+            
+            # Skip hidden files and common non-tools
+            case "$basename_file" in
+                .*|*.tmp|*.bak|*~|README*|LICENSE*|Makefile|makefile) continue ;;
+            esac
+            
+            # Detect metadata
+            local metadata=$(detect_tool_metadata "$file")
+            
+            # Safely extract the tool name using Python
+            local tool_name=""
+            tool_name=$(echo "$metadata" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('name', 'unknown'))
+except Exception as e:
+    print('unknown')
+")
+            
+            # Store the metadata in a safe format that can be passed later
+            local encoded_metadata=""
+            encoded_metadata=$(echo "$metadata" | python3 -c "
+import sys, json, base64
+try:
+    data = json.load(sys.stdin)
+    print(base64.b64encode(json.dumps(data).encode('utf-8')).decode('utf-8'))
+except Exception as e:
+    print('')
+")
+            
+            if [ -n "$encoded_metadata" ]; then
+                tools_found+=("$file|$encoded_metadata")
+                echo "  📁 Found: $tool_name"
+            else
+                print_warning "Failed to process metadata for $file"
+            fi
+        fi
+    done < <(find "$scan_dir" -maxdepth 2 -type f -print0)
+    
+    if [ ${#tools_found[@]} -eq 0 ]; then
+        print_warning "No executable tools found in $scan_dir"
+        return 0
+    fi
+    
+    echo ""
+    printf '%s\n' "${tools_found[@]}"
+}
+
+# Install tool from file
+install_tool() {
+    local source_file="$1"
+    local encoded_metadata="$2"
+    local force="${3:-false}"
+    
+    debug_print "Installing tool from: $source_file"
+    
+    if [ ! -f "$source_file" ]; then
+        print_error "Source file not found: $source_file"
+        return 1
+    fi
+    
+    # Decode the base64 metadata
+    local metadata=$(echo "$encoded_metadata" | python3 -c "
+import sys, json, base64
+try:
+    encoded = sys.stdin.read().strip()
+    decoded = base64.b64decode(encoded).decode('utf-8')
+    print(decoded)
+except Exception as e:
+    print('{\"name\":\"unknown\", \"description\":\"Error decoding metadata\", \"version\":\"1.0.0\", \"category\":\"utility\", \"usage\":\"\"}')
+")
+    
+    local tool_name=$(echo "$metadata" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('name', 'unknown'))
+except Exception as e:
+    print('unknown')
+")
+    
+    debug_print "Tool name detected: $tool_name"
+    
+    local target_path="$TOOLS_DIR/$tool_name"
+    debug_print "Target path: $target_path"
+    
+    # Check if already exists
+    if [ -f "$target_path" ] && [ "$force" != "true" ]; then
+        print_warning "Tool '$tool_name' already exists. Use --force to overwrite."
+        return 1
+    fi
+    
+    # Copy tool
+    debug_print "Copying $source_file to $target_path"
+    cp "$source_file" "$target_path"
+    chmod +x "$target_path"
+    
+    # Register in database
+    debug_print "Registering tool in database: $REGISTRY_FILE"
+    python3 << EOF
+import json
+import sys
+from datetime import datetime
+import base64
+
+# Read current registry
+try:
+    with open('$REGISTRY_FILE', 'r') as f:
+        registry = json.load(f)
+    print("Registry loaded successfully", file=sys.stderr)
+except Exception as e:
+    print(f"Error loading registry: {str(e)}", file=sys.stderr)
+    registry = {"tools": [], "version": "$TOOLMGR_VERSION", "last_updated": "", "auto_detected_dirs": []}
+
+# Remove existing entry
+registry['tools'] = [t for t in registry['tools'] if t['name'] != '$tool_name']
+
+try:
+    # Parse metadata and add new entry
+    metadata = json.loads('''$metadata''')
+    print(f"Parsed metadata for {metadata.get('name', 'unknown')}", file=sys.stderr)
+    
+    new_tool = {
+        "name": '$tool_name',
+        "path": '$target_path',
+        "source": '$source_file',
+        "description": metadata['description'],
+        "version": metadata['version'],
+        "category": metadata['category'],
+        "type": "$(file -b --mime-type "$source_file" | cut -d'/' -f1)",
+        "installed_date": datetime.utcnow().isoformat() + "Z",
+        "auto_detected": True
+    }
+
+    registry['tools'].append(new_tool)
+    registry['last_updated'] = datetime.utcnow().isoformat() + "Z"
+
+    # Save registry
+    with open('$REGISTRY_FILE', 'w') as f:
+        json.dump(registry, f, indent=2)
+    print(f"Registry updated with {new_tool['name']}", file=sys.stderr)
+
+    print(f"✓ Installed {new_tool['name']}")
+except Exception as e:
+    print(f"Error during tool registration: {str(e)}", file=sys.stderr)
+    print(f"✗ Failed to install {metadata.get('name', '$tool_name')}: {str(e)}")
+    exit(1)
+EOF
+    
+    return $?
+}
+
+# Show available tools in directory
+show_available_tools() {
+    local scan_dir="$1"
+    
+    print_header "Available Tools in $scan_dir"
+    
+    local tools_data=$(scan_directory "$scan_dir")
+    if [ -z "$tools_data" ]; then
+        return 0
+    fi
+    
+    echo ""
+    echo "┌─────────────────────────────────────────────────────────────────────────────┐"
+    printf "│ %-15s │ %-10s │ %-20s │ %-25s │\n" "Name" "Version" "Category" "Description"
+    echo "├─────────────────────────────────────────────────────────────────────────────┤"
+    
+    echo "$tools_data" | while IFS='|' read -r file encoded_metadata; do
+        if [ -n "$encoded_metadata" ]; then
+            python3 << EOF
+import json
+import base64
+
+try:
+    encoded = '''$encoded_metadata'''
+    metadata_json = base64.b64decode(encoded).decode('utf-8')
+    metadata = json.loads(metadata_json)
+    
+    name = metadata['name'][:15]
+    version = metadata['version'][:10]
+    category = metadata['category'][:20]
+    description = metadata['description'][:25]
+    
+    print(f"│ {name:<15} │ {version:<10} │ {category:<20} │ {description:<25} │")
+except Exception as e:
+    print(f"│ {'ERROR':<15} │ {'N/A':<10} │ {'N/A':<20} │ {'Failed to decode metadata':<25} │")
+EOF
+        fi
+    done
+    
+    echo "└─────────────────────────────────────────────────────────────────────────────┘"
+}
+
+# Install all tools from directory
+install_from_directory() {
+    local scan_dir="$1"
+    local force="${2:-false}"
+    
+    print_header "Installing tools from $scan_dir"
+    
+    local tools_data=$(scan_directory "$scan_dir")
+    if [ -z "$tools_data" ]; then
+        return 0
+    fi
+    
+    local installed_count=0
+    local failed_count=0
+    
+    # Use a temporary file to store results (to avoid subshell variable scope issues)
+    local temp_results=$(mktemp)
+    echo "0 0" > "$temp_results"  # Initialize installed_count failed_count
+    
+    debug_print "Processing tools from scan data: $(echo "$tools_data" | wc -l) lines"
+    
+    # Process each tool
+    while IFS='|' read -r file encoded_metadata; do
+        if [ -n "$encoded_metadata" ]; then
+            debug_print "Installing tool from file: $file"
+            
+            if install_tool "$file" "$encoded_metadata" "$force"; then
+                # Update installed count in temp file
+                read i_count f_count < "$temp_results"
+                echo "$((i_count+1)) $f_count" > "$temp_results"
+                debug_print "Tool installed successfully, count now: $((i_count+1))"
+            else
+                # Update failed count in temp file
+                read i_count f_count < "$temp_results"
+                echo "$i_count $((f_count+1))" > "$temp_results"
+                debug_print "Tool installation failed, failed count now: $((f_count+1))"
+            fi
+        fi
+    done <<< "$tools_data"
+    
+    # Read final counts
+    read installed_count failed_count < "$temp_results"
+    rm -f "$temp_results"
+    
+    debug_print "Installation summary: $installed_count installed, $failed_count failed"
+    
+    if [ $installed_count -gt 0 ]; then
+        print_success "Installation complete! Installed $installed_count tools successfully."
+        
+        if [ $failed_count -gt 0 ]; then
+            print_warning "$failed_count tools failed to install. Use --force to overwrite existing tools."
+        fi
+    else
+        if [ $failed_count -gt 0 ]; then
+            print_warning "No tools installed. $failed_count tools failed to install. Use --force to overwrite existing tools."
+        else
+            print_warning "No tools installed."
+        fi
+    fi
+}
+
+# List installed tools
+list_tools() {
+    local category_filter="$1"
+    local search_term="$2"
+    
+    setup_environment
+    
+    python3 << EOF
+import json
+import os
+
+try:
+    with open('$REGISTRY_FILE', 'r') as f:
+        registry = json.load(f)
+except:
+    print("No tools installed yet.")
+    exit(0)
+
+tools = registry.get('tools', [])
+
+# Apply filters
+if '$category_filter':
+    tools = [t for t in tools if t.get('category', '').lower() == '$category_filter'.lower()]
+
+if '$search_term':
+    search = '$search_term'.lower()
+    tools = [t for t in tools if search in t.get('name', '').lower() or search in t.get('description', '').lower()]
+
+if not tools:
+    print("No tools found matching criteria.")
+    exit(0)
+
+# Group by category
+categories = {}
+for tool in tools:
+    cat = tool.get('category', 'utility')
+    if cat not in categories:
+        categories[cat] = []
+    categories[cat].append(tool)
+
+print(f"🔧 Installed Tools ({len(tools)} total)")
+print("=" * 60)
+
+for category, cat_tools in sorted(categories.items()):
+    print(f"\n📂 {category.upper()}")
+    print("-" * 40)
+    
+    for tool in sorted(cat_tools, key=lambda x: x['name']):
+        name = tool['name']
+        desc = tool.get('description', 'No description')
+        version = tool.get('version', '?')
+        
+        # Check if tool exists
+        exists = os.path.isfile(tool.get('path', '')) and os.access(tool.get('path', ''), os.X_OK)
+        status = "✅" if exists else "❌"
+        
+        print(f"  {status} {name:<18} v{version:<8} {desc}")
+
+print(f"\n📊 Total: {len(tools)} tools across {len(categories)} categories")
+EOF
+}
+
+# Show usage
+show_usage() {
+    cat << 'EOF'
+🔧 Smart Tool Manager v2.0.0
+
+USAGE:
+    toolmgr [COMMAND] [OPTIONS]
+
+COMMANDS:
+    setup                       Set up tool manager environment
+    scan <directory>            Show available tools in directory
+    install-dir <directory>     Install all tools from directory
+    install <file>              Install specific tool file
+    list [category] [search]    List installed tools
+    remove <tool>               Remove installed tool
+    info <tool>                 Show tool information
+    health                      Check health of installed tools
+    update-path                 Add tools directory to PATH
+
+EXAMPLES:
+    toolmgr setup                           # Initial setup
+    toolmgr scan ./tools                    # Show tools in ./tools directory
+    toolmgr install-dir ./tools             # Install all tools from ./tools
+    toolmgr install ./my-script.sh         # Install specific script
+    toolmgr list development                # List development tools
+    toolmgr info repo-analyze               # Show tool details
+    toolmgr remove old-tool                 # Remove a tool
+
+FEATURES:
+    • Auto-detects bash, python, node.js tools
+    • Extracts metadata from script headers
+    • Manages tool registry and PATH
+    • Supports categories and versioning
+    • Health checking and cleanup
+
+TIP: Add metadata to your scripts like this:
+    # description: What this tool does
+    # version: 1.2.3
+    # category: development
+EOF
+}
+
+# Main command processing
+case "${1:-help}" in
+    setup)
+        print_header "Setting up Tool Manager..."
+        setup_environment
+        check_path
+        print_success "Setup complete! You can now use 'toolmgr' commands."
+        ;;
+    
+    scan)
+        if [ -z "$2" ]; then
+            print_error "Usage: toolmgr scan <directory>"
+            exit 1
+        fi
+        show_available_tools "$2"
+        ;;
+    
+    install-dir)
+        if [ -z "$2" ]; then
+            print_error "Usage: toolmgr install-dir <directory> [--force]"
+            exit 1
+        fi
+        setup_environment
+        install_from_directory "$2" "$([[ "$3" == "--force" ]] && echo "true" || echo "false")"
+        ;;
+    
+    install)
+        if [ -z "$2" ]; then
+            print_error "Usage: toolmgr install <file>"
+            exit 1
+        fi
+        setup_environment
+        metadata=$(detect_tool_metadata "$2")
+        # Encode the metadata for safe passing
+        encoded_metadata=$(echo "$metadata" | python3 -c "
+import sys, json, base64
+try:
+    data = json.load(sys.stdin)
+    print(base64.b64encode(json.dumps(data).encode('utf-8')).decode('utf-8'))
+except Exception as e:
+    print('')
+")
+        install_tool "$2" "$encoded_metadata" "false"
+        ;;
+    
+    list|ls)
+        list_tools "$2" "$3"
+        ;;
+    
+    remove|rm)
+        if [ -z "$2" ]; then
+            print_error "Usage: toolmgr remove <tool-name>"
+            exit 1
+        fi
+        # Remove tool implementation
+        rm -f "$TOOLS_DIR/$2"
+        python3 << EOF
+import json
+from datetime import datetime
+
+try:
+    with open('$REGISTRY_FILE', 'r') as f:
+        registry = json.load(f)
+    
+    registry['tools'] = [t for t in registry['tools'] if t['name'] != '$2']
+    registry['last_updated'] = datetime.utcnow().isoformat() + "Z"
+    
+    with open('$REGISTRY_FILE', 'w') as f:
+        json.dump(registry, f, indent=2)
+    
+    print(f"✓ Removed $2")
+except Exception as e:
+    print(f"Error: {e}")
+EOF
+        ;;
+    
+    info)
+        if [ -z "$2" ]; then
+            print_error "Usage: toolmgr info <tool-name>"
+            exit 1
+        fi
+        python3 << EOF
+import json
+import os
+
+try:
+    with open('$REGISTRY_FILE', 'r') as f:
+        registry = json.load(f)
+    
+    tool = next((t for t in registry['tools'] if t['name'] == '$2'), None)
+    if not tool:
+        print(f"Tool '$2' not found")
+        exit(1)
+    
+    print(f"🔧 {tool['name']}")
+    print("=" * (len(tool['name']) + 3))
+    print(f"Description: {tool.get('description', 'N/A')}")
+    print(f"Version: {tool.get('version', 'N/A')}")
+    print(f"Category: {tool.get('category', 'N/A')}")
+    print(f"Path: {tool.get('path', 'N/A')}")
+    print(f"Source: {tool.get('source', 'N/A')}")
+    print(f"Type: {tool.get('type', 'N/A')}")
+    print(f"Installed: {tool.get('installed_date', 'N/A')}")
+    
+    if os.path.isfile(tool.get('path', '')):
+        print("Status: ✅ Available")
+    else:
+        print("Status: ❌ Missing")
+        
+except Exception as e:
+    print(f"Error: {e}")
+EOF
+        ;;
+    
+    health)
+        python3 << EOF
+import json
+import os
+
+try:
+    with open('$REGISTRY_FILE', 'r') as f:
+        registry = json.load(f)
+    
+    tools = registry.get('tools', [])
+    healthy = sum(1 for t in tools if os.path.isfile(t.get('path', '')) and os.access(t.get('path', ''), os.X_OK))
+    broken = len(tools) - healthy
+    
+    print(f"🏥 Tool Health Report")
+    print(f"Healthy: {healthy}")
+    print(f"Broken: {broken}")
+    print(f"Total: {len(tools)}")
+    
+    if broken > 0:
+        print(f"\nBroken tools:")
+        for tool in tools:
+            if not (os.path.isfile(tool.get('path', '')) and os.access(tool.get('path', ''), os.X_OK)):
+                print(f"  ❌ {tool['name']}")
+                
+except Exception as e:
+    print(f"Error: {e}")
+EOF
+        ;;
+    
+    update-path)
+        check_path
+        ;;
+    
+    debug)
+        DEBUG=true
+        print_info "Debug mode enabled"
+        shift
+        if [ -z "$1" ]; then
+            print_error "Usage: toolmgr debug <command> [args...]"
+            exit 1
+        fi
+        # Execute the command with debug mode enabled
+        "$0" "$@"
+        ;;
+    
+    help|--help|-h)
+        show_usage
+        ;;
+    
+    *)
+        print_error "Unknown command: $1"
+        show_usage
+        exit 1
+        ;;
+esac
