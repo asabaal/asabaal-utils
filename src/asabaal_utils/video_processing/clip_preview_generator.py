@@ -14,6 +14,7 @@ import json
 import base64
 from datetime import datetime
 import hashlib
+from collections import defaultdict
 
 from .path_utils import convert_path_to_current_os, resolve_media_path, get_available_wsl_mounts
 from .frame_extractor import FrameExtractor
@@ -305,6 +306,7 @@ class ClipPreviewGenerator:
             return {
                 'clips': [],
                 'duplicates': [],
+                'unused_media': [],
                 'timestamp': datetime.now().isoformat()
             }
         
@@ -361,9 +363,41 @@ class ClipPreviewGenerator:
         for clip in self.clips:
             clip['is_duplicate'] = clip['clip_id'] in duplicate_clip_ids
         
+        # Identify unused media files if timeline_data contains media_pool
+        unused_media = []
+        if 'media_pool' in timeline_data and isinstance(timeline_data['media_pool'], list):
+            # Find all files in the media pool
+            all_media = self._extract_all_media(timeline_data['media_pool'])
+            
+            # Find all used media files from clips
+            used_media_paths = set()
+            for clip in self.clips:
+                material_path = clip.get('material_path', '')
+                if material_path:
+                    # Normalize path for comparison
+                    norm_path = os.path.normpath(material_path)
+                    used_media_paths.add(norm_path)
+                    
+                    # Also add just the filename to catch relative paths
+                    filename = os.path.basename(material_path)
+                    used_media_paths.add(filename)
+            
+            # Identify unused media
+            for media in all_media:
+                # Check if any of the potential paths for this media are in used_media_paths
+                is_used = False
+                for path in [media.get('path', ''), os.path.basename(media.get('path', ''))]:  
+                    if path and path in used_media_paths:
+                        is_used = True
+                        break
+                
+                if not is_used:
+                    unused_media.append(media)
+        
         return {
             'clips': self.clips,
             'duplicates': self.duplicate_groups,
+            'unused_media': unused_media,
             'timestamp': datetime.now().isoformat(),
             'output_dir': self.output_dir,
             'path_conversion_info': {
@@ -396,7 +430,7 @@ class ClipPreviewGenerator:
             self.process_clips(timeline_data, wsl_path_prefix=wsl_path_prefix)
         
         # Generate HTML content
-        html_content = self._generate_html_dashboard(include_base64)
+        html_content = self._generate_html_dashboard(include_base64, timeline_data)
         
         # Save to file
         with open(output_file, 'w', encoding='utf-8') as f:
@@ -405,7 +439,60 @@ class ClipPreviewGenerator:
         logger.info(f"Dashboard saved to {output_file}")
         return output_file
     
-    def _generate_html_dashboard(self, include_base64: bool = False) -> str:
+    def _extract_all_media(self, media_pool: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Extract all media files from the media pool.
+        
+        Args:
+            media_pool: List of media items from the timeline data
+            
+        Returns:
+            List of media file information dictionaries
+        """
+        all_media = []
+        
+        for media_item in media_pool:
+            # Extract basic media information
+            media_path = media_item.get('path', '')
+            if not media_path:
+                continue
+                
+            media_name = os.path.basename(media_path)
+            media_type = media_item.get('type', 'unknown')
+            
+            # Determine media type from file extension if not specified
+            if media_type == 'unknown':
+                ext = os.path.splitext(media_path)[1].lower()
+                if ext in ['.mp4', '.mov', '.avi', '.mkv']:
+                    media_type = 'video'
+                elif ext in ['.mp3', '.wav', '.m4a', '.aac']:
+                    media_type = 'audio'
+                elif ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
+                    media_type = 'image'
+            
+            # Extract duration if available
+            duration = None
+            if 'duration' in media_item:
+                # Convert to seconds if in microseconds
+                if media_item['duration'] > 10000:  # Likely in microseconds
+                    duration = media_item['duration'] / 1000000
+                else:
+                    duration = media_item['duration']
+            
+            # Create media info dictionary
+            media_info = {
+                'path': media_path,
+                'name': media_name,
+                'type': media_type,
+                'duration': duration,
+                'id': media_item.get('id', None)
+            }
+            
+            all_media.append(media_info)
+        
+        return all_media
+        
+    def _generate_html_dashboard(self, include_base64: bool = False, timeline_data: Dict[str, Any] = None) -> str:
         """
         Generate HTML content for the dashboard.
         
@@ -876,6 +963,57 @@ class ClipPreviewGenerator:
                 html += '        </div>\n'
         else:
             html += '        <p>No duplicate clips found.</p>\n'
+        
+        # Add unused media section if available
+        unused_media = timeline_data.get('unused_media', [])
+        if unused_media:
+            html += '        <h3>Unused Media Files</h3>\n'
+            html += '        <p class="text-muted">These files are in your project\'s media pool but are not used in the timeline</p>\n'
+            
+            # Group by type
+            media_by_type = defaultdict(list)
+            for media in unused_media:
+                media_type = media.get('type', 'unknown')
+                media_by_type[media_type].append(media)
+            
+            # Create a card for each type
+            for media_type, media_list in media_by_type.items():
+                html += f'        <div class="card mb-4">\n'
+                html += f'            <div class="card-header bg-warning">\n'
+                html += f'                <h5 class="card-title mb-0">Unused {media_type.title()} Files ({len(media_list)})</h5>\n'
+                html += '            </div>\n'
+                html += '            <div class="card-body">\n'
+                html += '                <div class="table-responsive">\n'
+                html += '                    <table class="table table-striped">\n'
+                html += '                        <thead>\n'
+                html += '                            <tr>\n'
+                html += '                                <th>Name</th>\n'
+                html += '                                <th>Path</th>\n'
+                html += '                                <th>Duration</th>\n'
+                html += '                            </tr>\n'
+                html += '                        </thead>\n'
+                html += '                        <tbody>\n'
+                
+                for media in sorted(media_list, key=lambda x: x.get('name', '')):
+                    name = media.get('name', 'Unknown')
+                    path = media.get('path', 'Unknown')
+                    duration = media.get('duration', None)
+                    duration_str = f"{duration:.2f}s" if duration is not None else "N/A"
+                    
+                    html += '                            <tr>\n'
+                    html += f'                                <td>{name}</td>\n'
+                    html += f'                                <td>{path}</td>\n'
+                    html += f'                                <td>{duration_str}</td>\n'
+                    html += '                            </tr>\n'
+                
+                html += '                        </tbody>\n'
+                html += '                    </table>\n'
+                html += '                </div>\n'
+                html += '            </div>\n'
+                html += '        </div>\n'
+        else:
+            html += '        <h3>Unused Media Files</h3>\n'
+            html += '        <p>No unused media files detected. All files in your project are used in the timeline.</p>\n'
 
         html += """
         <h3>All Clips</h3>
@@ -1257,7 +1395,7 @@ class ClipPreviewGenerator:
         is_duplicate = 'is-duplicate' if clip.get('is_duplicate', False) else ''
         
         extraction_method = clip.get('extraction_method', 'unknown')
-        html = f'            <div class="col-md-3 clip-card {is_duplicate}" data-clip-id="{clip_id}" data-extraction-method="{extraction_method}">\n'
+        html = f'            <div class="col-md-3 clip-card {is_duplicate}" data-clip-id="{clip_id}" data-extraction-method="{extraction_method}" data-material-path="{clip.get("material_path", "")}">\n'
         html += '                <div class="card h-100">\n'
         
         # Add thumbnail if available
