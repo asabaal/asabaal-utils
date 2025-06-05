@@ -32,14 +32,19 @@ This interactive visualization tool allows you to explore and understand the str
 ## Usage
 
 ```bash
+# Directly visualize a CapCut project file
 python visualize_project_structure.py path/to/draft_content.json [options]
+
+# Or visualize from a pre-analyzed project structure file
+python visualize_project_structure.py path/to/project_structure_analysis.json --analysis [options]
 ```
 
 ### Options
 
-- `--output` or `-o`: Directory to save visualization files (default: creates a "project_visualization" directory next to the project file)
+- `--output` or `-o`: Directory to save visualization files (default: creates a "project_visualization" directory next to the input file)
 - `--no-browser`: Don't automatically open the visualization in a browser
 - `--verbose` or `-v`: Print detailed information during analysis
+- `--analysis` or `-a`: Specify that the input file is an analysis JSON file created by analyze_project_structure.py
 
 ## Navigation
 
@@ -72,9 +77,30 @@ If you encounter issues with the visualization:
 
 4. **Manual Opening**: If the browser doesn't open automatically, use the `--no-browser` flag and manually open the HTML file from the output directory.
 
+## Integration with Project Analyzer
+
+For large CapCut projects, it's recommended to use a two-step process:
+
+1. First, analyze the project structure using the analyze_project_structure.py tool:
+   ```bash
+   python analyze_project_structure.py path/to/draft_content.json --output ./analysis
+   ```
+
+2. Then visualize the analysis results using this tool:
+   ```bash
+   python visualize_project_structure.py ./analysis/project_structure_analysis.json --analysis
+   ```
+
+This approach offers several advantages:
+- Much faster visualization for large projects since the analysis is pre-computed
+- Reduces memory usage when working with very large project files
+- Allows sharing analysis files without the full project data
+- Enables batch processing of multiple projects for comparison
+
 ## Notes
 
 - This tool analyzes the project structure without modifying any files
 - For very large projects, the visualization may take a moment to load
 - The tool works best with standard CapCut project files (draft_content.json)
 - Different versions of CapCut may use slightly different project structures
+- When using analysis files, some detailed exploration features may be limited since the raw project data isn't available

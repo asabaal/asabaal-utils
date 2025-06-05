@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""
+System information display tool
+Shows basic system stats in a user-friendly format
+"""
+# description: Displays system information and stats
+# version: 1.0.0
+# category: monitoring
+
+import platform
+import psutil
+import shutil
+from datetime import datetime
+
+def format_bytes(bytes_value):
+    """Convert bytes to human readable format"""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if bytes_value < 1024.0:
+            return f"{bytes_value:.1f} {unit}"
+        bytes_value /= 1024.0
+    return f"{bytes_value:.1f} PB"
+
+def main():
+    print("🖥️  System Information")
+    print("=" * 40)
+    
+    # Basic system info
+    print(f"OS: {platform.system()} {platform.release()}")
+    print(f"Architecture: {platform.machine()}")
+    print(f"Hostname: {platform.node()}")
+    print(f"Python: {platform.python_version()}")
+    
+    print("\n💾 Memory Usage")
+    print("-" * 20)
+    memory = psutil.virtual_memory()
+    print(f"Total: {format_bytes(memory.total)}")
+    print(f"Available: {format_bytes(memory.available)}")
+    print(f"Used: {format_bytes(memory.used)} ({memory.percent:.1f}%)")
+    
+    print("\n💿 Disk Usage")
+    print("-" * 20)
+    disk = psutil.disk_usage('/')
+    print(f"Total: {format_bytes(disk.total)}")
+    print(f"Free: {format_bytes(disk.free)}")
+    print(f"Used: {format_bytes(disk.used)} ({disk.used/disk.total*100:.1f}%)")
+    
+    print("\n🔋 CPU Info")
+    print("-" * 20)
+    print(f"Cores: {psutil.cpu_count()}")
+    print(f"Usage: {psutil.cpu_percent(interval=1):.1f}%")
+    
+    print(f"\n⏰ Uptime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+if __name__ == "__main__":
+    main()

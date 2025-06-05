@@ -1,0 +1,197 @@
+.timeline-visualizer .page-title {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 0.75rem;
+}
+
+/* Timeline container */
+.timeline-visualizer .timeline-container {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.timeline-visualizer .timeline-content {
+  position: relative;
+  min-height: 300px;
+  padding-bottom: 20px;
+}
+
+/* Ruler */
+.timeline-visualizer .timeline-ruler {
+  height: 30px;
+  position: sticky;
+  top: 0;
+  background-color: #191919;
+  z-index: 5;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.timeline-visualizer .timeline-ruler-mark {
+  position: absolute;
+  bottom: 0;
+  height: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.timeline-visualizer .timeline-ruler-text {
+  position: absolute;
+  bottom: 12px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Tracks */
+.timeline-visualizer .timeline-tracks {
+  position: relative;
+}
+
+.timeline-visualizer .timeline-track {
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin-bottom: 12px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.timeline-visualizer .timeline-track-label {
+  position: sticky;
+  left: 0;
+  background-color: #222;
+  padding: 2px 8px;
+  z-index: 4;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 12px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Clips */
+.timeline-visualizer .timeline-clip {
+  position: absolute;
+  height: 100%;
+  background-color: rgba(52, 152, 219, 0.3);
+  border: 2px solid var(--highlight-color);
+  border-radius: 4px;
+  padding: 2px 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeline-visualizer .timeline-clip:hover {
+  background-color: rgba(52, 152, 219, 0.5);
+  transform: scaleY(1.1);
+  z-index: 10;
+}
+
+.timeline-visualizer .timeline-clip.selected {
+  box-shadow: 0 0 0 2px #fff;
+  z-index: 11;
+}
+
+/* Clip types */
+.timeline-visualizer .timeline-clip.video-clip {
+  border-color: var(--video-color);
+  background-color: rgba(243, 156, 18, 0.3);
+}
+
+.timeline-visualizer .timeline-clip.audio-clip {
+  border-color: var(--audio-color);
+  background-color: rgba(155, 89, 182, 0.3);
+}
+
+.timeline-visualizer .timeline-clip.image-clip {
+  border-color: var(--image-color);
+  background-color: rgba(26, 188, 156, 0.3);
+}
+
+/* Zoom controls */
+.timeline-visualizer .timeline-zoom-controls {
+  display: flex;
+  align-items: center;
+}
+
+.timeline-visualizer .zoom-level {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Clip details */
+.timeline-visualizer .clip-details {
+  font-size: 14px;
+}
+
+.timeline-visualizer .details-section {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.timeline-visualizer .details-section h6 {
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 8px;
+}
+
+.timeline-visualizer .details-row {
+  display: flex;
+  margin-bottom: 10px;
+  border-bottom: 1px dotted var(--card-border);
+  padding-bottom: 10px;
+}
+
+.timeline-visualizer .details-label {
+  font-weight: bold;
+  width: 120px;
+  color: #aaa;
+}
+
+.timeline-visualizer .details-value {
+  flex: 1;
+}
+
+.timeline-visualizer .details-value code {
+  background-color: #333;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.timeline-visualizer .location-path {
+  display: block;
+  padding: 10px;
+  background-color: #333;
+  border-radius: 4px;
+  font-size: 12px;
+  word-break: break-all;
+  margin-top: 10px;
+}
+
+/* Media type colors */
+.timeline-visualizer .media-type-video {
+  color: var(--video-color);
+}
+
+.timeline-visualizer .media-type-audio {
+  color: var(--audio-color);
+}
+
+.timeline-visualizer .media-type-image {
+  color: var(--image-color);
+}

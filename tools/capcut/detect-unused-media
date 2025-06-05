@@ -1,0 +1,22 @@
+#!/bin/bash
+# detect-unused-media - Detect unused media files in a CapCut project
+#
+# Description: Identifies media files in a CapCut project that aren't used in the timeline
+# Version: 1.0.0
+# Category: video
+# Usage: detect-unused-media <draft_content.json> [--output <output_dir>] [--html] [--verbose]
+
+set -e
+
+# Detect script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Install required Python package if necessary
+if ! python3 -c "import asabaal_utils" &>/dev/null; then
+    echo "Installing asabaal_utils package..."
+    pip install -e "${REPO_ROOT}" >/dev/null
+fi
+
+# Pass all arguments to the Python script
+python3 -m asabaal_utils.video_processing.detect_unused_media "$@"

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Tool Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Visual Tool Manager</h1>
+            <p>Easy installation and management of command-line tools</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="browse">📂 Browse & Install</button>
+            <button class="tab-button" data-tab="installed">📋 Installed Tools</button>
+            <button class="tab-button" data-tab="health">🏥 Health Check</button>
+        </div>
+
+        <!-- Browse & Install Tab -->
+        <div id="browse" class="tab-content active">
+            <div class="section">
+                <h2>📁 Select Directory to Scan</h2>
+                <div class="directory-selector">
+                    <div class="common-dirs">
+                        <h3>Common Directories</h3>
+                        <div id="common-directories" class="dir-grid">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="custom-path">
+                        <h3>Custom Path</h3>
+                        <div class="path-input-group">
+                            <input type="text" id="custom-path" placeholder="/path/to/tools" />
+                            <button id="browse-custom" class="btn btn-secondary">Browse</button>
+                            <button id="scan-custom" class="btn btn-primary">Scan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Directory Browser -->
+            <div id="browser-section" class="section" style="display: none;">
+                <h2>📂 Directory Browser</h2>
+                <div class="breadcrumb" id="breadcrumb"></div>
+                <div id="directory-contents" class="file-browser">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="browser-actions">
+                    <button id="scan-current" class="btn btn-primary">Scan Current Directory</button>
+                </div>
+            </div>
+
+            <!-- Tools Found -->
+            <div id="tools-found" class="section" style="display: none;">
+                <h2>🔍 Tools Found</h2>
+                <div class="scan-info">
+                    <p>Scanning: <span id="scanned-directory"></span></p>
+                </div>
+                <div id="tools-list" class="tools-grid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="install-actions">
+                    <label>
+                        <input type="checkbox" id="force-install"> Force overwrite existing tools
+                    </label>
+                    <button id="install-all" class="btn btn-success">Install All Tools</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installed Tools Tab -->
+        <div id="installed" class="tab-content">
+            <div class="section">
+                <h2>📦 Installed Tools</h2>
+                <div class="actions">
+                    <button id="refresh-installed" class="btn btn-secondary">🔄 Refresh</button>
+                </div>
+                <div id="installed-tools" class="installed-list">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Check Tab -->
+        <div id="health" class="tab-content">
+            <div class="section">
+                <h2>🏥 System Health</h2>
+                <div class="actions">
+                    <button id="run-health-check" class="btn btn-primary">Run Health Check</button>
+                    <button id="setup-toolmgr" class="btn btn-secondary">Setup Tool Manager</button>
+                </div>
+                <div id="health-results" class="health-display">
+                    <p>Click "Run Health Check" to see the status of your installed tools.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status/Output Area -->
+        <div class="status-area">
+            <h3>📤 Output</h3>
+            <div id="output" class="output-box"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

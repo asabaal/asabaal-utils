@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""
+YouTube Video Downloader Tool
+
+Downloads YouTube videos in various formats and qualities.
+Supports playlists, audio-only downloads, and custom output formats.
+"""
+
+# description: Download YouTube videos and playlists with customizable quality and format options
+# version: 1.0.0
+# category: media
+
+import argparse
+import sys
+import os
+import subprocess
+from pathlib import Path
+from typing import Optional, List
+
+def check_dependencies():
+    """Check if yt-dlp is installed."""
+    try:
+        subprocess.run(['yt-dlp', '--version'], 
+                      capture_output=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+def install_yt_dlp():
+    """Install yt-dlp if not present."""
+    print("yt-dlp not found. Installing...")
+    try:
+        subprocess.run([sys.executable, '-m', 'pip', 'install', 'yt-dlp'], 
+                      check=True)
+        print("✓ yt-dlp installed successfully")
+        return True
+    except subprocess.CalledProcessError:
+        print("✗ Failed to install yt-dlp")
+        return False
+
+def download_video(
+    url: str,
+    output_dir: str = ".",
+    quality: str = "best",
+    audio_only: bool = False,
+    playlist: bool = False,
+    format_selector: Optional[str] = None
+) -> bool:
+    """
+    Download video from YouTube URL.
+    
+    Args:
+        url: YouTube URL
+        output_dir: Output directory
+        quality: Video quality (best, worst, 720p, 480p, etc.)
+        audio_only: Download audio only
+        playlist: Download entire playlist
+        format_selector: Custom format selector
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    cmd = ['yt-dlp']
+    
+    # Output directory
+    output_path = Path(output_dir).expanduser().resolve()
+    output_path.mkdir(parents=True, exist_ok=True)
+    cmd.extend(['-o', str(output_path / '%(title)s.%(ext)s')])
+    
+    # Format selection
+    if audio_only:
+        cmd.extend(['-f', 'bestaudio/best', '--extract-audio', 
+                   '--audio-format', 'mp3'])
+    elif format_selector:
+        cmd.extend(['-f', format_selector])
+    else:
+        if quality == "best":
+            cmd.extend(['-f', 'best'])
+        elif quality == "worst":
+            cmd.extend(['-f', 'worst'])
+        else:
+            # Try specific quality
+            cmd.extend(['-f', f'best[height<={quality.rstrip("p")}]'])
+    
+    # Playlist handling
+    if not playlist:
+        cmd.append('--no-playlist')
+    
+    # Add URL
+    cmd.append(url)
+    
+    try:
+        print(f"Downloading from: {url}")
+        print(f"Output directory: {output_path}")
+        if audio_only:
+            print("Mode: Audio only (MP3)")
+        else:
+            print(f"Quality: {quality}")
+            
+        result = subprocess.run(cmd, check=True)
+        print("✓ Download completed successfully")
+        return True
+        
+    except subprocess.CalledProcessError as e:
+        print(f"✗ Download failed: {e}")
+        return False
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Download YouTube videos and playlists",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  youtube-downloader "https://www.youtube.com/watch?v=VIDEO_ID"
+  youtube-downloader -q 720p -o ~/Downloads "VIDEO_URL"
+  youtube-downloader --audio-only "VIDEO_URL"
+  youtube-downloader --playlist "PLAYLIST_URL"
+  youtube-downloader -f "best[height<=480]" "VIDEO_URL"
+        """
+    )
+    
+    parser.add_argument('url', help='YouTube URL to download')
+    parser.add_argument('-o', '--output', default='.', 
+                       help='Output directory (default: current directory)')
+    parser.add_argument('-q', '--quality', default='best',
+                       choices=['best', 'worst', '2160p', '1440p', '1080p', '720p', '480p', '360p'],
+                       help='Video quality (default: best)')
+    parser.add_argument('-a', '--audio-only', action='store_true',
+                       help='Download audio only as MP3')
+    parser.add_argument('-p', '--playlist', action='store_true',
+                       help='Download entire playlist')
+    parser.add_argument('-f', '--format', dest='format_selector',
+                       help='Custom format selector (overrides quality)')
+    parser.add_argument('--install-deps', action='store_true',
+                       help='Install yt-dlp dependency')
+    
+    args = parser.parse_args()
+    
+    if args.install_deps:
+        success = install_yt_dlp()
+        sys.exit(0 if success else 1)
+    
+    # Check dependencies
+    if not check_dependencies():
+        print("Error: yt-dlp is required but not installed.")
+        print("Install it with: youtube-downloader --install-deps")
+        print("Or manually: pip install yt-dlp")
+        sys.exit(1)
+    
+    # Download video
+    success = download_video(
+        url=args.url,
+        output_dir=args.output,
+        quality=args.quality,
+        audio_only=args.audio_only,
+        playlist=args.playlist,
+        format_selector=args.format_selector
+    )
+    
+    sys.exit(0 if success else 1)
+
+if __name__ == '__main__':
+    main()

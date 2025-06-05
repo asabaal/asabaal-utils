@@ -1,0 +1,22 @@
+#!/bin/bash
+# visualize-project - Visualize CapCut project structure
+#
+# Description: Creates an interactive visualization of a CapCut project's structure
+# Version: 1.0.0
+# Category: video
+# Usage: visualize-project <draft_content.json> [--output <output_dir>] [--no-browser] [--verbose]
+
+set -e
+
+# Detect script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Install required Python package if necessary
+if ! python3 -c "import asabaal_utils" &>/dev/null; then
+    echo "Installing asabaal_utils package..."
+    pip install -e "${REPO_ROOT}" >/dev/null
+fi
+
+# Pass all arguments to the Python script
+python3 -m asabaal_utils.video_processing.visualize_project_structure "$@"

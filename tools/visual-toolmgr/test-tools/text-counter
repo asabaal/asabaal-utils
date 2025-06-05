@@ -1,0 +1,51 @@
+#!/bin/bash
+# description: Counts lines, words, and characters in text files
+# version: 1.0.0
+# category: analysis
+# usage: text-counter <file1> [file2] [...]
+
+if [ $# -eq 0 ]; then
+    echo "Usage: text-counter <file1> [file2] [...]"
+    echo "Counts lines, words, and characters in text files"
+    exit 1
+fi
+
+echo "📊 Text Analysis Report"
+echo "======================"
+
+total_lines=0
+total_words=0
+total_chars=0
+
+for file in "$@"; do
+    if [ ! -f "$file" ]; then
+        echo "⚠️  Warning: '$file' not found, skipping..."
+        continue
+    fi
+    
+    lines=$(wc -l < "$file")
+    words=$(wc -w < "$file")
+    chars=$(wc -c < "$file")
+    
+    total_lines=$((total_lines + lines))
+    total_words=$((total_words + words))
+    total_chars=$((total_chars + chars))
+    
+    echo ""
+    echo "📄 $file"
+    echo "   Lines: $lines"
+    echo "   Words: $words"
+    echo "   Characters: $chars"
+done
+
+if [ $# -gt 1 ]; then
+    echo ""
+    echo "📈 Total Summary"
+    echo "   Files: $#"
+    echo "   Lines: $total_lines"
+    echo "   Words: $total_words"
+    echo "   Characters: $total_chars"
+fi
+
+echo ""
+echo "✅ Analysis complete!"

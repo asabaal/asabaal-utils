@@ -1,0 +1,317 @@
+#!/bin/bash
+# visualize-capcut - Enhanced CapCut project visualization tool
+#
+# Description: Creates an interactive visualization of a CapCut project with improved structure detection
+# Version: 1.0.0
+# Category: video
+# Usage: visualize-capcut <draft_content.json> [--output <output_dir>] [--no-browser] [--verbose]
+
+set -e
+
+# Parse command line arguments
+PROJECT_FILE=""
+OUTPUT_DIR=""
+NO_BROWSER=""
+VERBOSE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output|-o)
+      OUTPUT_DIR="$2"
+      shift 2
+      ;;
+    --no-browser)
+      NO_BROWSER="--no-browser"
+      shift
+      ;;
+    --verbose|-v)
+      VERBOSE="--verbose"
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: visualize-capcut <draft_content.json> [--output <output_dir>] [--no-browser] [--verbose]"
+      echo
+      echo "Enhanced visualization tool for CapCut projects with better structure detection"
+      echo
+      echo "Options:"
+      echo "  --output, -o DIR    Directory to save visualization files"
+      echo "  --no-browser        Don't open visualization in browser"
+      echo "  --verbose, -v       Print verbose output"
+      echo "  --help, -h          Show this help message"
+      exit 0
+      ;;
+    *)
+      if [ -z "$PROJECT_FILE" ]; then
+        PROJECT_FILE="$1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$PROJECT_FILE" ]; then
+  echo "Error: Project file not specified"
+  echo "Usage: visualize-capcut <draft_content.json> [--output <output_dir>] [--no-browser] [--verbose]"
+  exit 1
+fi
+
+# Check if file exists
+if [ ! -f "$PROJECT_FILE" ]; then
+  echo "Error: Project file not found: $PROJECT_FILE"
+  exit 1
+fi
+
+# Detect script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Install required Python package if necessary
+if ! python3 -c "import asabaal_utils" &>/dev/null; then
+  echo "Installing asabaal_utils package..."
+  pip install -e "${REPO_ROOT}" >/dev/null
+fi
+
+# Create a temporary directory for intermediate files if no output dir specified
+if [ -z "$OUTPUT_DIR" ]; then
+  TEMP_DIR=$(mktemp -d)
+  OUTPUT_DIR="$TEMP_DIR"
+  CLEANUP_TEMP=1
+else
+  CLEANUP_TEMP=0
+  # Create output directory if it doesn't exist
+  mkdir -p "$OUTPUT_DIR"
+fi
+
+echo "Analyzing CapCut project structure..."
+
+# Create a temporary Python script to integrate the analyzer and visualizer
+TMP_SCRIPT=$(mktemp)
+cat > "$TMP_SCRIPT" << 'PYTHON_SCRIPT'
+#!/usr/bin/env python3
+import sys
+import os
+import json
+import argparse
+from pathlib import Path
+import importlib.util
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description="Enhanced CapCut project visualization")
+parser.add_argument("project_file", help="Path to the CapCut project file")
+parser.add_argument("--output", "-o", help="Directory to save visualization files")
+parser.add_argument("--no-browser", action="store_true", help="Don't open visualization in browser")
+parser.add_argument("--verbose", "-v", action="store_true", help="Print verbose output")
+args = parser.parse_args()
+
+# Import required modules
+try:
+    from asabaal_utils.video_processing.analyze_project_structure import analyze_project_structure
+    from asabaal_utils.video_processing.visualize_project_structure import visualize_project_structure
+    from asabaal_utils.video_processing.visualize_project_structure import generate_visualization_html
+except ImportError as e:
+    print(f"Error importing required modules: {e}")
+    print("Make sure asabaal_utils is installed properly")
+    sys.exit(1)
+
+# Create output directory if needed
+if args.output is None:
+    output_dir = os.path.join(os.path.dirname(args.project_file), "project_visualization")
+else:
+    output_dir = args.output
+os.makedirs(output_dir, exist_ok=True)
+
+print(f"Processing project file: {args.project_file}")
+
+# Step 1: Run the analyzer
+try:
+    print("Analyzing project structure...")
+    with open(args.project_file, 'r', encoding='utf-8') as f:
+        project_data = json.load(f)
+    
+    # Get project file size for display
+    file_size = os.path.getsize(args.project_file) / (1024 * 1024)  # Convert to MB
+    
+    # Create HTML directly instead of relying on the built-in function
+    html_file = os.path.join(output_dir, "project_structure.html")
+    
+    # Extract key information needed for the visualization
+    from asabaal_utils.video_processing.visualize_project_structure import (
+        analyze_project_structure as visualizer_analyze,
+        extract_media_info,
+        extract_timeline_info,
+        build_relationships
+    )
+    
+    # Use the more thorough analysis first
+    analysis_result = analyze_project_structure(args.project_file, output_dir, args.verbose)
+    
+    # Then use the visualizer's analysis function to get the structure needed for D3
+    structure_data = visualizer_analyze(project_data, args.verbose)
+    
+    # Extract additional data for the visualization
+    media_info = extract_media_info(project_data)
+    timeline_info = extract_timeline_info(project_data)
+    relationships = build_relationships(project_data, media_info, timeline_info)
+    
+    # Enhance media information from the analyzer
+    if 'media_pools' in analysis_result and analysis_result['media_pools']:
+        media_items = []
+        # Collect all media items from all pools
+        for pool_key, pool_info in analysis_result['media_pools'].items():
+            media_items.extend(pool_info['items'])
+        
+        # Update media info
+        if media_items:
+            # Group by type
+            by_type = {}
+            for media in media_items:
+                media_type = media.get('type', 'unknown')
+                if media_type not in by_type:
+                    by_type[media_type] = []
+                by_type[media_type].append(media)
+            
+            # Update media info with more complete data
+            media_info = {
+                "total_count": len(media_items),
+                "type_counts": {t: len(items) for t, items in by_type.items()},
+                "by_type": by_type,
+                "all_items": media_items
+            }
+    
+    # Enhance timeline info from the analyzer
+    if 'timeline_data' in analysis_result and analysis_result['timeline_data']:
+        all_tracks = []
+        all_clips = []
+        
+        for timeline_key, timeline_info_data in analysis_result['timeline_data'].items():
+            # Extract tracks
+            for track in timeline_info_data.get('tracks', []):
+                track_info = {
+                    "id": track.get('id', f"track_{track.get('index', 0)}"),
+                    "index": track.get('index', 0),
+                    "type": track.get('type', 'unknown'),
+                    "location": f"tracks[{track.get('index', 0)}]"
+                }
+                all_tracks.append(track_info)
+                
+                # Extract clips from each track
+                for segment in track.get('segments', []):
+                    clip_info = {
+                        "id": segment.get('id', f"clip_{track.get('index', 0)}_{segment.get('index', 0)}"),
+                        "track_id": track_info['id'],
+                        "track_index": track.get('index', 0),
+                        "clip_index": segment.get('index', 0),
+                        "material_id": segment.get('material_id'),
+                        "media_path": segment.get('media_path'),
+                        "timeline_start": segment.get('timeline_start'),
+                        "timeline_duration": segment.get('timeline_duration'),
+                        "location": f"tracks[{track.get('index', 0)}].segments[{segment.get('index', 0)}]"
+                    }
+                    all_clips.append(clip_info)
+        
+        # Update timeline info with more complete data if we found anything
+        if all_tracks or all_clips:
+            # Calculate track type counts
+            track_types = {}
+            for track in all_tracks:
+                track_type = track.get('type', 'unknown')
+                track_types[track_type] = track_types.get(track_type, 0) + 1
+            
+            timeline_info = {
+                "total_tracks": len(all_tracks),
+                "total_clips": len(all_clips),
+                "track_types": track_types,
+                "tracks": all_tracks,
+                "clips": all_clips
+            }
+    
+    # Enhance relationships data with unused media information
+    if 'clip_references' in analysis_result and 'unused_media' in analysis_result:
+        clip_refs = analysis_result['clip_references']
+        unused = analysis_result['unused_media']
+        
+        # Build media-to-clip relationships
+        used_media_ids = set()
+        used_media_paths = set()
+        relationships_list = []
+        
+        for clip_id, media_info_item in clip_refs.items():
+            source = None
+            target = clip_id
+            source_type = None
+            
+            if 'id' in media_info_item and media_info_item['id']:
+                source = media_info_item['id']
+                source_type = 'id'
+                used_media_ids.add(source)
+            elif 'path' in media_info_item and media_info_item['path']:
+                source = media_info_item['path']
+                source_type = 'path'
+                used_media_paths.add(source)
+            
+            if source:
+                relationships_list.append({
+                    "source": source,
+                    "target": target,
+                    "type": "media_to_clip",
+                    "source_type": source_type
+                })
+        
+        # Update relationships with more complete data
+        relationships = {
+            "relationships": relationships_list,
+            "used_media_ids": list(used_media_ids),
+            "used_media_paths": list(used_media_paths),
+            "unused_media": unused
+        }
+    
+    # Enhance the visualization data with the complete analysis
+    visualization_data = {
+        "structure": structure_data.get('structure', {}),
+        "media_info": media_info,
+        "timeline_info": timeline_info,
+        "relationships": relationships
+    }
+    
+    # Generate the HTML
+    print(f"Generating visualization...")
+    generate_visualization_html(
+        project_data,
+        visualization_data,
+        html_file,
+        os.path.basename(args.project_file),
+        file_size
+    )
+    
+    print(f"Visualization created at: {html_file}")
+    
+    # Open in browser if requested
+    if not args.no_browser:
+        try:
+            import webbrowser
+            webbrowser.open(f"file://{os.path.abspath(html_file)}")
+            print("Visualization opened in browser")
+        except Exception as e:
+            print(f"Couldn't open browser automatically: {str(e)}")
+            print(f"Please open {html_file} manually in your browser")
+
+except Exception as e:
+    print(f"Error: {str(e)}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+PYTHON_SCRIPT
+
+# Run the integrated script
+python3 "$TMP_SCRIPT" "$PROJECT_FILE" ${OUTPUT_DIR:+--output "$OUTPUT_DIR"} $NO_BROWSER $VERBOSE
+
+# Clean up
+rm "$TMP_SCRIPT"
+if [ "$CLEANUP_TEMP" -eq 1 ]; then
+  # Only remove temp dir if no error occurred
+  if [ $? -eq 0 ]; then
+    rm -rf "$TEMP_DIR"
+  else
+    echo "Temporary files are in: $TEMP_DIR"
+  fi
+fi

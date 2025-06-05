@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""
+Network port checker utility
+Checks if specific ports are open on localhost or remote hosts
+"""
+# description: Checks if network ports are open and accessible
+# version: 1.0.0
+# category: monitoring
+
+import socket
+import sys
+import argparse
+from typing import List, Tuple
+
+def check_port(host: str, port: int, timeout: float = 3.0) -> bool:
+    """Check if a port is open on the given host"""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(timeout)
+            result = sock.connect_ex((host, port))
+            return result == 0
+    except socket.gaierror:
+        return False
+
+def main():
+    parser = argparse.ArgumentParser(description='Check if network ports are open')
+    parser.add_argument('ports', nargs='+', type=int, help='Port numbers to check')
+    parser.add_argument('--host', default='localhost', help='Host to check (default: localhost)')
+    parser.add_argument('--timeout', type=float, default=3.0, help='Connection timeout in seconds')
+    
+    try:
+        args = parser.parse_args()
+    except SystemExit:
+        print("Usage: port-checker <port1> [port2] [...] [--host HOST] [--timeout SECONDS]")
+        print("Example: port-checker 80 443 22 --host google.com")
+        return
+
+    print(f"🌐 Checking ports on {args.host}")
+    print("=" * 40)
+    
+    open_ports = []
+    closed_ports = []
+    
+    for port in args.ports:
+        print(f"Checking port {port}...", end=" ")
+        if check_port(args.host, port, args.timeout):
+            print("✅ OPEN")
+            open_ports.append(port)
+        else:
+            print("❌ CLOSED")
+            closed_ports.append(port)
+    
+    print("\n📊 Summary")
+    print("-" * 20)
+    print(f"Open ports: {len(open_ports)} - {open_ports}")
+    print(f"Closed ports: {len(closed_ports)} - {closed_ports}")
+
+if __name__ == "__main__":
+    main()

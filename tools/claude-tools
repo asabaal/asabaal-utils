@@ -1,0 +1,208 @@
+#!/bin/bash
+# description: One-command interface to all Claude Tool Integration features
+# version: 1.0.0
+# category: integration
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+show_banner() {
+    echo "🤖 =============================================== 🤖"
+    echo "    CLAUDE TOOL INTEGRATION COMMAND CENTER"
+    echo "🤖 =============================================== 🤖"
+    echo ""
+}
+
+show_status() {
+    echo "📊 SYSTEM STATUS"
+    echo "=================="
+    
+    # Check if services are running
+    if curl -s http://localhost:7000 > /dev/null 2>&1; then
+        echo "✅ Claude Bridge: RUNNING (http://localhost:7000)"
+    else
+        echo "❌ Claude Bridge: STOPPED"
+    fi
+    
+    if curl -s http://localhost:8000 > /dev/null 2>&1; then
+        echo "✅ Converter API: RUNNING (http://localhost:8000)"
+    else
+        echo "❌ Converter API: STOPPED"
+    fi
+    
+    echo ""
+}
+
+show_commands() {
+    echo "🚀 AVAILABLE COMMANDS"
+    echo "====================="
+    echo "  claude-tools start       # Start the complete system"
+    echo "  claude-tools stop        # Stop all services"
+    echo "  claude-tools test        # Test the system"
+    echo "  claude-tools tools       # List all available tools"
+    echo "  claude-tools health      # Check tool health"
+    echo "  claude-tools demo        # Run a demo"
+    echo "  claude-tools status      # Show this status"
+    echo ""
+}
+
+show_quick_access() {
+    echo "⚡ QUICK ACCESS"
+    echo "==============="
+    echo "  🌐 Bridge API:     http://localhost:7000"
+    echo "  📋 Tool List:      http://localhost:7000/tools"
+    echo "  🏥 Health Check:   http://localhost:7000/health"
+    echo "  📚 API Docs:       http://localhost:8000/docs"
+    echo ""
+}
+
+case "${1:-status}" in
+    start)
+        echo "🚀 Starting Claude Tool Integration System..."
+        exec "$SCRIPT_DIR/start_claude_bridge.sh"
+        ;;
+    
+    stop)
+        echo "🛑 Stopping Claude Tool Integration System..."
+        exec "$SCRIPT_DIR/stop_claude_bridge.sh"
+        ;;
+    
+    test)
+        echo "🧪 Testing Claude Tool Integration..."
+        if ! curl -s http://localhost:7000 > /dev/null 2>&1; then
+            echo "❌ Bridge not running. Start with: claude-tools start"
+            exit 1
+        fi
+        
+        echo "✅ Bridge is running"
+        echo "🔄 Testing tool discovery..."
+        tool_count=$(curl -s http://localhost:7000/tools | python -c "import sys, json; print(len(json.load(sys.stdin)['tools']))" 2>/dev/null || echo "0")
+        echo "📊 Found $tool_count tools"
+        
+        echo "🧪 Running client test..."
+        cd "$SCRIPT_DIR" && python claude_client.py
+        ;;
+    
+    tools)
+        echo "📋 Fetching available tools..."
+        if curl -s http://localhost:7000 > /dev/null 2>&1; then
+            curl -s http://localhost:7000/tools | python -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    tools = data['tools']
+    categories = {}
+    for tool in tools:
+        cat = tool.get('category', 'other')
+        if cat not in categories:
+            categories[cat] = []
+        categories[cat].append(tool)
+    
+    print(f'📊 Total Tools: {len(tools)}')
+    print('=' * 50)
+    for category, cat_tools in categories.items():
+        print(f'\n📂 {category.upper()} ({len(cat_tools)} tools)')
+        print('-' * 40)
+        for tool in cat_tools:
+            status = '✅' if tool['status'] == 'active' else '❌'
+            print(f'  {status} {tool[\"name\"]:<20} - {tool[\"description\"][:50]}...')
+except:
+    print('❌ Failed to parse tools data')
+"
+        else
+            echo "❌ Bridge not running. Start with: claude-tools start"
+        fi
+        ;;
+    
+    health)
+        echo "🏥 Checking system health..."
+        if curl -s http://localhost:7000 > /dev/null 2>&1; then
+            curl -s http://localhost:7000/health | python -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(f'🌡️  Overall Health: {data[\"overall_health\"].upper()}')
+    print(f'✅ Healthy Tools: {data[\"healthy_tools\"]}')
+    print(f'❌ Unhealthy Tools: {data[\"unhealthy_tools\"]}')
+    print(f'📊 Total Tools: {data[\"total_tools\"]}')
+except:
+    print('❌ Failed to parse health data')
+"
+        else
+            echo "❌ Bridge not running. Start with: claude-tools start"
+        fi
+        ;;
+    
+    demo)
+        echo "🎪 Running Claude Tool Integration Demo..."
+        if ! curl -s http://localhost:7000 > /dev/null 2>&1; then
+            echo "❌ Bridge not running. Starting it first..."
+            "$SCRIPT_DIR/start_claude_bridge.sh" &
+            echo "⏳ Waiting for bridge to start..."
+            sleep 5
+        fi
+        
+        echo ""
+        echo "🔍 Demo 1: Document Analysis"
+        echo "============================="
+        curl -s -X POST http://localhost:7000/execute \
+            -H "Content-Type: application/json" \
+            -d '{"tool_name": "document_analyzer", "parameters": {"text": "This is a demo document for Claude Tool Integration! It has multiple sentences and shows how Claude can analyze text.", "content_type": "txt"}}' | \
+            python -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    if data['success']:
+        result = data['result']['data']
+        print(f'📊 Word Count: {result[\"basic_stats\"][\"word_count\"]}')
+        print(f'📖 Reading Level: {result[\"readability\"][\"reading_level\"]}')
+        print(f'⏱️  Execution Time: {data[\"execution_time_ms\"]:.1f}ms')
+    else:
+        print(f'❌ Error: {data[\"message\"]}')
+except Exception as e:
+    print(f'❌ Demo failed: {e}')
+"
+        
+        echo ""
+        echo "🔄 Demo 2: Format Conversion"
+        echo "============================"
+        curl -s -X POST http://localhost:7000/execute \
+            -H "Content-Type: application/json" \
+            -d '{"tool_name": "format_converter", "parameters": {"content": "name,age,city\nAlice,25,NYC\nBob,30,LA", "from_format": "csv", "to_format": "json"}}' | \
+            python -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    if data['success']:
+        # Handle nested data structure
+        result_data = data['result']
+        if 'data' in result_data:
+            conversion_data = result_data['data']
+        else:
+            conversion_data = result_data
+        
+        print(f'✅ Converted CSV to JSON successfully')
+        if 'conversion_info' in conversion_data:
+            info = conversion_data['conversion_info']
+            print(f'📄 Original size: {info[\"original_size_chars\"]} chars')
+            print(f'📄 Converted size: {info[\"converted_size_chars\"]} chars')
+        print(f'⏱️  Execution Time: {data[\"execution_time_ms\"]:.1f}ms')
+    else:
+        print(f'❌ Error: {data[\"message\"]}')
+except Exception as e:
+    print(f'❌ Demo failed: {e}')
+"
+        
+        echo ""
+        echo "🎉 Demo complete! Claude can now use all your tools instantly!"
+        ;;
+    
+    status|*)
+        show_banner
+        show_status
+        show_commands
+        show_quick_access
+        echo "💡 TIP: Run 'claude-tools start' to begin, then 'claude-tools demo' to see it in action!"
+        echo ""
+        ;;
+esac

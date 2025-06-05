@@ -21,39 +21,47 @@ import math
 from collections import defaultdict
 import base64
 
-def visualize_project_structure(project_file: str, output_dir: Optional[str] = None, 
-                             open_browser: bool = True, verbose: bool = False):
+def visualize_project_structure(input_file: str, output_dir: Optional[str] = None, 
+                             open_browser: bool = True, verbose: bool = False,
+                             is_analysis_file: bool = False):
     """
     Create an interactive visualization of a CapCut project structure.
     
     Args:
-        project_file: Path to the CapCut project file
+        input_file: Path to the CapCut project file or analysis JSON file
         output_dir: Directory to save visualization files
         open_browser: Whether to open the visualization in a browser
         verbose: Whether to print verbose output
+        is_analysis_file: Whether the input file is an analysis JSON (vs raw project file)
     """
-    print(f"Analyzing project file: {project_file}")
+    print(f"Processing input file: {input_file}")
     
     # Create output directory if needed
     if output_dir is None:
-        output_dir = os.path.join(os.path.dirname(project_file), "project_visualization")
+        output_dir = os.path.join(os.path.dirname(input_file), "project_visualization")
     os.makedirs(output_dir, exist_ok=True)
     
-    # Load the project data
+    # Load the input file
     try:
-        with open(project_file, 'r', encoding='utf-8') as f:
-            project_data = json.load(f)
-            print("Project file loaded successfully!")
+        with open(input_file, 'r', encoding='utf-8') as f:
+            input_data = json.load(f)
+            print("Input file loaded successfully!")
     except Exception as e:
-        print(f"Error loading project file: {str(e)}")
+        print(f"Error loading input file: {str(e)}")
         sys.exit(1)
     
-    # Get project file size for display
-    file_size = os.path.getsize(project_file) / (1024 * 1024)  # Convert to MB
+    # Get file size for display
+    file_size = os.path.getsize(input_file) / (1024 * 1024)  # Convert to MB
     
-    # Analyze the project structure
-    print("Analyzing project structure...")
-    structure_data = analyze_project_structure(project_data, verbose)
+    # Process data based on file type
+    if is_analysis_file:
+        print("Processing analysis data...")
+        project_data = None  # We don't have raw project data
+        structure_data = process_analysis_data(input_data, verbose)
+    else:
+        print("Analyzing project structure...")
+        project_data = input_data
+        structure_data = analyze_project_structure(project_data, verbose)
     
     # Build visualization assets
     asset_dir = os.path.join(output_dir, "assets")
@@ -68,7 +76,7 @@ def visualize_project_structure(project_file: str, output_dir: Optional[str] = N
         project_data,
         structure_data,
         html_file,
-        os.path.basename(project_file),
+        os.path.basename(input_file),
         file_size
     )
     
@@ -82,6 +90,178 @@ def visualize_project_structure(project_file: str, output_dir: Optional[str] = N
         except Exception as e:
             print(f"Couldn't open browser automatically: {str(e)}")
             print(f"Please open {html_file} manually in your browser")
+
+def process_analysis_data(analysis_data: Dict[str, Any], verbose: bool = False) -> Dict[str, Any]:
+    """
+    Process data from an analysis JSON file for visualization.
+    
+    Args:
+        analysis_data: The analysis data from project_structure_analysis.json
+        verbose: Whether to print verbose output
+        
+    Returns:
+        Dictionary with processed structure data for visualization
+    """
+    if verbose:
+        print("Converting analysis data to visualization format...")
+    
+    # Create a tree structure for visualization
+    top_level = {
+        "name": "Project Root",
+        "children": []
+    }
+    
+    # Add top-level keys from the analysis
+    if "top_level_keys" in analysis_data:
+        for key in analysis_data["top_level_keys"]:
+            node = {
+                "name": key,
+                "type": "object",
+                "size": 1  # Default size
+            }
+            top_level["children"].append(node)
+    
+    # Process media information
+    media_info = {
+        "total_count": 0,
+        "type_counts": {},
+        "by_type": {},
+        "all_items": []
+    }
+    
+    # Process media pools
+    if "media_pools" in analysis_data:
+        all_media_items = []
+        by_type = defaultdict(list)
+        type_counts = defaultdict(int)
+        
+        # Collect all media items from all pools
+        for pool_key, pool_data in analysis_data["media_pools"].items():
+            if "items" in pool_data:
+                for item in pool_data["items"]:
+                    # Ensure each item has required fields
+                    media_item = {
+                        "id": item.get("id", f"media_{len(all_media_items)}"),
+                        "path": item.get("path", "unknown"),
+                        "name": item.get("name", os.path.basename(item.get("path", "unknown"))),
+                        "type": item.get("type", "unknown"),
+                        "duration": item.get("duration", None),
+                        "location": pool_key
+                    }
+                    
+                    all_media_items.append(media_item)
+                    by_type[media_item["type"]].append(media_item)
+                    type_counts[media_item["type"]] += 1
+        
+        media_info["all_items"] = all_media_items
+        media_info["by_type"] = dict(by_type)
+        media_info["type_counts"] = dict(type_counts)
+        media_info["total_count"] = len(all_media_items)
+    
+    # Process timeline information
+    timeline_info = {
+        "total_tracks": 0,
+        "total_clips": 0,
+        "track_types": {},
+        "tracks": [],
+        "clips": []
+    }
+    
+    # Process timeline data
+    if "timeline_data" in analysis_data:
+        tracks = []
+        clips = []
+        track_types = defaultdict(int)
+        
+        # Process all timeline sections
+        for timeline_key, timeline_data in analysis_data["timeline_data"].items():
+            if "tracks" in timeline_data:
+                for track in timeline_data["tracks"]:
+                    # Create track info
+                    track_info = {
+                        "id": track.get("index", f"track_{len(tracks)}"),
+                        "index": track.get("index", len(tracks)),
+                        "type": track.get("type", "unknown"),
+                        "location": f"{timeline_key}.tracks[{track.get('index', len(tracks))}]"
+                    }
+                    
+                    tracks.append(track_info)
+                    track_types[track_info["type"]] += 1
+                    
+                    # Process clips/segments in this track
+                    if "segments" in track:
+                        for segment in track["segments"]:
+                            # Create clip info
+                            clip_info = {
+                                "id": segment.get("index", f"clip_{track_info['index']}_{len(clips)}"),
+                                "track_id": track_info["id"],
+                                "track_index": track_info["index"],
+                                "clip_index": segment.get("index", len(clips)),
+                                "material_id": segment.get("material_id", None),
+                                "media_path": segment.get("media_path", None),
+                                "timeline_start": segment.get("timeline_start", 0),
+                                "timeline_duration": segment.get("timeline_duration", 0),
+                                "location": f"{timeline_key}.tracks[{track_info['index']}].segments[{segment.get('index', len(clips))}]"
+                            }
+                            
+                            clips.append(clip_info)
+        
+        timeline_info["tracks"] = tracks
+        timeline_info["clips"] = clips
+        timeline_info["track_types"] = dict(track_types)
+        timeline_info["total_tracks"] = len(tracks)
+        timeline_info["total_clips"] = len(clips)
+    
+    # Process relationships
+    relationships = {
+        "relationships": [],
+        "used_media_ids": [],
+        "used_media_paths": [],
+        "unused_media": []
+    }
+    
+    # Process clip references to build relationships
+    if "clip_references" in analysis_data:
+        clip_refs = []
+        used_media_ids = set()
+        used_media_paths = set()
+        
+        for clip_id, media_info_item in analysis_data["clip_references"].items():
+            source = None
+            source_type = None
+            
+            # Check for material ID or path
+            if "id" in media_info_item and media_info_item["id"]:
+                source = media_info_item["id"]
+                source_type = "id"
+                used_media_ids.add(source)
+            elif "path" in media_info_item and media_info_item["path"]:
+                source = media_info_item["path"]
+                source_type = "path"
+                used_media_paths.add(source)
+            
+            if source:
+                clip_refs.append({
+                    "source": source,
+                    "target": clip_id,
+                    "type": "media_to_clip",
+                    "source_type": source_type
+                })
+        
+        relationships["relationships"] = clip_refs
+        relationships["used_media_ids"] = list(used_media_ids)
+        relationships["used_media_paths"] = list(used_media_paths)
+    
+    # Process unused media
+    if "unused_media" in analysis_data:
+        relationships["unused_media"] = analysis_data["unused_media"]
+    
+    return {
+        "structure": top_level,
+        "media_info": media_info,
+        "timeline_info": timeline_info,
+        "relationships": relationships
+    }
 
 def analyze_project_structure(project_data: Dict[str, Any], verbose: bool = False) -> Dict[str, Any]:
     """
@@ -498,7 +678,7 @@ def copy_visualization_assets(asset_dir: str):
     # We'll embed the required libraries in the HTML
     pass
 
-def generate_visualization_html(project_data: Dict[str, Any],
+def generate_visualization_html(project_data: Optional[Dict[str, Any]],
                              structure_data: Dict[str, Any],
                              output_file: str,
                              project_filename: str,
@@ -507,7 +687,7 @@ def generate_visualization_html(project_data: Dict[str, Any],
     Generate the visualization HTML file.
     
     Args:
-        project_data: The project data
+        project_data: The project data (may be None if using analysis file)
         structure_data: Project structure analysis data
         output_file: Output HTML file path
         project_filename: Project file name
@@ -518,6 +698,11 @@ def generate_visualization_html(project_data: Dict[str, Any],
     media_json = json.dumps(structure_data['media_info'])
     timeline_json = json.dumps(structure_data['timeline_info'])
     relationships_json = json.dumps(structure_data['relationships'])
+    
+    # For raw project data (needed for search functionality)
+    raw_project_data = "null"
+    if project_data:
+        raw_project_data = json.dumps(project_data)
     
     # Generate HTML
     html = f"""<!DOCTYPE html>
@@ -1037,7 +1222,10 @@ def generate_visualization_html(project_data: Dict[str, Any],
         const relationshipInfo = {relationships_json};
         
         // Raw project data for search and exploration
-        const rawProjectData = structureData;
+        const rawProjectData = {raw_project_data};
+        
+        // If raw project data is not available (analysis file mode), use structure data
+        const searchableData = rawProjectData || structureData;
         
         // Initialize visualizations when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {{
@@ -1190,7 +1378,7 @@ def generate_visualization_html(project_data: Dict[str, Any],
                 // Try to find the actual value in the raw data
                 try {{
                     const pathParts = pathString.split('.');
-                    let value = rawProjectData;
+                    let value = searchableData;
                     
                     for (const part of pathParts) {{
                         if (part.includes('[')) {{
@@ -1519,7 +1707,7 @@ def generate_visualization_html(project_data: Dict[str, Any],
                 const searchTerm = query.trim().toLowerCase();
                 
                 // Perform search
-                const results = searchInObject(rawProjectData, searchTerm);
+                const results = searchInObject(searchableData, searchTerm);
                 
                 // Display results
                 if (results.length === 0) {{
@@ -1809,18 +1997,27 @@ def generate_visualization_html(project_data: Dict[str, Any],
 
 def main():
     parser = argparse.ArgumentParser(description="Interactive visualization of CapCut project structure")
-    parser.add_argument("project_file", help="Path to the CapCut project file (usually draft_content.json)")
+    parser.add_argument("input_file", help="Path to the CapCut project file (draft_content.json) or analysis file (project_structure_analysis.json)")
     parser.add_argument("--output", "-o", help="Directory to save visualization files")
     parser.add_argument("--no-browser", action="store_true", help="Don't open visualization in browser")
     parser.add_argument("--verbose", "-v", action="store_true", help="Print verbose output")
+    parser.add_argument("--analysis", "-a", action="store_true", 
+                        help="Specify if the input file is an analysis JSON file created by analyze_project_structure.py")
     
     args = parser.parse_args()
     
+    # Auto-detect if it's an analysis file by name if not explicitly specified
+    is_analysis_file = args.analysis
+    if not is_analysis_file and "project_structure_analysis" in args.input_file:
+        print("Detected analysis file based on filename. Use --analysis flag to confirm.")
+        is_analysis_file = True
+    
     visualize_project_structure(
-        args.project_file, 
+        args.input_file, 
         args.output,
         not args.no_browser,
-        args.verbose
+        args.verbose,
+        is_analysis_file
     )
 
 if __name__ == "__main__":
