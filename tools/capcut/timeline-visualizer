@@ -1,0 +1,27 @@
+#!/bin/bash
+# timeline-visualizer - Analyze and visualize CapCut project timeline
+#
+# Description: Analyzes video coverage in a CapCut project and creates visualizations
+# Version: 1.0.0
+# Category: video
+# Usage: timeline-visualizer all|analyze|visualize [--capcut <project.json>] [--output-dir <dir>] [--generate-dashboard]
+
+set -e
+
+# Detect script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Install required Python package if necessary
+if ! python3 -c "import asabaal_utils" &>/dev/null; then
+    echo "Installing asabaal_utils package..."
+    pip install -e "${REPO_ROOT}" >/dev/null
+fi
+
+# Create entry point in PATH to run the CLI command
+python3 -c "
+import sys
+from asabaal_utils.video_processing.cli import capcut_timeline_cli
+sys.argv = ['capcut-timeline'] + sys.argv[1:]
+capcut_timeline_cli()
+" "$@"

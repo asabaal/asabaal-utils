@@ -1,0 +1,125 @@
+#!/bin/bash
+# capcut-analyzer - Interactive dashboard for CapCut project analysis
+#
+# Description: Analyzes CapCut projects with focus on media usage and unused assets
+# Version: 1.0.0
+# Category: video
+# Usage: capcut-analyzer [project_structure_analysis.json] [--port PORT]
+
+set -e
+
+# Parse arguments
+PROJECT_FILE=""
+PORT="3000"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --port)
+      PORT="$2"
+      shift 2
+      ;;
+    --help|-h)
+      echo "Usage: capcut-analyzer [project_structure_analysis.json] [--port PORT]"
+      echo ""
+      echo "Interactive dashboard for CapCut project analysis."
+      echo ""
+      echo "Options:"
+      echo "  --port PORT    Specify the port for the web server (default: 3000)"
+      echo "  --help, -h     Show this help message"
+      echo ""
+      echo "Examples:"
+      echo "  capcut-analyzer"
+      echo "  capcut-analyzer path/to/project_structure_analysis.json"
+      echo "  capcut-analyzer --port 8080"
+      exit 0
+      ;;
+    *)
+      if [ -z "$PROJECT_FILE" ]; then
+        PROJECT_FILE="$1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+# Detect script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UI_DIR="${SCRIPT_DIR}/capcut-analyzer-ui"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Check if the UI directory exists
+if [ ! -d "${UI_DIR}" ]; then
+  echo "Error: CapCut Analyzer UI directory not found at ${UI_DIR}"
+  exit 1
+fi
+
+# Check if there's a dist or build directory, if not, build the app
+if [ ! -d "${UI_DIR}/dist" ] && [ ! -d "${UI_DIR}/build" ]; then
+  echo "Building CapCut Analyzer UI..."
+  cd "${UI_DIR}"
+  
+  # Check if Node.js is installed
+  if ! command -v node &> /dev/null; then
+    echo "Error: Node.js is required to build the CapCut Analyzer UI"
+    echo "Please install Node.js and try again"
+    exit 1
+  fi
+  
+  # Check if npm is installed
+  if ! command -v npm &> /dev/null; then
+    echo "Error: npm is required to build the CapCut Analyzer UI"
+    echo "Please install npm and try again"
+    exit 1
+  fi
+  
+  # Build the app
+  npm install
+  npm run build
+  
+  # Check if build was successful
+  if [ ! -d "${UI_DIR}/dist" ] && [ ! -d "${UI_DIR}/build" ]; then
+    echo "Error: Failed to build the CapCut Analyzer UI"
+    exit 1
+  fi
+  
+  echo "Build completed successfully!"
+fi
+
+# Determine which directory to serve
+SERVE_DIR="${UI_DIR}/dist"
+if [ ! -d "${SERVE_DIR}" ]; then
+  SERVE_DIR="${UI_DIR}/build"
+fi
+
+# If a project file was specified, copy it to the public directory
+if [ -n "${PROJECT_FILE}" ] && [ -f "${PROJECT_FILE}" ]; then
+  # Create public directory if it doesn't exist
+  mkdir -p "${SERVE_DIR}/public"
+  
+  # Copy the file
+  cp "${PROJECT_FILE}" "${SERVE_DIR}/public/project_data.json"
+  echo "Project file copied to ${SERVE_DIR}/public/project_data.json"
+fi
+
+# Start a simple HTTP server
+echo "Starting CapCut Analyzer UI server on port ${PORT}..."
+echo "Open your browser and navigate to http://localhost:${PORT}"
+echo "Press Ctrl+C to stop the server"
+
+# Choose the appropriate HTTP server based on what's available
+if command -v python3 &> /dev/null; then
+  # Use Python 3's built-in HTTP server
+  cd "${SERVE_DIR}"
+  python3 -m http.server "${PORT}"
+elif command -v python &> /dev/null; then
+  # Use Python 2's SimpleHTTPServer
+  cd "${SERVE_DIR}"
+  python -m SimpleHTTPServer "${PORT}"
+elif command -v npx &> /dev/null; then
+  # Use serve package with npx
+  npx serve -s "${SERVE_DIR}" -p "${PORT}"
+else
+  echo "Error: No suitable HTTP server found."
+  echo "Please install Python 3, Python 2, or npx (Node.js) to run the server."
+  exit 1
+fi

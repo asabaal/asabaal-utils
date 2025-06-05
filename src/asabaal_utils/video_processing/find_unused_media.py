@@ -11,9 +11,114 @@ import json
 import os
 import argparse
 import sys
-from typing import Dict, List, Set, Tuple, Any
+from typing import Dict, List, Set, Tuple, Any, Optional
 from collections import defaultdict
 import pprint
+
+def find_project_files(directory: str) -> List[str]:
+    """
+    Find all potential CapCut project files in a directory.
+    
+    Args:
+        directory: Directory to search
+        
+    Returns:
+        List of paths to potential project files
+    """
+    project_files = []
+    
+    # Look for common CapCut project file names
+    common_names = [
+        "draft_content.json",
+        "project.json",
+        "draft_meta.json",
+        "project_meta.json"
+    ]
+    
+    for root, _, files in os.walk(directory):
+        for filename in files:
+            if filename in common_names or (filename.endswith('.json') and 'project' in filename.lower()):
+                full_path = os.path.join(root, filename)
+                # Verify it looks like a CapCut project
+                if is_likely_capcut_project(full_path):
+                    project_files.append(full_path)
+    
+    return project_files
+
+
+def is_likely_capcut_project(file_path: str) -> bool:
+    """
+    Check if a file is likely to be a CapCut project file.
+    
+    Args:
+        file_path: Path to the file to check
+        
+    Returns:
+        True if the file is likely a CapCut project, False otherwise
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+            # Look for common CapCut project indicators
+            indicators = [
+                'materials' in data,
+                'tracks' in data,
+                'timeline' in data,
+                'mediaPool' in data,
+                'resources' in data,
+                'assets' in data
+            ]
+            
+            # If at least one indicator is found, it might be a CapCut project
+            return any(indicators)
+    except Exception:
+        # If we can't read the file or it's not valid JSON, it's not a project file
+        return False
+
+
+def process_projects(project_paths: List[str], output_dir: Optional[str], 
+                    generate_html: bool, verbose: bool) -> List[Dict[str, Any]]:
+    """
+    Process multiple CapCut projects.
+    
+    Args:
+        project_paths: List of paths to project files
+        output_dir: Base directory for outputs
+        generate_html: Whether to generate HTML reports
+        verbose: Whether to print verbose output
+        
+    Returns:
+        List of analysis results
+    """
+    results = []
+    
+    for project_path in project_paths:
+        print(f"\n{'-' * 80}")
+        print(f"Processing project: {project_path}")
+        print(f"{'-' * 80}")
+        
+        # Create project-specific output directory if needed
+        if output_dir is not None:
+            project_name = os.path.basename(os.path.dirname(project_path))
+            project_output_dir = os.path.join(output_dir, project_name)
+        else:
+            project_output_dir = None
+        
+        # Process the project
+        result = find_unused_media(
+            json_file_path=project_path,
+            output_file=project_output_dir if project_output_dir else None,
+            verbose=verbose
+        )
+        
+        results.append({
+            'project_path': project_path,
+            'result': result
+        })
+    
+    return results
+
 
 def find_unused_media(json_file_path: str, output_file: str = None, verbose: bool = False) -> Dict[str, Any]:
     """

@@ -1,0 +1,35 @@
+#!/bin/bash
+# description: Creates timestamped backups of files or directories
+# version: 2.1.0
+# category: automation
+# usage: quick-backup <file_or_directory>
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: quick-backup <file_or_directory>"
+    echo "Creates a timestamped backup copy"
+    exit 1
+fi
+
+SOURCE="$1"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+if [ ! -e "$SOURCE" ]; then
+    echo "Error: '$SOURCE' does not exist"
+    exit 1
+fi
+
+if [ -d "$SOURCE" ]; then
+    BACKUP_NAME="${SOURCE%/}_backup_${TIMESTAMP}"
+    cp -r "$SOURCE" "$BACKUP_NAME"
+    echo "📁 Directory backup created: $BACKUP_NAME"
+else
+    EXTENSION="${SOURCE##*.}"
+    BASENAME="${SOURCE%.*}"
+    BACKUP_NAME="${BASENAME}_backup_${TIMESTAMP}.${EXTENSION}"
+    cp "$SOURCE" "$BACKUP_NAME"
+    echo "📄 File backup created: $BACKUP_NAME"
+fi
+
+echo "✅ Backup complete!"

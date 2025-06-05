@@ -1,0 +1,64 @@
+#!/bin/bash
+# description: Organizes files in a directory by file type
+# version: 1.0.0
+# category: automation
+# usage: file-organizer <directory>
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: file-organizer <directory>"
+    echo "Organizes files by creating subdirectories for each file type"
+    exit 1
+fi
+
+TARGET_DIR="$1"
+
+if [ ! -d "$TARGET_DIR" ]; then
+    echo "Error: Directory '$TARGET_DIR' does not exist"
+    exit 1
+fi
+
+echo "🗂️  Organizing files in: $TARGET_DIR"
+
+cd "$TARGET_DIR"
+
+# Create subdirectories for common file types
+declare -A extensions=(
+    ["images"]="jpg jpeg png gif bmp svg webp"
+    ["documents"]="pdf doc docx txt md rtf"
+    ["videos"]="mp4 avi mkv mov wmv"
+    ["audio"]="mp3 wav flac aac ogg"
+    ["archives"]="zip rar 7z tar gz"
+    ["scripts"]="sh py js ts"
+)
+
+for category in "${!extensions[@]}"; do
+    mkdir -p "$category"
+done
+
+# Move files to appropriate directories
+for file in *; do
+    if [ -f "$file" ]; then
+        extension="${file##*.}"
+        extension=$(echo "$extension" | tr '[:upper:]' '[:lower:]')
+        
+        moved=false
+        for category in "${!extensions[@]}"; do
+            if [[ " ${extensions[$category]} " =~ " $extension " ]]; then
+                mv "$file" "$category/"
+                echo "  📁 $file → $category/"
+                moved=true
+                break
+            fi
+        done
+        
+        if [ "$moved" = false ]; then
+            mkdir -p "other"
+            mv "$file" "other/"
+            echo "  📄 $file → other/"
+        fi
+    fi
+done
+
+echo "✅ File organization complete!"

@@ -1,0 +1,118 @@
+.media-explorer .page-title {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 0.75rem;
+}
+
+/* Media list */
+.media-explorer .media-list {
+  max-height: 650px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.media-explorer .media-item {
+  padding: 10px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.media-explorer .media-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.media-explorer .media-item.selected {
+  background-color: rgba(52, 152, 219, 0.2);
+  border: 1px solid var(--highlight-color);
+}
+
+.media-explorer .media-item.unused {
+  border-left: 4px solid var(--unused-color);
+}
+
+.media-explorer .media-item.used {
+  border-left: 4px solid var(--used-color);
+}
+
+/* Media details */
+.media-explorer .media-details {
+  font-size: 14px;
+}
+
+.media-explorer .details-row {
+  display: flex;
+  margin-bottom: 10px;
+  border-bottom: 1px dotted var(--card-border);
+  padding-bottom: 10px;
+}
+
+.media-explorer .details-label {
+  font-weight: bold;
+  width: 100px;
+  color: #aaa;
+}
+
+.media-explorer .details-value {
+  flex: 1;
+}
+
+.media-explorer .details-value code {
+  background-color: #333;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* Stats section */
+.media-explorer .stats-row {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.media-explorer .stats-label {
+  font-weight: bold;
+  width: 120px;
+  color: #aaa;
+}
+
+.media-explorer .stats-value {
+  flex: 1;
+}
+
+/* Media type icons */
+.media-explorer .media-type-video {
+  color: var(--video-color);
+}
+
+.media-explorer .media-type-audio {
+  color: var(--audio-color);
+}
+
+.media-explorer .media-type-image {
+  color: var(--image-color);
+}
+
+/* Scrollbar styling for the media list */
+.media-explorer .media-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.media-explorer .media-list::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 4px;
+}
+
+.media-explorer .media-list::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.media-explorer .media-list::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
