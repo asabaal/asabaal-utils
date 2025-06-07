@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Rendering Debug Report</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: linear-gradient(145deg, #2a2a2a, #1f1f1f); 
+            padding: 30px; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border-radius: 15px;
+            border: 1px solid #444;
+        }
+        h1 { 
+            color: #00ff88; 
+            border-bottom: 3px solid #00ff88; 
+            padding-bottom: 15px; 
+            text-shadow: 0 0 10px rgba(0,255,136,0.3);
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        h2 { 
+            color: #88ddff; 
+            margin-top: 40px;
+            font-size: 1.8em;
+            text-shadow: 0 0 5px rgba(136,221,255,0.3);
+        }
+        h3 {
+            color: #ffaa44;
+            margin-top: 25px;
+            font-size: 1.3em;
+        }
+        .test-case { 
+            margin: 25px 0; 
+            padding: 20px; 
+            border: 1px solid #555; 
+            border-radius: 10px; 
+            background: linear-gradient(145deg, #333, #2a2a2a);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .issue { 
+            background: linear-gradient(145deg, #3a1f1f, #2a1515); 
+            border-left: 5px solid #ff4444; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px;
+            color: #ffcccc;
+        }
+        .success { 
+            background: linear-gradient(145deg, #1f3a1f, #15251a); 
+            border-left: 5px solid #44ff44; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px;
+            color: #ccffcc;
+        }
+        .code { 
+            background: #1a1a1a; 
+            padding: 15px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            border: 1px solid #444;
+            color: #88ff88;
+            font-size: 0.9em;
+        }
+        img { 
+            max-width: 100%; 
+            height: auto; 
+            margin: 15px 0; 
+            border: 2px solid #555; 
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .metrics { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 15px; 
+            margin: 20px 0;
+        }
+        .metric { 
+            background: linear-gradient(145deg, #2a4a6a, #1f3a5a); 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            border: 1px solid #4a6a8a;
+            color: #ccddff;
+        }
+        .metric strong {
+            color: #88ddff;
+            font-size: 1.1em;
+        }
+        .recommendation { 
+            background: linear-gradient(145deg, #4a3a1a, #3a2a0f); 
+            border: 1px solid #ffaa44; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 25px 0;
+            color: #ffddaa;
+        }
+        .status-good { color: #44ff44; font-weight: bold; }
+        .status-bad { color: #ff4444; font-weight: bold; }
+        .highlight { color: #ffff44; font-weight: bold; }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Text Rendering Debug Report</h1>
+        <p>Generated: 2025-06-07 09:02:25</p>
+        <p>Resolution: 1920 x 1080</p>
+        
+        <h2>Summary</h2>
+        <img src="summary.png" alt="Summary">
+        
+        <h2>Test Cases</h2>
+
+        <div class="test-case">
+            <h3>✅ Test: test_0_0</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>48px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>255px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>53px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>150px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_0_0_debug.png" alt="test_0_0">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_0_1</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>72px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>374px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>72px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>404px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_0_1_debug.png" alt="test_0_1">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_0_2</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>96px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>494px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>90px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>640px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_0_2_debug.png" alt="test_0_2">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_0_3</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>120px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>613px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>109px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>386px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_0_3_debug.png" alt="test_0_3">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_1_0</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>48px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>901px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>62px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>150px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_1_0_debug.png" alt="test_1_0">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_1_1</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>72px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>1344px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>86px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>397px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_1_1_debug.png" alt="test_1_1">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_1_2</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>96px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>1786px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>109px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>621px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_1_2_debug.png" alt="test_1_2">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_1_3</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>120px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>2229px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>132px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>374px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_1_3_debug.png" alt="test_1_3">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_2_0</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>48px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>2040px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>62px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>150px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_2_0_debug.png" alt="test_2_0">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_2_1</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>72px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>3052px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>86px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>397px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_2_1_debug.png" alt="test_2_1">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_2_2</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>96px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>4064px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>109px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>621px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_2_2_debug.png" alt="test_2_2">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_2_3</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>120px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>5076px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>132px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>374px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_2_3_debug.png" alt="test_2_3">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_3_0</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>48px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>1279px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>62px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>150px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_3_0_debug.png" alt="test_3_0">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_3_1</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>72px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>1909px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>86px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>397px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_3_1_debug.png" alt="test_3_1">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_3_2</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>96px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>2540px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>109px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>621px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_3_2_debug.png" alt="test_3_2">
+        </div>
+
+        <div class="test-case">
+            <h3>✅ Test: test_3_3</h3>
+            <div class="metrics">
+                <div class="metric">
+                    <strong>Font Size</strong><br>120px
+                </div>
+                <div class="metric">
+                    <strong>Text Width</strong><br>3171px
+                </div>
+                <div class="metric">
+                    <strong>Text Height</strong><br>132px
+                </div>
+                <div class="metric">
+                    <strong>Y Position</strong><br>374px
+                </div>
+            </div>
+            <div class="success">
+                No issues detected - text fits within screen bounds
+            </div>
+            <img src="test_3_3_debug.png" alt="test_3_3">
+        </div>
+
+        <h2>Debugging Code</h2>
+        <div class="code">
+# Key functions to investigate:
+# 1. TextRenderer._calculate_vertical_position()
+# 2. TextRenderer.render_lyric_line() 
+# 3. TextRenderer._composite_image()
+# 4. VideoCompositor._blend_layer()
+
+# Enable detailed logging:
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Test specific position:
+renderer = TextRenderer((1920, 1080))
+style = TextStyle(font_size=72, vertical_position="center")
+y_pos = renderer._calculate_vertical_position(100, style, 0.0, None)
+print(f"Calculated Y position: {y_pos}")
+        </div>
+        
+        <div class="recommendation">
+            <h3>🎯 Next Steps</h3>
+            <ol>
+                <li>Check if the issue happens with specific fonts or all fonts</li>
+                <li>Test with different video resolutions (720p, 1080p, 4K)</li>
+                <li>Add logging to track exact pixel positions during rendering</li>
+                <li>Verify that video encoding isn't cropping the output</li>
+                <li>Test with transparent background vs. video background</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
