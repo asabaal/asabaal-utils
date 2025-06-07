@@ -1460,6 +1460,10 @@ Examples:
                         help="Output video file path")
     parser.add_argument("--background",
                         help="Path to background video file (optional)")
+    parser.add_argument("--background-clips-dir",
+                        help="Path to directory of background video clips for beat-based switching")
+    parser.add_argument("--text-only", action="store_true",
+                        help="Generate transparent text overlay only (no background)")
     parser.add_argument("--template", default="default",
                         help="Template name or path to template JSON (default: 'default')")
     parser.add_argument("--resolution", default="1920x1080",
@@ -1537,6 +1541,10 @@ Examples:
         print(f"FPS: {args.fps}")
         if args.background:
             print(f"Background: {args.background}")
+        elif args.background_clips_dir:
+            print(f"Background clips directory: {args.background_clips_dir}")
+        elif args.text_only:
+            print("Mode: Text overlay only (transparent background)")
         print(f"Template: {args.template}")
         print()
         
@@ -1546,8 +1554,10 @@ Examples:
             lyrics_path=args.lyrics,
             output_path=args.output,
             background_video=args.background,
+            background_clips_dir=args.background_clips_dir,
             template=args.template,
-            custom_config=custom_config if custom_config else None
+            custom_config=custom_config if custom_config else None,
+            text_only_output=args.text_only
         )
         
         print(f"\n✅ Lyric video created successfully: {output_path}")

@@ -7,6 +7,8 @@ import logging
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import cv2
+from .font_loader import EnhancedFontLoader
+from .font_generator import BespokeFontGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,12 @@ class FontManager:
     
     def __init__(self):
         self.font_cache: Dict[str, ImageFont.FreeTypeFont] = {}
+        self.font_loader = EnhancedFontLoader()
+        self.font_generator = BespokeFontGenerator()
         self.system_fonts = self._discover_system_fonts()
+        
+        # Auto-download popular fonts on first use
+        self._ensure_popular_fonts()
         
     def _discover_system_fonts(self) -> Dict[str, str]:
         """Discover available system fonts."""
@@ -68,52 +75,29 @@ class FontManager:
         if cache_key in self.font_cache:
             return self.font_cache[cache_key]
             
-        # Try to load font
-        font = None
+        # Use enhanced font loader
+        font = self.font_loader.load_font(font_family, font_size)
         
-        # First try as direct path
-        if os.path.exists(font_family):
-            try:
-                font = ImageFont.truetype(font_family, font_size)
-                logger.info(f"Loaded font from path: {font_family}")
-            except Exception as e:
-                logger.error(f"Failed to load font from path {font_family}: {e}")
-                
-        # Try system fonts
-        if font is None and font_family in self.system_fonts:
-            try:
-                font = ImageFont.truetype(self.system_fonts[font_family], font_size)
-                logger.info(f"Loaded system font: {font_family}")
-            except Exception as e:
-                logger.error(f"Failed to load system font {font_family}: {e}")
-                
-        # Try common font names
+        # If font loader returns None, create a large bitmap font as fallback
         if font is None:
-            common_fonts = {
-                'Arial': ['Arial', 'arial', 'ArialMT'],
-                'Helvetica': ['Helvetica', 'helvetica'],
-                'Times': ['Times', 'times', 'Times New Roman'],
-                'Courier': ['Courier', 'courier', 'Courier New']
-            }
+            logger.error(f"Font {font_family} not available, creating emergency fallback")
+            # Instead of using the tiny default font, we'll create a basic large font
+            # by using the first available TrueType font at the requested size
+            available_fonts = self.font_loader.list_available_fonts()
+            if available_fonts:
+                # Try to load any available font at the requested size
+                for fallback_name in ["DejaVuSans", "Ubuntu-R", "DejaVuSans-Bold"]:
+                    if fallback_name in available_fonts:
+                        font = self.font_loader.load_font(fallback_name, font_size)
+                        if font:
+                            logger.warning(f"Using {fallback_name} as emergency fallback")
+                            break
             
-            for base_name, variants in common_fonts.items():
-                if font_family.lower().startswith(base_name.lower()):
-                    for variant in variants:
-                        if variant in self.system_fonts:
-                            try:
-                                font = ImageFont.truetype(self.system_fonts[variant], font_size)
-                                logger.info(f"Loaded font variant: {variant}")
-                                break
-                            except:
-                                continue
-                if font:
-                    break
-                    
-        # Fallback to default
-        if font is None:
-            logger.warning(f"Font {font_family} not found, using default")
-            font = ImageFont.load_default()
-            
+            # Absolute last resort - but we should never get here with the enhanced loader
+            if font is None:
+                font = ImageFont.load_default()
+                logger.error("WARNING: Using tiny default font - text will be very small!")
+        
         self.font_cache[cache_key] = font
         return font
         
@@ -136,7 +120,11 @@ class FontManager:
         # Get text size
         bbox = font.getbbox(text)
         width = bbox[2] - bbox[0] + stroke_width * 2 + 10
-        height = bbox[3] - bbox[1] + stroke_width * 2 + 10
+        
+        # Use full font height (ascent + descent) instead of just bbox height
+        # This prevents cutoff of characters with descenders (g, j, p, q, y)
+        ascent, descent = font.getmetrics()
+        height = ascent + descent + stroke_width * 2 + 10
         
         # Create RGBA image
         img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
@@ -290,3 +278,166 @@ class FontManager:
         # Alpha composite
         alpha = overlay_region[:, :, 3:4] / 255.0
         base_region[:] = (alpha * overlay_region + (1 - alpha) * base_region).astype(np.uint8)
+    
+    def _ensure_popular_fonts(self):
+        """Ensure popular fonts are available, downloading if needed."""
+        try:
+            # Try to download popular fonts in background
+            self.font_loader.auto_download_popular_fonts()
+        except Exception as e:
+            logger.debug(f"Could not auto-download fonts: {e}")
+    
+    def render_bespoke_text(self, text: str, style: str, size: int = 72) -> np.ndarray:
+        """Render text using bespoke font generation.
+        
+        Args:
+            text: Text to render
+            style: Bespoke style (neon, graffiti, chrome, fire, etc.)
+            size: Font size
+            
+        Returns:
+            RGBA numpy array with stylized text
+        """
+        return self.font_generator.generate_stylized_text(text, style, size)
+    
+    def get_available_font_styles(self) -> Dict[str, List[str]]:
+        """Get all available font styles categorized.
+        
+        Returns:
+            Dictionary with categories and their fonts
+        """
+        styles = {
+            "System Fonts": list(self.system_fonts.keys()),
+            "Downloaded Fonts": self.font_loader.list_available_fonts(),
+            "Font Categories": self.font_loader.get_all_categories(),
+            "Bespoke Styles": self.font_generator.list_available_styles()
+        }
+        return styles
+    
+    def suggest_font_for_genre(self, genre: str) -> str:
+        """Suggest font based on music genre.
+        
+        Args:
+            genre: Music genre (rock, pop, classical, electronic, etc.)
+            
+        Returns:
+            Suggested font name
+        """
+        genre_lower = genre.lower()
+        
+        if any(word in genre_lower for word in ['rock', 'metal', 'punk', 'grunge']):
+            return "Bebas Neue"  # Bold impact for rock
+        elif any(word in genre_lower for word in ['pop', 'dance', 'electronic', 'edm']):
+            return "Montserrat Bold"  # Modern for pop/electronic
+        elif any(word in genre_lower for word in ['classical', 'opera', 'symphony']):
+            return "Playfair Display"  # Elegant for classical
+        elif any(word in genre_lower for word in ['jazz', 'blues', 'soul']):
+            return "Dancing Script"  # Smooth script for jazz
+        elif any(word in genre_lower for word in ['hip-hop', 'rap', 'urban']):
+            return "Oswald Bold"  # Strong display for hip-hop
+        elif any(word in genre_lower for word in ['indie', 'alternative', 'folk']):
+            return "Open Sans"  # Clean modern for indie
+        elif any(word in genre_lower for word in ['country', 'americana', 'western']):
+            return "Merriweather"  # Traditional serif
+        elif any(word in genre_lower for word in ['techno', 'synthwave', 'cyberpunk']):
+            return "Orbitron"  # Futuristic for electronic
+        else:
+            return "Righteous"  # Good all-around display font
+    
+    def suggest_bespoke_style_for_mood(self, mood: str) -> str:
+        """Suggest bespoke style based on song mood.
+        
+        Args:
+            mood: Song mood (energetic, calm, mysterious, etc.)
+            
+        Returns:
+            Suggested bespoke style name
+        """
+        mood_lower = mood.lower()
+        
+        if any(word in mood_lower for word in ['energetic', 'high-energy', 'exciting', 'party']):
+            return "neon"  # Bright and energetic
+        elif any(word in mood_lower for word in ['mysterious', 'dark', 'atmospheric']):
+            return "matrix"  # Digital/mysterious
+        elif any(word in mood_lower for word in ['romantic', 'love', 'emotional']):
+            return "gold"  # Warm and luxurious
+        elif any(word in mood_lower for word in ['cool', 'chill', 'calm', 'peaceful']):
+            return "ice"  # Cool and calm
+        elif any(word in mood_lower for word in ['intense', 'powerful', 'aggressive']):
+            return "fire"  # Intense and powerful
+        elif any(word in mood_lower for word in ['futuristic', 'sci-fi', 'space']):
+            return "hologram"  # Sci-fi effect
+        elif any(word in mood_lower for word in ['urban', 'street', 'gritty']):
+            return "graffiti"  # Street style
+        elif any(word in mood_lower for word in ['elegant', 'classy', 'luxury']):
+            return "chrome"  # Metallic luxury
+        else:
+            return "basic"  # Colorful fallback
+    
+    def get_font_recommendations(self, text: str, genre: str = None, mood: str = None) -> Dict[str, str]:
+        """Get comprehensive font recommendations.
+        
+        Args:
+            text: Text to be rendered
+            genre: Optional music genre
+            mood: Optional song mood
+            
+        Returns:
+            Dictionary with different font recommendations
+        """
+        recommendations = {}
+        
+        # Basic recommendations
+        recommendations["modern"] = "Montserrat Bold"
+        recommendations["classic"] = "Playfair Display"
+        recommendations["bold"] = "Bebas Neue"
+        recommendations["elegant"] = "Dancing Script"
+        
+        # Genre-based recommendation
+        if genre:
+            recommendations["genre_match"] = self.suggest_font_for_genre(genre)
+        
+        # Mood-based bespoke style
+        if mood:
+            recommendations["bespoke_style"] = self.suggest_bespoke_style_for_mood(mood)
+        
+        # Text length based
+        if len(text.split()) > 10:  # Long text
+            recommendations["readability"] = "Open Sans"
+        else:  # Short text
+            recommendations["impact"] = "Anton"
+        
+        return recommendations
+    
+    def list_downloadable_fonts_by_category(self) -> Dict[str, List[str]]:
+        """List downloadable fonts organized by category."""
+        categories = {}
+        for category in self.font_loader.get_all_categories():
+            categories[category] = self.font_loader.get_fonts_by_category(category)
+        return categories
+    
+    def download_fonts_for_style(self, style: str) -> List[str]:
+        """Download fonts that match a particular style.
+        
+        Args:
+            style: Style description (modern, bold, elegant, etc.)
+            
+        Returns:
+            List of downloaded font paths
+        """
+        style_lower = style.lower()
+        downloaded = []
+        
+        # Map styles to categories
+        if "modern" in style_lower:
+            downloaded.extend(self.font_loader.download_fonts_by_category("modern"))
+        if "bold" in style_lower or "impact" in style_lower:
+            downloaded.extend(self.font_loader.download_fonts_by_category("impact"))
+            downloaded.extend(self.font_loader.download_fonts_by_category("display"))
+        if "elegant" in style_lower:
+            downloaded.extend(self.font_loader.download_fonts_by_category("elegant"))
+            downloaded.extend(self.font_loader.download_fonts_by_category("script"))
+        if "tech" in style_lower or "futuristic" in style_lower:
+            downloaded.extend(self.font_loader.download_fonts_by_category("tech"))
+        
+        return downloaded
