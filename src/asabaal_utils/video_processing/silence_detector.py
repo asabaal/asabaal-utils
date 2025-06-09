@@ -16,12 +16,7 @@ from pathlib import Path
 import logging
 from tqdm import tqdm
 
-try:
-    from moviepy.editor import VideoFileClip, concatenate_videoclips
-except ImportError:
-    # MoviePy 2.x has different import structure
-    from moviepy.video.io.VideoFileClip import VideoFileClip
-    from moviepy.video.tools.cuts import concatenate_videoclips
+from .moviepy_imports import VideoFileClip, concatenate_videoclips
 import librosa
 
 from .memory_utils import memory_adaptive_processing

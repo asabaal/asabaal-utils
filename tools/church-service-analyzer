@@ -1,0 +1,324 @@
+#!/usr/bin/env python3
+"""
+Church Service Video Analyzer CLI Tool
+
+Analyze church service videos to automatically segment and classify different
+parts of the service (music, announcements, sermons, slideshows, etc.).
+"""
+
+# description: Analyze church service videos to segment and classify content (music, sermon, announcements, etc.)
+# version: 1.0.0
+# category: video
+
+import argparse
+import sys
+import os
+import json
+from pathlib import Path
+from typing import Optional
+
+# Add the src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src'))
+
+try:
+    from asabaal_utils.video_processing.church_service_analyzer import (
+        ChurchServiceAnalyzer, 
+        analyze_church_service_cli
+    )
+    from asabaal_utils.video_processing.church_audio_classifier import (
+        ChurchAudioClassifier,
+        create_sample_training_data
+    )
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+    print("Please ensure the project is properly installed with: pip install -e .")
+    sys.exit(1)
+
+
+def analyze_service(args):
+    """Analyze a church service video."""
+    analyzer = ChurchServiceAnalyzer(
+        silence_threshold=args.silence_threshold,
+        min_segment_duration=args.min_duration,
+        frame_sample_rate=args.frame_rate
+    )
+    
+    print(f"Analyzing church service video: {args.video}")
+    if args.transcript:
+        print(f"Using transcript: {args.transcript}")
+    
+    result = analyzer.analyze_service(
+        video_path=args.video,
+        transcript_path=args.transcript,
+        output_dir=args.output_dir
+    )
+    
+    # Print summary
+    print(f"\\n{'='*60}")
+    print(f"CHURCH SERVICE ANALYSIS RESULTS")
+    print(f"{'='*60}")
+    print(f"Video: {result.video_path}")
+    print(f"Duration: {result.total_duration/60:.1f} minutes ({result.total_duration:.1f} seconds)")
+    print(f"Segments: {len(result.segments)}")
+    
+    # Segment type summary
+    type_counts = {}
+    type_durations = {}
+    for segment in result.segments:
+        type_counts[segment.segment_type] = type_counts.get(segment.segment_type, 0) + 1
+        type_durations[segment.segment_type] = type_durations.get(segment.segment_type, 0) + segment.duration
+    
+    print(f"\\nSegment Type Summary:")
+    print(f"{'Type':<15} {'Count':<8} {'Duration':<12} {'% of Total':<12}")
+    print(f"{'-'*50}")
+    for seg_type in sorted(type_counts.keys()):
+        count = type_counts[seg_type]
+        duration = type_durations[seg_type]
+        percentage = (duration / result.total_duration) * 100
+        print(f"{seg_type:<15} {count:<8} {duration/60:>8.1f}m {percentage:>8.1f}%")
+    
+    print(f"\\nDetailed Segment Breakdown:")
+    print(f"{'#':<3} {'Type':<12} {'Start':<8} {'End':<8} {'Duration':<10} {'Confidence':<10}")
+    print(f"{'-'*60}")
+    
+    for i, segment in enumerate(result.segments, 1):
+        start_min = int(segment.start_time // 60)
+        start_sec = int(segment.start_time % 60)
+        end_min = int(segment.end_time // 60)
+        end_sec = int(segment.end_time % 60)
+        duration_min = int(segment.duration // 60)
+        duration_sec = int(segment.duration % 60)
+        
+        print(f"{i:<3} {segment.segment_type:<12} "
+              f"{start_min:02d}:{start_sec:02d} "
+              f"{end_min:02d}:{end_sec:02d} "
+              f"{duration_min:02d}:{duration_sec:02d} "
+              f"{segment.confidence:.2f}")
+    
+    # Save results
+    if args.output:
+        output_path = Path(args.output)
+    else:
+        video_name = Path(args.video).stem
+        output_path = Path(f"{video_name}_analysis.json")
+    
+    result.save_to_json(output_path)
+    print(f"\\nDetailed results saved to: {output_path}")
+    
+    # Generate summary report if requested
+    if args.report:
+        generate_report(result, args.report)
+        print(f"Summary report saved to: {args.report}")
+
+
+def analyze_audio_only(args):
+    """Analyze only the audio content of a video."""
+    classifier = ChurchAudioClassifier()
+    
+    print(f"Analyzing audio content: {args.video}")
+    
+    results = classifier.analyze_audio_file(
+        args.video,
+        segment_length=args.segment_length,
+        overlap=args.overlap
+    )
+    
+    print(f"\\nAudio Classification Results")
+    print(f"{'='*60}")
+    print(f"{'Start':<8} {'End':<8} {'Duration':<10} {'Type':<12} {'Confidence':<10}")
+    print(f"{'-'*60}")
+    
+    for result in results:
+        start_min = int(result.start_time // 60)
+        start_sec = int(result.start_time % 60)
+        end_min = int(result.end_time // 60)
+        end_sec = int(result.end_time % 60)
+        duration = result.end_time - result.start_time
+        duration_min = int(duration // 60)
+        duration_sec = int(duration % 60)
+        
+        print(f"{start_min:02d}:{start_sec:02d} "
+              f"{end_min:02d}:{end_sec:02d} "
+              f"{duration_min:02d}:{duration_sec:02d} "
+              f"{result.classification:<12} "
+              f"{result.confidence:.2f}")
+    
+    # Save audio results
+    if args.output:
+        output_data = [
+            {
+                'start_time': r.start_time,
+                'end_time': r.end_time,
+                'classification': r.classification,
+                'confidence': r.confidence,
+                'features': r.features
+            }
+            for r in results
+        ]
+        
+        with open(args.output, 'w') as f:
+            json.dump(output_data, f, indent=2)
+        print(f"\\nResults saved to: {args.output}")
+
+
+def setup_training(args):
+    """Set up training data directory structure."""
+    create_sample_training_data(args.directory)
+    print(f"\\nTraining data directory structure created at: {args.directory}")
+    print("\\nNext steps:")
+    print("1. Place audio samples in the appropriate subdirectories")
+    print("2. Use the --train option to train the classifier")
+    print("3. Save the trained model for future use")
+
+
+def generate_report(result, report_path: str):
+    """Generate a human-readable HTML report."""
+    html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Church Service Analysis Report</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; }}
+        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
+        .summary {{ margin: 20px 0; }}
+        .segments {{ margin: 20px 0; }}
+        table {{ width: 100%; border-collapse: collapse; }}
+        th, td {{ padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }}
+        th {{ background-color: #f2f2f2; }}
+        .music {{ background-color: #e8f5e8; }}
+        .sermon {{ background-color: #e8e8f5; }}
+        .announcement {{ background-color: #f5f5e8; }}
+        .slideshow {{ background-color: #f5e8e8; }}
+        .prayer {{ background-color: #f0e8f5; }}
+        .transition {{ background-color: #f8f8f8; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Church Service Analysis Report</h1>
+        <p><strong>Video:</strong> {result.video_path}</p>
+        <p><strong>Duration:</strong> {result.total_duration/60:.1f} minutes</p>
+        <p><strong>Analysis Date:</strong> {result.analysis_timestamp}</p>
+    </div>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>This church service video was automatically analyzed and segmented into {len(result.segments)} distinct sections.</p>
+    </div>
+    
+    <div class="segments">
+        <h2>Service Segments</h2>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Type</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Duration</th>
+                <th>Confidence</th>
+            </tr>
+"""
+    
+    for i, segment in enumerate(result.segments, 1):
+        start_time = f"{int(segment.start_time//60):02d}:{int(segment.start_time%60):02d}"
+        end_time = f"{int(segment.end_time//60):02d}:{int(segment.end_time%60):02d}"
+        duration = f"{int(segment.duration//60):02d}:{int(segment.duration%60):02d}"
+        
+        html_content += f"""
+            <tr class="{segment.segment_type}">
+                <td>{i}</td>
+                <td>{segment.segment_type.title()}</td>
+                <td>{start_time}</td>
+                <td>{end_time}</td>
+                <td>{duration}</td>
+                <td>{segment.confidence:.2f}</td>
+            </tr>
+"""
+    
+    html_content += """
+        </table>
+    </div>
+</body>
+</html>
+"""
+    
+    with open(report_path, 'w') as f:
+        f.write(html_content)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Analyze church service videos for content segmentation",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Analyze a church service video
+  church-service-analyzer analyze service.mp4
+  
+  # Analyze with transcript and custom output
+  church-service-analyzer analyze service.mp4 --transcript service.srt --output analysis.json
+  
+  # Audio-only analysis with custom segments
+  church-service-analyzer audio service.mp4 --segment-length 5
+  
+  # Set up training data structure
+  church-service-analyzer setup-training ./training_data
+  
+  # Generate HTML report
+  church-service-analyzer analyze service.mp4 --report service_report.html
+        """
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Analyze command
+    analyze_parser = subparsers.add_parser('analyze', help='Analyze church service video')
+    analyze_parser.add_argument('video', help='Path to video file')
+    analyze_parser.add_argument('--transcript', help='Path to transcript/SRT file')
+    analyze_parser.add_argument('--output', help='Output JSON file path')
+    analyze_parser.add_argument('--report', help='Generate HTML report at this path')
+    analyze_parser.add_argument('--output-dir', help='Directory for intermediate files')
+    analyze_parser.add_argument('--silence-threshold', type=float, default=-40.0,
+                               help='Silence threshold in dB (default: -40.0)')
+    analyze_parser.add_argument('--min-duration', type=float, default=30.0,
+                               help='Minimum segment duration in seconds (default: 30.0)')
+    analyze_parser.add_argument('--frame-rate', type=float, default=1.0,
+                               help='Frame sampling rate for visual analysis (default: 1.0)')
+    
+    # Audio-only analysis command
+    audio_parser = subparsers.add_parser('audio', help='Analyze audio content only')
+    audio_parser.add_argument('video', help='Path to video/audio file')
+    audio_parser.add_argument('--output', help='Output JSON file path')
+    audio_parser.add_argument('--segment-length', type=float, default=10.0,
+                             help='Audio segment length in seconds (default: 10.0)')
+    audio_parser.add_argument('--overlap', type=float, default=2.0,
+                             help='Overlap between segments in seconds (default: 2.0)')
+    
+    # Setup training command
+    setup_parser = subparsers.add_parser('setup-training', 
+                                        help='Set up training data directory structure')
+    setup_parser.add_argument('directory', help='Directory to create training structure')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    try:
+        if args.command == 'analyze':
+            analyze_service(args)
+        elif args.command == 'audio':
+            analyze_audio_only(args)
+        elif args.command == 'setup-training':
+            setup_training(args)
+    except KeyboardInterrupt:
+        print("\\nAnalysis interrupted by user")
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

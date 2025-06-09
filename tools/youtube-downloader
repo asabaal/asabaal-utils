@@ -44,7 +44,8 @@ def download_video(
     quality: str = "best",
     audio_only: bool = False,
     playlist: bool = False,
-    format_selector: Optional[str] = None
+    format_selector: Optional[str] = None,
+    update_archive: bool = False
 ) -> bool:
     """
     Download video from YouTube URL.
@@ -56,6 +57,7 @@ def download_video(
         audio_only: Download audio only
         playlist: Download entire playlist
         format_selector: Custom format selector
+        update_archive: Use archive to skip already downloaded videos
     
     Returns:
         True if successful, False otherwise
@@ -75,16 +77,24 @@ def download_video(
         cmd.extend(['-f', format_selector])
     else:
         if quality == "best":
-            cmd.extend(['-f', 'best'])
+            # Use better format selection that combines video and audio
+            cmd.extend(['-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'])
         elif quality == "worst":
             cmd.extend(['-f', 'worst'])
         else:
-            # Try specific quality
-            cmd.extend(['-f', f'best[height<={quality.rstrip("p")}]'])
+            # Try specific quality with fallback
+            height = quality.rstrip("p")
+            cmd.extend(['-f', f'bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]/best[height<={height}]/best'])
     
     # Playlist handling
     if not playlist:
         cmd.append('--no-playlist')
+    
+    # Archive handling for incremental updates
+    if playlist and update_archive:
+        archive_file = output_path / '.yt-dlp-archive.txt'
+        cmd.extend(['--download-archive', str(archive_file)])
+        cmd.append('--ignore-errors')  # Continue on errors for playlist updates
     
     # Add URL
     cmd.append(url)
@@ -96,13 +106,21 @@ def download_video(
             print("Mode: Audio only (MP3)")
         else:
             print(f"Quality: {quality}")
+        
+        if playlist:
+            if update_archive:
+                print("Mode: Playlist update (incremental)")
+            else:
+                print("Mode: Full playlist download")
             
         result = subprocess.run(cmd, check=True)
-        print("✓ Download completed successfully")
+        print("\n✓ Download completed successfully")
+        sys.stdout.flush()
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"✗ Download failed: {e}")
+        print(f"\n✗ Download failed: {e}")
+        sys.stdout.flush()
         return False
 
 def main():
@@ -115,6 +133,7 @@ Examples:
   youtube-downloader -q 720p -o ~/Downloads "VIDEO_URL"
   youtube-downloader --audio-only "VIDEO_URL"
   youtube-downloader --playlist "PLAYLIST_URL"
+  youtube-downloader --playlist --update "PLAYLIST_URL"
   youtube-downloader -f "best[height<=480]" "VIDEO_URL"
         """
     )
@@ -129,6 +148,8 @@ Examples:
                        help='Download audio only as MP3')
     parser.add_argument('-p', '--playlist', action='store_true',
                        help='Download entire playlist')
+    parser.add_argument('-u', '--update', action='store_true',
+                       help='Update playlist (skip already downloaded videos)')
     parser.add_argument('-f', '--format', dest='format_selector',
                        help='Custom format selector (overrides quality)')
     parser.add_argument('--install-deps', action='store_true',
@@ -154,7 +175,8 @@ Examples:
         quality=args.quality,
         audio_only=args.audio_only,
         playlist=args.playlist,
-        format_selector=args.format_selector
+        format_selector=args.format_selector,
+        update_archive=args.update
     )
     
     sys.exit(0 if success else 1)

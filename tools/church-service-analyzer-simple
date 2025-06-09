@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+"""
+Simple Church Service Video Analyzer 
+
+Memory-efficient version that uses ffmpeg for audio extraction
+to handle very large church service videos.
+"""
+
+# description: Memory-efficient church service video analyzer using ffmpeg
+# version: 1.0.0  
+# category: video
+
+import argparse
+import sys
+import os
+import json
+import subprocess
+import tempfile
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+import logging
+
+# Add the src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src'))
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+
+def check_ffmpeg():
+    """Check if ffmpeg is installed."""
+    try:
+        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def extract_audio_to_wav(video_path: str, output_path: str) -> bool:
+    """Extract audio from video to WAV file using ffmpeg."""
+    cmd = [
+        'ffmpeg',
+        '-y',  # Overwrite output
+        '-i', video_path,
+        '-vn',  # No video
+        '-acodec', 'pcm_s16le',  # WAV format
+        '-ar', '22050',  # Sample rate
+        '-ac', '1',  # Mono
+        output_path
+    ]
+    
+    try:
+        print(f"Extracting audio from video (this may take a few minutes)...")
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        
+        # Monitor progress
+        for line in process.stderr:
+            if 'time=' in line:
+                # Extract time from ffmpeg output
+                time_str = line.split('time=')[1].split()[0]
+                print(f"\rExtracting: {time_str}", end='', flush=True)
+        
+        process.wait()
+        print()  # New line
+        
+        if process.returncode == 0:
+            print("✓ Audio extraction complete")
+            return True
+        else:
+            print("✗ Audio extraction failed")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Failed to extract audio: {e}")
+        return False
+
+
+def get_video_duration(video_path: str) -> float:
+    """Get video duration using ffprobe."""
+    cmd = [
+        'ffprobe',
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        video_path
+    ]
+    
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return float(result.stdout.strip())
+    except:
+        return 0.0
+
+
+def analyze_audio_chunks(audio_path: str, chunk_duration: float = 60.0) -> List[Dict[str, Any]]:
+    """Analyze audio file in chunks using the church audio classifier."""
+    try:
+        from asabaal_utils.video_processing.church_audio_classifier import ChurchAudioClassifier
+        from asabaal_utils.video_processing.church_service_analyzer import ServiceSegment
+    except ImportError as e:
+        print(f"Error importing analysis modules: {e}")
+        return []
+    
+    classifier = ChurchAudioClassifier()
+    results = []
+    
+    print("Analyzing audio content...")
+    
+    # Get audio duration
+    duration_cmd = [
+        'ffprobe',
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        audio_path
+    ]
+    
+    try:
+        duration_result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
+        total_duration = float(duration_result.stdout.strip())
+    except:
+        print("Warning: Could not determine audio duration")
+        total_duration = 0
+    
+    # Analyze in chunks
+    current_time = 0
+    chunk_num = 0
+    
+    while current_time < total_duration:
+        chunk_num += 1
+        chunk_end = min(current_time + chunk_duration, total_duration)
+        
+        print(f"\rAnalyzing chunk {chunk_num} ({current_time:.0f}s - {chunk_end:.0f}s)", end='', flush=True)
+        
+        # Extract chunk to temp file
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_chunk:
+            extract_cmd = [
+                'ffmpeg',
+                '-y',
+                '-i', audio_path,
+                '-ss', str(current_time),
+                '-t', str(chunk_duration),
+                '-acodec', 'copy',
+                tmp_chunk.name
+            ]
+            
+            try:
+                subprocess.run(extract_cmd, capture_output=True, check=True)
+                
+                # Analyze chunk
+                chunk_results = classifier.analyze_audio_file(
+                    tmp_chunk.name,
+                    segment_length=10.0,
+                    overlap=2.0
+                )
+                
+                # Adjust times and add to results
+                for result in chunk_results:
+                    results.append({
+                        'start_time': current_time + result.start_time,
+                        'end_time': current_time + result.end_time,
+                        'classification': result.classification,
+                        'confidence': result.confidence
+                    })
+                
+            except Exception as e:
+                logger.error(f"Error analyzing chunk {chunk_num}: {e}")
+            finally:
+                # Clean up temp file
+                try:
+                    os.unlink(tmp_chunk.name)
+                except:
+                    pass
+        
+        current_time += chunk_duration - 5  # 5 second overlap
+    
+    print()  # New line
+    return results
+
+
+def merge_segments(segments: List[Dict[str, Any]], min_duration: float = 30.0) -> List[Dict[str, Any]]:
+    """Merge similar adjacent segments."""
+    if not segments:
+        return []
+    
+    # Sort by start time
+    segments.sort(key=lambda x: x['start_time'])
+    
+    merged = [segments[0]]
+    
+    for current in segments[1:]:
+        last = merged[-1]
+        
+        # Check if should merge
+        if (current['classification'] == last['classification'] and
+            current['start_time'] - last['end_time'] < 10.0):  # Less than 10s gap
+            
+            # Extend last segment
+            last['end_time'] = current['end_time']
+            last['confidence'] = (last['confidence'] + current['confidence']) / 2
+        else:
+            merged.append(current)
+    
+    # Filter out very short segments
+    filtered = [seg for seg in merged if seg['end_time'] - seg['start_time'] >= min_duration]
+    
+    # Post-process segment types
+    for seg in filtered:
+        # Refine speech classification based on duration
+        if seg['classification'] == 'speech':
+            duration = seg['end_time'] - seg['start_time']
+            if duration > 300:  # > 5 minutes
+                seg['segment_type'] = 'sermon'
+            elif duration > 60:  # > 1 minute
+                seg['segment_type'] = 'announcement'
+            else:
+                seg['segment_type'] = 'transition'
+        elif seg['classification'] in ['music', 'singing']:
+            seg['segment_type'] = 'music'
+        else:
+            seg['segment_type'] = seg['classification']
+    
+    return filtered
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Simple memory-efficient church service video analyzer",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+This is a simplified version that extracts audio first to avoid memory issues
+with very large video files.
+
+Examples:
+  church-service-analyzer-simple video.mp4
+  church-service-analyzer-simple video.mp4 --output analysis.json
+  church-service-analyzer-simple video.mp4 --keep-audio
+        """
+    )
+    
+    parser.add_argument('video', help='Path to church service video file')
+    parser.add_argument('--output', help='Output JSON file (default: video_name_simple_analysis.json)')
+    parser.add_argument('--chunk-duration', type=float, default=60.0,
+                       help='Duration of audio chunks to process (default: 60s)')
+    parser.add_argument('--keep-audio', action='store_true',
+                       help='Keep extracted audio file after analysis')
+    parser.add_argument('--audio-only', help='Use existing audio file instead of extracting')
+    
+    args = parser.parse_args()
+    
+    # Check ffmpeg
+    if not check_ffmpeg():
+        print("Error: ffmpeg not found. Please install ffmpeg.")
+        print("  Ubuntu/Debian: sudo apt-get install ffmpeg")
+        print("  MacOS: brew install ffmpeg")
+        print("  Windows: Download from https://ffmpeg.org/download.html")
+        sys.exit(1)
+    
+    video_path = Path(args.video)
+    if not video_path.exists():
+        print(f"Error: Video file not found: {video_path}")
+        sys.exit(1)
+    
+    print(f"\\nChurch Service Video Analyzer (Simple Mode)")
+    print(f"{'='*50}")
+    print(f"Video: {video_path.name}")
+    
+    # Get video duration
+    duration = get_video_duration(str(video_path))
+    if duration > 0:
+        print(f"Duration: {duration/60:.1f} minutes")
+    
+    # Extract or use audio
+    if args.audio_only:
+        audio_path = args.audio_only
+        print(f"Using existing audio: {audio_path}")
+    else:
+        audio_path = str(video_path.with_suffix('.wav'))
+        if not extract_audio_to_wav(str(video_path), audio_path):
+            print("Failed to extract audio")
+            sys.exit(1)
+    
+    # Analyze audio
+    segments = analyze_audio_chunks(audio_path, args.chunk_duration)
+    
+    # Merge segments
+    print("\\nMerging and processing segments...")
+    final_segments = merge_segments(segments)
+    
+    # Display results
+    print(f"\\nAnalysis Results")
+    print(f"{'='*60}")
+    print(f"Found {len(final_segments)} segments:\\n")
+    print(f"{'Type':<15} {'Start':<10} {'End':<10} {'Duration':<12} {'Confidence':<10}")
+    print(f"{'-'*60}")
+    
+    for seg in final_segments:
+        start_min = seg['start_time'] / 60
+        end_min = seg['end_time'] / 60
+        duration_min = (seg['end_time'] - seg['start_time']) / 60
+        
+        print(f"{seg['segment_type']:<15} "
+              f"{start_min:>6.1f}m "
+              f"{end_min:>6.1f}m "
+              f"{duration_min:>8.1f}m "
+              f"{seg['confidence']:>8.2f}")
+    
+    # Save results
+    if args.output:
+        output_path = args.output
+    else:
+        output_path = str(video_path.with_suffix('')) + '_simple_analysis.json'
+    
+    results = {
+        'video_path': str(video_path),
+        'duration': duration,
+        'segments': final_segments,
+        'analysis_method': 'simple_chunked'
+    }
+    
+    with open(output_path, 'w') as f:
+        json.dump(results, f, indent=2)
+    
+    print(f"\\nResults saved to: {output_path}")
+    
+    # Clean up audio file
+    if not args.keep_audio and not args.audio_only:
+        try:
+            os.remove(audio_path)
+            print("Temporary audio file removed")
+        except:
+            pass
+    elif args.keep_audio:
+        print(f"Audio file saved: {audio_path}")
+
+
+if __name__ == '__main__':
+    main()

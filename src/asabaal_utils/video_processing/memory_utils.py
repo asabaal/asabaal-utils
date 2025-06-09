@@ -27,7 +27,7 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 import numpy as np
-from moviepy.editor import VideoFileClip
+from .moviepy_imports import VideoFileClip
 
 logger = logging.getLogger(__name__)
 
