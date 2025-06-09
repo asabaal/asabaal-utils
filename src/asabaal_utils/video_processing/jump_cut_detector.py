@@ -17,11 +17,10 @@ import math
 import numpy as np
 from tqdm import tqdm
 
-from moviepy.editor import concatenate_videoclips, VideoFileClip, CompositeVideoClip
-from moviepy.video.VideoClip import VideoClip, ColorClip
-from moviepy.video.compositing.transitions import crossfadein
-from moviepy.video.fx.fadein import fadein
-from moviepy.video.fx.fadeout import fadeout
+from .moviepy_imports import (
+    VideoFileClip, concatenate_videoclips, CompositeVideoClip,
+    VideoClip, ColorClip, vfx
+)
 from PIL import Image, ImageChops, ImageFilter
 from scipy.ndimage import gaussian_filter
 from skimage.metrics import structural_similarity as ssim

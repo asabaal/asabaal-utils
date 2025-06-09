@@ -40,6 +40,15 @@ from .thumbnail_generator import ThumbnailGenerator, generate_thumbnails
 from .color_analyzer import ColorAnalyzer, analyze_video_colors
 from .frame_extractor import FrameExtractor, extract_frame_from_video
 
+# Import church service analysis modules
+try:
+    from .church_service_analyzer import ChurchServiceAnalyzer, ServiceAnalysisResult
+    from .church_audio_classifier import ChurchAudioClassifier
+except ImportError:
+    ChurchServiceAnalyzer = None
+    ServiceAnalysisResult = None
+    ChurchAudioClassifier = None
+
 __all__ = [
     'SilenceDetector',
     'remove_silence',

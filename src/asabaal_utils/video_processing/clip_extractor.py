@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
-from moviepy.editor import VideoFileClip
+from .moviepy_imports import VideoFileClip
 
 logger = logging.getLogger(__name__)
 

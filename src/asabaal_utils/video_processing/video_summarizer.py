@@ -18,10 +18,7 @@ import heapq
 
 import numpy as np
 from tqdm import tqdm
-from moviepy.editor import VideoFileClip
-from moviepy.editor import concatenate_videoclips, CompositeVideoClip
-from moviepy.video.fx.fadein import fadein
-from moviepy.video.fx.fadeout import fadeout
+from .moviepy_imports import VideoFileClip, concatenate_videoclips, CompositeVideoClip, vfx
 import librosa
 from scipy.signal import find_peaks
 from scipy import stats
