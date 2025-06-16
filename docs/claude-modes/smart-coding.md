@@ -1,0 +1,133 @@
+# Smart Coding Mode - Systems Thinking Approach
+
+## Summary
+A systematic approach to coding that emphasizes understanding data flow, validating assumptions, and fixing root causes rather than symptoms. Based on successful debugging patterns from real-world problem solving.
+
+## Core Principles
+
+### 1. Understand Before Acting
+- STOP and analyze what the system is ACTUALLY doing
+- Trace data flow from input → processing → output
+- Identify WHERE transformations happen
+- Question assumptions about data types and formats
+
+### 2. Validate at Each Step
+When debugging or implementing:
+1. **Input Validation**: What goes IN?
+2. **Process Validation**: What HAPPENS to it?
+3. **Output Validation**: What comes OUT?
+4. **Usage Validation**: How is it USED?
+
+### 3. Debug Notebooks Are Essential
+For complex issues:
+- Create versioned debug notebooks (v1, v2, v3...)
+- Each cell tests ONE specific thing
+- Print types, values, and intermediate states
+- Build understanding incrementally
+
+## The Smart Coding Workflow
+
+### Phase 1: Problem Definition
+```
+WHAT: Specific behavior that's wrong
+WHERE: Exact location in the pipeline
+WHEN: Under what conditions
+WHY: Root cause (to be discovered)
+```
+
+### Phase 2: System Mapping
+Before changing code, map the system:
+- What files/modules are involved?
+- What's the data flow sequence?
+- Where are transformations applied?
+- What are the dependencies?
+
+### Phase 3: Incremental Investigation
+1. Start with the WORKING parts
+2. Trace forward until it BREAKS
+3. Identify the EXACT transformation
+4. Understand WHY it happens
+
+### Phase 4: Solution Design
+- Fix the ROOT CAUSE, not symptoms
+- Preserve working functionality
+- Consider edge cases
+- Validate the fix doesn't break other parts
+
+## Red Flags to Avoid
+
+### 1. Assumption-Based Coding
+❌ "This should work because..."
+✅ "Let me verify this works by..."
+
+### 2. Fixing Symptoms
+❌ Adding workarounds without understanding why
+✅ Finding root cause and fixing properly
+
+### 3. Rushed Solutions
+❌ Implementing first idea without validation
+✅ Testing hypothesis before implementing
+
+### 4. Ignoring Data Flow
+❌ Focusing on individual functions
+✅ Understanding the complete pipeline
+
+## Example: The Section Type Issue
+
+**Problem**: Lyric video showed wrong section types
+**Initial Assumption**: File loading was wrong
+**Reality**: Multiple transformation layers
+
+**Smart Approach**:
+1. Validated analyze-structure output ✓
+2. Traced saved file content ✓
+3. Found transformation in video_sections file
+4. Discovered enum missing values
+5. Fixed at the source
+
+## Debug Notebook Template
+
+```python
+# Cell 1: Problem Statement
+"""
+Problem: [specific issue]
+Expected: [correct behavior]
+Actual: [wrong behavior]
+"""
+
+# Cell 2: Validate Input
+# Check what we're starting with
+data = load_input()
+print(f"Type: {type(data)}")
+print(f"Content: {data}")
+
+# Cell 3: Trace Transformation
+# Follow the data through each step
+step1_output = process_step1(data)
+print(f"After step 1: {step1_output}")
+
+# Cell 4: Identify Issue
+# Where does it go wrong?
+
+# Cell 5: Test Fix
+# Verify solution works
+```
+
+## Key Questions to Always Ask
+
+1. **What TYPE is this data?** (Don't assume!)
+2. **Where is this TRANSFORMED?** (Find all locations)
+3. **What DEPENDS on this?** (Understand impact)
+4. **Have I VALIDATED this works?** (Test, don't hope)
+
+## The Golden Rule
+
+**Never change code until you understand:**
+- What it currently does
+- Why it does that
+- What you want it to do instead
+- How to verify the change works
+
+---
+
+Remember: Smart coding is about understanding systems, not just fixing errors.

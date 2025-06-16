@@ -1,0 +1,126 @@
+#!/bin/bash
+# claude-mode - Manage Claude interaction modes and prompts
+# Version: 1.0.0
+# Category: ai-assistance
+# Description: Switch between different Claude interaction modes
+# Usage: claude-mode [mode] [--short]
+
+# Directory for mode files
+MODES_DIR="$HOME/.local/share/custom-tools/claude-modes"
+FALLBACK_DIR="/home/asabaal/asabaal_ventures/repos/asabaal-utils/docs/claude-modes"
+
+# Create modes directory if it doesn't exist
+mkdir -p "$MODES_DIR"
+
+# Function to list available modes
+list_modes() {
+    echo "# Available Claude Modes"
+    echo ""
+    echo "Usage: claude-mode <mode> [--short]"
+    echo ""
+    echo "Modes:"
+    
+    # Check both directories for mode files
+    declare -A modes_found
+    
+    # Check primary directory
+    if [ -d "$MODES_DIR" ]; then
+        for mode_file in "$MODES_DIR"/*.md; do
+            if [ -f "$mode_file" ]; then
+                mode_name=$(basename "$mode_file" .md)
+                modes_found["$mode_name"]=1
+                echo "  - $mode_name"
+            fi
+        done
+    fi
+    
+    # Check fallback directory
+    if [ -d "$FALLBACK_DIR" ]; then
+        for mode_file in "$FALLBACK_DIR"/*.md; do
+            if [ -f "$mode_file" ]; then
+                mode_name=$(basename "$mode_file" .md)
+                if [ -z "${modes_found[$mode_name]}" ]; then
+                    echo "  - $mode_name"
+                fi
+            fi
+        done
+    fi
+    
+    # Also check for standalone prompt tools
+    echo ""
+    echo "Standalone prompt tools:"
+    echo "  - debug-prompt (original debug mode)"
+    echo "  - smart-coding-prompt (systems thinking approach)"
+    
+    echo ""
+    echo "Examples:"
+    echo "  claude-mode debug          # Show debug mode guide"
+    echo "  claude-mode smart-coding   # Show smart coding methodology"
+    echo "  claude-mode list          # Show this list"
+}
+
+# Function to display a mode
+show_mode() {
+    local mode=$1
+    local short=$2
+    
+    # Check for mode file in primary location
+    local mode_file="$MODES_DIR/$mode.md"
+    
+    # Fall back to secondary location
+    if [ ! -f "$mode_file" ]; then
+        mode_file="$FALLBACK_DIR/$mode.md"
+    fi
+    
+    # Special handling for legacy tools
+    if [ "$mode" == "debug" ] && [ ! -f "$mode_file" ]; then
+        # Use the existing debug-prompt tool
+        if [ "$short" == "--short" ]; then
+            debug-prompt --short
+        else
+            debug-prompt
+        fi
+        return
+    elif [ "$mode" == "smart-coding" ] && [ ! -f "$mode_file" ]; then
+        # Use the smart-coding-prompt tool
+        smart-coding-prompt
+        return
+    fi
+    
+    # Check if mode file exists
+    if [ ! -f "$mode_file" ]; then
+        echo "Error: Mode '$mode' not found"
+        echo ""
+        list_modes
+        exit 1
+    fi
+    
+    # Display the mode content
+    if [ "$short" == "--short" ]; then
+        # Try to extract a summary section
+        if grep -q "## Summary" "$mode_file"; then
+            sed -n '/## Summary/,/^##/p' "$mode_file" | head -n -1
+        elif grep -q "## Quick Reference" "$mode_file"; then
+            sed -n '/## Quick Reference/,/^##/p' "$mode_file" | head -n -1
+        elif grep -q "## Workflow" "$mode_file"; then
+            sed -n '/## Workflow/,/^##/p' "$mode_file" | head -n -1
+        else
+            # Just show first 20 lines as summary
+            head -n 20 "$mode_file"
+            echo ""
+            echo "[... use 'claude-mode $mode' for full content ...]"
+        fi
+    else
+        cat "$mode_file"
+    fi
+}
+
+# Main logic
+case "$1" in
+    ""|"list"|"--list"|"-l")
+        list_modes
+        ;;
+    *)
+        show_mode "$1" "$2"
+        ;;
+esac
