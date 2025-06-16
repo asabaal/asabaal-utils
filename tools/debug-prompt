@@ -1,0 +1,33 @@
+#!/bin/bash
+# description: Display collaborative debugging guide for Claude interactions
+# version: 1.0.0
+# category: development
+# usage: debug-prompt [--short]
+
+# The guide is embedded in the tool installation
+# When installed, we'll look for it in a standard location
+GUIDE_FILE="$HOME/.local/share/custom-tools/collaborative_debugging_guide.md"
+
+# If not found there, check the source repository
+if [ ! -f "$GUIDE_FILE" ]; then
+    GUIDE_FILE="/home/asabaal/asabaal_ventures/repos/asabaal-utils/docs/collaborative_debugging_guide.md"
+fi
+
+# Check if guide file exists
+if [ ! -f "$GUIDE_FILE" ]; then
+    echo "Error: Debugging guide not found at $GUIDE_FILE"
+    exit 1
+fi
+
+# Parse arguments
+if [ "$1" == "--short" ]; then
+    # Display just the workflow section for quick reference
+    sed -n '/## Debugging Workflow/,/## Example: The Tempo Array Issue/p' "$GUIDE_FILE" | head -n -1
+else
+    # Display the full guide
+    cat "$GUIDE_FILE"
+fi
+
+echo ""
+echo "---"
+echo "Tip: Use 'debug-prompt --short' for just the workflow checklist"
