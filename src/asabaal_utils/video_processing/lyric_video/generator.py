@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Optional, Union, Generator, Tuple
 import numpy as np
@@ -91,15 +92,19 @@ class LyricVideoGenerator:
             )
             
         # Process lyrics
-        logger.info("Processing lyrics...")
-        self.lyrics = self.lyric_processor.parse_lyrics(lyrics_path)
-        
-        # Apply time range filtering to lyrics if specified
-        if start_time is not None or end_time is not None:
-            self.lyrics = self._filter_lyrics_by_time(self.lyrics, start_time, end_time)
+        if lyrics_path:
+            logger.info("Processing lyrics...")
+            self.lyrics = self.lyric_processor.parse_lyrics(lyrics_path)
+            
+            # Apply time range filtering to lyrics if specified
+            if start_time is not None or end_time is not None:
+                self.lyrics = self._filter_lyrics_by_time(self.lyrics, start_time, end_time)
+        else:
+            logger.info("No lyrics provided, creating visual-only video...")
+            self.lyrics = []
         
         # Align lyrics to audio if requested
-        if self.config['animation_config'].get('sync_to_beats', False):
+        if self.config['animation_config'].get('sync_to_beats', False) and self.lyrics:
             self.lyrics = self.lyric_processor.align_to_audio(
                 self.audio_features,
                 snap_to_beats=True,
@@ -108,10 +113,54 @@ class LyricVideoGenerator:
             
         # Load song sections for visual variation
         if structure_file:
-            logger.info(f"Loading song sections from structure file: {structure_file}")
-            detected_sections = self.section_manager.load_structure_from_file(
-                structure_file, self.audio_features.duration
-            )
+            # Check if this is an initial structure file that needs analysis
+            if '_initial' in structure_file or '_structure' in structure_file:
+                logger.info(f"Running analyze-structure on audio with initial structure: {structure_file}")
+                
+                import subprocess
+                import tempfile
+                import json
+                
+                # Create temp file for output
+                with tempfile.NamedTemporaryFile(mode='w', suffix='_final.json', delete=False) as tmp:
+                    temp_output = tmp.name
+                
+                # Run analyze-structure command
+                cmd = [
+                    'analyze-structure',
+                    audio_path,
+                    '--structure-file', structure_file,
+                    '-o', temp_output
+                ]
+                
+                logger.info(f"Running: {' '.join(cmd)}")
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                
+                if result.returncode != 0:
+                    logger.error(f"analyze-structure failed: {result.stderr}")
+                    raise RuntimeError(f"Failed to analyze structure: {result.stderr}")
+                
+                # Use the video sections format file that was auto-generated
+                lyric_video_file = temp_output.replace('.json', '_video_sections.json')
+                
+                if not os.path.exists(lyric_video_file):
+                    logger.error(f"Expected video sections file not found: {lyric_video_file}")
+                    raise RuntimeError("analyze-structure did not create video sections format file")
+                
+                logger.info(f"Using analyzed structure from: {lyric_video_file}")
+                detected_sections = self.section_manager.load_structure_from_file(
+                    lyric_video_file, self.audio_features.duration
+                )
+                
+                # Clean up temp file
+                os.unlink(temp_output)
+                os.unlink(lyric_video_file)
+            else:
+                # Direct lyric video format file
+                logger.info(f"Loading song sections from structure file: {structure_file}")
+                detected_sections = self.section_manager.load_structure_from_file(
+                    structure_file, self.audio_features.duration
+                )
         else:
             logger.info("Detecting song sections for visual variation...")
             detected_sections = self.section_manager.detect_sections_from_audio(
@@ -214,8 +263,8 @@ class LyricVideoGenerator:
         
     def _generate_frames(self, text_only_output: bool = False) -> Generator[np.ndarray, None, None]:
         """Generate video frames."""
-        if not self.audio_features or not self.lyrics:
-            raise ValueError("Audio and lyrics must be loaded before generating frames")
+        if not self.audio_features:
+            raise ValueError("Audio must be loaded before generating frames")
             
         # Create text style from config
         text_config = self.config['text_config']
