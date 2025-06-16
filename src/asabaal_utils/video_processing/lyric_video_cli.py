@@ -38,8 +38,8 @@ Examples:
     
     parser.add_argument("--audio", required=True,
                         help="Path to audio file (MP3, WAV, FLAC, etc.)")
-    parser.add_argument("--lyrics", required=True,
-                        help="Path to lyrics file (SRT, LRC) or raw text")
+    parser.add_argument("--lyrics",
+                        help="Path to lyrics file (SRT, LRC) or raw text (optional)")
     parser.add_argument("--output", required=True,
                         help="Output video file path")
     parser.add_argument("--background",

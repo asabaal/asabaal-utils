@@ -21,6 +21,18 @@ class SectionType(Enum):
     BRIDGE = "bridge"
     INSTRUMENTAL = "instrumental"
     OUTRO = "outro"
+    HOOK = "hook"
+    PRECHORUS = "prechorus"
+    INTERLUDE = "interlude"
+    DROP = "drop"
+    BUILDUP = "buildup"
+    BREAKDOWN = "breakdown"
+    REFRAIN = "refrain"
+    SOLO = "solo"
+    AD_LIB = "ad_lib"
+    VAMP = "vamp"
+    TAG = "tag"
+    CODA = "coda"
     UNKNOWN = "unknown"
 
 
@@ -169,6 +181,65 @@ class SectionManager:
             background_intensity=0.6,
             clip_switching_frequency="slow"
         )
+        
+        # HOOK: Catchy, memorable, energetic like chorus
+        self.section_configs[SectionType.HOOK] = SectionConfig(
+            ambient_glow_intensity=1.4,
+            dynamic_colors_enabled=True,
+            lighting_effects_enabled=True,
+            energy_bursts_enabled=True,
+            primary_color_hue=45,  # Orange/yellow tones
+            color_temperature="warm",
+            saturation_boost=1.2,
+            dynamic_positioning=True,
+            motion_tracking=True,
+            positioning_style="dynamic",
+            background_intensity=1.1,
+            clip_switching_frequency="fast"
+        )
+        
+        # PRECHORUS: Building energy, transition
+        self.section_configs[SectionType.PRECHORUS] = SectionConfig(
+            ambient_glow_intensity=0.9,
+            dynamic_colors_enabled=True,
+            lighting_effects_enabled=True,
+            energy_bursts_enabled=False,
+            primary_color_hue=180,  # Cyan tones
+            color_temperature="neutral",
+            saturation_boost=1.0,
+            dynamic_positioning=False,
+            motion_tracking=True,
+            positioning_style="center",
+            background_intensity=0.9,
+            clip_switching_frequency="medium"
+        )
+        
+        # INTERLUDE: Instrumental break, artistic
+        self.section_configs[SectionType.INTERLUDE] = SectionConfig(
+            ambient_glow_intensity=0.5,
+            dynamic_colors_enabled=True,
+            lighting_effects_enabled=True,
+            energy_bursts_enabled=False,
+            primary_color_hue=270,  # Purple tones
+            color_temperature="cool",
+            saturation_boost=0.8,
+            dynamic_positioning=False,
+            motion_tracking=False,
+            positioning_style="center",
+            background_intensity=0.7,
+            clip_switching_frequency="slow"
+        )
+        
+        # For other new types, copy similar configs
+        self.section_configs[SectionType.DROP] = self.section_configs[SectionType.CHORUS]
+        self.section_configs[SectionType.BUILDUP] = self.section_configs[SectionType.PRECHORUS]
+        self.section_configs[SectionType.BREAKDOWN] = self.section_configs[SectionType.INSTRUMENTAL]
+        self.section_configs[SectionType.REFRAIN] = self.section_configs[SectionType.CHORUS]
+        self.section_configs[SectionType.SOLO] = self.section_configs[SectionType.INSTRUMENTAL]
+        self.section_configs[SectionType.AD_LIB] = self.section_configs[SectionType.VERSE]
+        self.section_configs[SectionType.VAMP] = self.section_configs[SectionType.VERSE]
+        self.section_configs[SectionType.TAG] = self.section_configs[SectionType.OUTRO]
+        self.section_configs[SectionType.CODA] = self.section_configs[SectionType.OUTRO]
         
     def add_section(self, start_time: float, end_time: float, section_type: SectionType):
         """Add a song section with timing information."""
