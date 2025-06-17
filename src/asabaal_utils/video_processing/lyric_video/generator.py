@@ -10,6 +10,7 @@ import numpy as np
 from .audio import AudioAnalyzer, AudioFeatures
 from .lyrics import LyricProcessor
 from .text import TextRenderer, TextStyle, AnimationConfig, AnimationType, AnimationEasing
+from .text import ProfessionalTextRenderer, ProfessionalTextStyle
 from .compositor import VideoCompositor, CompositeLayer
 from .encoder import OutputEncoder
 from .hardware_detection import HardwareDetector
@@ -36,6 +37,7 @@ class LyricVideoGenerator:
         self.audio_analyzer = AudioAnalyzer()
         self.lyric_processor = LyricProcessor()
         self.text_renderer = TextRenderer(resolution)
+        self.professional_text_renderer = ProfessionalTextRenderer(resolution=resolution)  # Add professional renderer
         self.compositor = VideoCompositor(resolution, fps)
         self.encoder = OutputEncoder(resolution, fps)
         self.motion_effect_renderer = MotionEffectRenderer(resolution)
@@ -268,23 +270,51 @@ class LyricVideoGenerator:
             
         # Create text style from config
         text_config = self.config['text_config']
-        style = TextStyle(
-            font_family=text_config.get('font_family', 'Arial'),
-            font_size=text_config.get('font_size', 72),
-            color=tuple(text_config.get('color', [255, 255, 255])),
-            stroke_width=text_config.get('stroke_width', 3),
-            stroke_color=tuple(text_config.get('stroke_color', [0, 0, 0])),
-            glow_radius=text_config.get('glow_radius', 10),
-            glow_color=tuple(text_config.get('glow_color', [0, 255, 0])) if text_config.get('glow_color') else None,
-            shadow_offset=tuple(text_config.get('shadow_offset', [2, 2])) if text_config.get('shadow_offset') else None,
-            shadow_blur=text_config.get('shadow_blur', 5),
-            shadow_opacity=text_config.get('shadow_opacity', 0.5),
-            line_spacing=text_config.get('line_spacing', 1.2),
-            alignment=text_config.get('alignment', 'center'),
-            vertical_position=text_config.get('vertical_position', 'center'),
-            dynamic_positioning=text_config.get('dynamic_positioning', False),
-            motion_tracking=text_config.get('motion_tracking', False)
-        )
+        
+        # Check if we should use professional text style
+        if text_config.get('renderer') == 'professional':
+            style = ProfessionalTextStyle(
+                font_family=text_config.get('font_family', 'Arial'),
+                font_size=text_config.get('font_size', 72),
+                color=tuple(text_config.get('color', [255, 255, 255])),
+                stroke_width=text_config.get('stroke_width', 3),
+                stroke_color=tuple(text_config.get('stroke_color', [0, 0, 0])),
+                glow_radius=text_config.get('glow_radius', 10),
+                glow_color=tuple(text_config.get('glow_color', [0, 255, 0])) if text_config.get('glow_color') else None,
+                shadow_offset=tuple(text_config.get('shadow_offset', [2, 2])) if text_config.get('shadow_offset') else None,
+                shadow_blur=text_config.get('shadow_blur', 5),
+                shadow_opacity=text_config.get('shadow_opacity', 0.5),
+                line_spacing=text_config.get('line_spacing', 1.2),
+                alignment=text_config.get('alignment', 'center'),
+                vertical_position=text_config.get('vertical_position', 'center'),
+                dynamic_positioning=text_config.get('dynamic_positioning', False),
+                motion_tracking=text_config.get('motion_tracking', False),
+                # Professional attributes
+                kinetic_enabled=text_config.get('kinetic_enabled', False),
+                kinetic_animation=text_config.get('kinetic_animation', None),
+                path_animation=text_config.get('path_animation', None),
+                transform_3d=text_config.get('transform_3d', None),
+                precision_sync=text_config.get('precision_sync', None),
+                use_timeline=text_config.get('use_timeline', False)
+            )
+        else:
+            style = TextStyle(
+                font_family=text_config.get('font_family', 'Arial'),
+                font_size=text_config.get('font_size', 72),
+                color=tuple(text_config.get('color', [255, 255, 255])),
+                stroke_width=text_config.get('stroke_width', 3),
+                stroke_color=tuple(text_config.get('stroke_color', [0, 0, 0])),
+                glow_radius=text_config.get('glow_radius', 10),
+                glow_color=tuple(text_config.get('glow_color', [0, 255, 0])) if text_config.get('glow_color') else None,
+                shadow_offset=tuple(text_config.get('shadow_offset', [2, 2])) if text_config.get('shadow_offset') else None,
+                shadow_blur=text_config.get('shadow_blur', 5),
+                shadow_opacity=text_config.get('shadow_opacity', 0.5),
+                line_spacing=text_config.get('line_spacing', 1.2),
+                alignment=text_config.get('alignment', 'center'),
+                vertical_position=text_config.get('vertical_position', 'center'),
+                dynamic_positioning=text_config.get('dynamic_positioning', False),
+                motion_tracking=text_config.get('motion_tracking', False)
+            )
         
         # Create animation config
         anim_config_dict = self.config['animation_config']
@@ -357,17 +387,60 @@ class LyricVideoGenerator:
                 if 'vertical_position' in style_mods:
                     modified_style.vertical_position = style_mods['vertical_position']
                 
-                # Render text for current line with section-based configuration
-                text_img = self.text_renderer.render_lyric_line(
-                    words=active_line.words,
-                    current_time=current_time,
-                    style=modified_style,
-                    animation_config=animation_config,
-                    line_start=active_line.start_time,
-                    line_end=active_line.end_time,
-                    audio_features=audio_features,
-                    effects_config=section_effects
-                )
+                # Check if we should use professional renderer
+                use_professional = isinstance(style, ProfessionalTextStyle) or \
+                                 isinstance(modified_style, ProfessionalTextStyle)
+                
+                if use_professional:
+                    # Use professional text renderer - set it up with the style
+                    self.professional_text_renderer.style = modified_style
+                    
+                    # Set up config for professional features
+                    from .text import create_professional_config
+                    
+                    # Get animation type from style
+                    anim_type = getattr(modified_style, 'kinetic_animation', 'wave')
+                    config = create_professional_config(
+                        text=' '.join([w.text for w in active_line.words]),
+                        style=f"kinetic_{anim_type}" if getattr(modified_style, 'kinetic_enabled', False) else "3d_rotation",
+                        duration=active_line.end_time - active_line.start_time
+                    )
+                    
+                    # Update config with style attributes
+                    if hasattr(modified_style, 'kinetic_enabled'):
+                        config['style']['kinetic_enabled'] = modified_style.kinetic_enabled
+                    if hasattr(modified_style, 'kinetic_animation'):
+                        config['style']['kinetic_animation'] = modified_style.kinetic_animation
+                    if hasattr(modified_style, 'path_animation'):
+                        config['style']['path_animation'] = modified_style.path_animation
+                    if hasattr(modified_style, 'transform_3d'):
+                        config['style']['transform_3d'] = modified_style.transform_3d
+                    
+                    self.professional_text_renderer.setup_from_config(config)
+                    
+                    # Render with professional renderer
+                    text_img = self.professional_text_renderer.render_lyric_line(
+                        words=active_line.words,
+                        current_time=current_time,
+                        style=modified_style,
+                        animation_config=animation_config,
+                        line_start=active_line.start_time,
+                        line_end=active_line.end_time,
+                        audio_features=audio_features,
+                        effects_config=section_effects
+                    )
+                else:
+                    # Use standard renderer
+                    text_img = self.text_renderer.render_lyric_line(
+                        words=active_line.words,
+                        current_time=current_time,
+                        style=modified_style,
+                        animation_config=animation_config,
+                        line_start=active_line.start_time,
+                        line_end=active_line.end_time,
+                        audio_features=audio_features,
+                        effects_config=section_effects
+                    )
                 
                 # Apply motion effects to text
                 text_img = self._apply_motion_effects(text_img, current_time, active_line, audio_features)
@@ -453,6 +526,24 @@ class LyricVideoGenerator:
                 logger.debug(f"Error applying effect combination {combination_name}: {e}")
                 
         return text_img
+    
+    def _get_y_position(self, vertical_position: str) -> int:
+        """Get Y position based on vertical position setting.
+        
+        Args:
+            vertical_position: 'top', 'center', or 'bottom'
+            
+        Returns:
+            Y coordinate
+        """
+        height = self.resolution[1]
+        
+        if vertical_position == 'top':
+            return int(height * 0.2)
+        elif vertical_position == 'bottom':
+            return int(height * 0.8)
+        else:  # center
+            return height // 2
         
     def _filter_audio_features_by_time(self, audio_features: AudioFeatures, 
                                      start_time: Optional[float], 
