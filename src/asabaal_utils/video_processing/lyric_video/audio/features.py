@@ -14,11 +14,15 @@ class BeatInfo:
     
     def get_nearest_beat(self, time: float) -> Tuple[float, int]:
         """Get the nearest beat time and index for a given time."""
+        if len(self.times) == 0:
+            return 0.0, 0
         idx = np.argmin(np.abs(self.times - time))
         return self.times[idx], idx
     
     def is_on_beat(self, time: float, tolerance: float = 0.05) -> bool:
         """Check if a time is on or near a beat."""
+        if len(self.times) == 0:
+            return False
         nearest_beat, _ = self.get_nearest_beat(time)
         return abs(time - nearest_beat) <= tolerance
 
