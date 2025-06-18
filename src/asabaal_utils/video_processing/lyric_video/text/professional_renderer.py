@@ -63,35 +63,135 @@ class KineticTypography:
         self.text: str = ""
         self.base_position: Tuple[int, int] = (0, 0)
         
-    def prepare_text(self, text: str, font, font_scale: float, base_position: Tuple[int, int]):
-        """Prepare text for kinetic animation"""
+
+    def _get_character_metrics(self, font, font_scale: float, thickness: int = 2):
+        """Get actual character metrics for smart spacing"""
+        if hasattr(self, '_char_metrics_cache'):
+            return self._char_metrics_cache
+            
+        # These are measured actual widths and offsets for common characters
+        # at font_scale 2.5 - we'll scale proportionally
+        base_scale = 2.5
+        scale_factor = font_scale / base_scale
+        
+        base_metrics = {
+            'A': {'actual': 42, 'offset': 7},
+            'B': {'actual': 36, 'offset': 9},
+            'C': {'actual': 40, 'offset': 7},
+            'D': {'actual': 40, 'offset': 9},
+            'E': {'actual': 36, 'offset': 9},
+            'F': {'actual': 32, 'offset': 9},
+            'G': {'actual': 43, 'offset': 7},
+            'H': {'actual': 38, 'offset': 9},
+            'I': {'actual': 3, 'offset': 9},
+            'J': {'actual': 30, 'offset': 2},
+            'K': {'actual': 38, 'offset': 9},
+            'L': {'actual': 33, 'offset': 9},
+            'M': {'actual': 45, 'offset': 9},
+            'N': {'actual': 38, 'offset': 9},
+            'O': {'actual': 43, 'offset': 7},
+            'P': {'actual': 36, 'offset': 9},
+            'Q': {'actual': 43, 'offset': 7},
+            'R': {'actual': 38, 'offset': 9},
+            'S': {'actual': 38, 'offset': 7},
+            'T': {'actual': 39, 'offset': 2},
+            'U': {'actual': 38, 'offset': 9},
+            'V': {'actual': 42, 'offset': 2},
+            'W': {'actual': 57, 'offset': 2},
+            'X': {'actual': 42, 'offset': 2},
+            'Y': {'actual': 42, 'offset': 2},
+            'Z': {'actual': 38, 'offset': 7},
+            # Lowercase
+            'i': {'actual': 5, 'offset': 8},
+            'l': {'actual': 3, 'offset': 9},
+            # Numbers
+            '1': {'actual': 16, 'offset': 14},
+            # Punctuation
+            '.': {'actual': 8, 'offset': 9},
+            ',': {'actual': 8, 'offset': 9},
+            '!': {'actual': 8, 'offset': 9},
+            '?': {'actual': 30, 'offset': 7},
+            ':': {'actual': 8, 'offset': 9},
+            ';': {'actual': 8, 'offset': 9},
+            "'": {'actual': 3, 'offset': 9},
+            '"': {'actual': 23, 'offset': 9},
+            ' ': {'actual': 0, 'offset': 0},  # Space
+        }
+        
+        # Scale metrics to current font size
+        metrics = {}
+        for char, data in base_metrics.items():
+            metrics[char] = {
+                'actual': int(data['actual'] * scale_factor),
+                'offset': int(data['offset'] * scale_factor)
+            }
+        
+        # For unknown characters, fall back to OpenCV measurements
+        self._char_metrics_cache = metrics
+        return metrics
+
+
+    def prepare_text(self, text: str, font, font_scale: float, 
+                    base_position: Tuple[int, int]):
+        """Prepare text with smart manual character spacing"""
         self.text = text
         self.character_states.clear()
         self.character_bounds.clear()
         
-        # Calculate total width to center text
-        total_width = 0
-        char_info = []
+        # Get character metrics
+        metrics = self._get_character_metrics(font, font_scale)
         
-        for char in text:
-            (char_width, char_height), baseline = cv2.getTextSize(char, font, font_scale, 2)
-            char_info.append((char_width, char_height))
-            total_width += char_width + int(font_scale * 2)
+        # Calculate positions using actual widths
+        positions = []
+        current_x = 0
+        char_spacing = int(font_scale * 3)  # Base spacing between characters
         
-        total_width -= int(font_scale * 2)  # Remove last spacing
+        for i, char in enumerate(text):
+            if char in metrics:
+                # Use known metrics
+                char_metrics = metrics[char]
+                actual_width = char_metrics['actual']
+                offset = char_metrics['offset']
+            else:
+                # Fall back to OpenCV for unknown characters
+                (opencv_width, height), _ = cv2.getTextSize(char, font, font_scale, 2)
+                # Estimate actual width as 75% of OpenCV width
+                actual_width = int(opencv_width * 0.75)
+                offset = int(opencv_width * 0.15)
+            
+            # Store position adjusted for offset
+            positions.append({
+                'draw_x': current_x - offset,
+                'actual_x': current_x,
+                'width': actual_width
+            })
+            
+            # Move to next character
+            current_x += actual_width + char_spacing
+        
+        # Remove last spacing
+        if positions:
+            total_width = current_x - char_spacing
+        else:
+            total_width = 0
         
         # Center the text
         start_x = base_position[0] - total_width // 2
         self.base_position = (start_x, base_position[1])
         
-        # Now position each character
-        x_offset = 0
-        for i, (char, (char_width, char_height)) in enumerate(zip(text, char_info)):
-            self.character_bounds.append((x_offset, 0, char_width, char_height))
-            char_pos = (start_x + x_offset, base_position[1])
+        # Create character states with corrected positions
+        for i, (char, pos_data) in enumerate(zip(text, positions)):
+            # Character bounds relative to text start
+            self.character_bounds.append((
+                pos_data['actual_x'], 0, 
+                pos_data['width'], 50  # Approximate height
+            ))
+            
+            # Absolute position for drawing
+            char_pos = (start_x + pos_data['draw_x'], base_position[1])
             self.character_states.append(CharacterTransform(position=char_pos))
-            x_offset += char_width + int(font_scale * 2)
-    
+
+
     def animate_wave(self, progress: float, amplitude: float = 30, frequency: float = 2.0, 
                      speed: float = 2.0, vertical: bool = True):
         """Animate characters in a wave pattern"""
@@ -199,15 +299,8 @@ class KineticTypography:
             center_x = (char_img.shape[1] - text_width) // 2
             center_y = (char_img.shape[0] + text_height) // 2
             
-            # Adjust position for narrow characters that OpenCV misreports
-            # Most narrow characters need a constant 1 pixel offset
-            # '1' needs more because it has extra space on the left
-            narrow_char_offsets = {
-                'I': 1, 'i': 1, 'l': 1, '|': 1, '1': 4, '!': 1,
-                '.': 1, ',': 1, ':': 1, ';': 1, "'": 1, '"': 1
-            }
-            x_offset = narrow_char_offsets.get(char, 0)
-            cv2.putText(char_img, char, (center_x + x_offset, center_y), 
+            # No offset needed - positioning is handled in prepare_text
+            cv2.putText(char_img, char, (center_x, center_y), 
                        font, font_scale, (*color, int(255 * state.opacity)), thickness)
             
             if state.blur > 0:
