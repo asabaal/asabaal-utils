@@ -71,11 +71,13 @@ class KineticTypography:
         
         # Calculate total width to center text
         total_width = 0
-        char_widths = []
+        char_info = []
+        
         for char in text:
             (char_width, char_height), baseline = cv2.getTextSize(char, font, font_scale, 2)
-            char_widths.append((char_width, char_height))
+            char_info.append((char_width, char_height))
             total_width += char_width + int(font_scale * 2)
+        
         total_width -= int(font_scale * 2)  # Remove last spacing
         
         # Center the text
@@ -84,7 +86,7 @@ class KineticTypography:
         
         # Now position each character
         x_offset = 0
-        for i, (char, (char_width, char_height)) in enumerate(zip(text, char_widths)):
+        for i, (char, (char_width, char_height)) in enumerate(zip(text, char_info)):
             self.character_bounds.append((x_offset, 0, char_width, char_height))
             char_pos = (start_x + x_offset, base_position[1])
             self.character_states.append(CharacterTransform(position=char_pos))
@@ -187,10 +189,25 @@ class KineticTypography:
             char_img = np.zeros((char_size[1] * buffer_multiplier, char_size[0] * buffer_multiplier, 4), dtype=np.uint8)
             
             color = state.color if state.color else base_color
-            # Center character in buffer
-            center_x = char_img.shape[1] // 2 - char_size[0] // 2
-            center_y = char_img.shape[0] // 2 + char_size[1] // 2
-            cv2.putText(char_img, char, (center_x, center_y), 
+            
+            # For narrow characters like 'I', we need better centering
+            # Get the actual text bounds to center properly
+            (text_width, text_height), baseline = cv2.getTextSize(char, font, font_scale, thickness)
+            
+            # Center character in buffer - but account for OpenCV's text positioning
+            # OpenCV draws from bottom-left, and narrow chars like 'I' need special handling
+            center_x = (char_img.shape[1] - text_width) // 2
+            center_y = (char_img.shape[0] + text_height) // 2
+            
+            # Adjust position for narrow characters that OpenCV misreports
+            # Most narrow characters need a constant 1 pixel offset
+            # '1' needs more because it has extra space on the left
+            narrow_char_offsets = {
+                'I': 1, 'i': 1, 'l': 1, '|': 1, '1': 4, '!': 1,
+                '.': 1, ',': 1, ':': 1, ';': 1, "'": 1, '"': 1
+            }
+            x_offset = narrow_char_offsets.get(char, 0)
+            cv2.putText(char_img, char, (center_x + x_offset, center_y), 
                        font, font_scale, (*color, int(255 * state.opacity)), thickness)
             
             if state.blur > 0:
