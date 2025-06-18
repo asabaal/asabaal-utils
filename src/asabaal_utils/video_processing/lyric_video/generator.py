@@ -457,7 +457,7 @@ class LyricVideoGenerator:
             frame = self.compositor.composite_frame(background, layers)
             
             # Apply audio-reactive effects
-            if self.config['audio_reactive'].get('enable_frequency_reactive', False):
+            if self.config.get('audio_reactive', {}).get('enable_frequency_reactive', False):
                 frame = self.compositor.apply_audio_reactive_effects(frame, audio_features)
                 
             yield frame

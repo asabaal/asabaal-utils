@@ -66,15 +66,27 @@ class KineticTypography:
     def prepare_text(self, text: str, font, font_scale: float, base_position: Tuple[int, int]):
         """Prepare text for kinetic animation"""
         self.text = text
-        self.base_position = base_position
         self.character_states.clear()
         self.character_bounds.clear()
         
-        x_offset = 0
-        for i, char in enumerate(text):
+        # Calculate total width to center text
+        total_width = 0
+        char_widths = []
+        for char in text:
             (char_width, char_height), baseline = cv2.getTextSize(char, font, font_scale, 2)
+            char_widths.append((char_width, char_height))
+            total_width += char_width + int(font_scale * 2)
+        total_width -= int(font_scale * 2)  # Remove last spacing
+        
+        # Center the text
+        start_x = base_position[0] - total_width // 2
+        self.base_position = (start_x, base_position[1])
+        
+        # Now position each character
+        x_offset = 0
+        for i, (char, (char_width, char_height)) in enumerate(zip(text, char_widths)):
             self.character_bounds.append((x_offset, 0, char_width, char_height))
-            char_pos = (base_position[0] + x_offset, base_position[1])
+            char_pos = (start_x + x_offset, base_position[1])
             self.character_states.append(CharacterTransform(position=char_pos))
             x_offset += char_width + int(font_scale * 2)
     
@@ -91,7 +103,7 @@ class KineticTypography:
                 state.position = (self.base_position[0] + self.character_bounds[i][0] + offset, 
                                 state.position[1])
     
-    def animate_cascade(self, progress: float, delay_factor: float = 0.1, 
+    def animate_cascade(self, progress: float, delay_factor: float = 0.05, 
                        drop_height: float = 200):
         """Cascade animation with staggered timing"""
         for i, state in enumerate(self.character_states):
@@ -170,10 +182,15 @@ class KineticTypography:
                 continue
             
             char_size = cv2.getTextSize(char, font, font_scale, thickness)[0]
-            char_img = np.zeros((char_size[1] * 3, char_size[0] * 3, 4), dtype=np.uint8)
+            # Make buffer larger to accommodate rotations and scaling
+            buffer_multiplier = 4 if state.rotation != 0 or state.scale != (1.0, 1.0) else 3
+            char_img = np.zeros((char_size[1] * buffer_multiplier, char_size[0] * buffer_multiplier, 4), dtype=np.uint8)
             
             color = state.color if state.color else base_color
-            cv2.putText(char_img, char, (char_size[0], char_size[1] * 2), 
+            # Center character in buffer
+            center_x = char_img.shape[1] // 2 - char_size[0] // 2
+            center_y = char_img.shape[0] // 2 + char_size[1] // 2
+            cv2.putText(char_img, char, (center_x, center_y), 
                        font, font_scale, (*color, int(255 * state.opacity)), thickness)
             
             if state.blur > 0:
@@ -574,7 +591,8 @@ class ProfessionalTextRenderer(TextRenderer):
                     self.timeline.add_keyframe(track_name, **kf)
     
     def render_professional_text(self, text: str, frame: np.ndarray, 
-                               current_time: float, position: Tuple[int, int]) -> np.ndarray:
+                               current_time: float, position: Tuple[int, int],
+                               line_duration: Optional[float] = None) -> np.ndarray:
         """Render text with professional effects"""
         result = frame.copy()
         
@@ -589,7 +607,11 @@ class ProfessionalTextRenderer(TextRenderer):
             # Get animation progress from timeline or calculate
             progress = self.timeline.get_value("kinetic_progress", current_time)
             if progress is None:
-                progress = (current_time % 2.0) / 2.0  # Default 2-second loop
+                # Use line duration if available, otherwise use a sensible default
+                if line_duration and line_duration > 0:
+                    progress = min(1.0, current_time / line_duration)
+                else:
+                    progress = (current_time % 2.0) / 2.0  # Fallback 2-second loop
             
             # Apply kinetic animation
             if self.style.kinetic_animation == "wave":
@@ -705,11 +727,13 @@ class ProfessionalTextRenderer(TextRenderer):
         y_position = self._get_y_position(style.vertical_position)
         
         # Render with professional system
+        line_duration = line_end - line_start
         result = self.render_professional_text(
             text=text,
             frame=frame,
             current_time=current_time - line_start,
-            position=(x_position, y_position)
+            position=(x_position, y_position),
+            line_duration=line_duration
         )
         
         # Convert to RGBA if needed
@@ -774,7 +798,7 @@ def create_professional_config(text: str, style: str = "kinetic_wave",
         config["style"]["kinetic_animation"] = "wave"
         config["timeline"]["tracks"]["kinetic_progress"] = [
             {"time": 0.0, "value": 0.0},
-            {"time": duration, "value": duration / 2.0}
+            {"time": duration, "value": 1.0}  # Full animation cycle
         ]
     
     elif style == "kinetic_cascade":
@@ -782,7 +806,7 @@ def create_professional_config(text: str, style: str = "kinetic_wave",
         config["style"]["kinetic_animation"] = "cascade"
         config["timeline"]["tracks"]["kinetic_progress"] = [
             {"time": 0.0, "value": 0.0},
-            {"time": 1.5, "value": 1.0, "interpolation": "bezier", "bezier_handles": (0, 0, 0.58, 1)}
+            {"time": min(1.5, duration), "value": 1.0, "interpolation": "bezier", "bezier_handles": (0, 0, 0.58, 1)}
         ]
     
     elif style == "3d_rotation":
