@@ -1,0 +1,100 @@
+name: Deploy to Abacus AI VM
+
+on:
+  push:
+    branches: [main, feature/video-processing]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.ABACUS_VM_SSH_KEY }}
+        
+    - name: Deploy to VM
+      env:
+        VM_HOST: ${{ secrets.ABACUS_VM_HOST }}
+        VM_USER: ${{ secrets.ABACUS_VM_USER }}
+      run: |
+        # Create deployment script
+        cat > deploy.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "🚀 Starting deployment to Abacus AI VM..."
+        
+        # Navigate to project directory
+        cd /home/ubuntu/asabaal-utils || {
+          echo "📁 Creating project directory..."
+          mkdir -p /home/ubuntu/asabaal-utils
+          cd /home/ubuntu/asabaal-utils
+        }
+        
+        # Update code
+        if [ -d ".git" ]; then
+          echo "📥 Pulling latest changes..."
+          git pull origin main
+        else
+          echo "📥 Cloning repository..."
+          git clone https://github.com/asabaal/asabaal-utils.git .
+        fi
+        
+        # Setup Python environment
+        echo "🐍 Setting up Python environment..."
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        
+        # Stop existing services
+        echo "🛑 Stopping existing services..."
+        pkill -f claude_tool_bridge || true
+        pkill -f converter_api || true
+        
+        # Start services in background
+        echo "🚀 Starting Claude Tool Bridge..."
+        cd tools
+        nohup python claude_tool_bridge.py > ../logs/bridge.log 2>&1 &
+        nohup python converter_api.py > ../logs/api.log 2>&1 &
+        
+        # Wait for services to start
+        sleep 10
+        
+        # Verify deployment
+        echo "🔍 Verifying deployment..."
+        curl -f http://localhost:7000/health || exit 1
+        curl -f http://localhost:8000/ || exit 1
+        
+        echo "✅ Deployment successful!"
+        echo "🌐 Claude Bridge: http://$VM_HOST:7000"
+        echo "🔧 Converter API: http://$VM_HOST:8000"
+        EOF
+        
+        # Make script executable and copy to VM
+        chmod +x deploy.sh
+        
+        # Create logs directory and deploy
+        ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "mkdir -p /home/ubuntu/asabaal-utils/logs"
+        scp deploy.sh $VM_USER@$VM_HOST:/home/ubuntu/
+        ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "bash /home/ubuntu/deploy.sh"
+        
+    - name: Test Deployment
+      env:
+        VM_HOST: ${{ secrets.ABACUS_VM_HOST }}
+      run: |
+        # Wait for services to be ready
+        sleep 30
+        
+        # Test endpoints
+        curl -f http://$VM_HOST:7000/health || exit 1
+        curl -f http://$VM_HOST:8000/ || exit 1
+        
+        echo "✅ All services responding correctly!"
