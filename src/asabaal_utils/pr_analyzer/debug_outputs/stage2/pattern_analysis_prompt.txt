@@ -1,0 +1,226 @@
+You are a senior software architect analyzing code patterns and consistency across this PR.
+
+## PR Context
+- Analyzing: 257 files
+- Categories: 9 different types
+
+## Analysis Focus
+Look for patterns and consistency issues:
+
+1. **Naming Conventions**
+   - File naming patterns
+   - Variable and function naming
+   - Directory structure consistency
+
+2. **Architecture Patterns**
+   - Similar functionality implemented differently
+   - Inconsistent approaches to the same problems
+   - Missing architectural patterns
+
+3. **Code Style**
+   - Formatting inconsistencies
+   - Different coding patterns for similar tasks
+   - Inconsistent error handling approaches
+
+## Sample File Analysis
+## .env.example
+- Category: CONFIGURATION (MEDIUM)
+- Change: A (+14/-0)
+- Size: 974 bytes, 29 lines
+- Content sample:
+```
+# Supabase Configuration for Asabaal Ventures Website
+# Copy this file to .env and fill in your actual values
+# Get these from your Supabase project dashboard -> Settings -> API
+
+# Your Supabase project URL (required)
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_URL=https://your-project-id.supabase.co
+
+# Your Supabase anon/public key (required)
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Service rol
+... [truncated]
+```
+
+## .gitignore
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+34/-0)
+- Size: 659 bytes, 38 lines
+- Content sample:
+```
+**/.claude/settings.local.json
+*.pdf
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Local Supabase configuration (keep your keys private!)
+config/supabase-keys.js
+
+# Content Management
+# Note: You can choose to track or ignore blog content
+# Option 1: Track everything (recommended for backup)
+# content/
+
+# Option 2: Ignore drafts only (track published content)
+content/blog/drafts/
+
+# Option 3: Ignore all content (if you prefer external storage)
+# content/blog/
+
+# Migration script ou
+... [truncated]
+```
+
+## DEPLOY-READY.md
+- Category: DOCUMENTATION (MEDIUM)
+- Change: A (+102/-0)
+- Size: 3193 bytes, 102 lines
+- Content sample:
+```
+# 🚀 Ready to Deploy Guide
+
+Your website is ready to deploy! Here's the minimal setup to get contact forms and email subscriptions working.
+
+## ✅ What Works Right Now (No Database Needed)
+- ✅ Blog system (static files in `/blog/` + `blog-data.js`)
+- ✅ All website pages and navigation
+- ✅ All styling and responsive design
+- ✅ Blog post display and navigation
+
+## 🔧 5-Minute Supabase Setup (Only for Contact Forms)
+
+### Step 1: Create Supabase Project
+1. Go to [supabase.com](https://supabase.com) → S
+... [truncated]
+```
+
+## Founder Quote Image.jpg:Zone.Identifier
+- Category: ASSETS_MEDIA (LOW)
+- Change: A (+4/-0)
+- Size: 589 bytes, 5 lines
+- Content sample:
+```
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://www.canva.com/
+HostUrl=https://export-download.canva.com/dWing/DAGufJdWing/2/0/0001-6715340367104364665.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20250728%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250728T135716Z&X-Amz-Expires=29380&X-Amz-Signature=f75be8a27b367c058c630876c412646c73b500bd079e01b52f32b0fa759cc422&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%2A%3DUTF-8%27%27Founder%25
+... [truncated]
+```
+
+## Initial Phases Concepts/Pitch Deck Updated 20250714.html
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+1545/-0)
+- Size: 91705 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## Initial Phases Concepts/Pitch Deck Updated 20250714.html:Zone.Identifier
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+3/-0)
+- Size: 54 bytes, 4 lines
+- Content sample:
+```
+[ZoneTransfer]
+ZoneId=3
+HostUrl=https://claude.ai/
+
+```
+
+## Initial Phases Concepts/phase-1.html
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+1659/-0)
+- Size: 59391 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## Initial Phases Concepts/phase-2.html
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+631/-0)
+- Size: 21045 bytes, 631 lines
+- Content sample:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 2: Content Foundation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 25%, #2d1b69 50%, #4c1d95 75%, #6b21a8 100%);
+          
+... [truncated]
+```
+
+## Initial Phases Concepts/phase-3.html
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+791/-0)
+- Size: 27664 bytes, 791 lines
+- Content sample:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3: Contest + Community Beta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 25%, #2d1b69 50%, #4c1d95 75%, #6b21a8 100%);
+    
+... [truncated]
+```
+
+## Initial Phases Concepts/phase-4.html
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+922/-0)
+- Size: 33159 bytes, 922 lines
+- Content sample:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 4: Activation Economy Mechanics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 25%, #2d1b69 50%, #4c1d95 75%, #6b21a8 100%);
+
+... [truncated]
+```
+
+
+## Output Format
+Identify specific pattern issues with recommendations for improvement.

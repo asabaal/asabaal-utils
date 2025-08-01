@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""PR Analyzer CLI wrapper for toolmgr installation"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+# Add the package path to Python path
+package_root = Path("/home/asabaal/asabaal_ventures/repos/asabaal-utils/src")
+sys.path.insert(0, str(package_root))
+
+from asabaal_utils.pr_analyzer import UnifiedPRAnalyzer
+
+
+def main():
+    """Main entry point with argparse."""
+    parser = argparse.ArgumentParser(description='PR Analyzer - Comprehensive pull request analysis tool')
+    parser.add_argument('--from', dest='from_branch', default=None,
+                       help='Source branch (default: current branch)')
+    parser.add_argument('--to', dest='to_branch', default='main',
+                       help='Target branch (default: main)')
+    parser.add_argument('--repo', dest='repo_path', default='.',
+                       help='Repository path (default: current directory)')
+    
+    # Feedback mode
+    parser.add_argument('--feedback', dest='feedback',
+                       help='Provide feedback to update existing analysis')
+    parser.add_argument('--feedback-files', nargs='*', dest='feedback_files',
+                       help='Additional files to include with feedback')
+    
+    args = parser.parse_args()
+    
+    try:
+        analyzer = UnifiedPRAnalyzer(args.repo_path)
+        
+        # Handle feedback mode
+        if args.feedback:
+            success = analyzer.update_analysis_with_feedback(args.feedback, args.feedback_files)
+        else:
+            # Regular analysis mode - get current branch if from_branch not specified
+            from_branch = args.from_branch
+            if not from_branch:
+                result = subprocess.run(['git', 'branch', '--show-current'], 
+                                      capture_output=True, text=True, cwd=args.repo_path)
+                from_branch = result.stdout.strip() if result.returncode == 0 else 'HEAD'
+            
+            # Always generate reports by default
+            success = analyzer.analyze_pr(from_branch, args.to_branch)
+            
+            if success:
+                # Show the generated reports
+                output_dir = Path(args.repo_path) / "pr_analysis_output"
+                html_report = output_dir / "pr_analysis_interactive.html"
+                markdown_report = output_dir / "debug_outputs" / "stage6" / "PR_ANALYSIS_REPORT.md"
+                
+                print(f"\n📊 Reports Generated:")
+                if html_report.exists():
+                    print(f"   🌐 Interactive HTML: {html_report}")
+                    print(f"   🔗 Open in browser: file://{html_report.absolute()}")
+                if markdown_report.exists():
+                    print(f"   📄 Markdown Report: {markdown_report}")
+        
+        if success:
+            print("\n🎉 Analysis completed successfully!")
+        else:
+            print("\n⚠️  Analysis completed with some issues.")
+            sys.exit(1)
+        
+    except KeyboardInterrupt:
+        print("\n⚠️  Analysis interrupted by user.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n❌ Fatal error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
