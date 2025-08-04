@@ -511,7 +511,8 @@ class ResultCombiner:
         
         # 1. Complete JSON report (ESSENTIAL OUTPUT)
         report_dict = asdict(report)
-        main_output_dir = self.test_output_dir.parent.parent  # Go up from debug_outputs/stage6 to pr_analysis_output/
+        from .path_utils import get_main_output_dir
+        main_output_dir = get_main_output_dir(self.test_output_dir)
         with open(main_output_dir / "complete_pr_analysis.json", 'w') as f:
             json.dump(report_dict, f, indent=2)
         # Also save in debug folder for troubleshooting
@@ -673,7 +674,8 @@ class ResultCombiner:
         ])
         
         # Save markdown report (ESSENTIAL OUTPUT)
-        main_output_dir = self.test_output_dir.parent.parent  # Go up from debug_outputs/stage6 to pr_analysis_output/
+        from .path_utils import get_main_output_dir
+        main_output_dir = get_main_output_dir(self.test_output_dir)
         with open(main_output_dir / "PR_ANALYSIS_REPORT.md", 'w') as f:
             f.write('\n'.join(lines))
         # Also save in debug folder for troubleshooting

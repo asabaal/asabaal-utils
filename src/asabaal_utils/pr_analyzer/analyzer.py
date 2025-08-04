@@ -16,20 +16,31 @@ from .stages import (
     ResponseParser,
     IssueExtractor,
     FilteringAndCombination,
-    AgenticHTMLReportGenerator,
+    FileAssessmentGenerator,
+    Stage9HTMLGenerator,
     FeedbackUpdateSystem
 )
+
+# Import both versions of DetailedAnalysisEngine for migration
+try:
+    from .stage7_detailed_analysis_v2 import DetailedAnalysisEngine as DetailedAnalysisEngineV2
+    TOOLKIT_VERSION_AVAILABLE = True
+except ImportError:
+    TOOLKIT_VERSION_AVAILABLE = False
+
+from .stage7_detailed_analysis import DetailedAnalysisEngine as DetailedAnalysisEngineV1
 
 
 class UnifiedPRAnalyzer:
     """Unified PR analyzer that runs all stages and saves outputs locally"""
     
-    def __init__(self, repo_path: str, debug_mode: bool = False):
+    def __init__(self, repo_path: str, debug_mode: bool = False, max_files: int = None):
         self.repo_path = Path(repo_path).resolve()
         self.analyzer_dir = Path(__file__).parent
         self.output_dir = self.repo_path / "pr_analysis_output"
         self.output_dir.mkdir(exist_ok=True)
         self.debug_mode = debug_mode
+        self.max_files = max_files
         
         # Copy necessary files to local output directory
         self.setup_local_environment()
@@ -185,21 +196,31 @@ class UnifiedPRAnalyzer:
             print(f"❌ Stage 6: ERROR - {e}")
             return False
     
-    def run_stage7_html_generation(self) -> bool:
-        """Run Stage 7: HTML report generation"""
-        print("🔄 Stage 7: HTML Report Generation")
+    def run_stage7_detailed_analysis(self) -> bool:
+        """Run Stage 7: Detailed file-level analysis"""
+        print("🔄 Stage 7: Detailed File-Level Analysis")
         
         try:
-            stage7 = AgenticHTMLReportGenerator(str(self.repo_path), str(self.output_dir))
-            result = stage7.run_stage7_agentic_html_test()
+            # Use the new toolkit-based version if available, otherwise fall back to V1
+            if TOOLKIT_VERSION_AVAILABLE:
+                if self.debug_mode:
+                    print("🔧 Using generalized batch processing toolkit (V2)")
+                stage7 = DetailedAnalysisEngineV2(str(self.repo_path), str(self.output_dir), self.debug_mode, self.max_files)
+            else:
+                if self.debug_mode:
+                    print("🔧 Using legacy implementation (V1)")
+                stage7 = DetailedAnalysisEngineV1(str(self.repo_path), str(self.output_dir), self.debug_mode, self.max_files)
+            
+            result = stage7.run_detailed_analysis()
             
             if result:
                 print("✅ Stage 7: SUCCESS")
-                # HTML report is already generated in the correct location
-                html_file = self.output_dir / "pr_analysis_interactive.html"
-                if html_file.exists():
-                    print(f"📊 HTML Report Generated: {html_file}")
-                    print(f"🔗 Open in browser: file://{html_file.absolute()}")
+                # Analysis results are saved to main output directory
+                analysis_file = self.output_dir / "detailed_analysis_results.json"
+                if analysis_file.exists():
+                    print(f"📊 Detailed Analysis Generated: {analysis_file}")
+                if self.debug_mode:
+                    print(f"🐛 Debug outputs saved to: {self.output_dir}/debug_outputs/stage7")
                 return True
             else:
                 print("❌ Stage 7: FAILED")
@@ -209,8 +230,52 @@ class UnifiedPRAnalyzer:
             print(f"❌ Stage 7: ERROR - {e}")
             return False
     
-    def analyze_pr(self, from_branch: str = "main", to_branch: str = None) -> bool:
-        """Run complete PR analysis pipeline"""
+    def run_stage8_file_assessment(self) -> bool:
+        """Run Stage 8: File-Level Merge Readiness Assessment"""
+        print("🔄 Stage 8: File Assessment")
+        
+        try:
+            stage8 = FileAssessmentGenerator(str(self.repo_path), str(self.output_dir))
+            result = stage8.run_stage8_file_assessment()
+            
+            if result:
+                print("✅ Stage 8: SUCCESS")
+                print("📊 File assessment completed - results saved for Stage 9")
+                return True
+            else:
+                print("❌ Stage 8: FAILED")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Stage 8: FAILED with error: {e}")
+            return False
+    
+    def run_stage9_html_generation(self) -> bool:
+        """Run Stage 9: HTML report generation"""
+        print("🔄 Stage 9: HTML Report Generation")
+        
+        try:
+            stage9 = Stage9HTMLGenerator(str(self.repo_path), str(self.output_dir))
+            result = stage9.run_stage9_html_generation()
+            
+            if result:
+                print("✅ Stage 9: SUCCESS")
+                # HTML report is already generated in the correct location
+                html_file = self.output_dir / "pr_analysis_interactive.html"
+                if html_file.exists():
+                    print(f"📊 HTML Report Generated: {html_file}")
+                    print(f"🔗 Open in browser: file://{html_file.absolute()}")
+                return True
+            else:
+                print("❌ Stage 9: FAILED")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Stage 9: ERROR - {e}")
+            return False
+    
+    def analyze_pr(self, from_branch: str = "main", to_branch: str = None, start_stage: int = 1, end_stage: int = 9) -> bool:
+        """Run complete PR analysis pipeline with optional stage range"""
         
         print("=" * 80)
         print("🚀 PR ANALYZER - UNIFIED PIPELINE")
@@ -218,46 +283,87 @@ class UnifiedPRAnalyzer:
         print(f"📂 Repository: {self.repo_path}")
         print(f"🔀 Analyzing: {from_branch} → {to_branch or 'current branch'}")
         print(f"📁 Output directory: {self.output_dir}")
+        print(f"🎯 Running stages: {start_stage} → {end_stage}")
         print()
         
         start_time = time.time()
         
-        # Run all stages in sequence
-        stages = [
-            ("Stage 1: Context Preparation", lambda: self.run_stage1_context_prep(from_branch, to_branch)),
-            ("Stage 2: Agent Prompts", self.run_stage2_agent_prompts),
-            ("Stage 3: Agent Communication", self.run_stage3_agent_communication),
-            ("Stage 4: Response Parsing", self.run_stage4_response_parsing),
-            ("Stage 5: Issue Extraction", self.run_stage5_issue_extraction),
-            ("Stage 6: Filtering & Combination", self.run_stage6_filtering_combination),
-            ("Stage 7: HTML Generation", self.run_stage7_html_generation)
+        # Define all stages with their numbers
+        all_stages = [
+            (1, "Stage 1: Context Preparation", lambda: self.run_stage1_context_prep(from_branch, to_branch)),
+            (2, "Stage 2: Agent Prompts", self.run_stage2_agent_prompts),
+            (3, "Stage 3: Agent Communication", self.run_stage3_agent_communication),
+            (4, "Stage 4: Response Parsing", self.run_stage4_response_parsing),
+            (5, "Stage 5: Issue Extraction", self.run_stage5_issue_extraction),
+            (6, "Stage 6: Filtering & Combination", self.run_stage6_filtering_combination),
+            (7, "Stage 7: Detailed Analysis", self.run_stage7_detailed_analysis),
+            (8, "Stage 8: File Assessment", self.run_stage8_file_assessment),
+            (9, "Stage 9: HTML Generation", self.run_stage9_html_generation)
         ]
+        
+        # Filter stages by range
+        stages = [(name, func) for num, name, func in all_stages if start_stage <= num <= end_stage]
         
         failed_stages = []
         
         for stage_name, stage_func in stages:
+            print(f"🔄 Running {stage_name}...")
             success = stage_func()
             if not success:
                 failed_stages.append(stage_name)
-                print(f"⚠️  Continuing despite {stage_name} failure...")
+                print(f"❌ {stage_name} FAILED - Stopping pipeline execution")
+                print(f"💡 Fix the error above and run the analyzer again")
+                return False
+            print(f"✅ {stage_name} completed successfully")
             print()
         
         elapsed_time = time.time() - start_time
         print("=" * 80)
         
         if not failed_stages:
-            print("✅ ALL STAGES COMPLETED SUCCESSFULLY!")
+            if start_stage == end_stage:
+                print(f"✅ STAGE {start_stage} COMPLETED SUCCESSFULLY!")
+            elif start_stage == 1 and end_stage == 9:
+                print("✅ ALL STAGES COMPLETED SUCCESSFULLY!")
+            else:
+                print(f"✅ STAGES {start_stage}-{end_stage} COMPLETED SUCCESSFULLY!")
             print(f"⏱️  Total time: {elapsed_time:.1f} seconds")
             
-            # Show output files
-            html_report = self.output_dir / "pr_analysis_interactive.html"
-            if html_report.exists():
-                print(f"📊 Interactive HTML Report: {html_report}")
-                print(f"🔗 Open in browser: file://{html_report.absolute()}")
+            # Only show reports if the stages that generate them were run
+            reports_shown = []
             
-            markdown_report = self.output_dir / "debug_outputs" / "stage6" / "PR_ANALYSIS_REPORT.md"
-            if markdown_report.exists():
-                print(f"📄 Markdown Report: {markdown_report}")
+            # HTML report is generated by Stage 9
+            if end_stage >= 9:
+                html_report = self.output_dir / "pr_analysis_interactive.html"
+                if html_report.exists():
+                    print(f"📊 Interactive HTML Report: {html_report}")
+                    print(f"🔗 Open in browser: file://{html_report.absolute()}")
+                    reports_shown.append("HTML")
+            
+            # File assessment results are generated by Stage 8
+            elif end_stage >= 8:
+                assessment_file = self.output_dir / "file_assessment_results.json"
+                if assessment_file.exists():
+                    print(f"📊 File Assessment Results: {assessment_file}")
+                    print(f"➡️  Run Stage 9 to generate HTML report from these results")
+                    reports_shown.append("File Assessment")
+            
+            # Markdown report is generated by Stage 6 - only show if we actually ran Stage 6
+            if start_stage <= 6 and end_stage >= 6:
+                markdown_report = self.output_dir / "debug_outputs" / "stage6" / "PR_ANALYSIS_REPORT.md"
+                if markdown_report.exists():
+                    print(f"📄 Markdown Report: {markdown_report}")
+                    reports_shown.append("Markdown")
+            
+            # Stage 7 detailed analysis - only show if we actually ran Stage 7
+            if start_stage <= 7 and end_stage >= 7:
+                detailed_report = self.output_dir / "detailed_analysis_results.json"
+                if detailed_report.exists():
+                    print(f"🔍 Detailed Analysis: {detailed_report}")
+                    reports_shown.append("Detailed Analysis")
+            
+            if not reports_shown:
+                print("📋 No final reports generated (stages run did not include report generation)")
             
             return True
         else:
@@ -286,13 +392,15 @@ class UnifiedPRAnalyzer:
                 print("✅ Feedback update completed successfully!")
                 
                 # Copy updated results to local output
-                source_debug = self.analyzer_dir.parent.parent.parent.parent / "pr_analyzer" / "debug_outputs" / "stage8_feedback"
+                from .path_utils import find_repo_root
+                repo_root = find_repo_root()
+                source_debug = repo_root / "pr_analyzer" / "debug_outputs" / "stage8_feedback"
                 target_debug = self.output_dir / "debug_outputs" / "stage8_feedback"
                 if source_debug.exists():
                     shutil.copytree(source_debug, target_debug, dirs_exist_ok=True)
                 
                 # Re-run HTML generation with updated data
-                if self.run_stage7_html_generation():
+                if self.run_stage8_html_generation():
                     print("✅ HTML report updated with feedback!")
                 
                 return True

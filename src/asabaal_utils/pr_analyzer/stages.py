@@ -8,8 +8,10 @@ from .stage3_agent_communication import RobustAgentCaller
 from .stage4_response_parsing import ResponseParser
 from .stage5_issue_extraction import IssueValidator as IssueExtractor
 from .stage6_filtering_combination import ResultCombiner as FilteringAndCombination
-from .stage7_agentic_html import AgenticHTMLReportGenerator
-from .stage8_feedback_updates import FeedbackUpdateSystem
+from .stage7_detailed_analysis import DetailedAnalysisEngine
+from .stage8_file_assessment import FileAssessmentGenerator
+from .stage9_html_generator import Stage9HTMLGenerator
+from .stage10_feedback_updates import FeedbackUpdateSystem
 
 __all__ = [
     'ContextPreparer',
@@ -18,6 +20,8 @@ __all__ = [
     'ResponseParser', 
     'IssueExtractor',
     'FilteringAndCombination',
-    'AgenticHTMLReportGenerator',
+    'DetailedAnalysisEngine',
+    'FileAssessmentGenerator',
+    'Stage9HTMLGenerator', 
     'FeedbackUpdateSystem'
 ]

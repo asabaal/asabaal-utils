@@ -23,6 +23,12 @@ def main():
     parser.add_argument('--repo', dest='repo_path', default='.',
                        help='Repository path (default: current directory)')
     
+    # Stage control
+    parser.add_argument('--start-stage', type=int, default=1,
+                       help='Starting stage number (default: 1)')
+    parser.add_argument('--end-stage', type=int, default=8,
+                       help='Ending stage number (default: 8 - runs all stages)')
+    
     # Feedback mode
     parser.add_argument('--feedback', dest='feedback',
                        help='Provide feedback to update existing analysis')
@@ -46,7 +52,7 @@ def main():
                 from_branch = result.stdout.strip() if result.returncode == 0 else 'HEAD'
             
             # Always generate reports by default
-            success = analyzer.analyze_pr(from_branch, args.to_branch)
+            success = analyzer.analyze_pr(from_branch, args.to_branch, args.start_stage, args.end_stage)
             
             if success:
                 # Show the generated reports

@@ -75,15 +75,25 @@ class ContextPreparationTester:
             
             pr_analysis = self.git_analyzer.analyze_pr(from_branch, to_branch, include_diffs=False)
             
+            # Define analysis files early for use in debug output
+            analysis_files = pr_analysis.file_changes_excluding_analysis or pr_analysis.file_changes
+            # Filter out deleted files - they shouldn't be analyzed for duplicates since they're being removed
+            analysis_files = [fc for fc in analysis_files if fc.change_type != 'D']
+            
             end_time = time.time()
             
             # Debug output
             git_debug = {
                 'from_branch': pr_analysis.from_branch,
                 'to_branch': pr_analysis.to_branch,
+                # All files (including PR analysis outputs)
                 'total_files_changed': pr_analysis.total_files_changed,
                 'total_lines_added': pr_analysis.total_lines_added,
                 'total_lines_removed': pr_analysis.total_lines_removed,
+                # Filtered files (excluding PR analysis outputs) - used for recommendations
+                'total_files_changed_excluding_analysis': pr_analysis.total_files_changed_excluding_analysis,
+                'total_lines_added_excluding_analysis': pr_analysis.total_lines_added_excluding_analysis,
+                'total_lines_removed_excluding_analysis': pr_analysis.total_lines_removed_excluding_analysis,
                 'file_changes_sample': [
                     {
                         'file_path': fc.file_path,
@@ -92,6 +102,15 @@ class ContextPreparationTester:
                         'lines_removed': fc.lines_removed
                     }
                     for fc in pr_analysis.file_changes[:10]  # First 10 files
+                ],
+                'analysis_files_sample': [
+                    {
+                        'file_path': fc.file_path,
+                        'change_type': fc.change_type,
+                        'lines_added': fc.lines_added,
+                        'lines_removed': fc.lines_removed
+                    }
+                    for fc in analysis_files[:10]  # First 10 analysis files
                 ],
                 'commit_messages_sample': pr_analysis.commit_messages[:5],
                 'performance_ms': (end_time - start_time) * 1000
@@ -102,8 +121,8 @@ class ContextPreparationTester:
                 json.dump(git_debug, f, indent=2)
             
             print(f"✅ Git analysis completed:")
-            print(f"   Files changed: {pr_analysis.total_files_changed}")
-            print(f"   Lines: +{pr_analysis.total_lines_added}/-{pr_analysis.total_lines_removed}")
+            print(f"   All files: {pr_analysis.total_files_changed} files, +{pr_analysis.total_lines_added}/-{pr_analysis.total_lines_removed} lines")
+            print(f"   For analysis: {pr_analysis.total_files_changed_excluding_analysis} files, +{pr_analysis.total_lines_added_excluding_analysis}/-{pr_analysis.total_lines_removed_excluding_analysis} lines")
             print(f"   Performance: {git_debug['performance_ms']:.1f}ms")
             
             return {
@@ -127,13 +146,20 @@ class ContextPreparationTester:
             import time
             start_time = time.time()
             
+            # Define analysis files for this method
+            analysis_files = pr_analysis.file_changes_excluding_analysis or pr_analysis.file_changes
+            
+            # Filter out deleted files - they shouldn't be analyzed for duplicates since they're being removed
+            analysis_files = [fc for fc in analysis_files if fc.change_type != 'D']
+            
             classified_files = []
             classification_debug = {
                 'categories': {},
-                'classification_errors': []
+                'classification_errors': [],
+                'deleted_files_filtered': len((pr_analysis.file_changes_excluding_analysis or pr_analysis.file_changes)) - len(analysis_files)
             }
             
-            for file_change in pr_analysis.file_changes:
+            for file_change in analysis_files:
                 try:
                     classified_file = self.file_classifier.classify_file(file_change.file_path)
                     classified_files.append(classified_file)
@@ -344,9 +370,14 @@ class ContextPreparationTester:
                 'pr_summary': {
                     'from_branch': pr_analysis.from_branch,
                     'to_branch': pr_analysis.to_branch,
-                    'total_files_changed': pr_analysis.total_files_changed,
-                    'total_lines_added': pr_analysis.total_lines_added,
-                    'total_lines_removed': pr_analysis.total_lines_removed,
+                    # Use filtered statistics for agent analysis (excluding PR analysis files)
+                    'total_files_changed': pr_analysis.total_files_changed_excluding_analysis,
+                    'total_lines_added': pr_analysis.total_lines_added_excluding_analysis,
+                    'total_lines_removed': pr_analysis.total_lines_removed_excluding_analysis,
+                    # Also include full stats for transparency
+                    'total_files_changed_all': pr_analysis.total_files_changed,
+                    'total_lines_added_all': pr_analysis.total_lines_added,
+                    'total_lines_removed_all': pr_analysis.total_lines_removed,
                     'commit_messages': pr_analysis.commit_messages[:10]  # First 10 commits
                 },
                 'files': file_info,
@@ -366,7 +397,8 @@ class ContextPreparationTester:
             }
             
             # Save the full context that would be passed to agents (ESSENTIAL OUTPUT)
-            main_output_dir = self.test_output_dir.parent.parent  # Go up from debug_outputs/stage1 to pr_analysis_output/
+            from .path_utils import get_main_output_dir
+            main_output_dir = get_main_output_dir(self.test_output_dir)
             with open(main_output_dir / "final_analysis_context.json", 'w') as f:
                 json.dump(analysis_context, f, indent=2)
             # Also save in debug folder for troubleshooting

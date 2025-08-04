@@ -13,7 +13,8 @@ from .stages import (
     ResponseParser,
     IssueExtractor,
     FilteringAndCombination,
-    AgenticHTMLReportGenerator,
+    FileAssessmentGenerator,
+    Stage9HTMLGenerator,
     FeedbackUpdateSystem
 )
 
@@ -25,6 +26,7 @@ __all__ = [
     'ResponseParser',
     'IssueExtractor',
     'FilteringAndCombination',
-    'AgenticHTMLReportGenerator',
+    'FileAssessmentGenerator',
+    'Stage9HTMLGenerator',
     'FeedbackUpdateSystem'
 ]

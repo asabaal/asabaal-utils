@@ -34,6 +34,11 @@ class PRAnalysis:
     total_lines_removed: int
     file_changes: List[FileChange]
     commit_messages: List[str]
+    # Separate stats excluding PR analysis files
+    total_files_changed_excluding_analysis: int = 0
+    total_lines_added_excluding_analysis: int = 0
+    total_lines_removed_excluding_analysis: int = 0
+    file_changes_excluding_analysis: List[FileChange] = None
     
 
 class GitAnalyzer:
@@ -43,9 +48,35 @@ class GitAnalyzer:
         """Initialize Git analyzer with repository path."""
         self.repo_path = Path(repo_path).resolve()
         
+        # Define patterns for PR analysis files to exclude from recommendations
+        self.pr_analysis_patterns = [
+            'pr_analysis_output/',
+            'pr_analysis.html',
+            'pr_analysis_interactive.html',
+            'pr_analysis_report.txt',
+            'pr_analysis_report.md',
+            'complete_pr_analysis.json'
+        ]
+        
         # Verify this is a git repository
         if not (self.repo_path / '.git').exists():
             raise ValueError(f"Not a valid Git repository: {self.repo_path}")
+    
+    def _get_pr_comparison_range(self, from_branch: str, to_branch: str) -> str:
+        """
+        Get the correct git comparison range for PR analysis.
+        
+        For PR analysis, we want to see what changes from_branch introduces
+        compared to to_branch (i.e., what's in the PR).
+        
+        Args:
+            from_branch: The feature branch (what we're analyzing)
+            to_branch: The target branch (usually main/master)
+            
+        Returns:
+            Git comparison range string in the format "to_branch..from_branch"
+        """
+        return f"{to_branch}..{from_branch}"
     
     def _run_git_command(self, args: List[str]) -> str:
         """Run a git command and return the output."""
@@ -60,6 +91,23 @@ class GitAnalyzer:
             return result.stdout
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Git command failed: {' '.join(args)}\nError: {e.stderr}")
+    
+    def _is_pr_analysis_file(self, file_path: str) -> bool:
+        """Check if a file is part of PR analysis output and should be excluded from recommendations."""
+        normalized_path = str(Path(file_path)).replace('\\', '/')
+        
+        # Check against PR analysis patterns
+        for pattern in self.pr_analysis_patterns:
+            if pattern.endswith('/'):
+                # Directory pattern - check if file is under this directory
+                if normalized_path.startswith(pattern) or f"/{pattern}" in f"/{normalized_path}":
+                    return True
+            else:
+                # File pattern - check if file matches exactly or is at any path level
+                if pattern in normalized_path or normalized_path.endswith(pattern):
+                    return True
+        
+        return False
     
     def analyze_pr(self, from_branch: str, to_branch: str, 
                    include_diffs: bool = True) -> PRAnalysis:
@@ -78,9 +126,19 @@ class GitAnalyzer:
             # Get file changes using git diff
             file_changes = self._get_file_changes(from_branch, to_branch, include_diffs)
             
-            # Calculate totals
+            # Calculate totals for all files
             total_lines_added = sum(fc.lines_added for fc in file_changes)
             total_lines_removed = sum(fc.lines_removed for fc in file_changes)
+            
+            # Separate non-PR-analysis files for recommendations
+            file_changes_excluding_analysis = [
+                fc for fc in file_changes 
+                if not self._is_pr_analysis_file(fc.file_path)
+            ]
+            
+            # Calculate totals excluding PR analysis files
+            total_lines_added_excluding = sum(fc.lines_added for fc in file_changes_excluding_analysis)
+            total_lines_removed_excluding = sum(fc.lines_removed for fc in file_changes_excluding_analysis)
             
             # Get commit messages
             commit_messages = self._get_commit_messages(from_branch, to_branch)
@@ -92,7 +150,11 @@ class GitAnalyzer:
                 total_lines_added=total_lines_added,
                 total_lines_removed=total_lines_removed,
                 file_changes=file_changes,
-                commit_messages=commit_messages
+                commit_messages=commit_messages,
+                total_files_changed_excluding_analysis=len(file_changes_excluding_analysis),
+                total_lines_added_excluding_analysis=total_lines_added_excluding,
+                total_lines_removed_excluding_analysis=total_lines_removed_excluding,
+                file_changes_excluding_analysis=file_changes_excluding_analysis
             )
             
         except Exception as e:
@@ -104,14 +166,15 @@ class GitAnalyzer:
         file_changes = []
         
         # Get file status changes - show what from_branch adds compared to to_branch
-        # This shows the changes being brought by from_branch
+        # This shows the changes being brought by from_branch (what's in the PR)
+        comparison_range = self._get_pr_comparison_range(from_branch, to_branch)
         status_output = self._run_git_command([
-            'diff', '--name-status', f"{to_branch}..{from_branch}"
+            'diff', '--name-status', comparison_range
         ])
         
         # Get line count changes - show what from_branch adds compared to to_branch
         numstat_output = self._run_git_command([
-            'diff', '--numstat', f"{to_branch}..{from_branch}"
+            'diff', '--numstat', comparison_range
         ])
         
         # Parse status changes
@@ -178,8 +241,9 @@ class GitAnalyzer:
             return None
         
         try:
+            comparison_range = self._get_pr_comparison_range(from_branch, to_branch)
             diff_output = self._run_git_command([
-                'diff', f"{from_branch}..{to_branch}", '--', file_path
+                'diff', comparison_range, '--', file_path
             ])
             return diff_output if diff_output.strip() else None
         except Exception:
@@ -188,8 +252,9 @@ class GitAnalyzer:
     def _get_commit_messages(self, from_branch: str, to_branch: str) -> List[str]:
         """Get commit messages between two branches."""
         try:
+            comparison_range = self._get_pr_comparison_range(from_branch, to_branch)
             log_output = self._run_git_command([
-                'log', '--pretty=format:%s', f"{from_branch}..{to_branch}"
+                'log', '--pretty=format:%s', comparison_range
             ])
             messages = [line.strip() for line in log_output.split('\n') if line.strip()]
             return messages

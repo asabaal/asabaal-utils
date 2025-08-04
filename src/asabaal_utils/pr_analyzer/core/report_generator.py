@@ -22,14 +22,17 @@ class ReportGenerator:
     def __init__(self, config_path: str = None):
         """Initialize report generator with configuration."""
         if config_path is None:
-            config_path = Path(__file__).parent.parent / "config" / "analysis_config.yaml"
+            from ..path_utils import get_config_path
+            config_path = get_config_path("analysis_config.yaml")
         
         self.config = self._load_config(config_path)
         self.impact_analyzer = ImpactAnalyzer(self.config)
         self.html_generator = HTMLGenerator()
         
         # Setup Jinja2 template environment
-        template_dir = Path(__file__).parent.parent / "templates"  
+        from ..path_utils import find_repo_root
+        repo_root = find_repo_root()
+        template_dir = repo_root / "templates"  
         self.jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))
     
     def _load_config(self, config_path: str) -> Dict[str, Any]:

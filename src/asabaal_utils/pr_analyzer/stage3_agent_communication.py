@@ -57,8 +57,11 @@ class RobustAgentCaller:
         self.prompt_data_dir = self.test_output_dir / "prompt_data"
         self.prompt_data_dir.mkdir(exist_ok=True)
         
-        # Load context from Stage 1
-        stage1_dir = Path(__file__).parent / "debug_outputs" / "stage1"
+        # Load context from Stage 1 in the current output directory
+        if output_dir:
+            stage1_dir = Path(output_dir) / "debug_outputs" / "stage1"
+        else:
+            stage1_dir = Path(__file__).parent / "debug_outputs" / "stage1"
         context_file = stage1_dir / "final_analysis_context.json"
         
         if not context_file.exists():
