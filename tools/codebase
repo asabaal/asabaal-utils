@@ -1,0 +1,202 @@
+#!/bin/bash
+# description: Codebase reference management for safe experimentation
+# version: 1.0.0
+# category: development
+# usage: codebase [--set-ref|--revert|--status|--help]
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REF_FILE="$PWD/.codebase_ref"
+
+show_help() {
+    cat << EOF
+Codebase Reference Management Tool
+==================================
+
+Manage experimental commits and easy reversion for development workflows.
+
+Usage: codebase [COMMAND]
+
+Commands:
+  --set-ref     Set current state as reference point
+  --revert      Revert to saved reference point
+  --status      Show current reference and git status
+  --help        Show this help message
+
+Examples:
+  codebase --set-ref    # Save current commit as reference
+  codebase --revert     # Go back to reference commit
+  codebase --status     # Show what reference is saved
+
+Description:
+  This tool helps manage experimental development by allowing you to:
+  1. Set a "checkpoint" reference point before trying changes
+  2. Safely revert back to that point if experiments don't work
+  3. Auto-commit changes when setting references to avoid data loss
+
+Workflow:
+  1. codebase --set-ref      # Before experimenting
+  2. Make changes, test things
+  3. codebase --revert       # If you want to go back
+  OR
+  3. codebase --set-ref      # If you want to keep changes and set new reference
+EOF
+}
+
+set_reference() {
+    # Check if there are uncommitted changes OR untracked files
+    HAS_CHANGES=false
+    
+    # Check for tracked file changes
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        HAS_CHANGES=true
+    fi
+    
+    # Check for untracked files
+    if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+        HAS_CHANGES=true
+    fi
+    
+    if [ "$HAS_CHANGES" = true ]; then
+        echo "🔄 Changes detected (modified or untracked files). Auto-committing..."
+        git add .
+        
+        # Generate commit message with timestamp
+        TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+        COMMIT_MSG="Auto-commit before setting reference ($TIMESTAMP)"
+        
+        git commit -m "$COMMIT_MSG"
+        echo "✅ Auto-committed all changes and new files"
+    fi
+    
+    # Get current commit hash
+    CURRENT_COMMIT=$(git rev-parse HEAD)
+    
+    # Save reference
+    echo "$CURRENT_COMMIT" > "$REF_FILE"
+    
+    echo "📌 Reference set to: $CURRENT_COMMIT"
+    echo "📅 Branch: $(git branch --show-current)"
+    echo "💾 Reference saved to: $REF_FILE"
+}
+
+revert_to_reference() {
+    if [[ ! -f "$REF_FILE" ]]; then
+        echo "❌ No reference point set! Run 'codebase --set-ref' first."
+        exit 1
+    fi
+    
+    REF_COMMIT=$(cat "$REF_FILE")
+    
+    echo "🔄 Reverting to reference: $REF_COMMIT"
+    
+    # Check if there are uncommitted changes
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        echo "⚠️  Uncommitted changes detected!"
+        read -p "Do you want to stash them? (y/N): " -r
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            git stash push -m "Auto-stash before revert $(date '+%Y-%m-%d %H:%M:%S')"
+            echo "📦 Changes stashed"
+        fi
+    fi
+    
+    # Get list of untracked files BEFORE reset (files that shouldn't exist at reference)
+    FILES_TO_CLEAN=$(git ls-files --others --exclude-standard)
+    
+    # Reset to reference commit
+    git reset --hard "$REF_COMMIT"
+    
+    # Clean up untracked files that were created after reference
+    if [ -n "$FILES_TO_CLEAN" ]; then
+        echo "🧹 Cleaning up untracked files not in reference..."
+        
+        # Process each untracked file/directory
+        while IFS= read -r file; do
+            if [ -n "$file" ]; then
+                if [ -f "$file" ]; then
+                    echo "  🗑️  Removing file: $file"
+                    rm -f "$file"
+                elif [ -d "$file" ]; then
+                    echo "  🗑️  Removing directory: $file"
+                    rm -rf "$file"
+                fi
+            fi
+        done <<< "$FILES_TO_CLEAN"
+        
+        # Clean up empty directories that may have been left behind
+        find . -type d -empty -not -path "./.git*" -delete 2>/dev/null || true
+    fi
+    
+    echo "✅ Successfully reverted to reference commit"
+    echo "📍 Current commit: $(git rev-parse HEAD)"
+    echo "🧹 Repository state restored to reference point"
+}
+
+show_status() {
+    echo "Codebase Reference Status"
+    echo "========================"
+    
+    if [[ -f "$REF_FILE" ]]; then
+        REF_COMMIT=$(cat "$REF_FILE")
+        echo "📌 Saved Reference: $REF_COMMIT"
+        
+        # Show reference commit details
+        if git rev-parse --verify "$REF_COMMIT" >/dev/null 2>&1; then
+            echo "📅 Reference Date: $(git show -s --format=%ci "$REF_COMMIT")"
+            echo "💬 Reference Message: $(git show -s --format=%s "$REF_COMMIT")"
+        else
+            echo "⚠️  Reference commit no longer exists in repository"
+        fi
+    else
+        echo "❌ No reference point set"
+    fi
+    
+    echo ""
+    echo "Current Git Status:"
+    echo "=================="
+    echo "📍 Current Commit: $(git rev-parse HEAD)"
+    echo "🌿 Current Branch: $(git branch --show-current)"
+    
+    # Show if we're ahead/behind reference
+    if [[ -f "$REF_FILE" ]]; then
+        REF_COMMIT=$(cat "$REF_FILE")
+        CURRENT_COMMIT=$(git rev-parse HEAD)
+        
+        if [[ "$CURRENT_COMMIT" == "$REF_COMMIT" ]]; then
+            echo "✅ At reference commit"
+        else
+            AHEAD=$(git rev-list --count "$REF_COMMIT..HEAD" 2>/dev/null || echo "0")
+            echo "📈 $AHEAD commits ahead of reference"
+        fi
+    fi
+    
+    # Show working directory status
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        echo "⚠️  Uncommitted changes present"
+    else
+        echo "✅ Working directory clean"
+    fi
+}
+
+# Main command handling
+case "${1:-}" in
+    --set-ref)
+        set_reference
+        ;;
+    --revert)
+        revert_to_reference
+        ;;
+    --status)
+        show_status
+        ;;
+    --help|"")
+        show_help
+        ;;
+    *)
+        echo "❌ Unknown command: $1"
+        echo ""
+        show_help
+        exit 1
+        ;;
+esac

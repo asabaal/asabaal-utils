@@ -306,10 +306,6 @@ class Stage9HTMLGenerator:
             '{{RECOMMENDATIONS_CONTENT}}': self.generate_recommendations_content(complete_analysis)
         }
         
-        print(f"🔧 Debug: Replacing {len(replacements)} template variables:")
-        for key, value in replacements.items():
-            print(f"  {key} → {value}")
-        
         # Apply all replacements
         result = html_template
         replacements_made = 0
@@ -318,9 +314,6 @@ class Stage9HTMLGenerator:
             result = result.replace(placeholder, value)
             if old_result != result:
                 replacements_made += 1
-                print(f"  ✅ Replaced {placeholder}")
-            else:
-                print(f"  ⚠️  {placeholder} not found in template")
             
         print(f"✅ Made {replacements_made}/{len(replacements)} template variable replacements")
         return result

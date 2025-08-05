@@ -292,17 +292,48 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
         recommendations = []
         file_path = file_analysis.get('file_path', '').lower()
         merge_readiness = file_analysis.get('merge_readiness', '')
+        detailed_feedback = file_analysis.get('feedback', '')
         
         if merge_readiness == 'not_ready':
-            if 'template' in file_path:
-                recommendations.extend(["Complete template content", "Remove placeholder text"])
+            # Check for specific issues mentioned in detailed feedback
+            if 'placeholder' in detailed_feedback.lower() or 'template' in detailed_feedback.lower():
+                recommendations.extend(["Complete template content", "Remove placeholder text", "Add actual content"])
+            elif 'draft' in detailed_feedback.lower():
+                recommendations.extend(["Complete draft content", "Review and publish when ready"])
+            elif 'missing' in detailed_feedback.lower() or 'incomplete' in detailed_feedback.lower():
+                recommendations.extend(["Complete missing content", "Review file completeness"])
+            elif 'error' in detailed_feedback.lower() or 'issue' in detailed_feedback.lower():
+                recommendations.extend(["Fix identified issues", "Review and test changes"])
+            else:
+                # Generic not_ready recommendations
+                recommendations.extend(["Address issues mentioned in feedback", "Review before merge"])
+                
+            # File-type specific recommendations for not_ready files
             if '.svg' in file_path:
-                recommendations.extend(["Optimize file size", "Consider PNG alternative"])
+                recommendations.append("Optimize file size if needed")
+            elif '.json' in file_path and 'config' in file_path:
+                recommendations.append("Validate JSON structure")
+            elif '.js' in file_path:
+                recommendations.append("Test functionality")
+                
         elif merge_readiness == 'conditional':
+            # Conditional files need specific conditions met
             if 'form' in file_path or 'client' in file_path:
                 recommendations.extend(["Add input validation", "Implement rate limiting"])
+            elif 'config' in file_path:
+                recommendations.extend(["Review configuration values", "Test in staging environment"])
+            elif 'script' in file_path or '.js' in file_path:
+                recommendations.extend(["Add error handling", "Test edge cases"])
+            else:
+                recommendations.extend(["Review conditions mentioned in feedback", "Test thoroughly before merge"])
+                
+        elif merge_readiness == 'ready':
+            recommendations.append("File is ready for merge")
+        else:
+            # Unknown status
+            recommendations.append("Review file status and requirements")
         
-        return recommendations if recommendations else ["File is ready for merge"]
+        return recommendations
     
     def _generate_priority_actions(self, assessments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate priority actions based on assessments"""

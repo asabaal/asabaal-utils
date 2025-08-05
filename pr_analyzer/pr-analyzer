@@ -44,6 +44,19 @@ def main():
         if args.feedback:
             success = analyzer.update_analysis_with_feedback(args.feedback, args.feedback_files)
         else:
+            # Read feedback from files if provided but no direct feedback
+            feedback_content = args.feedback
+            if args.feedback_files and not feedback_content:
+                feedback_parts = []
+                for file_path in args.feedback_files:
+                    try:
+                        with open(file_path, 'r') as f:
+                            feedback_parts.append(f"--- {file_path} ---\n{f.read()}")
+                    except Exception as e:
+                        print(f"Warning: Could not read feedback file {file_path}: {e}")
+                
+                if feedback_parts:
+                    feedback_content = "\n\n".join(feedback_parts)
             # Regular analysis mode - get current branch if from_branch not specified
             from_branch = args.from_branch
             if not from_branch:
@@ -51,8 +64,8 @@ def main():
                                       capture_output=True, text=True, cwd=args.repo_path)
                 from_branch = result.stdout.strip() if result.returncode == 0 else 'HEAD'
             
-            # Always generate reports by default
-            success = analyzer.analyze_pr(from_branch, args.to_branch, args.start_stage, args.end_stage)
+            # Always generate reports by default  
+            success = analyzer.analyze_pr(from_branch, args.to_branch, args.start_stage, args.end_stage, feedback_content, args.feedback_files)
             
             if success:
                 # Show the generated reports

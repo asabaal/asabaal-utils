@@ -274,7 +274,42 @@ class UnifiedPRAnalyzer:
             print(f"❌ Stage 9: ERROR - {e}")
             return False
     
-    def analyze_pr(self, from_branch: str = "main", to_branch: str = None, start_stage: int = 1, end_stage: int = 9) -> bool:
+    def run_stage10_feedback_update(self, feedback: str = None, feedback_files: list = None) -> bool:
+        """Run Stage 10: Feedback-based analysis updates"""
+        print("🔄 Stage 10: Feedback Update System")
+        
+        try:
+            # Check if we have feedback to process
+            if not feedback and not feedback_files:
+                print("❌ Stage 10 requires feedback to process")
+                return False
+                
+            stage10 = FeedbackUpdateSystem()
+            success = stage10.process_feedback_update(feedback, feedback_files)
+            
+            if success:
+                # Copy updated results to local output
+                from .path_utils import find_repo_root
+                repo_root = find_repo_root()
+                source_debug = repo_root / "pr_analyzer" / "debug_outputs" / "stage10_feedback"
+                target_debug = self.output_dir / "debug_outputs" / "stage10_feedback"
+                if source_debug.exists():
+                    shutil.copytree(source_debug, target_debug, dirs_exist_ok=True)
+                
+                # Re-run HTML generation with updated data
+                if self.run_stage9_html_generation():
+                    print("✅ HTML report updated with feedback!")
+                
+                return True
+            else:
+                print("❌ Stage 10 feedback update failed")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error in Stage 10: {e}")
+            return False
+    
+    def analyze_pr(self, from_branch: str = "main", to_branch: str = None, start_stage: int = 1, end_stage: int = 10, feedback: str = None, feedback_files: list = None) -> bool:
         """Run complete PR analysis pipeline with optional stage range"""
         
         print("=" * 80)
@@ -298,7 +333,8 @@ class UnifiedPRAnalyzer:
             (6, "Stage 6: Filtering & Combination", self.run_stage6_filtering_combination),
             (7, "Stage 7: Detailed Analysis", self.run_stage7_detailed_analysis),
             (8, "Stage 8: File Assessment", self.run_stage8_file_assessment),
-            (9, "Stage 9: HTML Generation", self.run_stage9_html_generation)
+            (9, "Stage 9: HTML Generation", self.run_stage9_html_generation),
+            (10, "Stage 10: Feedback Update", lambda: self.run_stage10_feedback_update(feedback, feedback_files))
         ]
         
         # Filter stages by range
@@ -384,9 +420,9 @@ class UnifiedPRAnalyzer:
         print()
         
         try:
-            # Run Stage 8: Feedback updates
-            stage8 = FeedbackUpdateSystem()
-            success = stage8.process_feedback_update(feedback, feedback_files)
+            # Run Stage 10: Feedback updates
+            stage10 = FeedbackUpdateSystem()
+            success = stage10.process_feedback_update(feedback, feedback_files)
             
             if success:
                 print("✅ Feedback update completed successfully!")
@@ -394,13 +430,13 @@ class UnifiedPRAnalyzer:
                 # Copy updated results to local output
                 from .path_utils import find_repo_root
                 repo_root = find_repo_root()
-                source_debug = repo_root / "pr_analyzer" / "debug_outputs" / "stage8_feedback"
-                target_debug = self.output_dir / "debug_outputs" / "stage8_feedback"
+                source_debug = repo_root / "pr_analyzer" / "debug_outputs" / "stage10_feedback"
+                target_debug = self.output_dir / "debug_outputs" / "stage10_feedback"
                 if source_debug.exists():
                     shutil.copytree(source_debug, target_debug, dirs_exist_ok=True)
                 
                 # Re-run HTML generation with updated data
-                if self.run_stage8_html_generation():
+                if self.run_stage9_html_generation():
                     print("✅ HTML report updated with feedback!")
                 
                 return True
