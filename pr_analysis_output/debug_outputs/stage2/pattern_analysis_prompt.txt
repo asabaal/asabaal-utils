@@ -1,0 +1,215 @@
+You are a senior software architect analyzing code patterns and consistency across this PR.
+
+## PR Context
+- Analyzing: 259 files
+- Categories: 9 different types
+
+## Analysis Focus
+Look for patterns and consistency issues:
+
+1. **Naming Conventions**
+   - File naming patterns
+   - Variable and function naming
+   - Directory structure consistency
+
+2. **Architecture Patterns**
+   - Similar functionality implemented differently
+   - Inconsistent approaches to the same problems
+   - Missing architectural patterns
+
+3. **Code Style**
+   - Formatting inconsistencies
+   - Different coding patterns for similar tasks
+   - Inconsistent error handling approaches
+
+## Sample File Analysis
+## .env.example
+- Category: CONFIGURATION (MEDIUM)
+- Change: D (+0/-26)
+- Size: 974 bytes, 26 lines
+- Content sample:
+```
+# Environment Configuration for Asabaal Ventures Website
+# Copy this file to .env and fill in your actual values
+# Get Supabase values from your project dashboard -> Settings -> API
+
+# Supabase Configuration (required for contact forms)
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-anon-key-here
+
+# Optional: Service role key for admin operations (keep this secret!)
+# Only needed if you plan to add admin functionality later
+
+... [truncated]
+```
+
+## .gitignore
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: D (+0/-40)
+- Size: 710 bytes, 41 lines
+- Content sample:
+```
+**/.claude/settings.local.json
+*.pdf
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Local Supabase configuration (keep your keys private!)
+config/supabase-keys.js
+
+# Content Management
+# Note: You can choose to track or ignore blog content
+# Option 1: Track everything (recommended for backup)
+# content/
+
+# Option 2: Ignore drafts only (track published content)
+content/blog/drafts/
+
+# Option 3: Ignore all content (if you prefer external storage)
+# content/blog/
+
+# Migration script ou
+... [truncated]
+```
+
+## AGENTIC_SYSTEM_TECHNICAL_WALKTHROUGH.md
+- Category: DOCUMENTATION (MEDIUM)
+- Change: D (+0/-345)
+- Size: 16437 bytes, 345 lines
+- Content sample:
+```
+# Agentic PR Analysis System - Technical Walkthrough
+
+*Visual guide to how the agent-calling-agents architecture works*
+
+---
+
+## System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PR ANALYZER ORCHESTRATOR                     │
+│                        (pr_analyzer.py)                         │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌────────────────
+... [truncated]
+```
+
+## DEPLOYMENT.md
+- Category: DOCUMENTATION (MEDIUM)
+- Change: D (+0/-233)
+- Size: 7252 bytes, 233 lines
+- Content sample:
+```
+# 🚀 Deployment Guide
+
+Your website is ready to deploy! This guide covers deployment to multiple platforms with full backend functionality.
+
+## ✅ What's Already Ready
+- ✅ Blog system (static files, no database needed)
+- ✅ All website pages and styling
+- ✅ Contact forms and email subscription forms
+- ✅ Responsive design and professional layout
+
+## 🔧 Step 1: Setup Supabase Backend (5 minutes)
+
+### 1.1 Create Supabase Project
+1. Go to [supabase.com](https://supabase.com) → Sign up/Login
+2. Click **"
+... [truncated]
+```
+
+## SUPABASE_SETUP.md
+- Category: DOCUMENTATION (MEDIUM)
+- Change: D (+0/-232)
+- Size: 6368 bytes, 232 lines
+- Content sample:
+```
+# Supabase Backend Setup Guide
+
+This guide will help you set up the backend infrastructure for the Asabaal Ventures website using Supabase.
+
+## 🚀 Quick Start
+
+### Step 1: Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com)
+2. Sign up/Login with your account
+3. Click "New Project"
+4. Choose your organization
+5. Fill in project details:
+   - **Name**: `asabaal-ventures-backend`
+   - **Database Password**: Generate a secure password (save this!)
+   - **Region**: Choose closest to
+... [truncated]
+```
+
+## TECHNICAL_SPECIFICATION.md
+- Category: DOCUMENTATION (MEDIUM)
+- Change: D (+0/-309)
+- Size: 9752 bytes, 309 lines
+- Content sample:
+```
+# Asabaal Ventures Multimedia Ecosystem - Technical Specification
+
+## 🎯 Project Overview
+
+**Goal**: Build a revolutionary multimedia ecosystem combining Discord community management, tiered content access, live events, gaming integration, and music experience platform.
+
+**Timeline**: 
+- Soft Launch: Winter 2024/2025 (with 4th demo EP)
+- Full Launch: July 2026 (with debut professional album)
+
+## 🏗️ System Architecture
+
+### Core Components
+
+#### 1. Website Platform (Content Hub)
+- **Current**: Sta
+... [truncated]
+```
+
+## assets/images/blog/20250512-cover-image.jpg
+- Category: BLOG_CONTENT (MEDIUM)
+- Change: D (+0/-0)
+- Size: 203669 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## assets/images/blog/asabaal-ventures.jpg
+- Category: BLOG_CONTENT (MEDIUM)
+- Change: D (+0/-0)
+- Size: 288052 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## assets/images/blog/by-my-hand.jpg
+- Category: BLOG_CONTENT (MEDIUM)
+- Change: D (+0/-0)
+- Size: 336708 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## assets/images/blog/charting-a-course.jpg
+- Category: BLOG_CONTENT (MEDIUM)
+- Change: D (+0/-0)
+- Size: 349764 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+
+## Output Format
+Identify specific pattern issues with recommendations for improvement.

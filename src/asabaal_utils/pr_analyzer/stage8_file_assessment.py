@@ -10,12 +10,21 @@ Saves structured outputs that Stage 9 (HTML generation) can quickly read.
 import os
 import sys
 import json
-import subprocess
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+
+# Import backend manager
+try:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager, BackendConfig, BackendType
+    BACKEND_MANAGER_AVAILABLE = True
+except ImportError:
+    BACKEND_MANAGER_AVAILABLE = False
+    BackendManager = None  # type: ignore
+    BackendConfig = None  # type: ignore
+    BackendType = None  # type: ignore
 
 class FileAssessmentGenerator:
-    def __init__(self, target_repo_path: str = None, output_dir: str = None):
+    def __init__(self, target_repo_path: Optional[str] = None, output_dir: Optional[str] = None, config: Optional[Dict[str, Any]] = None):
         # Use current working directory as target repo if not specified
         self.target_repo = Path(target_repo_path) if target_repo_path else Path.cwd()
         
@@ -32,6 +41,44 @@ class FileAssessmentGenerator:
         
         self.prompt_data_dir = self.output_dir / "prompt_data"
         self.prompt_data_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize backend manager
+        self.backend_manager = None
+        if BACKEND_MANAGER_AVAILABLE:
+            try:
+                # Create backend config from provided config or auto-detect
+                backend_config = None
+                if config and 'agentic_backend' in config:
+                    backend_cfg = config['agentic_backend']
+                    provider = backend_cfg.get('provider', 'openrouter')
+                    model = backend_cfg.get('model', 'anthropic/claude-3.5-sonnet')
+                    
+                    if provider == 'ollama':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.OLLAMA,
+                            model=model,
+                            base_url='http://localhost:11434'
+                        )
+                    elif provider == 'openrouter':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.OPENROUTER,
+                            model=model,
+                            api_key=os.getenv('OPENROUTER_API_KEY')
+                        )
+                    elif provider == 'claude':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.CLAUDE,
+                            model=model,
+                            api_key=os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
+                        )
+                
+                self.backend_manager = BackendManager(backend_config)
+                backend_info = self.backend_manager.get_backend_info()
+                print(f"🔧 Backend manager initialized for file assessment")
+                print(f"   Using {backend_info['backend_type']} backend with model {backend_info.get('model', 'unknown')}")
+            except Exception as e:
+                print(f"⚠️  Backend manager initialization failed: {e}")
+                self.backend_manager = None
     
     def load_stage7_results(self) -> Dict[str, Any]:
         """Load Stage 7 detailed analysis results"""
@@ -131,7 +178,7 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
         return prompt
     
     def call_assessment_agent(self, prompt: str) -> str:
-        """Call Claude agent for file assessment"""
+        """Call agent for file assessment using OpenRouter API"""
         print("🤖 Calling file assessment agent...")
         
         # Save prompt for debugging
@@ -140,46 +187,32 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
             f.write(prompt)
         print(f"💾 Saved prompt to {prompt_file}")
         
-        # Check for OAuth token
-        oauth_token = os.environ.get('CLAUDE_CODE_OAUTH_TOKEN')
-        if not oauth_token:
-            raise Exception("CLAUDE_CODE_OAUTH_TOKEN not available - run 'claude setup-token'")
+        # Check AI backend availability
+        if not self.backend_manager:
+            raise Exception("AI backend manager not available - check appropriate configuration")
         
+        # Use AI backend API
         try:
-            # Call Claude agent
-            cmd = ['claude', '-p', prompt]
-            print(f"🔄 Running file assessment agent (prompt length: {len(prompt):,} chars)")
-            
-            result = subprocess.run(
-                cmd,
-                env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': oauth_token},
-                capture_output=True,
-                text=True,
-                timeout=None  # No timeout
-            )
-            
-            if result.returncode != 0:
-                error_msg = f"Agent call failed with return code {result.returncode}"
-                if result.stderr:
-                    error_msg += f"\\nSTDERR: {result.stderr}"
-                if result.stdout:
-                    error_msg += f"\\nSTDOUT: {result.stdout}"
-                raise Exception(error_msg)
-            
-            response = result.stdout.strip()
+            backend_info = self.backend_manager.get_backend_info()
+            backend_type = backend_info['backend_type']
+            backend_model = backend_info.get('model', 'unknown')
+            print(f"🔄 Using {backend_type} API with model {backend_model} (prompt length: {len(prompt):,} chars)")
+            response = self.backend_manager.call_agent(prompt, timeout=600)
             
             # Save full response for debugging
             response_file = self.debug_dir / "file_assessment_full_response.txt"
             with open(response_file, 'w') as f:
                 f.write(response)
             print(f"💾 Saved full response to {response_file}")
-            print(f"✅ File assessment agent completed ({len(response):,} chars)")
+            print(f"✅ {backend_type} file assessment agent completed ({len(response):,} chars)")
             
             return response
             
         except Exception as e:
-            print(f"❌ Error calling file assessment agent: {e}")
-            raise
+            backend_info = self.backend_manager.get_backend_info() if self.backend_manager else {'backend_type': 'AI Backend'}
+            backend_type = backend_info['backend_type']
+            print(f"❌ {backend_type} API error: {e}")
+            raise Exception(f"{backend_type} API call failed: {str(e)}")
     
     def save_assessment_results(self, comprehensive_data: Dict[str, Any]) -> Path:
         """Save comprehensive file assessment results for Stage 9 to read"""
@@ -262,7 +295,10 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
     
     def _calculate_business_impact_score(self, file_analysis: Dict[str, Any]) -> int:
         """Calculate business impact score based on file analysis"""
-        file_path = file_analysis.get('file_path', '').lower()
+        file_path = file_analysis.get('file_path', '')
+        if isinstance(file_path, list):
+            file_path = file_path[0] if file_path else ''
+        file_path = str(file_path).lower()
         merge_readiness = file_analysis.get('merge_readiness', '')
         
         # High impact files
@@ -278,7 +314,10 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
     def _calculate_technical_risk_score(self, file_analysis: Dict[str, Any]) -> int:
         """Calculate technical risk score based on file analysis"""
         merge_readiness = file_analysis.get('merge_readiness', '')
-        file_path = file_analysis.get('file_path', '').lower()
+        file_path = file_analysis.get('file_path', '')
+        if isinstance(file_path, list):
+            file_path = file_path[0] if file_path else ''
+        file_path = str(file_path).lower()
         
         if merge_readiness == 'not_ready':
             return 8 if 'template' in file_path or 'placeholder' in file_path else 7
@@ -290,9 +329,17 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
     def _generate_recommendations(self, file_analysis: Dict[str, Any]) -> List[str]:
         """Generate recommendations based on file analysis"""
         recommendations = []
-        file_path = file_analysis.get('file_path', '').lower()
+        file_path = file_analysis.get('file_path', '')
+        if isinstance(file_path, list):
+            file_path = file_path[0] if file_path else ''
+        file_path = str(file_path).lower()
         merge_readiness = file_analysis.get('merge_readiness', '')
-        detailed_feedback = file_analysis.get('feedback', '')
+        detailed_feedback = file_analysis.get('detailed_feedback', '') or file_analysis.get('feedback', '')
+        if isinstance(detailed_feedback, list):
+            detailed_feedback = ' '.join(detailed_feedback)
+        
+        # Check if detailed feedback suggests the file is actually ready despite conditional status
+        feedback_suggests_ready = self._feedback_indicates_readiness(detailed_feedback)
         
         if merge_readiness == 'not_ready':
             # Check for specific issues mentioned in detailed feedback
@@ -317,15 +364,19 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
                 recommendations.append("Test functionality")
                 
         elif merge_readiness == 'conditional':
-            # Conditional files need specific conditions met
-            if 'form' in file_path or 'client' in file_path:
-                recommendations.extend(["Add input validation", "Implement rate limiting"])
-            elif 'config' in file_path:
-                recommendations.extend(["Review configuration values", "Test in staging environment"])
-            elif 'script' in file_path or '.js' in file_path:
-                recommendations.extend(["Add error handling", "Test edge cases"])
+            # If feedback suggests the file is ready, override with ready recommendation
+            if feedback_suggests_ready:
+                recommendations.append("File is ready for merge")
             else:
-                recommendations.extend(["Review conditions mentioned in feedback", "Test thoroughly before merge"])
+                # Conditional files need specific conditions met
+                if 'form' in file_path or 'client' in file_path:
+                    recommendations.extend(["Add input validation", "Implement rate limiting"])
+                elif 'config' in file_path:
+                    recommendations.extend(["Review configuration values", "Test in staging environment"])
+                elif 'script' in file_path or '.js' in file_path:
+                    recommendations.extend(["Add error handling", "Test edge cases"])
+                else:
+                    recommendations.extend(["Review conditions mentioned in feedback", "Test thoroughly before merge"])
                 
         elif merge_readiness == 'ready':
             recommendations.append("File is ready for merge")
@@ -334,6 +385,64 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
             recommendations.append("Review file status and requirements")
         
         return recommendations
+    
+    def _feedback_indicates_readiness(self, detailed_feedback: str) -> bool:
+        """Check if detailed feedback suggests the file is actually ready for merge"""
+        if not detailed_feedback:
+            return False
+        
+        feedback_lower = detailed_feedback.lower()
+        
+        # Phrases that suggest the file is ready despite conditional classification
+        ready_phrases = [
+            'good ux',
+            'well implemented',
+            'proper error handling',
+            'good fallback',
+            'solid implementation',
+            'well structured',
+            'properly implemented',
+            'ready for use',
+            'functionally complete',
+            'no critical issues',
+            'minor improvements',
+            'cosmetic issues',
+            'documentation only',
+            'consider removing'  # If suggestion is to remove, it's ready as-is
+        ]
+        
+        # Phrases that suggest the file needs work
+        not_ready_phrases = [
+            'broken',
+            'does not work',
+            'critical issues',
+            'major problems',
+            'security concerns',
+            'missing functionality',
+            'incomplete',
+            'needs fixing',
+            'requires changes',
+            'must be updated'
+        ]
+        
+        # Check for not-ready indicators first (higher priority)
+        for phrase in not_ready_phrases:
+            if phrase in feedback_lower:
+                return False
+        
+        # Check for ready indicators
+        for phrase in ready_phrases:
+            if phrase in feedback_lower:
+                return True
+        
+        # If feedback mentions minor/suggestive improvements, consider it ready
+        if any(word in feedback_lower for word in ['consider', 'suggest', 'could', 'might']):
+            # But only if there are no strong negative indicators
+            negative_words = ['error', 'broken', 'fail', 'issue', 'problem', 'bug']
+            if not any(word in feedback_lower for word in negative_words):
+                return True
+        
+        return False
     
     def _generate_priority_actions(self, assessments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate priority actions based on assessments"""

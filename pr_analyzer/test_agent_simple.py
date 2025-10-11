@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple test - just test the Claude CLI call directly
+Simple test - just test the agent call directly
 """
 
 import sys
@@ -11,17 +11,17 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from analyzers.agentic_quality_analyzer import AgenticQualityAnalyzer
 
-def test_claude_cli_call():
-    """Test the Claude CLI call directly with a simple prompt"""
+def test_agent_call():
+    """Test the agent call directly with a simple prompt"""
     
-    print("🧪 Testing Claude CLI Call Directly")
+    print("🧪 Testing Agent Call Directly")
     print("=" * 50)
     
     analyzer = AgenticQualityAnalyzer({})
     
     # Simple test prompt
     test_prompt = """
-You are testing the Claude CLI integration. 
+You are testing the OpenRouter API integration. 
 
 Analyze these duplicate files:
 
@@ -48,16 +48,16 @@ Provide a clear analysis of their similarity and recommend consolidation.
     print("📋 Test Prompt Prepared")
     print(f"   Length: {len(test_prompt)} characters")
     
-    print("\n🤖 Calling Claude CLI...")
+    print("\n🤖 Calling Agent via OpenRouter API...")
     
     try:
-        # Test the Claude CLI call directly
-        result = analyzer._call_claude_agent(test_prompt)
+        # Test the agent call directly
+        result = analyzer._call_agent(test_prompt)
         
         if result:
-            print(f"✅ Claude CLI Success!")
+            print(f"✅ Agent Call Success!")
             print(f"   Response length: {len(result)} characters")
-            print(f"\n📄 Claude Response:")
+            print(f"\n📄 Agent Response:")
             print("-" * 50)
             print(result)
             print("-" * 50)
@@ -74,10 +74,10 @@ Provide a clear analysis of their similarity and recommend consolidation.
                 print(f"❌ Response doesn't mention our test files")
                 
         else:
-            print(f"❌ Claude CLI returned None")
+            print(f"❌ Agent Call returned None")
             
     except Exception as e:
-        print(f"❌ Claude CLI call failed: {e}")
+        print(f"❌ Agent call failed: {e}")
         import traceback
         traceback.print_exc()
 
@@ -88,7 +88,7 @@ def test_parsing():
     print("🔍 Testing Response Parsing")
     print("=" * 50)
     
-    # Mock a good Claude response
+    # Mock a good agent response
     mock_response = """
 I can see these files are functional duplicates:
 
@@ -108,7 +108,7 @@ Reasoning: Having three scripts that do essentially the same thing creates maint
     
     analyzer = AgenticQualityAnalyzer({})
     
-    print("📋 Testing with mock Claude response...")
+    print("📋 Testing with mock agent response...")
     
     try:
         # Test the parsing logic
@@ -130,13 +130,13 @@ Reasoning: Having three scripts that do essentially the same thing creates maint
         traceback.print_exc()
 
 if __name__ == "__main__":
-    # Test Claude CLI call
-    test_claude_cli_call()
+    # Test agent call
+    test_agent_call()
     
     # Test response parsing
     test_parsing()
     
     print(f"\n🎯 Summary:")
-    print(f"   This tests the core Claude CLI integration")
+    print(f"   This tests the core OpenRouter API integration")
     print(f"   If this works, the agent should find duplicates")
     print(f"   If this fails, we know where the problem is")

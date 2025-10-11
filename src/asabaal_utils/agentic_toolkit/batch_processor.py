@@ -19,6 +19,14 @@ from typing import Dict, List, Any, Optional, Callable, Union
 from dataclasses import dataclass, asdict
 from enum import Enum
 
+# Import backend manager
+try:
+    from .backend_config import BackendManager
+    BACKEND_MANAGER_AVAILABLE = True
+except ImportError:
+    BackendManager = None
+    BACKEND_MANAGER_AVAILABLE = False
+
 
 class TokenEstimator:
     """Utility class for estimating token usage to make smart processing decisions"""
@@ -160,7 +168,8 @@ class BatchProcessor(ABC):
     
     def __init__(self, 
                  output_dir: str,
-                 config: Optional[BatchProcessingConfig] = None):
+                 config: Optional[BatchProcessingConfig] = None,
+                 backend_config: Optional[Dict[str, Any]] = None):
         
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -175,6 +184,45 @@ class BatchProcessor(ABC):
         if self.config.debug_mode:
             self.debug_dir = self.output_dir / "debug" / self.__class__.__name__.lower()
             self.debug_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize backend manager
+        self.backend_manager = None
+        if BACKEND_MANAGER_AVAILABLE:
+            try:
+                from .backend_config import BackendManager, BackendConfig, BackendType
+                
+                # Create backend config from provided config or auto-detect
+                config_obj = None
+                if backend_config and 'agentic_backend' in backend_config:
+                    backend_cfg = backend_config['agentic_backend']
+                    provider = backend_cfg.get('provider', 'openrouter')
+                    model = backend_cfg.get('model', 'anthropic/claude-3.5-sonnet')
+                    
+                    if provider == 'ollama':
+                        config_obj = BackendConfig(
+                            backend_type=BackendType.OLLAMA,
+                            model=model,
+                            base_url='http://localhost:11434'
+                        )
+                    elif provider == 'openrouter':
+                        config_obj = BackendConfig(
+                            backend_type=BackendType.OPENROUTER,
+                            model=model,
+                            api_key=os.getenv('OPENROUTER_API_KEY')
+                        )
+                    elif provider == 'claude':
+                        config_obj = BackendConfig(
+                            backend_type=BackendType.CLAUDE,
+                            model=model,
+                            api_key=os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
+                        )
+                
+                self.backend_manager = BackendManager(config_obj)
+                backend_info = self.backend_manager.get_backend_info()
+                print(f"🤖 Using {backend_info['backend_type']} for batch processing")
+            except Exception as e:
+                print(f"⚠️  Failed to initialize backend manager: {e}")
+                self.backend_manager = None
     
     @abstractmethod
     def process_batch(self, batch_items: List[Any], context: Dict[str, Any]) -> List[Any]:
@@ -253,42 +301,28 @@ class BatchProcessor(ABC):
         Returns:
             Agent response
         """
-        oauth_token = os.environ.get('CLAUDE_CODE_OAUTH_TOKEN')
-        if not oauth_token:
-            raise Exception("CLAUDE_CODE_OAUTH_TOKEN not available")
-        
         if self.config.debug_mode:
             # Save prompt for debugging
             prompt_file = self.debug_dir / f"prompt_{int(time.time())}.txt"
             with open(prompt_file, 'w') as f:
                 f.write(prompt)
         
+        # Check backend manager availability
+        if not self.backend_manager:
+            raise Exception("Backend manager not available - check backend configuration")
+        
+        # Use backend manager
         try:
-            cmd = ['claude', '-p', prompt]
-            result = subprocess.run(
-                cmd,
-                env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': oauth_token},
-                capture_output=True,
-                text=True,
-                timeout=None  # No timeout - allow unlimited processing time
-            )
-            
-            if result.returncode != 0:
-                raise Exception(f"Agent call failed: {result.stderr}")
-            
-            response = result.stdout.strip()
-            
+            response = self.backend_manager.ask(prompt)
             if self.config.debug_mode:
                 # Save response for debugging
                 response_file = self.debug_dir / f"response_{int(time.time())}.txt"
                 with open(response_file, 'w') as f:
-                    f.write(response)
-            
-            return response
-            
-        except subprocess.TimeoutExpired:
-            # This should never happen now since timeout=None, but keep for safety
-            raise Exception("Agent call timed out (unexpected - timeout was disabled)")
+                    f.write(response.content if hasattr(response, 'content') else str(response))
+            return response.content if hasattr(response, 'content') else str(response)
+        except Exception as e:
+            print(f"❌ Backend API error: {e}")
+            raise Exception(f"Backend API call failed: {str(e)}")
     
     def load_progress(self) -> Dict[str, Any]:
         """Load previous progress if available"""

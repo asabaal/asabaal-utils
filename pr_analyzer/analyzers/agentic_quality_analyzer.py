@@ -13,6 +13,25 @@ from pathlib import Path
 from typing import Dict, List, Any, Set, Tuple
 from dataclasses import dataclass
 
+# Import OpenRouter client
+try:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+    from analyzers.openrouter_client import OpenRouterClient
+    OPENROUTER_AVAILABLE = True
+except ImportError:
+    try:
+        # Fallback for direct execution
+        from openrouter_client import OpenRouterClient
+        OPENROUTER_AVAILABLE = True
+    except ImportError:
+        OpenRouterClient = None
+        OPENROUTER_AVAILABLE = False
+
+# Import json for response parsing
+import json
+
 
 @dataclass
 class QualityIssue:
@@ -33,10 +52,25 @@ class AgenticQualityAnalyzer:
         """Initialize agentic quality analyzer."""
         self.config = config
         
-        # Get OAUTH token (following blog processor pattern)
-        self.oauth_token = os.getenv('CLAUDE_CODE_OAUTH_TOKEN')
-        if not self.oauth_token:
-            print("⚠️  CLAUDE_CODE_OAUTH_TOKEN not set - agentic analysis will use fallback")
+        # Initialize agentic backend
+        self.agentic_backend = config.get('agentic_backend', {})
+        self.provider = self.agentic_backend.get('provider', 'openrouter')
+        self.model = self.agentic_backend.get('model') or os.getenv('OPENROUTER_MODEL', 'qwen/qwen-2.5-coder-32b-instruct')
+        
+        # Initialize appropriate client
+        if self.provider == 'openrouter' and OpenRouterClient:
+            try:
+                self.openrouter_client = OpenRouterClient(model=self.model)
+                print(f"🤖 Using OpenRouter with model: {self.model}")
+            except Exception as e:
+                print(f"⚠️  Failed to initialize OpenRouter client: {e}")
+                self.openrouter_client = None
+        else:
+            # Fallback to Claude CLI
+            self.oauth_token = os.getenv('CLAUDE_CODE_OAUTH_TOKEN')
+            if not self.oauth_token:
+                print("⚠️  CLAUDE_CODE_OAUTH_TOKEN not set - agentic analysis will use fallback")
+            self.openrouter_client = None
         
         self.load_exceptions()
         
@@ -219,44 +253,29 @@ Focus on DISCOVERING actual content-based duplicates, not generic observations.
         print("🧠 Launching intelligent content analysis agent...")
         
         # Use subprocess to call claude CLI directly (following your blog automation pattern)
-        # Call the Claude agent - this is an agentic system, no fallbacks
-        agent_result = self._call_claude_agent(agent_prompt)
+        # Call the agent - this is an agentic system, no fallbacks
+        agent_result = self._call_agent(agent_prompt)
         if not agent_result:
-            raise RuntimeError("Claude agent call failed - agentic system requires working agent")
+            raise RuntimeError("Agent call failed - agentic system requires working agent")
         
         return self._parse_agent_content_analysis(agent_result, context)
     
-    def _call_claude_agent(self, prompt):
-        """Call Claude CLI using subprocess (following blog automation pattern)"""
+    def _call_agent(self, prompt):
+        """Call agent using configured backend (OpenRouter API)"""
+        # Clean prompt to avoid null bytes and other problematic characters
+        clean_prompt = prompt.replace('\x00', '').replace('\r\n', '\n').encode('utf-8', errors='ignore').decode('utf-8')
+        
+        # Check OpenRouter availability
+        if self.provider != 'openrouter' or not self.openrouter_client:
+            print("❌ OpenRouter client not available")
+            return None
+        
+        # Use OpenRouter API
         try:
-            # Clean prompt to avoid null bytes and other problematic characters
-            clean_prompt = prompt.replace('\x00', '').replace('\r\n', '\n').encode('utf-8', errors='ignore').decode('utf-8')
-            
-            # Check OAuth token
-            if not self.oauth_token:
-                print("❌ CLAUDE_CODE_OAUTH_TOKEN not available")
-                return None
-            
-            cmd = ['claude', '-p', clean_prompt]
-            result = subprocess.run(cmd, 
-                env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': self.oauth_token},
-                capture_output=True, 
-                text=True, 
-                timeout=120
-            )
-            if result.returncode == 0:
-                return result.stdout.strip()
-            else:
-                print(f"❌ Claude CLI error (code {result.returncode}): {result.stderr}")
-                return None
-        except subprocess.TimeoutExpired:
-            print("❌ Claude CLI timeout after 120 seconds")
-            return None
-        except FileNotFoundError:
-            print("❌ Claude CLI not found - install from https://claude.ai/code")
-            return None
+            response = self.openrouter_client.ask(clean_prompt)
+            return response.content
         except Exception as e:
-            print(f"❌ Error calling Claude: {e}")
+            print(f"❌ OpenRouter API error: {e}")
             return None
     
     def _launch_merge_readiness_agent(self, context: Dict[str, Any], repo_path: str) -> Dict[str, Any]:
@@ -332,8 +351,8 @@ Be thorough but practical - focus on issues that genuinely impact merge safety.
 
         print("🤖 Launching merge readiness assessment agent...")
         
-        # Call the Claude agent - agentic system, no fallbacks
-        agent_result = self._call_claude_agent(agent_prompt)
+        # Call the agent - agentic system, no fallbacks
+        agent_result = self._call_agent(agent_prompt)
         if not agent_result:
             raise RuntimeError("Merge readiness agent call failed - agentic system requires working agent")
         

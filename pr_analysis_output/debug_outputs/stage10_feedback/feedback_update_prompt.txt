@@ -1,0 +1,64 @@
+You are a senior technical analyst updating PR analysis based on user feedback.
+
+TASK: Update PR analysis report based on user feedback
+
+USER FEEDBACK:
+--provider
+
+ADDITIONAL FILES PROVIDED:
+ollama, --auto-recalculate
+
+EXISTING ANALYSIS DATA TO READ:
+- detailed_analysis_results.json (current analysis data)
+- debug_outputs/stage1/final_analysis_context.json (analysis context)
+- debug_outputs/stage3/communication_analysis.json (communication findings)
+- final_analysis_context.json (final context)
+
+REQUIREMENTS:
+- Incorporate user feedback into analysis
+- Update recommendations based on feedback
+- Preserve existing valid findings
+- Generate updated markdown report
+- Update structured JSON data
+
+OUTPUT REQUIREMENTS:
+Provide analysis and insights only. Do not create, write, or modify any files. The system will handle file updates automatically based on your analysis.
+
+
+
+
+EXISTING ANALYSIS DATA:
+{
+  "analysis_summary": {
+    "total_files_analyzed": 0,
+    "total_files_in_pr": 0,
+    "merge_ready_files": 0,
+    "conditional_files": 0,
+    "not_ready_files": 0,
+    "overall_merge_readiness": "ready",
+    "analysis_timestamp": "2025-08-03T13:50:37Z"
+  },
+  "file_analyses": [],
+  "recommendations": [],
+  "blocking_issues": []
+}
+
+
+
+TASK: Based on the user feedback and existing analysis data above, provide specific updates to the PR analysis.
+
+Focus on:
+1. File reclassifications mentioned in the feedback
+2. Updated assessments based on new architectural understanding
+3. Specific recommendations for the blog system structure
+4. IMPORTANT: Handle any deleted files detected above by reclassifying them to 'ready' status
+
+RESPONSE FORMAT:
+Provide a detailed analysis update that addresses the specific feedback points. Include:
+- Updated file classifications
+- Architectural insights
+- Specific recommendations
+- Any corrected assessments
+- Deleted file reclassifications (if applicable)
+
+Do not create files - just provide the analysis content that should be used to update the existing analysis.

@@ -117,6 +117,9 @@ class FontManager:
         Returns:
             RGBA numpy array
         """
+        # Normalize text to fix encoding issues with apostrophes and quotes
+        text = self._normalize_text_encoding(text)
+        
         # Get text size
         bbox = font.getbbox(text)
         width = bbox[2] - bbox[0] + stroke_width * 2 + 10
@@ -144,6 +147,62 @@ class FontManager:
         
         # Convert to numpy array
         return np.array(img)
+    
+    def _normalize_text_encoding(self, text: str) -> str:
+        """Normalize text to fix encoding issues with apostrophes, quotes, and special characters.
+        
+        This function converts problematic Unicode characters that can cause ???? symbols
+        when rendered in videos to their safe ASCII equivalents.
+        
+        Args:
+            text: Input text that may contain problematic characters
+            
+        Returns:
+            Normalized text with safe character replacements
+        """
+        if not text:
+            return text
+            
+        # Dictionary of problematic characters and their safe replacements
+        char_replacements = {
+            # Various apostrophe and quote characters (using Unicode escape codes for reliability)
+            '\u2019': "'",    # Right single quotation mark (U+2019) - most common cause
+            '\u2018': "'",    # Left single quotation mark (U+2018)
+            '\u201C': '"',    # Left double quotation mark (U+201C)
+            '\u201D': '"',    # Right double quotation mark (U+201D)
+            '\u201A': "'",    # Single low-9 quotation mark (U+201A)
+            '\u201E': '"',    # Double low-9 quotation mark (U+201E)
+            '‹': '<',    # Single left-pointing angle quotation mark (U+2039)
+            '›': '>',    # Single right-pointing angle quotation mark (U+203A)
+            '«': '"',    # Left-pointing double angle quotation mark (U+00AB)
+            '»': '"',    # Right-pointing double angle quotation mark (U+00BB)
+            
+            # Dashes
+            '–': '-',    # En dash (U+2013)
+            '—': '-',    # Em dash (U+2014)
+            '―': '-',    # Horizontal bar (U+2015)
+            
+            # Other problematic characters
+            '…': '...',  # Horizontal ellipsis (U+2026)
+            '′': "'",    # Prime (U+2032)
+            '″': '"',    # Double prime (U+2033)
+            '‛': "'",    # Single high-reversed-9 quotation mark (U+201B)
+        }
+        
+        # Apply character replacements
+        normalized_text = text
+        for problem_char, replacement in char_replacements.items():
+            normalized_text = normalized_text.replace(problem_char, replacement)
+        
+        # Ensure the text is properly UTF-8 encoded
+        try:
+            # Try to encode/decode to catch any remaining encoding issues
+            normalized_text = normalized_text.encode('utf-8', errors='replace').decode('utf-8')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # If there are still encoding issues, fall back to ASCII-safe version
+            normalized_text = normalized_text.encode('ascii', errors='replace').decode('ascii')
+            
+        return normalized_text
         
     def measure_text(self, text: str, font: ImageFont.FreeTypeFont) -> Tuple[int, int]:
         """Measure text dimensions.
@@ -155,6 +214,8 @@ class FontManager:
         Returns:
             (width, height) tuple
         """
+        # Normalize text for consistent measurements
+        text = self._normalize_text_encoding(text)
         bbox = font.getbbox(text)
         return (bbox[2] - bbox[0], bbox[3] - bbox[1])
         
@@ -170,7 +231,7 @@ class FontManager:
         """Render text with multiple effects.
         
         Args:
-            text: Text to render
+            text: Text to render (will be normalized for encoding safety)
             font_family: Font family name
             font_size: Font size
             color: Text color

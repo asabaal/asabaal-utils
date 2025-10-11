@@ -1,0 +1,139 @@
+Forced Lyric Alignment Mode — Integration Spec (Copy-Paste Friendly)
+
+This document describes how to extend the current audio-transcription system to support forced lyric alignment for sung vocals when the ground-truth lyrics are available. The text below is raw, with no code blocks. You can paste it into any document or hand it to a coding agent as-is.
+
+1) Overview
+- Add a new processing mode named: lyrics-align.
+- Purpose: align an existing lyrics text file to a vocal-only audio stem to produce precise word-level timings and export JSON, LRC, SRT, and VTT.
+
+2) Interface and Inputs
+Required CLI or API flags:
+- --mode lyrics-align
+- --lyrics /path/to/lyrics.txt  (REQUIRED)
+- --stem /path/to/vocals.wav    (optional if input media already is the stem)
+Optional flags:
+- --split 30        (seconds per chunk, default 30)
+- --lang en         (override language, default en)
+- --normalize-lyrics true  (default true)
+- --write-lrc true  (default true)
+
+Expected outputs (written alongside existing pipeline outputs):
+- lyrics_aligned.json   (canonical JSON with word-level timings and stats)
+- lyrics.lrc            (per-word karaoke timing)
+- captions.srt          (per-line captions)
+- captions.vtt          (per-line captions)
+- align_report.txt      (summary: coverage, unaligned words, recommendations)
+
+3) Data Flow
+- Inputs: vocal stem (mono, 16 kHz recommended) and lyrics.txt (ground-truth, no timestamps).
+- Steps:
+  A. Preprocess audio if necessary (downmix mono, resample 16 kHz PCM WAV).
+  B. Preprocess lyrics (normalize, tokenize lines/phrases/words).
+  C. Create one alignment segment per lyric line.
+  D. Call the aligner (WhisperX) with segments and the audio.
+  E. Optionally chunk long songs and rebase times when merging.
+  F. Write outputs (JSON, LRC, SRT, VTT) and a plain-text alignment report.
+
+4) Audio Preparation
+- Require a vocal stem for lyrics-align mode. If only a full mix is provided, abort with a helpful error instructing the user to supply a vocal-only stem.
+- Ensure mono 16 kHz PCM WAV for alignment accuracy.
+- Example command (informational): ffmpeg -y -i input.wav -ac 1 -ar 16000 -c:a pcm_s16le vocals_16k.wav
+
+5) Lyrics Normalization
+Implement a small normalizer function with the following behavior:
+- Lowercase text.
+- Strip punctuation except apostrophes in contractions.
+- Remove section labels such as [Chorus], [Verse], etc.
+- Collapse extra whitespace.
+- Optionally map non-lexical vocables (ooh, yeah, uh, ahh) to canonical tokens so they can align.
+- Preserve a mapping from normalized tokens to their original forms for pretty-printing in outputs.
+
+6) Segment Construction
+- Build a list of alignment segments, one per lyric line or short phrase (about 5 to 15 words).
+- Each segment is a dictionary with fields: start (0.0 placeholder), end (0.0 placeholder), text (normalized line).
+- Example conceptual structure:
+  [
+    {start: 0.0, end: 0.0, text: this is my line},
+    {start: 0.0, end: 0.0, text: second lyric line}
+  ]
+- Do not pass a single massive paragraph; per-line segments align faster and more accurately.
+
+7) Alignment Step (WhisperX)
+- Load the alignment model once and reuse it across files.
+- Pseudocode for the align call:
+  - align_model, metadata = whisperx.load_align_model(language_code=lang, device=device)
+  - aligned = whisperx.align({segments: wx_segments, language: lang}, align_model, metadata, vocals_wav_path, device)
+- The aligned result contains aligned segments with per-word timestamps.
+- No ASR pass is required in lyrics-align mode; you are aligning known text.
+
+8) Error Handling and Mismatch Recovery
+- If words return without timestamps (None or missing):
+  - Record them in align_report.txt under an unaligned_words section.
+- If coverage (aligned_words / total_words) drops below 85 percent:
+  - Suggest re-exporting a cleaner vocal stem or reducing chunk size (for example, --split 20).
+- If a specific line fails badly:
+  - Optional fallback: run a short ASR on the corresponding audio slice (10 to 20 seconds), fuzzy-match ASR text to the intended lyric line, adjust the line, and retry alignment. Keep this optional; most clean stems align well without it.
+
+9) Chunking Strategy for Long Songs
+- For songs longer than about 3 minutes, add a pre-split step to improve stability and memory usage.
+- Split by time every N seconds (default 30) but place splits between lyric lines; do not split in the middle of a lyric line.
+- For each chunk:
+  - Provide only the subset of lyric segments that belong to the chunk.
+  - Align and then rebase word times by adding the chunk start offset.
+- Concatenate all chunk results to a single aligned structure before writing outputs.
+
+10) Output Writers (Formats and Rules)
+A) JSON (canonical)
+- Include keys: language, duration, lines (list), stats (object).
+- Each line has: text, start, end, and words (list of objects with text, start, end).
+- Include a stats section with lines_total, lines_aligned, words_total, words_aligned, coverage (percent).
+
+B) LRC (per-word karaoke)
+- Output one token per line: [mm:ss.cc]word
+- If some words have no time, either skip those words or fall back to line-level timing for that line.
+- Save as lyrics.lrc
+
+C) SRT and VTT (per-line captions)
+- One caption per lyric line for readability.
+- Line start time equals first word start; line end time equals last word end (or a small epsilon before the next line).
+- Save as captions.srt and captions.vtt
+
+11) Reporting (align_report.txt)
+- Include a simple text report, example fields:
+  lines_total: 48
+  lines_aligned: 47
+  words_total: 512
+  words_aligned: 507
+  coverage: 99.0%
+  unaligned_words: ["yeah", "uh", "oooh"]
+  recommendation: Try --split 20 or denoise the stem.
+
+12) Configuration Additions (example toggles)
+- LYRICS_ALIGN_ENABLED = true
+- LYRICS_ALIGN_WRITE_LRC = true
+- LYRICS_ALIGN_SPLIT_SECONDS = 30
+- LYRICS_ALIGN_LANGUAGE = en
+- LYRICS_ALIGN_NORMALIZE = true
+
+13) Integration Points in the Existing Pipeline
+- Argument parsing: add mode lyrics-align and the flags described in Section 2.
+- Router in process_media (or equivalent orchestrator):
+  If mode equals lyrics-align:
+    - Ensure a vocal stem path is selected or derived; abort if only a full mix is present.
+    - Read and normalize lyrics.
+    - Build segments (one per line).
+    - Run alignment (no ASR in this mode).
+    - Write JSON, LRC, SRT, VTT, and align_report.txt.
+  Else:
+    - Proceed with existing modes as currently implemented.
+- Writers: reuse the SRT and VTT writers if they already exist; add an LRC writer that uses word timestamps when present.
+
+14) Testing and Acceptance Criteria
+- Use a short song (60 to 90 seconds) with clean vocal stem and exact lyrics.
+- Expect at least 95 percent of words aligned in the JSON stats.
+- Manually review lyrics.lrc in a karaoke-capable player to confirm per-word highlighting matches audio delivery.
+
+15) Future Enhancements (Optional)
+- Beat-snap word boundaries to musical grid using a BPM detector (for example, librosa beat tracking) as a cosmetic post-process.
+- Preserve section labels like [Chorus], [Verse 2] in the JSON under a section field while omitting them from alignment text.
+- Add a guard that compares lyrics to an ASR pass via Levenshtein distance; if drift is large, flag for human review or auto-correction.

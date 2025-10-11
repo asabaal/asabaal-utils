@@ -147,8 +147,8 @@ class ResponseParser:
         """Extract duplicate file groups from a section"""
         groups = []
         
-        # Look for subsection headers (### patterns)
-        subsections = re.split(r'\n### \*\*(.*?)\*\*', section_text)
+        # Look for numbered sections (1. Title: patterns)
+        subsections = re.split(r'\n\d+\.\s*(.*?):', section_text)
         
         for i in range(1, len(subsections), 2):  # Skip first empty part, then take pairs
             if i + 1 < len(subsections):
@@ -164,13 +164,8 @@ class ResponseParser:
                 path_matches = re.findall(r'[-*]\s*([A-Za-z0-9_/.-]+\.[a-z]+)', content)
                 files.extend([f for f in path_matches if f not in files])
                 
-                # Extract recommendation
-                rec_match = re.search(r'\*\*Recommendation\*\*[:\s]*(.*?)(?=\n\n|\n###|$)', content, re.DOTALL)
-                recommendation = rec_match.group(1).strip() if rec_match else "Consolidate or remove duplicates"
-                
-                # Extract description/evidence
-                evidence_match = re.search(r'\*\*Evidence\*\*[:\s]*(.*?)(?=\*\*Recommendation\*\*|\n\n|\n###|$)', content, re.DOTALL)
-                description = evidence_match.group(1).strip() if evidence_match else content[:200]
+                # Extract description (everything until next numbered section or end)
+                description = content.split('\n\n')[0].strip() if content else ""
                 
                 # Calculate confidence based on detail level
                 confidence = min(1.0, len(files) * 0.2 + (len(description) / 500))
@@ -180,7 +175,7 @@ class ResponseParser:
                         'title': title,
                         'description': description,
                         'files': files,
-                        'recommendation': recommendation,
+                        'recommendation': "Consolidate or remove duplicates",
                         'raw_text': content,
                         'confidence': confidence
                     })
@@ -272,15 +267,14 @@ class ResponseParser:
         
         issues = []
         
-        # Look for priority sections
-        priority_sections = {
-            'High Priority': Priority.HIGH,
-            'Medium Priority': Priority.MEDIUM,
-            'Low Priority': Priority.LOW
+        # Split into sections by priority level (matching actual agent response format)
+        sections = {
+            'CRITICAL': r'## CRITICAL[:\s]*(.*?)(?=## HIGH|## MEDIUM|## Summary|$)',
+            'HIGH': r'## HIGH[:\s]*(.*?)(?=## MEDIUM|## LOW|## Summary|$)',
+            'MEDIUM': r'## MEDIUM[:\s]*(.*?)(?=## LOW|## Summary|$)'
         }
         
-        for section_name, priority in priority_sections.items():
-            pattern = rf'\*\*{section_name}:\*\*\s*(.*?)(?=\*\*\w+\s+Priority:|\*\*\w+\s+Priority|\n\n[A-Z]|$)'
+        for priority_name, pattern in sections.items():
             matches = re.findall(pattern, response_text, re.DOTALL | re.IGNORECASE)
             
             if matches:
@@ -290,7 +284,7 @@ class ResponseParser:
                 items = re.findall(r'[-*]\s*([^\n]+)', section_content)
                 
                 for idx, item in enumerate(items):
-                    issue_id = f"pattern_{priority.value.lower()}_{idx + 1}"
+                    issue_id = f"pattern_{priority_name.lower()}_{idx + 1}"
                     
                     # Clean up the item text
                     item = item.strip()
@@ -298,7 +292,7 @@ class ResponseParser:
                     issue = QualityIssue(
                         id=issue_id,
                         type=IssueType.PATTERN_ISSUE,
-                        priority=priority,
+                        priority=Priority[priority_name],
                         title=f"Pattern Issue: {item[:50]}...",
                         description=item,
                         files_affected=[],  # Pattern issues are usually cross-cutting

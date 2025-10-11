@@ -92,7 +92,8 @@ class SilenceDetector:
             with VideoFileClip(file_path) as video:
                 with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
                     audio_path = temp_file.name
-                    video.audio.write_audiofile(audio_path, logger=None)
+                    if video.audio is not None:
+                        video.audio.write_audiofile(audio_path, logger=None)
         else:
             audio_path = file_path
             
@@ -165,7 +166,7 @@ class SilenceDetector:
             segments.append(AudioSegment(
                 start=segment_start,
                 end=duration,
-                is_silence=is_current_silence,
+                is_silence=bool(is_current_silence),
                 rms_power=current_rms
             ))
             

@@ -8,7 +8,7 @@ and change extraction for PR analysis using subprocess calls.
 import os
 import subprocess
 import re
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,7 +38,7 @@ class PRAnalysis:
     total_files_changed_excluding_analysis: int = 0
     total_lines_added_excluding_analysis: int = 0
     total_lines_removed_excluding_analysis: int = 0
-    file_changes_excluding_analysis: List[FileChange] = None
+    file_changes_excluding_analysis: Optional[List[FileChange]] = None
     
 
 class GitAnalyzer:
@@ -55,7 +55,9 @@ class GitAnalyzer:
             'pr_analysis_interactive.html',
             'pr_analysis_report.txt',
             'pr_analysis_report.md',
-            'complete_pr_analysis.json'
+            'complete_pr_analysis.json',
+            'prototypes/',
+            'prototype/'
         ]
         
         # Verify this is a git repository
@@ -269,7 +271,7 @@ class GitAnalyzer:
         except Exception:
             return None
     
-    def get_repository_info(self) -> Dict[str, any]:
+    def get_repository_info(self) -> Dict[str, Any]:
         """Get general repository information."""
         try:
             info = {}

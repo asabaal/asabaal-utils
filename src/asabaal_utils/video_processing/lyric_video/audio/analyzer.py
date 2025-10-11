@@ -28,29 +28,54 @@ class AudioAnalyzer:
         self._sample_rate: Optional[int] = None
         self._features: Optional[AudioFeatures] = None
         
-    def load_audio(self, audio_path: Union[str, Path]) -> None:
+    def load_audio(self, audio_path: Union[str, Path], start_time: Optional[float] = None, 
+                   end_time: Optional[float] = None) -> None:
         """Load audio file for analysis.
         
         Args:
             audio_path: Path to audio file
+            start_time: Start time in seconds (None for beginning)
+            end_time: End time in seconds (None for full file)
         """
         logger.info(f"Loading audio from {audio_path}")
-        self._audio_data, self._sample_rate = librosa.load(
-            str(audio_path), sr=None, mono=True
-        )
+        
+        # Calculate offset and duration parameters for librosa
+        offset = start_time if start_time is not None else 0.0
+        duration = None
+        
+        if end_time is not None:
+            duration = end_time - offset
+        elif start_time is not None:
+            # Load from start_time to end of file - let librosa determine duration
+            duration = None
+            
+        if offset > 0 or duration is not None:
+            logger.info(f"Loading audio segment: {offset}s to {end_time or 'end'}s")
+            self._audio_data, self._sample_rate = librosa.load(
+                str(audio_path), sr=None, mono=True, offset=offset, duration=duration
+            )
+        else:
+            # Load entire file
+            self._audio_data, self._sample_rate = librosa.load(
+                str(audio_path), sr=None, mono=True
+            )
+            
         logger.info(f"Loaded {len(self._audio_data)/self._sample_rate:.2f}s of audio at {self._sample_rate}Hz")
         
-    def analyze_audio(self, audio_path: Optional[Union[str, Path]] = None) -> AudioFeatures:
+    def analyze_audio(self, audio_path: Optional[Union[str, Path]] = None, 
+                     start_time: Optional[float] = None, end_time: Optional[float] = None) -> AudioFeatures:
         """Perform comprehensive audio analysis.
         
         Args:
             audio_path: Optional path to audio file (if not already loaded)
+            start_time: Start time in seconds for analysis
+            end_time: End time in seconds for analysis
             
         Returns:
             AudioFeatures object with complete analysis
         """
         if audio_path:
-            self.load_audio(audio_path)
+            self.load_audio(audio_path, start_time, end_time)
             
         if self._audio_data is None:
             raise ValueError("No audio data loaded")

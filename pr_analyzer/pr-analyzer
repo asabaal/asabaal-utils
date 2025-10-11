@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 # Add the package path to Python path
-package_root = Path("/home/asabaal/asabaal_ventures/repos/asabaal-utils/src")
+package_root = Path("/home/asabaal/repos/asabaal-utils/src")
 sys.path.insert(0, str(package_root))
 
 from asabaal_utils.pr_analyzer import UnifiedPRAnalyzer
@@ -35,10 +35,26 @@ def main():
     parser.add_argument('--feedback-files', nargs='*', dest='feedback_files',
                        help='Additional files to include with feedback')
     
+    # Model selection
+    parser.add_argument('--model', dest='model',
+                       help='AI model to use for analysis (e.g., anthropic/claude-3.5-sonnet, openai/gpt-4o)')
+    parser.add_argument('--provider', dest='provider', choices=['openrouter', 'claude_cli', 'ollama'],
+                       help='AI provider to use (default: openrouter)')
+    
     args = parser.parse_args()
     
     try:
+        # Initialize analyzer with model/provider overrides if provided
         analyzer = UnifiedPRAnalyzer(args.repo_path)
+        
+        # Apply runtime model/provider overrides
+        if args.model or args.provider:
+            config = analyzer.config.get('agentic_backend', {})
+            if args.provider:
+                config['provider'] = args.provider
+            if args.model:
+                config['model'] = args.model
+            analyzer.config['agentic_backend'] = config
         
         # Handle feedback mode
         if args.feedback:

@@ -6,7 +6,6 @@ Comprehensive code review at file, class, and function levels for merge readines
 
 import json
 import os
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -14,13 +13,23 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
 # Add the parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import backend manager
+try:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager, BackendConfig, BackendType
+    BACKEND_MANAGER_AVAILABLE = True
+except ImportError:
+    BACKEND_MANAGER_AVAILABLE = False
+    BackendManager = None  # type: ignore
+    BackendConfig = None  # type: ignore
+    BackendType = None  # type: ignore
 
 
 class DetailedAnalysisEngine:
     """Detailed file-level analysis for merge readiness assessment"""
     
-    def __init__(self, repo_path: str, output_dir: str = None, debug_mode: bool = False, max_files: int = None):
+    def __init__(self, repo_path: str, output_dir: Optional[str] = None, debug_mode: bool = False, max_files: Optional[int] = None, config: Optional[Dict[str, Any]] = None):
         self.repo_path = Path(repo_path)
         self.output_dir = Path(output_dir) if output_dir else self.repo_path / "pr_analysis_output"
         self.debug_mode = debug_mode
@@ -40,6 +49,44 @@ class DetailedAnalysisEngine:
         
         # Package directory for templates
         self.package_dir = Path(__file__).parent
+        
+        # Initialize backend manager
+        self.backend_manager = None
+        if BACKEND_MANAGER_AVAILABLE:
+            try:
+                # Create backend config from provided config or auto-detect
+                backend_config = None
+                if config and 'agentic_backend' in config:
+                    backend_cfg = config['agentic_backend']
+                    provider = backend_cfg.get('provider', 'openrouter')
+                    model = backend_cfg.get('model', 'anthropic/claude-3.5-sonnet')
+                    
+                    if provider == 'ollama':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.OLLAMA,
+                            model=model,
+                            base_url='http://localhost:11434'
+                        )
+                    elif provider == 'openrouter':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.OPENROUTER,
+                            model=model,
+                            api_key=os.getenv('OPENROUTER_API_KEY')
+                        )
+                    elif provider == 'claude':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.CLAUDE,
+                            model=model,
+                            api_key=os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
+                        )
+                
+                self.backend_manager = BackendManager(backend_config)
+                backend_info = self.backend_manager.get_backend_info()
+                print(f"🔧 Backend manager initialized for detailed analysis")
+                print(f"   Using {backend_info['backend_type']} backend with model {backend_info.get('model', 'unknown')}")
+            except Exception as e:
+                print(f"⚠️  Backend manager initialization failed: {e}")
+                self.backend_manager = None
         
         # Ensure directories exist
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -179,7 +226,7 @@ Return ONLY valid JSON in the exact format specified in the output format templa
         return prompt
         
     def call_detailed_analysis_agent(self, prompt: str) -> str:
-        """Call Claude agent for detailed file analysis"""
+        """Call agent for detailed file analysis using OpenRouter API"""
         print("🤖 Calling detailed analysis agent...")
         
         # Save prompt to file only in debug mode
@@ -189,45 +236,33 @@ Return ONLY valid JSON in the exact format specified in the output format templa
                 f.write(prompt)
             print(f"💾 Saved prompt to {prompt_file}")
         
-        # Check for OAuth token
-        oauth_token = os.environ.get('CLAUDE_CODE_OAUTH_TOKEN')
-        if not oauth_token:
-            raise Exception("CLAUDE_CODE_OAUTH_TOKEN not available - run 'claude setup-token'")
+        # Check backend availability
+        if not self.backend_manager:
+            raise Exception("AI backend manager not available - check appropriate configuration")
         
+        # Use AI backend API
         try:
-            # Call Claude agent with established pattern
-            cmd = ['claude', '-p', prompt]
+            backend_info = self.backend_manager.get_backend_info()
+            backend_type = backend_info['backend_type']
+            backend_model = backend_info.get('model', 'unknown')
+            print(f"🔄 Using {backend_type} API with model {backend_model} (prompt length: {len(prompt):,} chars)")
+            response = self.backend_manager.call_agent(prompt, timeout=300)
+            
+            # Save full response only in debug mode
             if self.debug_mode:
-                print(f"🔄 Running: claude -p <prompt> (prompt length: {len(prompt):,} chars)")
+                response_file = self.debug_dir / "detailed_analysis_full_response.txt"
+                with open(response_file, 'w') as f:
+                    f.write(response)
+                print(f"✅ {backend_type} agent call successful ({len(response):,} chars)")
             
-            result = subprocess.run(
-                cmd,
-                env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': oauth_token},
-                capture_output=True,
-                text=True,
-                timeout=300
-            )
+            return response
             
-            if result.returncode == 0:
-                response = result.stdout.strip()
-                
-                # Save full response only in debug mode
-                if self.debug_mode:
-                    response_file = self.debug_dir / "detailed_analysis_full_response.txt"
-                    with open(response_file, 'w') as f:
-                        f.write(response)
-                    print(f"✅ Agent call successful ({len(response):,} chars)")
-                
-                return response
-            else:
-                error_msg = result.stderr.strip() if result.stderr else "Unknown error"
-                raise Exception(f"Agent call failed with code {result.returncode}: {error_msg}")
-                
-        except subprocess.TimeoutExpired:
-            raise Exception("Agent call timed out after 300 seconds")
         except Exception as e:
-            print(f"❌ Error calling detailed analysis agent: {e}")
-            raise
+            backend_info = self.backend_manager.get_backend_info() if self.backend_manager else {'backend_type': 'AI Backend'}
+            backend_type = backend_info['backend_type']
+            if self.debug_mode:
+                print(f"❌ {backend_type} API error: {e}")
+            raise Exception(f"{backend_type} API call failed: {str(e)}")
             
     def save_detailed_analysis(self, analysis_response: str) -> Path:
         """Save and validate detailed analysis results"""
@@ -389,7 +424,7 @@ OVERALL RESULTS:
                 print(f"❌ Batch processing failed: {e}")
             return []
     
-    def process_single_file(self, file_data: Dict, previous_analyses: List[Dict]) -> Dict:
+    def process_single_file(self, file_data: Dict, previous_analyses: List[Dict]) -> Optional[Dict]:
         """Process a single file with full context from previous analyses"""
         
         # Format the single file data
@@ -538,7 +573,7 @@ Return a single JSON object analyzing this file:
         except:
             return []
     
-    def parse_single_file_response(self, response: str, file_path: str) -> Dict:
+    def parse_single_file_response(self, response: str, file_path: str) -> Optional[Dict]:
         """Parse single file analysis response"""
         try:
             json_str = response.strip()

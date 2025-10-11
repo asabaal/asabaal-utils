@@ -31,7 +31,9 @@ class OutputEncoder:
         
     def encode_video(self, frame_generator, audio_path: Union[str, Path], 
                     output_path: Union[str, Path], 
-                    quality_preset: str = "balanced") -> bool:
+                    quality_preset: str = "balanced",
+                    start_time: Optional[float] = None,
+                    end_time: Optional[float] = None) -> bool:
         """Encode video from frame generator.
         
         Args:
@@ -39,6 +41,8 @@ class OutputEncoder:
             audio_path: Path to audio file
             output_path: Output video path
             quality_preset: Quality preset ('fast', 'balanced', 'high_quality')
+            start_time: Start time in seconds for audio trimming
+            end_time: End time in seconds for audio trimming
             
         Returns:
             True if encoding succeeded
@@ -57,8 +61,8 @@ class OutputEncoder:
             if not self._encode_frames_to_video(frame_generator, temp_video_path, quality_preset):
                 return False
                 
-            # Combine with audio
-            return self._combine_video_audio(temp_video_path, audio_path, output_path)
+            # Combine with audio (with time trimming if specified)
+            return self._combine_video_audio(temp_video_path, audio_path, output_path, start_time, end_time)
             
         finally:
             # Clean up temporary file
@@ -240,20 +244,32 @@ class OutputEncoder:
             return False
             
     def _combine_video_audio(self, video_path: str, audio_path: str, 
-                            output_path: str) -> bool:
-        """Combine video and audio using FFmpeg."""
+                            output_path: str, start_time: Optional[float] = None,
+                            end_time: Optional[float] = None) -> bool:
+        """Combine video and audio using FFmpeg with optional audio trimming."""
         try:
-            cmd = [
-                'ffmpeg', '-y',
-                '-i', video_path,
+            cmd = ['ffmpeg', '-y', '-i', video_path]
+            
+            # Add audio input with trimming if specified
+            if start_time is not None:
+                cmd.extend(['-ss', str(start_time)])
+            if end_time is not None:
+                duration = end_time - (start_time or 0)
+                cmd.extend(['-t', str(duration)])
+            
+            cmd.extend([
                 '-i', audio_path,
                 '-c:v', 'copy',  # Copy video stream
                 '-c:a', 'aac',   # Re-encode audio to AAC
                 '-shortest',     # Match shortest stream
                 output_path
-            ]
+            ])
             
-            logger.info("Combining video and audio...")
+            if start_time is not None or end_time is not None:
+                logger.info(f"Combining video with audio segment: {start_time}s to {end_time or 'end'}s")
+            else:
+                logger.info("Combining video and audio...")
+            
             result = subprocess.run(cmd, capture_output=True, text=True)
             
             if result.returncode == 0:

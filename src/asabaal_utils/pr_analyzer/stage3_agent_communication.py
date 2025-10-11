@@ -10,12 +10,24 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
 
+if TYPE_CHECKING:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager
+
 # Add the parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import backend manager
+try:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager, list_available_backends
+    BACKEND_MANAGER_AVAILABLE = True
+except ImportError:
+    BACKEND_MANAGER_AVAILABLE = False
+    BackendManager = None  # type: ignore
+    list_available_backends = None  # type: ignore
 
 
 class AgentCallResult(Enum):
@@ -46,7 +58,7 @@ class AgentResponse:
 class RobustAgentCaller:
     """Robust agent communication system with file-based prompts"""
     
-    def __init__(self, output_dir: str = None):
+    def __init__(self, output_dir: Optional[str] = None, config: Optional[Dict[str, Any]] = None):
         if output_dir:
             self.test_output_dir = Path(output_dir) / "debug_outputs" / "stage3"
         else:
@@ -70,82 +82,123 @@ class RobustAgentCaller:
         with open(context_file, 'r') as f:
             self.analysis_context = json.load(f)
         
-        # Get OAuth token
-        self.oauth_token = os.getenv('CLAUDE_CODE_OAUTH_TOKEN')
+        # Initialize backend manager
+        self.backend_manager = None
         
-        print(f"🔧 Agent Communication System initialized:")
-        print(f"   Using file-based prompts to avoid command line limits")
-        print(f"   Context loaded: {len(self.analysis_context['files'])} files")
-        print(f"   OAuth token available: {'Yes' if self.oauth_token else 'No'}")
-        print(f"   Prompt data directory: {self.prompt_data_dir}")
+        if BACKEND_MANAGER_AVAILABLE:
+            try:
+                from asabaal_utils.agentic_toolkit.backend_config import BackendManager, list_available_backends, BackendConfig, BackendType
+                
+                # Create backend config from provided config or auto-detect
+                backend_config = None
+                if config and 'agentic_backend' in config:
+                    backend_cfg = config['agentic_backend']
+                    provider = backend_cfg.get('provider', 'openrouter')
+                    model = backend_cfg.get('model', 'anthropic/claude-3.5-sonnet')
+                    
+                    if provider == 'ollama':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.OLLAMA,
+                            model=model,
+                            base_url='http://localhost:11434'
+                        )
+                    elif provider == 'openrouter':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.OPENROUTER,
+                            model=model,
+                            api_key=os.getenv('OPENROUTER_API_KEY')
+                        )
+                    elif provider == 'claude':
+                        backend_config = BackendConfig(
+                            backend_type=BackendType.CLAUDE,
+                            model=model,
+                            api_key=os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
+                        )
+                
+                self.backend_manager = BackendManager(backend_config)
+                
+                # Show available backends
+                available_backends = list_available_backends()
+                backend_info = self.backend_manager.get_backend_info()
+                
+                print(f"🔧 Agent Communication System initialized:")
+                print(f"   Using {backend_info['backend_type']} backend with model {backend_info['model']}")
+                print(f"   Context loaded: {len(self.analysis_context['files'])} files")
+                print(f"   Backend available: {'Yes' if backend_info['available'] else 'No'}")
+                print(f"   Prompt data directory: {self.prompt_data_dir}")
+                
+                # Show all available backends
+                print(f"   Available backends:")
+                for name, info in available_backends.items():
+                    status = "✅" if info['available'] else "❌"
+                    print(f"     {status} {name}")
+                    
+            except Exception as e:
+                print(f"⚠️  Backend manager initialization failed: {e}")
+                self.backend_manager = None
+        else:
+            print(f"🔧 Agent Communication System initialization failed:")
+            print(f"   Backend manager not available")
+            print(f"   Context loaded: {len(self.analysis_context['files'])} files")
+            print(f"   Prompt data directory: {self.prompt_data_dir}")
     
     def test_environment_setup(self) -> Dict[str, Any]:
         """Test environment setup and prerequisites"""
         print("\n🔧 Testing Environment Setup...")
         
         setup_results = {
-            'claude_cli_available': False,
-            'claude_cli_version': None,
-            'oauth_token_present': bool(self.oauth_token),
-            'oauth_token_format_valid': False,
+            'backend_manager_available': False,
+            'backend_client_ready': False,
+            'backend_type': None,
+            'backend_model': None,
             'environment_ready': False,
+            'available_backends': {},
             'issues': []
         }
         
-        # Test 1: Check if Claude CLI is available
-        try:
-            result = subprocess.run(['claude', '--version'], 
-                capture_output=True, text=True, timeout=None)
-            if result.returncode == 0:
-                setup_results['claude_cli_available'] = True
-                setup_results['claude_cli_version'] = result.stdout.strip()
-                print(f"   ✅ Claude CLI found: {setup_results['claude_cli_version']}")
-            else:
-                setup_results['issues'].append(f"Claude CLI returned error: {result.stderr}")
-                print(f"   ❌ Claude CLI error: {result.stderr}")
-        except FileNotFoundError:
-            setup_results['issues'].append("Claude CLI not found in PATH")
-            print(f"   ❌ Claude CLI not found - install from https://claude.ai/code")
-        except subprocess.TimeoutExpired:
-            setup_results['issues'].append("Claude CLI --version timed out")
-            print(f"   ❌ Claude CLI version check timed out")
-        except Exception as e:
-            setup_results['issues'].append(f"Unexpected error checking Claude CLI: {e}")
-            print(f"   ❌ Unexpected error: {e}")
-        
-        # Test 2: Check OAuth token format
-        if self.oauth_token:
-            if self.oauth_token.startswith('sk-ant-'):
-                setup_results['oauth_token_format_valid'] = True
-                print(f"   ✅ OAuth token format valid")
-            else:
-                setup_results['issues'].append("OAuth token format invalid (should start with sk-ant-)")
-                print(f"   ❌ OAuth token format invalid")
-        else:
-            setup_results['issues'].append("CLAUDE_CODE_OAUTH_TOKEN environment variable not set")
-            print(f"   ❌ No OAuth token found")
-        
-        # Test 3: Simple CLI test
-        if setup_results['claude_cli_available'] and setup_results['oauth_token_format_valid']:
-            try:
-                test_prompt = "Reply with just 'test successful' and nothing else."
-                result = subprocess.run(['claude', '-p', test_prompt],
-                    env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': self.oauth_token},
-                    capture_output=True, text=True, timeout=None)
+        # Test 1: Check backend manager availability
+        if BACKEND_MANAGER_AVAILABLE and self.backend_manager:
+            setup_results['backend_manager_available'] = True
+            backend_info = self.backend_manager.get_backend_info()
+            setup_results['backend_type'] = backend_info['backend_type']
+            setup_results['backend_model'] = backend_info['model']
+            
+            print(f"   ✅ Backend manager available")
+            print(f"   📡 Using {backend_info['backend_type']} backend")
+            print(f"   🤖 Model: {backend_info['model']}")
+            
+            # Test backend client
+            if backend_info['available']:
+                setup_results['environment_ready'] = True
+                print(f"   ✅ Backend client available")
+                print(f"   ✅ Environment ready ({backend_info['backend_type']} provider available)")
                 
-                if result.returncode == 0 and 'test successful' in result.stdout.lower():
-                    setup_results['environment_ready'] = True
-                    print(f"   ✅ Simple CLI test successful")
-                else:
-                    setup_results['issues'].append(f"Simple CLI test failed: {result.stderr}")
-                    print(f"   ❌ Simple CLI test failed: {result.stderr}")
+                # Test backend client (optional, for debugging)
+                try:
+                    test_prompt = "Reply with just 'test successful' and nothing else."
+                    response = self.backend_manager.ask(test_prompt)
                     
-            except subprocess.TimeoutExpired:
-                setup_results['issues'].append("Simple CLI test timed out")
-                print(f"   ❌ Simple CLI test timed out")
-            except Exception as e:
-                setup_results['issues'].append(f"Simple CLI test error: {e}")
-                print(f"   ❌ Simple CLI test error: {e}")
+                    if response and hasattr(response, 'content') and 'test successful' in response.content.lower():
+                        setup_results['backend_client_ready'] = True
+                        print(f"   ✅ Backend client test successful")
+                    else:
+                        setup_results['issues'].append("Backend client test failed (but client is available)")
+                        print(f"   ⚠️  Backend client test failed (but client is available)")
+                        
+                except Exception as e:
+                    setup_results['issues'].append(f"Backend client test error: {e}")
+                    print(f"   ⚠️  Backend client test error: {e}")
+            else:
+                setup_results['issues'].append("Backend client not available")
+                print(f"   ❌ Backend client not available")
+                
+            # List all available backends
+            if list_available_backends:
+                setup_results['available_backends'] = list_available_backends()
+                
+        else:
+            setup_results['issues'].append("Backend manager not available")
+            print(f"   ❌ Backend manager not available")
         
         # Save environment test results
         with open(self.test_output_dir / "environment_test.json", 'w') as f:
@@ -185,18 +238,23 @@ class RobustAgentCaller:
                 }
                 file_analysis_data['file_details'].append(file_details)
         
-        # Save data file
+        # Save data file (for debugging)
         data_file = self.prompt_data_dir / "duplicate_analysis_data.json"
         with open(data_file, 'w') as f:
             json.dump(file_analysis_data, f, indent=2)
         
-        # Create clean prompt
+        # Create clean prompt with JSON content inline
+        json_content = json.dumps(file_analysis_data, indent=2)
         prompt = f"""You are a senior software architect detecting duplicate files.
 
-Read the detailed file analysis from {data_file} and identify duplicate or similar files.
+Here is the detailed file analysis data:
+
+```json
+{json_content}
+```
 
 Instructions:
-1. Read the JSON file which contains PR summary, file categories, and detailed file information
+1. Analyze the JSON data above which contains PR summary, file categories, and detailed file information
 2. Analyze file content samples and purposes to find duplicates
 3. Focus on functional duplicates - files that solve the same problems
 
@@ -205,17 +263,26 @@ Expected duplicates based on manual analysis:
 - Database setup files (supabase-setup.sql, etc.) 
 - Deployment guides (VERCEL-DEPLOY.md variants)
 
-Provide a summary report with:
-- CRITICAL: Exact duplicates or abandoned implementations
-- HIGH: Functional duplicates with different implementations  
-- MEDIUM: Similar purpose, potentially consolidatable
+Provide your response in this exact format:
+
+## CRITICAL:
+[Exact duplicates or abandoned implementations with specific file paths]
+
+## HIGH:
+[Functional duplicates with different implementations and file paths]
+
+## MEDIUM:
+[Similar purpose, potentially consolidatable files]
+
+## Summary:
+[Brief summary of duplicate analysis findings]
 
 Be specific about which files and provide evidence from the content samples."""
 
         return prompt
     
     def create_merge_readiness_prompt(self) -> str:
-        """Create merge readiness prompt with file references"""
+        """Create merge readiness prompt with inline JSON content"""
         
         # Save PR analysis data
         pr_data = {
@@ -236,32 +303,23 @@ Be specific about which files and provide evidence from the content samples."""
             ]
         }
         
-        # Save data file
+        # Save data file (for debugging)
         data_file = self.prompt_data_dir / "merge_readiness_data.json"
         with open(data_file, 'w') as f:
             json.dump(pr_data, f, indent=2)
         
-        # Save output format example to separate file (no special formatting in prompt!)
-        output_format = {
-            "merge_readiness_score": 75,
-            "status": "REVIEW_NEEDED", 
-            "blocking_issues": 0,
-            "warning_issues": 3,
-            "recommendation": "Large PR with some organizational issues but fundamentally sound",
-            "key_concerns": ["Large scope", "Multiple similar files", "Configuration redundancy"]
-        }
-        
-        format_file = self.prompt_data_dir / "merge_readiness_output_format.json"
-        with open(format_file, 'w') as f:
-            json.dump(output_format, f, indent=2)
-        
-        # Create clean prompt without special formatting
+        # Create prompt with inline JSON content
+        json_content = json.dumps(pr_data, indent=2)
         prompt = f"""You are a senior engineering manager evaluating merge readiness.
 
-Read the PR analysis data from {data_file} and assess if this PR is ready to merge.
+Here is the PR analysis data:
+
+```json
+{json_content}
+```
 
 Instructions:
-1. Read the JSON file containing PR summary, categories, and sample files
+1. Analyze the JSON data above which contains PR summary, categories, and sample files
 2. Evaluate completeness, code quality, and risks
 3. This is a massive PR with 257 files and significant line changes
 
@@ -271,12 +329,20 @@ Assessment criteria:
 - RISK: Large-scale changes, breaking changes, deployment risks
 - ORGANIZATION: Mixed concerns, experimental code
 
-Provide your response in the same JSON format as shown in {format_file}"""
+Provide your response in this exact JSON format:
+{{
+  "merge_readiness_score": <number 0-100>,
+  "status": "<READY|REVIEW_NEEDED|NOT_READY>", 
+  "blocking_issues": <number>,
+  "warning_issues": <number>,
+  "recommendation": "<brief summary>",
+  "key_concerns": ["<concern1>", "<concern2>"]
+}}"""
 
         return prompt
     
     def create_pattern_analysis_prompt(self) -> str:
-        """Create pattern analysis prompt with file references"""
+        """Create pattern analysis prompt with inline JSON content"""
         
         # Save pattern analysis data
         pattern_data = {
@@ -296,18 +362,23 @@ Provide your response in the same JSON format as shown in {format_file}"""
                     for f in files[:5]  # Max 5 per category
                 ]
         
-        # Save data file
+        # Save data file (for debugging)
         data_file = self.prompt_data_dir / "pattern_analysis_data.json"
         with open(data_file, 'w') as f:
             json.dump(pattern_data, f, indent=2)
         
-        # Create clean prompt
+        # Create prompt with inline JSON content
+        json_content = json.dumps(pattern_data, indent=2)
         prompt = f"""You are a software architect analyzing code patterns and consistency.
 
-Read the pattern data from {data_file} and identify consistency issues.
+Here is the pattern analysis data:
+
+```json
+{json_content}
+```
 
 Instructions:
-1. Read the JSON file with file categories and content samples
+1. Analyze the JSON data above which contains file categories and content samples
 2. Look for naming convention inconsistencies
 3. Identify different approaches to similar problems
 4. Note architectural pattern inconsistencies
@@ -318,129 +389,108 @@ Focus areas:
 - Similar functionality implemented differently
 - Missing architectural patterns
 
-List specific pattern issues with recommendations for consistency improvements."""
+Provide your response in this exact format:
+
+## CRITICAL:
+[Critical pattern issues that must be fixed]
+
+## HIGH:
+[High priority consistency issues]
+
+## MEDIUM:
+[Medium priority improvements]
+
+## Summary:
+[Brief summary of pattern analysis findings]"""
 
         return prompt
     
-    def call_agent_robust(self, agent_name: str, prompt: str, timeout_seconds: int = None) -> AgentResponse:
+    def call_agent_robust(self, agent_name: str, prompt: str, timeout_seconds: int = 300) -> AgentResponse:
         """Call agent with robust error handling and full debugging"""
         start_time = time.time()
         
         print(f"   🤖 Calling {agent_name} agent...")
         print(f"      Prompt length: {len(prompt):,} chars (file-based)")
-        print(f"      Timeout: {'None (unlimited)' if timeout_seconds is None else f'{timeout_seconds}s'}")
+        print(f"      Timeout: {timeout_seconds}s")
         
-        # Check prerequisites
-        if not self.oauth_token:
-            return AgentResponse(
-                agent_name=agent_name,
-                result_type=AgentCallResult.NO_TOKEN,
-                response_text="",
-                error_message="CLAUDE_CODE_OAUTH_TOKEN not available",
-                call_duration_ms=0,
-                prompt_length=len(prompt),
-                stdout="",
-                stderr="",
-                return_code=-1
-            )
-        
-        # Make agent call
-        try:
-            cmd = ['claude', '-p', prompt]
-            result = subprocess.run(
-                cmd,
-                env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': self.oauth_token},
-                capture_output=True,
-                text=True,
-                timeout=timeout_seconds  # None = no timeout
-            )
-            
+        # Use backend manager API
+        if not self.backend_manager:
             end_time = time.time()
             call_duration = (end_time - start_time) * 1000
-            
-            # Analyze result
-            if result.returncode == 0:
-                print(f"      ✅ Success ({call_duration:.1f}ms)")
-                print(f"      Response length: {len(result.stdout):,} chars")
-                
-                return AgentResponse(
-                    agent_name=agent_name,
-                    result_type=AgentCallResult.SUCCESS,
-                    response_text=result.stdout.strip(),
-                    error_message="",
-                    call_duration_ms=call_duration,
-                    prompt_length=len(prompt),
-                    stdout=result.stdout,
-                    stderr=result.stderr,
-                    return_code=result.returncode
-                )
-            else:
-                print(f"      ❌ Failed (code {result.returncode}, {call_duration:.1f}ms)")
-                print(f"      Error: {result.stderr[:200]}...")
-                
-                return AgentResponse(
-                    agent_name=agent_name,
-                    result_type=AgentCallResult.NETWORK_ERROR,
-                    response_text="",
-                    error_message=result.stderr,
-                    call_duration_ms=call_duration,
-                    prompt_length=len(prompt),
-                    stdout=result.stdout,
-                    stderr=result.stderr,
-                    return_code=result.returncode
-                )
-            
-        except subprocess.TimeoutExpired:
-            end_time = time.time()
-            call_duration = (end_time - start_time) * 1000
-            
-            print(f"      ⏰ Timeout after {timeout_seconds}s")
-            
-            return AgentResponse(
-                agent_name=agent_name,
-                result_type=AgentCallResult.TIMEOUT,
-                response_text="",
-                error_message=f"Agent call timed out after {timeout_seconds} seconds",
-                call_duration_ms=call_duration,
-                prompt_length=len(prompt),
-                stdout="",
-                stderr="",
-                return_code=-1
-            )
-            
-        except FileNotFoundError:
-            end_time = time.time()
-            call_duration = (end_time - start_time) * 1000
-            
-            print(f"      ❌ Claude CLI not found")
             
             return AgentResponse(
                 agent_name=agent_name,
                 result_type=AgentCallResult.NOT_FOUND,
                 response_text="",
-                error_message="Claude CLI not found - install from https://claude.ai/code",
+                error_message="Backend manager not available - check backend configuration",
                 call_duration_ms=call_duration,
                 prompt_length=len(prompt),
                 stdout="",
                 stderr="",
                 return_code=-1
+            )
+        
+        # Make backend API call
+        try:
+            backend_info = self.backend_manager.get_backend_info()
+            backend_type = backend_info['backend_type']
+            backend_model = backend_info.get('model', 'unknown')
+            print(f"      Using {backend_type} API with model {backend_model}...")
+            response_text = self.backend_manager.call_agent(prompt, timeout=timeout_seconds)
+            
+            end_time = time.time()
+            call_duration = (end_time - start_time) * 1000
+            
+            print(f"      ✅ {backend_type.title()} Success ({call_duration:.1f}ms)")
+            print(f"      Response length: {len(response_text):,} chars")
+            
+            return AgentResponse(
+                agent_name=agent_name,
+                result_type=AgentCallResult.SUCCESS,
+                response_text=response_text.strip(),
+                error_message="",
+                call_duration_ms=call_duration,
+                prompt_length=len(prompt),
+                stdout=response_text,
+                stderr="",
+                return_code=0
             )
             
         except Exception as e:
             end_time = time.time()
             call_duration = (end_time - start_time) * 1000
             
-            print(f"      ❌ Unexpected error: {e}")
+            # Get backend info for error messages
+            backend_info = self.backend_manager.get_backend_info()
+            backend_type = backend_info['backend_type']
+            
+            error_msg = str(e)
+            if "timeout" in error_msg.lower():
+                print(f"      ⏰ Timeout after {timeout_seconds}s")
+                result_type = AgentCallResult.TIMEOUT
+                error_message = f"{backend_type.title()} API call timed out after {timeout_seconds} seconds"
+            elif "api" in error_msg.lower() and "key" in error_msg.lower():
+                print(f"      ❌ API Key Error")
+                result_type = AgentCallResult.NO_TOKEN
+                error_message = f"{backend_type.title()} API key invalid or missing"
+            elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+                print(f"      ❌ Network Error")
+                result_type = AgentCallResult.NETWORK_ERROR
+                error_message = f"{backend_type.title()} API network error: {error_msg}"
+            else:
+                print(f"      ❌ {backend_type.title()} API Error: {e}")
+                result_type = AgentCallResult.UNKNOWN_ERROR
+                error_message = f"{backend_type.title()} API error: {error_msg}"
             
             return AgentResponse(
                 agent_name=agent_name,
-                result_type=AgentCallResult.UNKNOWN_ERROR,
+                result_type=result_type,
                 response_text="",
-                error_message=str(e),
+                error_message=error_message,
                 call_duration_ms=call_duration,
                 prompt_length=len(prompt),
                 stdout="",
-                stderr="",
+                stderr=error_msg,
                 return_code=-1
             )
     
@@ -465,7 +515,7 @@ List specific pattern issues with recommendations for consistency improvements."
                 f.write(prompt)
             
             # Call agent
-            response = self.call_agent_robust(agent_name, prompt)
+            response = self.call_agent_robust(agent_name, prompt, 300)
             responses[agent_name] = response
             
             # Save individual response
@@ -540,10 +590,23 @@ List specific pattern issues with recommendations for consistency improvements."
             analysis['status'] = "PARTIAL" if analysis['successful_calls'] > 0 else "NOT_READY"
             
             if 'not_found' in analysis['failure_types']:
-                analysis['recommendations'].append("❌ Install Claude CLI from https://claude.ai/code")
+                analysis['recommendations'].append("❌ Install openai package: pip install openai")
             
             if 'no_token' in analysis['failure_types']:
-                analysis['recommendations'].append("❌ Set CLAUDE_CODE_OAUTH_TOKEN environment variable")
+                if self.backend_manager:
+                    backend_info = self.backend_manager.get_backend_info()
+                    backend_type = backend_info['backend_type'].upper()
+                    analysis['recommendations'].append(f"❌ Set {backend_type}_API_KEY environment variable")
+                else:
+                    analysis['recommendations'].append("❌ Set appropriate API_KEY environment variable")
+            
+            if 'network_error' in analysis['failure_types']:
+                if self.backend_manager:
+                    backend_info = self.backend_manager.get_backend_info()
+                    backend_type = backend_info['backend_type'].title()
+                    analysis['recommendations'].append(f"❌ Check internet connection and {backend_type} API status")
+                else:
+                    analysis['recommendations'].append("❌ Check internet connection and API status")
         
         # Success rate assessment
         success_rate = analysis['successful_calls'] / analysis['total_agents'] if analysis['total_agents'] > 0 else 0
@@ -594,9 +657,9 @@ List specific pattern issues with recommendations for consistency improvements."
             for agent_name in ['duplicate_detection', 'merge_readiness', 'pattern_analysis']:
                 responses[agent_name] = AgentResponse(
                     agent_name=agent_name,
-                    result_type=AgentCallResult.NO_TOKEN if not self.oauth_token else AgentCallResult.NOT_FOUND,
+                    result_type=AgentCallResult.NOT_FOUND,
                     response_text="",
-                    error_message="Environment not ready",
+                    error_message="Environment not ready - AI backend client not available",
                     call_duration_ms=0,
                     prompt_length=0,
                     stdout="",

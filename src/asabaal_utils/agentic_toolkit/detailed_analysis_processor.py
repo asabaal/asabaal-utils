@@ -30,9 +30,10 @@ class DetailedAnalysisProcessor(BatchProcessor):
                  output_dir: str,
                  instructions_path: str,
                  output_format_path: str,
-                 config: Optional[BatchProcessingConfig] = None):
+                 config: Optional[BatchProcessingConfig] = None,
+                 backend_config: Optional[Dict[str, Any]] = None):
         
-        super().__init__(output_dir, config)
+        super().__init__(output_dir, config, backend_config)
         
         self.repo_path = Path(repo_path)
         self.instructions_path = Path(instructions_path)
@@ -349,7 +350,8 @@ def create_detailed_analysis_processor(repo_path: str,
                                      output_format_path: str,
                                      batch_size: int = 12,
                                      max_files: Optional[int] = None,
-                                     debug_mode: bool = False) -> DetailedAnalysisProcessor:
+                                     debug_mode: bool = False,
+                                     backend_config: Optional[Dict[str, Any]] = None) -> DetailedAnalysisProcessor:
     """
     Factory function to create detailed analysis processor.
     
@@ -375,7 +377,7 @@ def create_detailed_analysis_processor(repo_path: str,
     )
     
     processor = DetailedAnalysisProcessor(
-        repo_path, output_dir, instructions_path, output_format_path, config
+        repo_path, output_dir, instructions_path, output_format_path, config, backend_config
     )
     
     # Store max_files limit if provided

@@ -6,8 +6,9 @@ Unified PR Analyzer - Main analyzer class
 import subprocess
 import shutil
 import time
+import yaml
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from .stages import (
     ContextPreparer,
@@ -34,13 +35,16 @@ from .stage7_detailed_analysis import DetailedAnalysisEngine as DetailedAnalysis
 class UnifiedPRAnalyzer:
     """Unified PR analyzer that runs all stages and saves outputs locally"""
     
-    def __init__(self, repo_path: str, debug_mode: bool = False, max_files: int = None):
+    def __init__(self, repo_path: str, debug_mode: bool = False, max_files: int = 0):
         self.repo_path = Path(repo_path).resolve()
         self.analyzer_dir = Path(__file__).parent
         self.output_dir = self.repo_path / "pr_analysis_output"
         self.output_dir.mkdir(exist_ok=True)
         self.debug_mode = debug_mode
         self.max_files = max_files
+        
+        # Load configuration
+        self.config = self._load_config()
         
         # Copy necessary files to local output directory
         self.setup_local_environment()
@@ -60,6 +64,31 @@ class UnifiedPRAnalyzer:
                     shutil.copy2(file, local_prompt_dir / file.name)
         
         print(f"📁 Analysis output directory: {self.output_dir}")
+    
+    def _load_config(self) -> Dict[str, Any]:
+        """Load analysis configuration from YAML file"""
+        try:
+            config_path = self.analyzer_dir / "config" / "analysis_config.yaml"
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+            
+            # Add agentic backend configuration if not present
+            if 'agentic_backend' not in config:
+                config['agentic_backend'] = {
+                    'provider': 'openrouter',
+                    'model': 'anthropic/claude-3.5-sonnet'
+                }
+            
+            return config
+        except Exception as e:
+            print(f"⚠️  Warning: Could not load config file: {e}")
+            # Return default configuration
+            return {
+                'agentic_backend': {
+                    'provider': 'openrouter',
+                    'model': 'anthropic/claude-3.5-sonnet'
+                }
+            }
     
     def run_stage1_context_prep(self, from_branch: str, to_branch: str) -> bool:
         """Run Stage 1: Context preparation"""
@@ -113,7 +142,7 @@ class UnifiedPRAnalyzer:
         print("🔄 Stage 3: Agent Communication")
         
         try:
-            stage3 = RobustAgentCaller(str(self.output_dir))
+            stage3 = RobustAgentCaller(str(self.output_dir), config=self.config)
             results = stage3.run_full_stage3_test()
             
             if results.get('ready_for_stage4', False):
@@ -205,11 +234,11 @@ class UnifiedPRAnalyzer:
             if TOOLKIT_VERSION_AVAILABLE:
                 if self.debug_mode:
                     print("🔧 Using generalized batch processing toolkit (V2)")
-                stage7 = DetailedAnalysisEngineV2(str(self.repo_path), str(self.output_dir), self.debug_mode, self.max_files)
+                stage7 = DetailedAnalysisEngineV2(str(self.repo_path), str(self.output_dir), self.debug_mode, self.max_files, config=self.config)
             else:
                 if self.debug_mode:
                     print("🔧 Using legacy implementation (V1)")
-                stage7 = DetailedAnalysisEngineV1(str(self.repo_path), str(self.output_dir), self.debug_mode, self.max_files)
+                stage7 = DetailedAnalysisEngineV1(str(self.repo_path), str(self.output_dir), self.debug_mode, self.max_files, config=self.config)
             
             result = stage7.run_detailed_analysis()
             
@@ -235,7 +264,7 @@ class UnifiedPRAnalyzer:
         print("🔄 Stage 8: File Assessment")
         
         try:
-            stage8 = FileAssessmentGenerator(str(self.repo_path), str(self.output_dir))
+            stage8 = FileAssessmentGenerator(str(self.repo_path), str(self.output_dir), config=self.config)
             result = stage8.run_stage8_file_assessment()
             
             if result:
@@ -274,7 +303,7 @@ class UnifiedPRAnalyzer:
             print(f"❌ Stage 9: ERROR - {e}")
             return False
     
-    def run_stage10_feedback_update(self, feedback: str = None, feedback_files: list = None) -> bool:
+    def run_stage10_feedback_update(self, feedback: Optional[str] = None, feedback_files: Optional[list] = None) -> bool:
         """Run Stage 10: Feedback-based analysis updates"""
         print("🔄 Stage 10: Feedback Update System")
         
@@ -284,8 +313,11 @@ class UnifiedPRAnalyzer:
                 print("❌ Stage 10 requires feedback to process")
                 return False
                 
-            stage10 = FeedbackUpdateSystem()
-            success = stage10.process_feedback_update(feedback, feedback_files)
+            stage10 = FeedbackUpdateSystem(self.repo_path)
+            # Handle None values by providing empty defaults
+            feedback_content = feedback or ""
+            feedback_files_list = feedback_files or []
+            success = stage10.process_feedback_update(feedback_content, feedback_files_list)
             
             if success:
                 # Copy updated results to local output
@@ -309,7 +341,7 @@ class UnifiedPRAnalyzer:
             print(f"❌ Error in Stage 10: {e}")
             return False
     
-    def analyze_pr(self, from_branch: str = "main", to_branch: str = None, start_stage: int = 1, end_stage: int = 10, feedback: str = None, feedback_files: list = None) -> bool:
+    def analyze_pr(self, from_branch: str = "main", to_branch: Optional[str] = None, start_stage: int = 1, end_stage: int = 10, feedback: Optional[str] = None, feedback_files: Optional[list] = None) -> bool:
         """Run complete PR analysis pipeline with optional stage range"""
         
         print("=" * 80)
@@ -325,7 +357,7 @@ class UnifiedPRAnalyzer:
         
         # Define all stages with their numbers
         all_stages = [
-            (1, "Stage 1: Context Preparation", lambda: self.run_stage1_context_prep(from_branch, to_branch)),
+            (1, "Stage 1: Context Preparation", lambda: self.run_stage1_context_prep(from_branch, to_branch or "main")),
             (2, "Stage 2: Agent Prompts", self.run_stage2_agent_prompts),
             (3, "Stage 3: Agent Communication", self.run_stage3_agent_communication),
             (4, "Stage 4: Response Parsing", self.run_stage4_response_parsing),
@@ -409,7 +441,7 @@ class UnifiedPRAnalyzer:
             print(f"⏱️  Total time: {elapsed_time:.1f} seconds")
             return False
     
-    def update_analysis_with_feedback(self, feedback: str, feedback_files: list = None) -> bool:
+    def update_analysis_with_feedback(self, feedback: str, feedback_files: Optional[list] = None) -> bool:
         """Update analysis with user feedback"""
         print("=" * 80)
         print("🔄 PR ANALYZER - FEEDBACK UPDATE")
@@ -421,8 +453,10 @@ class UnifiedPRAnalyzer:
         
         try:
             # Run Stage 10: Feedback updates
-            stage10 = FeedbackUpdateSystem()
-            success = stage10.process_feedback_update(feedback, feedback_files)
+            stage10 = FeedbackUpdateSystem(self.repo_path, config=self.config)
+            # Handle None values by providing empty defaults
+            feedback_files_list = feedback_files or []
+            success = stage10.process_feedback_update(feedback, feedback_files_list)
             
             if success:
                 print("✅ Feedback update completed successfully!")

@@ -1,5 +1,17 @@
 # PR Analysis Configuration
 analysis_settings:
+  # Agentic backend configuration
+  agentic_backend:
+    provider: "openrouter"  # Options: "openrouter", "claude_cli"
+    model: "anthropic/claude-3.5-sonnet"  # OpenRouter model selection
+    # Popular OpenRouter models:
+    # - anthropic/claude-3.5-sonnet (recommended)
+    # - anthropic/claude-3-opus
+    # - openai/gpt-4o
+    # - openai/gpt-4o-mini
+    # - meta-llama/llama-3.1-70b
+    # - google/gemini-pro-1.5
+    
   # Impact scoring weights (must sum to 1.0)
   impact_weights:
     business_value: 0.4

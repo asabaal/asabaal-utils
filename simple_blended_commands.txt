@@ -1,0 +1,24 @@
+# Simple Blended Layout Commands (using working individual tools)
+# Run from the psalms directory
+
+cd /home/asabaal/Projects/the_ai_series/psalms
+
+# 16:9 (1920x1080)
+gradient-blend "book_of_life_psalms.png" "The AI Series(2).png" blended_16x9.png --width 1920 --overlap 0.25
+auto-layout blended_16x9.png --logos "asabaal.png" "PSALMS.png" "the_ai_series_text.png" --fixed "0:TC;1:BL;2:BR" --config layout_config.json --outdir . --basename final_16x9
+
+# 9:16 (1080x1920)
+gradient-blend "book_of_life_psalms.png" "The AI Series(2).png" blended_9x16.png --width 1080 --overlap 0.25
+auto-layout blended_9x16.png --logos "asabaal.png" "PSALMS.png" "the_ai_series_text.png" --fixed "0:TC;1:BL;2:BR" --config layout_config.json --outdir . --basename final_9x16
+
+# 1:1 (1024x1024)
+gradient-blend "book_of_life_psalms.png" "The AI Series(2).png" blended_1x1.png --width 1024 --overlap 0.25
+auto-layout blended_1x1.png --logos "asabaal.png" "PSALMS.png" "the_ai_series_text.png" --fixed "0:TC;1:BL;2:BR" --config layout_config.json --outdir . --basename final_1x1
+
+# 4:5 (1080x1350)
+gradient-blend "book_of_life_psalms.png" "The AI Series(2).png" blended_4x5.png --width 1080 --overlap 0.25
+auto-layout blended_4x5.png --logos "asabaal.png" "PSALMS.png" "the_ai_series_text.png" --fixed "0:TC;1:BL;2:BR" --config layout_config.json --outdir . --basename final_4x5
+
+# 5:4 (1350x1080)
+gradient-blend "book_of_life_psalms.png" "The AI Series(2).png" blended_5x4.png --width 1350 --overlap 0.25
+auto-layout blended_5x4.png --logos "asabaal.png" "PSALMS.png" "the_ai_series_text.png" --fixed "0:TC;1:BL;2:BR" --config layout_config.json --outdir . --basename final_5x4

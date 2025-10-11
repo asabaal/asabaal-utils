@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PR Analysis Dashboard</title>
+    <title>PR Analysis Dashboard - unknown → unknown</title>
     <style>
         * {
             margin: 0;
@@ -14,513 +14,394 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #0f0f23;
-            color: #e6e6e6;
+            color: #e0e0e0;
             line-height: 1.6;
-        }
-
-        .dashboard {
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px 0;
-            border-bottom: 2px solid #2a2a3a;
-        }
-
-        .header h1 {
-            color: #4a9eff;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #b0b0b0;
-            font-size: 1.1rem;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a3a 0%, #2a2a4a 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #00ff88;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+
+        .branch-info {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 20px;
         }
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
 
         .metric-card {
-            background: #1a1a2e;
-            border: 1px solid #2a2a3a;
-            border-radius: 10px;
-            padding: 25px;
-            transition: transform 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .metric-card:hover {
-            transform: translateY(-5px);
-            border-color: #4a9eff;
-        }
-
-        .metric-title {
-            font-size: 1.1rem;
-            color: #b0b0b0;
-            margin-bottom: 10px;
+        .metric-label {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 5px;
         }
 
         .metric-value {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: #4a9eff;
+            color: #00ff88;
         }
 
-        .metric-status {
-            margin-top: 10px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: inline-block;
-            font-weight: bold;
-        }
-
-        .status-ready {
-            background: #1a5a1a;
-            color: #4caf50;
-        }
-
-        .status-conditional {
-            background: #5a4a1a;
-            color: #ff9800;
-        }
-
-        .status-not-ready {
-            background: #5a1a1a;
-            color: #f44336;
-        }
-
-        .status-unknown {
-            background: #3a3a3a;
-            color: #999;
-        }
-
-        .content-section {
-            background: #1a1a2e;
-            border: 1px solid #2a2a3a;
-            border-radius: 10px;
+        .tabs {
             margin-bottom: 30px;
-            overflow: hidden;
         }
 
-        .section-header {
-            background: #2a2a3a;
-            padding: 20px 25px;
-            border-bottom: 1px solid #3a3a4a;
+        .tab-buttons {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .section-title {
-            font-size: 1.5rem;
-            color: #4a9eff;
+        .tab-button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tab-button.active {
+            background: #00ff88;
+            color: #0f0f23;
             font-weight: bold;
         }
 
-        .section-content {
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
             padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .search-filters {
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        /* File Analysis Styles */
+        .search-container {
+            margin-bottom: 20px;
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
         }
 
         .search-input {
             flex: 1;
             min-width: 250px;
-            padding: 12px 16px;
-            background: #2a2a3a;
-            border: 1px solid #3a3a4a;
-            border-radius: 6px;
-            color: #e6e6e6;
-            font-size: 1rem;
         }
 
-        .search-input:focus {
-            outline: none;
-            border-color: #4a9eff;
+        .file-tree {
+            max-height: 800px;
+            overflow-y: auto;
         }
 
-        .filter-select {
-            padding: 12px 16px;
-            background: #2a2a3a;
-            border: 1px solid #3a3a4a;
-            border-radius: 6px;
-            color: #e6e6e6;
-            font-size: 1rem;
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
         }
 
-        .tree-view {
-            margin-top: 20px;
-        }
+        .file-item.ready { border-left-color: #00ff88; }
+        .file-item.conditional { border-left-color: #ffaa00; }
+        .file-item.not_ready { border-left-color: #ff4444; }
 
-        .tree-node {
-            margin-left: 20px;
-            margin-bottom: 10px;
-        }
-
-        .tree-node.root {
-            margin-left: 0;
-        }
-
-        .node-header {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            background: #2a2a3a;
-            border-radius: 6px;
+        .file-header {
+            padding: 15px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .node-header:hover {
-            background: #3a3a4a;
+        .file-path {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
         }
 
-        .node-icon {
-            margin-right: 10px;
-            font-size: 1.2rem;
-            width: 20px;
-            text-align: center;
-        }
-
-        .node-title {
-            flex: 1;
-            font-weight: bold;
-        }
-
-        .node-status {
-            margin-left: 10px;
-            padding: 4px 8px;
-            border-radius: 12px;
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: bold;
         }
 
-        .expandable-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+        .status-badge.ready { background: #00ff88; color: #000; }
+        .status-badge.conditional { background: #ffaa00; color: #000; }
+        .status-badge.not_ready { background: #ff4444; color: #fff; }
+
+        .file-details {
+            display: none;
+            padding: 0 15px 15px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .expandable-content.expanded {
-            max-height: 1000px;
+        .file-details.expanded {
+            display: block;
         }
 
-        .node-details {
-            margin: 15px 0;
-            padding: 15px;
-            background: #1a1a2e;
-            border-radius: 6px;
-            border-left: 4px solid #4a9eff;
+        /* Issue and Duplicate Styles */
+        .issue-list, .duplicate-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #999;
-        }
-
-        .recommendation-item {
-            background: #2a2a3a;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #4a9eff;
-        }
-
-        .recommendation-title {
-            font-weight: bold;
-            color: #4a9eff;
-            margin-bottom: 8px;
-        }
-
-        .no-data-message {
-            background: #2a2a3a;
-            border-radius: 6px;
+        .issue-item, .duplicate-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
             padding: 20px;
-            text-align: center;
-            color: #999;
-            border: 2px dashed #3a3a4a;
+            border-left: 4px solid transparent;
         }
+
+        .issue-item.critical { border-left-color: #ff4444; }
+        .issue-item.high { border-left-color: #ff8800; }
+        .issue-item.medium { border-left-color: #ffaa00; }
+
+        .duplicate-item.critical { border-left-color: #ff4444; }
+        .duplicate-item.high { border-left-color: #ff8800; }
+        .duplicate-item.medium { border-left-color: #ffaa00; }
+
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .priority-badge.critical { background: #ff4444; color: #fff; }
+        .priority-badge.high { background: #ff8800; color: #fff; }
+        .priority-badge.medium { background: #ffaa00; color: #000; }
 
         @media (max-width: 768px) {
-            .dashboard {
-                padding: 10px;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .search-filters {
-                flex-direction: column;
-            }
-
-            .search-input {
-                min-width: auto;
-            }
+            .container { padding: 15px; }
+            .header { padding: 20px; }
+            .header h1 { font-size: 2rem; }
+            .search-container { flex-direction: column; }
+            .tab-buttons { justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
+    <div class="container">
         <div class="header">
-            <h1>PR Analysis Dashboard</h1>
-            <p>Comprehensive analysis results for your pull request</p>
-        </div>
-
-        <div class="container">
-            <!-- Executive Summary -->
+            <h1>🔍 PR Analysis Dashboard</h1>
+            <div class="branch-info">unknown → unknown</div>
             <div class="metrics-grid">
                 <div class="metric-card">
-                    <div class="metric-title">Total Files Analyzed</div>
-                    <div class="metric-value">0</div>
-                    <div class="metric-status status-unknown">No Analysis Data</div>
+                    <div class="metric-label">Quality Score</div>
+                    <div class="metric-value">0/10</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title">Merge Ready Files</div>
+                    <div class="metric-label">Files Analyzed</div>
                     <div class="metric-value">0</div>
-                    <div class="metric-status status-unknown">Pending Analysis</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title">Files Needing Review</div>
+                    <div class="metric-label">Ready Files</div>
                     <div class="metric-value">0</div>
-                    <div class="metric-status status-unknown">Unknown Status</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title">Overall Status</div>
-                    <div class="metric-value">Ready</div>
-                    <div class="metric-status status-ready">Default Status</div>
+                    <div class="metric-label">Issues Found</div>
+                    <div class="metric-value">0</div>
                 </div>
             </div>
+        </div>
 
-            <!-- Hierarchical File Analysis -->
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">📁 Hierarchical File Analysis</div>
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('overview')">📊 Overview</button>
+                <button class="tab-button" onclick="showTab('files')">📁 File Analysis</button>
+                <button class="tab-button" onclick="showTab('issues')">⚠️ Quality Issues</button>
+                <button class="tab-button" onclick="showTab('duplicates')">🔄 Duplicates</button>
+                <button class="tab-button" onclick="showTab('recommendations')">💡 Recommendations</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <h2>📊 Executive Summary</h2>
+                
+        <div class="overview-section">
+            <div class="pr-stats">
+                <div class="stat-item">
+                    <h4>0</h4>
+                    <p>Files Changed</p>
                 </div>
-                <div class="section-content">
-                    <div class="search-filters">
-                        <input type="text" class="search-input" id="fileSearch" placeholder="Search files, classes, or functions...">
-                        <select class="filter-select" id="statusFilter">
-                            <option value="all">All Status</option>
-                            <option value="ready">Ready for Merge</option>
-                            <option value="conditional">Conditional</option>
-                            <option value="not-ready">Not Ready</option>
-                        </select>
-                    </div>
+                <div class="stat-item">
+                    <h4>0</h4>
+                    <p>Lines Added</p>
+                </div>
+                <div class="stat-item">
+                    <h4>0</h4>
+                    <p>Lines Removed</p>
+                </div>
+                <div class="stat-item">
+                    <h4>0/10</h4>
+                    <p>Quality Score</p>
+                </div>
+            </div>
+            <div class="recommendation-box">
+                <h4>Recommendation: UNKNOWN</h4>
+                <p>Overall assessment based on code quality, merge readiness, and potential issues.</p>
+            </div>
+        </div>
+        
+            </div>
+
+            <div id="files" class="tab-content">
+                <h2>📁 Detailed File Analysis</h2>
+                <div class="search-container">
+                    <input type="text" class="search-input" id="fileSearch" placeholder="Search files..." onkeyup="filterFiles()">
+                    <select class="filter-select" id="statusFilter" onchange="filterFiles()">
+                        <option value="all">All Files</option>
+                        <option value="ready">Ready</option>
+                        <option value="conditional">Conditional</option>
+                        <option value="not_ready">Not Ready</option>
+                    </select>
+                </div>
+                <div class="file-tree" id="fileTree">
                     
-                    <div id="fileAnalysisTree">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📂</div>
-                            <h3>No File Analysis Available</h3>
-                            <p>Stage 7 detailed analysis data is not available for this PR.</p>
-                            <p>The analysis may still be in progress or the PR may not require detailed file-level analysis.</p>
-                        </div>
-                    </div>
+        <div class="search-container">
+            <input type="text" class="search-input" id="fileSearch" placeholder="Search files..." onkeyup="filterFiles()">
+            <select class="filter-select" id="statusFilter" onchange="filterFiles()">
+                <option value="all">All Files</option>
+                <option value="ready">Ready</option>
+                <option value="conditional">Conditional</option>
+                <option value="not_ready">Not Ready</option>
+            </select>
+        </div>
+        <div class="quick-filters">
+            <button class="quick-filter-btn" onclick="clearFilters()">Show All</button>
+            <button class="quick-filter-btn" onclick="showOnlyProblems()">Problems Only</button>
+            <button class="quick-filter-btn" onclick="showOnlyReady()">Ready Files</button>
+        </div>
+        <div class="filter-stats" id="filterStats">
+            Showing all files
+        </div>
+        <!-- Files will be rendered here by JavaScript -->
+        
                 </div>
             </div>
 
-            <!-- Quality Issues -->
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">⚠️ Quality Issues</div>
-                </div>
-                <div class="section-content">
-                    <div class="no-data-message">
-                        <h3>No Quality Issues Identified</h3>
-                        <p>No agent response data available for quality analysis. This could indicate either no issues were found or the analysis is still in progress.</p>
-                    </div>
+            <div id="issues" class="tab-content">
+                <h2>⚠️ Quality Issues</h2>
+                <div class="issue-list">
+                    <div class='no-issues'><p>No quality issues identified.</p></div>
                 </div>
             </div>
 
-            <!-- Duplicate Files -->
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">📋 Duplicate Files</div>
-                </div>
-                <div class="section-content">
-                    <div class="no-data-message">
-                        <h3>No Duplicate Files Detected</h3>
-                        <p>No duplicate detection data available. The duplicate detection analysis may not have been performed or completed yet.</p>
-                    </div>
+            <div id="duplicates" class="tab-content">
+                <h2>🔄 Duplicate Analysis</h2>
+                <div class="duplicate-list">
+                    <div class='duplicate-item'><h3>No Duplicates Found</h3><p>No duplicate analysis available.</p></div>
                 </div>
             </div>
 
-            <!-- Recommendations -->
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">💡 Recommendations</div>
-                </div>
-                <div class="section-content">
-                    <div class="recommendation-item">
-                        <div class="recommendation-title">🔍 Analysis Status</div>
-                        <p>This PR appears to have limited analysis data available. Consider:</p>
-                        <ul style="margin-top: 10px; margin-left: 20px;">
-                            <li>Running the complete PR analysis pipeline</li>
-                            <li>Ensuring all analysis stages have completed successfully</li>
-                            <li>Checking for any errors in the analysis process</li>
-                        </ul>
-                    </div>
-
-                    <div class="recommendation-item">
-                        <div class="recommendation-title">📊 Data Availability</div>
-                        <p>To get a complete analysis dashboard, ensure the following data sources are available:</p>
-                        <ul style="margin-top: 10px; margin-left: 20px;">
-                            <li>Agent responses for duplicate detection and merge readiness</li>
-                            <li>Stage 7 detailed file-level analysis results</li>
-                            <li>Quality issue assessments with impact scores</li>
-                        </ul>
-                    </div>
-                </div>
+            <div id="recommendations" class="tab-content">
+                <h2>💡 Recommendations</h2>
+                <div class='no-recommendations'><p>No specific recommendations available.</p></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Interactive functionality for the dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('fileSearch');
-            const statusFilter = document.getElementById('statusFilter');
-            const fileAnalysisTree = document.getElementById('fileAnalysisTree');
+        // FILE_DATA_INJECTION_POINT
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab and mark button as active
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
 
-            // Search functionality
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    filterFileTree();
-                });
-            }
-
-            // Status filter functionality
-            if (statusFilter) {
-                statusFilter.addEventListener('change', function() {
-                    filterFileTree();
-                });
-            }
-
-            function filterFileTree() {
-                const searchTerm = searchInput?.value.toLowerCase() || '';
-                const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+        function filterFiles() {
+            const searchTerm = document.getElementById('fileSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const fileItems = document.querySelectorAll('.file-item');
+            
+            fileItems.forEach(item => {
+                const filePath = item.querySelector('.file-path').textContent.toLowerCase();
+                const status = item.classList.contains('ready') ? 'ready' : 
+                              item.classList.contains('conditional') ? 'conditional' : 'not_ready';
                 
-                // This would filter the tree nodes based on search and status
-                // Implementation would depend on the actual data structure
-                console.log('Filtering with:', { searchTerm, statusFilter });
-            }
-
-            // Expandable tree nodes
-            function initializeTreeNodes() {
-                const nodeHeaders = document.querySelectorAll('.node-header');
-                nodeHeaders.forEach(header => {
-                    header.addEventListener('click', function() {
-                        const content = this.nextElementSibling;
-                        const icon = this.querySelector('.node-icon');
-                        
-                        if (content && content.classList.contains('expandable-content')) {
-                            content.classList.toggle('expanded');
-                            if (icon) {
-                                icon.textContent = content.classList.contains('expanded') ? '📂' : '📁';
-                            }
-                        }
-                    });
-                });
-            }
-
-            // Function to create tree nodes dynamically (for when data is available)
-            function createTreeNode(data) {
-                const node = document.createElement('div');
-                node.className = 'tree-node';
+                const matchesSearch = filePath.includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
                 
-                const header = document.createElement('div');
-                header.className = 'node-header';
-                
-                const icon = document.createElement('span');
-                icon.className = 'node-icon';
-                icon.textContent = '📁';
-                
-                const title = document.createElement('span');
-                title.className = 'node-title';
-                title.textContent = data.name || 'Unknown';
-                
-                const status = document.createElement('span');
-                status.className = `node-status status-${data.status || 'unknown'}`;
-                status.textContent = data.status || 'unknown';
-                
-                header.appendChild(icon);
-                header.appendChild(title);
-                header.appendChild(status);
-                
-                const content = document.createElement('div');
-                content.className = 'expandable-content';
-                
-                node.appendChild(header);
-                node.appendChild(content);
-                
-                return node;
-            }
-
-            // Initialize any existing tree nodes
-            initializeTreeNodes();
-
-            // Smooth scrolling for internal links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
+                item.style.display = (matchesSearch && matchesStatus) ? 'block' : 'none';
             });
+        }
 
-            // Add loading states and animations
-            function showLoading(element) {
-                element.innerHTML = '<div style="text-align: center; padding: 40px;"><div style="border: 4px solid #3a3a4a; border-top: 4px solid #4a9eff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div><p style="margin-top: 20px; color: #999;">Loading analysis data...</p></div>';
-            }
+        function toggleFileDetails(element) {
+            const details = element.nextElementSibling;
+            details.classList.toggle('expanded');
+        }
 
-            // Add CSS animation for loading spinner
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
+        // Add click handlers for file items
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileHeaders = document.querySelectorAll('.file-header');
+            fileHeaders.forEach(header => {
+                header.addEventListener('click', () => toggleFileDetails(header));
+            });
         });
     </script>
 </body>

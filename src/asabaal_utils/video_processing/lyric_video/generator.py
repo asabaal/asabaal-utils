@@ -82,16 +82,13 @@ class LyricVideoGenerator:
         # Load configuration
         self.config = self._load_config(template, custom_config)
         
-        # Analyze audio
-        logger.info("Analyzing audio...")
-        self.audio_features = self.audio_analyzer.analyze_audio(audio_path)
-        
-        # Apply time range filtering if specified
+        # Analyze audio - now directly loading only the needed segment
         if start_time is not None or end_time is not None:
-            logger.info(f"Applying time range filter: {start_time}s to {end_time or 'end'}s")
-            self.audio_features = self._filter_audio_features_by_time(
-                self.audio_features, start_time, end_time
-            )
+            logger.info(f"Analyzing audio segment: {start_time}s to {end_time or 'end'}s")
+            self.audio_features = self.audio_analyzer.analyze_audio(audio_path, start_time, end_time)
+        else:
+            logger.info("Analyzing full audio...")
+            self.audio_features = self.audio_analyzer.analyze_audio(audio_path)
             
         # Process lyrics
         if lyrics_path:
@@ -179,7 +176,7 @@ class LyricVideoGenerator:
             self.compositor.load_background_video(background_video)
             
         # Generate frames
-        frame_generator = self._generate_frames(text_only_output)
+        frame_generator = self._generate_frames(text_only_output, start_time)
         
         # Encode video
         logger.info("Encoding video...")
@@ -187,7 +184,9 @@ class LyricVideoGenerator:
             frame_generator,
             audio_path,
             output_path,
-            quality_preset=self.config.get('quality_preset', 'balanced')
+            quality_preset=self.config.get('quality_preset', 'balanced'),
+            start_time=start_time,
+            end_time=end_time
         )
         
         if success:
@@ -263,7 +262,7 @@ class LyricVideoGenerator:
                 
         return result
         
-    def _generate_frames(self, text_only_output: bool = False) -> Generator[np.ndarray, None, None]:
+    def _generate_frames(self, text_only_output: bool = False, time_offset: Optional[float] = None) -> Generator[np.ndarray, None, None]:
         """Generate video frames."""
         if not self.audio_features:
             raise ValueError("Audio must be loaded before generating frames")
@@ -332,8 +331,11 @@ class LyricVideoGenerator:
         
         logger.info(f"Generating {total_frames} frames ({video_duration:.1f}s @ {self.fps}fps)")
         
+        # Calculate time offset for frame generation
+        offset = time_offset if time_offset is not None else 0.0
+        
         for frame_num in range(total_frames):
-            current_time = frame_num / self.fps
+            current_time = (frame_num / self.fps) + offset
             
             # Get background frame (pass beat times for smart switching)
             background = None if text_only_output else self.compositor.get_background_frame(
@@ -387,9 +389,8 @@ class LyricVideoGenerator:
                 if 'vertical_position' in style_mods:
                     modified_style.vertical_position = style_mods['vertical_position']
                 
-                # Check if we should use professional renderer
-                use_professional = isinstance(style, ProfessionalTextStyle) or \
-                                 isinstance(modified_style, ProfessionalTextStyle)
+                # ALWAYS use professional renderer for better text quality
+                use_professional = True  # Force professional rendering for all text
                 
                 if use_professional:
                     # Use professional text renderer - set it up with the style
@@ -605,20 +606,9 @@ class LyricVideoGenerator:
             if start_time and line_end <= start_time:
                 continue
                 
-            # Adjust line timing relative to the new start
-            adjusted_line = line.copy() if hasattr(line, 'copy') else line
-            adjusted_line.start_time = max(0, line_start - start_offset)
-            adjusted_line.end_time = line_end - start_offset
-            
-            # Adjust word timings if they exist
-            if hasattr(adjusted_line, 'words') and adjusted_line.words:
-                for word in adjusted_line.words:
-                    if hasattr(word, 'start_time'):
-                        word.start_time = max(0, word.start_time - start_offset)
-                    if hasattr(word, 'end_time'):
-                        word.end_time = word.end_time - start_offset
-                        
-            filtered_lyrics.append(adjusted_line)
+            # Keep original timestamps - don't adjust them
+            # This allows the frame generator to find lyrics using original timeline
+            filtered_lyrics.append(line)
             
         return filtered_lyrics
                 

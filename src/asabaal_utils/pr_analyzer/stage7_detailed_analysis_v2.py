@@ -24,7 +24,7 @@ class DetailedAnalysisEngine:
     generalized framework internally for better consistency and maintainability.
     """
     
-    def __init__(self, repo_path: str, output_dir: str = None, debug_mode: bool = False, max_files: int = None):
+    def __init__(self, repo_path: str, output_dir: Optional[str] = None, debug_mode: bool = False, max_files: Optional[int] = None, config: Optional[Dict[str, Any]] = None):
         self.repo_path = Path(repo_path)
         self.output_dir = Path(output_dir) if output_dir else self.repo_path / "pr_analysis_output"
         self.debug_mode = debug_mode
@@ -44,7 +44,8 @@ class DetailedAnalysisEngine:
             output_format_path=str(self.package_dir / "detailed_analysis_output_format.json"),
             batch_size=12,
             max_files=max_files,
-            debug_mode=debug_mode
+            debug_mode=debug_mode,
+            backend_config=config
         )
     
     def load_analysis_context(self) -> Dict[str, Any]:

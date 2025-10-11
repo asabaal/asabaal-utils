@@ -272,7 +272,7 @@ class Stage9HTMLGenerator:
             print("❌ FILE_DATA_INJECTION_POINT placeholder not found in template")
             return html_template
     
-    def replace_template_variables(self, html_template: str, analysis_data: Dict[str, Any]) -> str:
+    def replace_template_variables(self, html_template: str, analysis_data: Dict[str, Any], called_from_stage10: bool = False) -> str:
         """Replace all template variables with real data"""
         print("🔧 Replacing template variables with real data...")
         
@@ -299,7 +299,7 @@ class Stage9HTMLGenerator:
             '{{QUALITY_SCORE}}': str(overall_assessment.get('overall_score', 0)),
             '{{TOTAL_ISSUES}}': str(overall_assessment.get('total_issues', 0)),
             # Content sections
-            '{{OVERVIEW_CONTENT}}': self.generate_overview_content(complete_analysis),
+            '{{OVERVIEW_CONTENT}}': self.generate_overview_content(complete_analysis, analysis_data.get('file_assessment', {}), called_from_stage10),
             '{{FILE_ANALYSIS_CONTENT}}': self.generate_enhanced_search_container(),
             '{{QUALITY_ISSUES_CONTENT}}': self.generate_quality_issues_content(complete_analysis), 
             '{{DUPLICATES_CONTENT}}': self.generate_duplicates_content(analysis_data.get('agent_responses', {})),
@@ -318,7 +318,7 @@ class Stage9HTMLGenerator:
         print(f"✅ Made {replacements_made}/{len(replacements)} template variable replacements")
         return result
     
-    def generate_overview_content(self, complete_analysis):
+    def generate_overview_content(self, complete_analysis, file_assessment={}, called_from_stage10: bool = False):
         """Generate overview content section"""
         pr_summary = complete_analysis.get('pr_summary', {})
         overall_assessment = complete_analysis.get('overall_assessment', {})
@@ -349,7 +349,158 @@ class Stage9HTMLGenerator:
             </div>
         </div>
         """
+        
+        # Add feedback history section if called from Stage 10
+        if called_from_stage10:
+            feedback_history = self._generate_feedback_history_section(file_assessment)
+            overview_html += feedback_history
+        
         return overview_html
+        return overview_html
+    
+    def _generate_feedback_history_section(self, file_assessment):
+        """Generate feedback history section for overview tab"""
+        
+        # Get feedback history from file assessment data
+        feedback_history = file_assessment.get('feedback_history', [])
+        
+        if not feedback_history:
+            return ""
+        
+        history_html = """
+        <div class="feedback-history-section">
+            <h3>📋 Feedback History</h3>
+            <div class="feedback-timeline">
+        """
+        
+        for entry in reversed(feedback_history):  # Show newest first
+            timestamp = entry.get('timestamp', 'Unknown time')
+            feedback_summary = entry.get('feedback_summary', 'No summary')
+            metrics_changes = entry.get('metrics_changes', {})
+            
+            # Format timestamp
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                formatted_time = dt.strftime('%Y-%m-%d %H:%M:%S')
+            except:
+                formatted_time = timestamp
+            
+            history_html += f"""
+            <div class="feedback-entry">
+                <div class="feedback-header">
+                    <span class="feedback-time">{formatted_time}</span>
+                    <span class="feedback-summary">{feedback_summary}</span>
+                </div>
+                <div class="feedback-metrics">
+                    <div class="metric-change">
+                        <span class="metric-label">Ready Files:</span>
+                        <span class="metric-value {'positive' if metrics_changes.get('ready_files_change', 0) > 0 else 'neutral'}">
+                            {metrics_changes.get('ready_files_change', 0):+d}
+                        </span>
+                    </div>
+                    <div class="metric-change">
+                        <span class="metric-label">Confidence:</span>
+                        <span class="metric-value {'positive' if metrics_changes.get('confidence_change', 0) > 0 else 'neutral'}">
+                            {metrics_changes.get('confidence_change', 0):+.1%}
+                        </span>
+                    </div>
+                    <div class="metric-change">
+                        <span class="metric-label">Quality Score:</span>
+                        <span class="metric-value {'positive' if metrics_changes.get('quality_score_change', 0) > 0 else 'neutral'}">
+                            {metrics_changes.get('quality_score_change', 0):+.1f}
+                        </span>
+                    </div>
+                    <div class="metric-change">
+                        <span class="metric-label">Issues:</span>
+                        <span class="metric-value {'positive' if metrics_changes.get('not_ready_files_change', 0) < 0 else 'neutral'}">
+                            {entry.get('quality_issues_count', 0)} total
+                        </span>
+                    </div>
+                </div>
+            </div>
+            """
+        
+        history_html += """
+            </div>
+        </div>
+        
+        <style>
+        .feedback-history-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feedback-history-section h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+        
+        .feedback-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .feedback-entry {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #00ff88;
+        }
+        
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .feedback-time {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .feedback-summary {
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .feedback-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .metric-change {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .metric-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .metric-value.positive {
+            color: #00ff88;
+        }
+        
+        .metric-value.negative {
+            color: #ff4444;
+        }
+        
+        .metric-value.neutral {
+            color: #e0e0e0;
+        }
+        </style>
+        """
+        
+        return history_html
     
     def generate_quality_issues_content(self, complete_analysis):
         """Generate quality issues content section"""
@@ -533,7 +684,7 @@ class Stage9HTMLGenerator:
         return html_file
     
     
-    def _generate_standard_html(self, analysis_data: Dict[str, Any]) -> Path:
+    def _generate_standard_html(self, analysis_data: Dict[str, Any], called_from_stage10: bool = False) -> Path:
         """Generate HTML using deterministic approach - pure Python template replacement"""
         
         print("🔄 Using deterministic approach: Python template replacement with complete file data...")
@@ -549,7 +700,7 @@ class Stage9HTMLGenerator:
         print(f"✅ Loaded working HTML template: {template_file}")
         
         # Step 2: Replace all template variables with real data
-        complete_html = self.replace_template_variables(html_template, analysis_data)
+        complete_html = self.replace_template_variables(html_template, analysis_data, called_from_stage10)
         
         # Step 3: Inject complete file data
         complete_html = self.inject_complete_file_data(complete_html, analysis_data)

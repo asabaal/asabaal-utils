@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .clip_extractor import extract_clips_from_json
 from .silence_detector import remove_silence
+from .transcription_silence_removal import remove_silence_transcription
 from .transcript_analyzer import analyze_transcript
 from .thumbnail_generator import generate_thumbnails
 from .color_analyzer import analyze_video_colors
@@ -76,24 +77,42 @@ def remove_silence_cli():
     parser = argparse.ArgumentParser(description="Remove silence from video files")
     parser.add_argument("input_file", help="Path to input video file")
     parser.add_argument("output_file", help="Path to output video file")
+    parser.add_argument("--method", choices=["amplitude", "transcription"], default="amplitude",
+                        help="Silence detection method: amplitude (traditional) or transcription (accurate)")
     parser.add_argument("--threshold-db", type=float, default=-40.0,
-                        help="Threshold in dB below which audio is considered silence (default: -40.0)")
+                        help="Threshold in dB below which audio is considered silence (amplitude method only, default: -40.0)")
     parser.add_argument("--min-silence", type=float, default=0.5,
-                        help="Minimum duration of silence to remove in seconds (default: 0.5)")
+                        help="Minimum duration of silence to remove in seconds (amplitude method only, default: 0.5)")
     parser.add_argument("--min-sound", type=float, default=0.3,
-                        help="Minimum duration of sound to keep in seconds (default: 0.3)")
+                        help="Minimum duration of sound to keep in seconds (amplitude method only, default: 0.3)")
     parser.add_argument("--padding", type=float, default=0.1,
                         help="Padding around non-silent segments in seconds (default: 0.1)")
     parser.add_argument("--chunk-size", type=float, default=0.05,
-                        help="Size of audio chunks for analysis in seconds (default: 0.05)")
+                        help="Size of audio chunks for analysis in seconds (amplitude method only, default: 0.05)")
     parser.add_argument("--aggressive", action="store_true",
-                        help="Use aggressive silence rejection algorithms")
+                        help="Use aggressive silence rejection algorithms (amplitude method only)")
+    
+    # Transcription method options
+    transcription_group = parser.add_argument_group('Transcription Method Options')
+    transcription_group.add_argument("--min-gap", type=float, default=1.0,
+                        help="Minimum gap duration to remove in seconds (transcription method only, default: 1.0)")
+    transcription_group.add_argument("--max-gap", type=float, default=10.0,
+                        help="Maximum gap duration to remove at once in seconds (transcription method only, default: 10.0)")
+    transcription_group.add_argument("--transcription-model", default="base",
+                        choices=["tiny", "base", "small", "medium", "large", "turbo"],
+                        help="Whisper model size for transcription (transcription method only, default: base)")
+    transcription_group.add_argument("--device", default="auto",
+                        choices=["auto", "cpu", "cuda"],
+                        help="Device for transcription (transcription method only, default: auto)")
+    transcription_group.add_argument("--no-vad", action="store_true",
+                        help="Disable voice activity detection (transcription method only)")
+    
     parser.add_argument("--log-level", default="INFO",
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the logging level")
     
-    # Memory management options
-    memory_group = parser.add_argument_group('Memory Management Options')
+    # Memory management options (amplitude method only)
+    memory_group = parser.add_argument_group('Memory Management Options (Amplitude Method Only)')
     memory_group.add_argument("--strategy", 
                         choices=["auto", "full_quality", "reduced_resolution", "chunked", "segment", "streaming"],
                         default="auto",
@@ -115,65 +134,91 @@ def remove_silence_cli():
     logging.getLogger().setLevel(getattr(logging, args.log_level))
     
     try:
-        # Determine whether to use memory adaptation
-        use_memory_adaptation = not args.disable_memory_adaptation
-        
-        # Determine whether to use FFmpeg implementation
-        use_ffmpeg = not args.disable_ffmpeg
-
-        # Prepare memory management options
-        memory_options = {}
-        if args.strategy != "auto":
-            memory_options["strategy"] = args.strategy
-        if args.segment_count is not None:
-            memory_options["segment_count"] = args.segment_count
-        if args.chunk_duration is not None:
-            memory_options["chunk_duration"] = args.chunk_duration
-        if args.resolution_scale is not None:
-            memory_options["resolution_scale"] = args.resolution_scale
-        
-        result = remove_silence(
-            input_file=args.input_file,
-            output_file=args.output_file,
-            threshold_db=args.threshold_db,
-            min_silence_duration=args.min_silence,
-            min_sound_duration=args.min_sound,
-            padding=args.padding,
-            chunk_size=args.chunk_size,
-            aggressive_silence_rejection=args.aggressive,
-            use_memory_adaptation=use_memory_adaptation,
-            use_ffmpeg=use_ffmpeg,
-            **memory_options,
-        )
-        
-        # Handle both direct return values and dictionary result from memory adaptation
-        if isinstance(result, tuple) and len(result) == 3:
-            # Direct implementation return value
-            original_duration, output_duration, time_saved = result
-            print(f"\nSilence removal complete:")
-            print(f"- Original duration: {original_duration:.2f}s")
-            print(f"- Output duration: {output_duration:.2f}s")
-            print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
-            print(f"- Output file: {os.path.abspath(args.output_file)}")
-        elif isinstance(result, dict):
-            # Memory adaptation result
-            if result.get("status") == "success":
-                print(f"\nSilence removal complete (using {result.get('processing_mode', 'adaptive')} mode):")
-                inner_result = result.get("result")
-                if isinstance(inner_result, tuple) and len(inner_result) == 3:
-                    original_duration, output_duration, time_saved = inner_result
-                    print(f"- Original duration: {original_duration:.2f}s")
-                    print(f"- Output duration: {output_duration:.2f}s")
-                    print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
+        if args.method == "transcription":
+            # Use transcription-based silence removal
+            result = remove_silence_transcription(
+                input_file=args.input_file,
+                output_file=args.output_file,
+                min_gap_duration=args.min_gap,
+                max_gap_duration=args.max_gap,
+                padding=args.padding,
+                transcription_model=args.transcription_model,
+                device=args.device,
+                use_vad=not args.no_vad,
+            )
+            
+            # Handle result
+            if isinstance(result, tuple) and len(result) == 3:
+                original_duration, output_duration, time_saved = result
+                print(f"\nTranscription-based silence removal complete:")
+                print(f"- Original duration: {original_duration:.2f}s")
+                print(f"- Output duration: {output_duration:.2f}s")
+                print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
                 print(f"- Output file: {os.path.abspath(args.output_file)}")
             else:
-                # Processing failed
-                logger.error(f"Processing failed: {result.get('message', 'Unknown error')}")
+                logger.error(f"Unexpected result from transcription silence removal: {result}")
                 return 1
         else:
-            # Unexpected return value
-            logger.error(f"Unexpected result from silence removal: {result}")
-            return 1
+            # Use traditional amplitude-based silence removal
+            # Determine whether to use memory adaptation
+            use_memory_adaptation = not args.disable_memory_adaptation
+            
+            # Determine whether to use FFmpeg implementation
+            use_ffmpeg = not args.disable_ffmpeg
+
+            # Prepare memory management options
+            memory_options = {}
+            if args.strategy != "auto":
+                memory_options["strategy"] = args.strategy
+            if args.segment_count is not None:
+                memory_options["segment_count"] = args.segment_count
+            if args.chunk_duration is not None:
+                memory_options["chunk_duration"] = args.chunk_duration
+            if args.resolution_scale is not None:
+                memory_options["resolution_scale"] = args.resolution_scale
+            
+            result = remove_silence(
+                input_file=args.input_file,
+                output_file=args.output_file,
+                threshold_db=args.threshold_db,
+                min_silence_duration=args.min_silence,
+                min_sound_duration=args.min_sound,
+                padding=args.padding,
+                chunk_size=args.chunk_size,
+                aggressive_silence_rejection=args.aggressive,
+                use_memory_adaptation=use_memory_adaptation,
+                use_ffmpeg=use_ffmpeg,
+                **memory_options,
+            )
+            
+            # Handle both direct return values and dictionary result from memory adaptation
+            if isinstance(result, tuple) and len(result) == 3:
+                # Direct implementation return value
+                original_duration, output_duration, time_saved = result
+                print(f"\nAmplitude-based silence removal complete:")
+                print(f"- Original duration: {original_duration:.2f}s")
+                print(f"- Output duration: {output_duration:.2f}s")
+                print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
+                print(f"- Output file: {os.path.abspath(args.output_file)}")
+            elif isinstance(result, dict):
+                # Memory adaptation result
+                if result.get("status") == "success":
+                    print(f"\nAmplitude-based silence removal complete (using {result.get('processing_mode', 'adaptive')} mode):")
+                    inner_result = result.get("result")
+                    if isinstance(inner_result, tuple) and len(inner_result) == 3:
+                        original_duration, output_duration, time_saved = inner_result
+                        print(f"- Original duration: {original_duration:.2f}s")
+                        print(f"- Output duration: {output_duration:.2f}s")
+                        print(f"- Time saved: {time_saved:.2f}s ({100 * time_saved / original_duration:.1f}%)")
+                    print(f"- Output file: {os.path.abspath(args.output_file)}")
+                else:
+                    # Processing failed
+                    logger.error(f"Processing failed: {result.get('message', 'Unknown error')}")
+                    return 1
+            else:
+                # Unexpected return value
+                logger.error(f"Unexpected result from silence removal: {result}")
+                return 1
         
         return 0
     except Exception as e:
