@@ -503,7 +503,7 @@ class Stage9HTMLGenerator:
         return history_html
     
     def generate_quality_issues_content(self, complete_analysis):
-        """Generate quality issues content section"""
+        """Generate quality issues content section with color coding and expandable files"""
         quality_issues = complete_analysis.get('quality_issues', [])
         
         if not quality_issues:
@@ -522,17 +522,185 @@ class Stage9HTMLGenerator:
             if issues:
                 issues_html += f"<h4 class='priority-{priority.lower()}'>{priority} Priority ({len(issues)} issues)</h4>"
                 for issue in issues:
+                    # Determine worst file status for color coding
+                    files_affected = issue.get('files_affected', [])
+                    worst_status = self._get_worst_file_status(files_affected)
+                    
                     issues_html += f"""
-                    <div class='issue-item priority-{priority.lower()}'>
-                        <h5>{issue.get('title', 'Unknown Issue')}</h5>
-                        <p><strong>Impact:</strong> {issue.get('business_impact_score', 0)}/10</p>
-                        <p><strong>Files:</strong> {issue.get('files_count', 0)}</p>
-                        <p><strong>Recommendation:</strong> {issue.get('recommendation', 'No recommendation')}</p>
+                    <div class='issue-item priority-{priority.lower()}' data-worst-status='{worst_status}'>
+                        <div class='issue-header'>
+                            <h5>{issue.get('title', 'Unknown Issue')}</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: {issue.get('business_impact_score', 0)}/10</span>
+                                <span class='confidence-badge'>Confidence: {issue.get('confidence', 0):.0%}</span>
+                                <span class='status-badge status-{worst_status}'>{worst_status.upper()}</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>{issue.get('description', 'No description')}</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>{len(files_affected)} Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                {self._generate_expanded_files_html(files_affected)}
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> {issue.get('recommendation', 'No recommendation')}
+                        </div>
                     </div>
                     """
         
         issues_html += "</div>"
+        
+        # Add JavaScript for interactivity
+        issues_html += """
+        <script>
+        function toggleIssueFiles(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.files-toggle');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // Initialize file data lookup
+        function getFileAnalysis(filePath) {
+            const file = fileData.find(f => f.file_path === filePath);
+            return file || null;
+        }
+        </script>
+        """
+        
         return issues_html
+    
+    def _get_worst_file_status(self, files_affected):
+        """Determine the worst merge readiness status among affected files"""
+        if not files_affected:
+            return 'unknown'
+        
+        status_priority = {
+            'not_ready': 3,
+            'conditional': 2, 
+            'ready': 1,
+            'unknown': 0
+        }
+        
+        worst_status = 'ready'
+        worst_priority = 0
+        
+        # Look up files in fileData (will be available in browser)
+        for file_path in files_affected:
+            # For now, assume worst case - this will be refined in JavaScript
+            # The actual status will be determined client-side
+            worst_status = 'not_ready'  # Conservative assumption
+            
+        return worst_status
+    
+    def _generate_expanded_files_html(self, files_affected):
+        """Generate HTML for expanded file view with analysis details"""
+        if not files_affected:
+            return "<p>No files affected</p>"
+        
+        files_html = "<div class='expanded-files-list'>"
+        
+        for file_path in files_affected:
+            files_html += f"""
+            <div class='affected-file' data-file-path='{file_path}'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>{file_path}</span>
+                    <span class='file-status-indicator' data-file='{file_path}'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='{file_path}'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            """
+        
+        files_html += "</div>"
+        
+        # Add JavaScript to populate file details
+        files_html += """
+        <script>
+        // Populate file status and details after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const affectedFiles = document.querySelectorAll('.affected-file');
+            
+            affectedFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    
+                    // Update analysis details
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Overall Assessment</h6>
+                                <p>${fileAnalysis.overall_assessment?.purpose || 'No purpose information'}</p>
+                                <p><strong>Business Impact:</strong> ${fileAnalysis.overall_assessment?.business_impact || 'Not assessed'}</p>
+                                <p><strong>Risk Assessment:</strong> ${fileAnalysis.overall_assessment?.risk_assessment || 'Not assessed'}</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Feedback</h6>
+                                <p>${fileAnalysis.detailed_feedback || 'No feedback available'}</p>
+                            </div>
+                            ${fileAnalysis.recommendations && fileAnalysis.recommendations.length > 0 ? `
+                            <div class='analysis-section'>
+                                <h6>Recommendations</h6>
+                                <ul>
+                                    ${fileAnalysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+            
+            // Update issue header colors based on worst file status
+            const issueItems = document.querySelectorAll('.issue-item');
+            issueItems.forEach(issueItem => {
+                const fileIndicators = issueItem.querySelectorAll('.file-status-indicator');
+                let worstStatus = 'ready';
+                
+                fileIndicators.forEach(indicator => {
+                    const status = indicator.textContent.toLowerCase();
+                    if (status === 'not_ready') worstStatus = 'not_ready';
+                    else if (status === 'conditional' && worstStatus !== 'not_ready') worstStatus = 'conditional';
+                });
+                
+                // Update issue item styling
+                issueItem.classList.add(`worst-status-${worstStatus}`);
+            });
+        });
+        </script>
+        """
+        
+        return files_html
     
     def generate_duplicates_content(self, agent_responses):
         """Generate duplicates detection content section"""

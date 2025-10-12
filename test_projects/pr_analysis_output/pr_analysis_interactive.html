@@ -228,6 +228,184 @@
         .priority-badge.high { background: #ff8800; color: #fff; }
         .priority-badge.medium { background: #ffaa00; color: #000; }
 
+        /* Enhanced Quality Issues Styles */
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .issue-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .impact-badge, .confidence-badge, .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .impact-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .confidence-badge {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .status-badge.status-ready { background: #00ff88; color: #000; }
+        .status-badge.status-conditional { background: #ffa500; color: #000; }
+        .status-badge.status-not_ready { background: #ff6b6b; color: #fff; }
+
+        .issue-description {
+            margin: 12px 0;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        .issue-files {
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .files-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .files-header:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .files-toggle {
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+
+        .files-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .expanded-files-list {
+            padding: 15px;
+        }
+
+        .affected-file {
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .file-path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .file-path-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+
+        .file-status-indicator {
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-analysis-details {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .file-analysis-content {
+            display: grid;
+            gap: 15px;
+        }
+
+        .analysis-section h6 {
+            color: #00ff88;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .analysis-section p {
+            margin: 5px 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .analysis-section ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .analysis-section li {
+            margin: 3px 0;
+            font-size: 0.85rem;
+        }
+
+        .no-analysis {
+            color: #888;
+            font-style: italic;
+        }
+
+        .analysis-placeholder {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Issue item coloring based on worst file status */
+        .issue-item.worst-status-not_ready {
+            border-left-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .issue-item.worst-status-conditional {
+            border-left-color: #ffa500;
+            background: rgba(255, 165, 0, 0.1);
+        }
+
+        .issue-item.worst-status-ready {
+            border-left-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .issue-recommendation {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+            border-radius: 4px;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .header { padding: 20px; }
@@ -340,181 +518,805 @@
                 <h2>⚠️ Quality Issues</h2>
                 <div class="issue-list">
                     <div class='quality-issues-list'><h4 class='priority-critical'>CRITICAL Priority (5 issues)</h4>
-                    <div class='issue-item priority-critical'>
-                        <h5>Authentication Logic Duplicates</h5>
-                        <p><strong>Impact:</strong> 10.0/10</p>
-                        <p><strong>Files:</strong> 2</p>
-                        <p><strong>Recommendation:</strong> Consolidate or remove duplicates</p>
+                    <div class='issue-item priority-critical' data-worst-status='not_ready'>
+                        <div class='issue-header'>
+                            <h5>Authentication Logic Duplicates</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 10.0/10</span>
+                                <span class='confidence-badge'>Confidence: 79%</span>
+                                <span class='status-badge status-not_ready'>NOT_READY</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>- auth_service/bad/security/user_auth.py 
+- auth_service/bad/auth/login_handler.py
+Both implement the same insecure authentication with plain text password comparison and similar token generation.</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>2 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <div class='expanded-files-list'>
+            <div class='affected-file' data-file-path='auth_service/bad/security/user_auth.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/bad/security/user_auth.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/bad/security/user_auth.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/bad/security/user_auth.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='affected-file' data-file-path='auth_service/bad/auth/login_handler.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/bad/auth/login_handler.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/bad/auth/login_handler.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/bad/auth/login_handler.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate file status and details after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const affectedFiles = document.querySelectorAll('.affected-file');
+            
+            affectedFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    
+                    // Update analysis details
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Overall Assessment</h6>
+                                <p>${fileAnalysis.overall_assessment?.purpose || 'No purpose information'}</p>
+                                <p><strong>Business Impact:</strong> ${fileAnalysis.overall_assessment?.business_impact || 'Not assessed'}</p>
+                                <p><strong>Risk Assessment:</strong> ${fileAnalysis.overall_assessment?.risk_assessment || 'Not assessed'}</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Feedback</h6>
+                                <p>${fileAnalysis.detailed_feedback || 'No feedback available'}</p>
+                            </div>
+                            ${fileAnalysis.recommendations && fileAnalysis.recommendations.length > 0 ? `
+                            <div class='analysis-section'>
+                                <h6>Recommendations</h6>
+                                <ul>
+                                    ${fileAnalysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+            
+            // Update issue header colors based on worst file status
+            const issueItems = document.querySelectorAll('.issue-item');
+            issueItems.forEach(issueItem => {
+                const fileIndicators = issueItem.querySelectorAll('.file-status-indicator');
+                let worstStatus = 'ready';
+                
+                fileIndicators.forEach(indicator => {
+                    const status = indicator.textContent.toLowerCase();
+                    if (status === 'not_ready') worstStatus = 'not_ready';
+                    else if (status === 'conditional' && worstStatus !== 'not_ready') worstStatus = 'conditional';
+                });
+                
+                // Update issue item styling
+                issueItem.classList.add(`worst-status-${worstStatus}`);
+            });
+        });
+        </script>
+        
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Consolidate or remove duplicates
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-critical'>
-                        <h5>Pattern Issue: SQL injection vulnerabilities in `product_search.p...</h5>
-                        <p><strong>Impact:</strong> 4.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-critical' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: SQL injection vulnerabilities in `product_search.p...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 4.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>SQL injection vulnerabilities in `product_search.py` and `product_finder.py` using raw SQL execution</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-critical'>
-                        <h5>Pattern Issue: Plain text password handling in `user_auth.py` vs ...</h5>
-                        <p><strong>Impact:</strong> 4.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-critical' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Plain text password handling in `user_auth.py` vs ...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 4.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Plain text password handling in `user_auth.py` vs proper password hashing in `auth_service.py`</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-critical'>
-                        <h5>Pattern Issue: Duplicate data processing logic between `data_proc...</h5>
-                        <p><strong>Impact:</strong> 4.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-critical' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Duplicate data processing logic between `data_proc...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 4.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Duplicate data processing logic between `data_processor.py` and `data_helper.py` with memory issues</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-critical'>
-                        <h5>Pattern Issue: Direct database connection management without prop...</h5>
-                        <p><strong>Impact:</strong> 4.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-critical' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Direct database connection management without prop...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 4.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Direct database connection management without proper connection pooling or resource cleanup</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     <h4 class='priority-high'>HIGH Priority (9 issues)</h4>
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: Inconsistent database access patterns:...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent database access patterns:...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent database access patterns:</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: `MockDatabase` in product_service.py...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `MockDatabase` in product_service.py...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`MockDatabase` in product_service.py</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: `SimpleDatabase` in user_auth.py...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `SimpleDatabase` in user_auth.py...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`SimpleDatabase` in user_auth.py</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: `Database` in product_search.py...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `Database` in product_search.py...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`Database` in product_search.py</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: `ProductDB` in product_finder.py...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `ProductDB` in product_finder.py...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`ProductDB` in product_finder.py</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: Inconsistent naming conventions:...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent naming conventions:...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent naming conventions:</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: `handle_dataset` vs `process_all_data` for similar...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `handle_dataset` vs `process_all_data` for similar...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`handle_dataset` vs `process_all_data` for similar operations</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: `query` vs `execute` for database operations...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `query` vs `execute` for database operations...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`query` vs `execute` for database operations</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-high'>
-                        <h5>Pattern Issue: Missing type hints in "bad" implementations while ...</h5>
-                        <p><strong>Impact:</strong> 3.8/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Missing type hints in "bad" implementations while ...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Missing type hints in "bad" implementations while "good" implementations use proper typing</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     <h4 class='priority-medium'>MEDIUM Priority (11 issues)</h4>
-                    <div class='issue-item priority-medium'>
-                        <h5>Authentication Services</h5>
-                        <p><strong>Impact:</strong> 5.7/10</p>
-                        <p><strong>Files:</strong> 1</p>
-                        <p><strong>Recommendation:</strong> Consolidate or remove duplicates</p>
+                    <div class='issue-item priority-medium' data-worst-status='not_ready'>
+                        <div class='issue-header'>
+                            <h5>Authentication Services</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 5.7/10</span>
+                                <span class='confidence-badge'>Confidence: 48%</span>
+                                <span class='status-badge status-not_ready'>NOT_READY</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>- auth_service/good/auth/auth_service.py provides a secure implementation that could replace both duplicate insecure auth implementations.</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>1 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <div class='expanded-files-list'>
+            <div class='affected-file' data-file-path='auth_service/good/auth/auth_service.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/good/auth/auth_service.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/good/auth/auth_service.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/good/auth/auth_service.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate file status and details after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const affectedFiles = document.querySelectorAll('.affected-file');
+            
+            affectedFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    
+                    // Update analysis details
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Overall Assessment</h6>
+                                <p>${fileAnalysis.overall_assessment?.purpose || 'No purpose information'}</p>
+                                <p><strong>Business Impact:</strong> ${fileAnalysis.overall_assessment?.business_impact || 'Not assessed'}</p>
+                                <p><strong>Risk Assessment:</strong> ${fileAnalysis.overall_assessment?.risk_assessment || 'Not assessed'}</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Feedback</h6>
+                                <p>${fileAnalysis.detailed_feedback || 'No feedback available'}</p>
+                            </div>
+                            ${fileAnalysis.recommendations && fileAnalysis.recommendations.length > 0 ? `
+                            <div class='analysis-section'>
+                                <h6>Recommendations</h6>
+                                <ul>
+                                    ${fileAnalysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+            
+            // Update issue header colors based on worst file status
+            const issueItems = document.querySelectorAll('.issue-item');
+            issueItems.forEach(issueItem => {
+                const fileIndicators = issueItem.querySelectorAll('.file-status-indicator');
+                let worstStatus = 'ready';
+                
+                fileIndicators.forEach(indicator => {
+                    const status = indicator.textContent.toLowerCase();
+                    if (status === 'not_ready') worstStatus = 'not_ready';
+                    else if (status === 'conditional' && worstStatus !== 'not_ready') worstStatus = 'conditional';
+                });
+                
+                // Update issue item styling
+                issueItem.classList.add(`worst-status-${worstStatus}`);
+            });
+        });
+        </script>
+        
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Consolidate or remove duplicates
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Inconsistent file naming patterns:...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent file naming patterns:...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent file naming patterns:</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: `data_transformer.py` vs `data_processor.py` vs `d...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `data_transformer.py` vs `data_processor.py` vs `d...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`data_transformer.py` vs `data_processor.py` vs `data_helper.py`</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: `auth_service.py` vs `user_auth.py`...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `auth_service.py` vs `user_auth.py`...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`auth_service.py` vs `user_auth.py`</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: `product_service.py` vs `product_search.py` vs `pr...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: `product_service.py` vs `product_search.py` vs `pr...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>`product_service.py` vs `product_search.py` vs `product_finder.py`</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Inconsistent use of dataclasses:...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent use of dataclasses:...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent use of dataclasses:</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Some files use `@dataclass` for data structures...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Some files use `@dataclass` for data structures...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Some files use `@dataclass` for data structures</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Others use plain classes or dictionaries...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Others use plain classes or dictionaries...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Others use plain classes or dictionaries</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Documentation inconsistency:...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Documentation inconsistency:...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Documentation inconsistency:</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Some files have detailed docstrings...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Some files have detailed docstrings...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Some files have detailed docstrings</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     
-                    <div class='issue-item priority-medium'>
-                        <h5>Pattern Issue: Others have minimal or no documentation...</h5>
-                        <p><strong>Impact:</strong> 3.2/10</p>
-                        <p><strong>Files:</strong> 0</p>
-                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Others have minimal or no documentation...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Others have minimal or no documentation</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
                     </div>
                     </div>
+        <script>
+        function toggleIssueFiles(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.files-toggle');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // Initialize file data lookup
+        function getFileAnalysis(filePath) {
+            const file = fileData.find(f => f.file_path === filePath);
+            return file || null;
+        }
+        </script>
+        
                 </div>
             </div>
 

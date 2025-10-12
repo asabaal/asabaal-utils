@@ -228,6 +228,184 @@
         .priority-badge.high { background: #ff8800; color: #fff; }
         .priority-badge.medium { background: #ffaa00; color: #000; }
 
+        /* Enhanced Quality Issues Styles */
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .issue-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .impact-badge, .confidence-badge, .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .impact-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .confidence-badge {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .status-badge.status-ready { background: #00ff88; color: #000; }
+        .status-badge.status-conditional { background: #ffa500; color: #000; }
+        .status-badge.status-not_ready { background: #ff6b6b; color: #fff; }
+
+        .issue-description {
+            margin: 12px 0;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        .issue-files {
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .files-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .files-header:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .files-toggle {
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+
+        .files-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .expanded-files-list {
+            padding: 15px;
+        }
+
+        .affected-file {
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .file-path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .file-path-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+
+        .file-status-indicator {
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-analysis-details {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .file-analysis-content {
+            display: grid;
+            gap: 15px;
+        }
+
+        .analysis-section h6 {
+            color: #00ff88;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .analysis-section p {
+            margin: 5px 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .analysis-section ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .analysis-section li {
+            margin: 3px 0;
+            font-size: 0.85rem;
+        }
+
+        .no-analysis {
+            color: #888;
+            font-style: italic;
+        }
+
+        .analysis-placeholder {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Issue item coloring based on worst file status */
+        .issue-item.worst-status-not_ready {
+            border-left-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .issue-item.worst-status-conditional {
+            border-left-color: #ffa500;
+            background: rgba(255, 165, 0, 0.1);
+        }
+
+        .issue-item.worst-status-ready {
+            border-left-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .issue-recommendation {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+            border-radius: 4px;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .header { padding: 20px; }

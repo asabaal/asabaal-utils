@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PR Analysis Dashboard - unknown → unknown</title>
+    <title>PR Analysis Dashboard - test-projects → main</title>
     <style>
         * {
             margin: 0;
@@ -228,6 +228,184 @@
         .priority-badge.high { background: #ff8800; color: #fff; }
         .priority-badge.medium { background: #ffaa00; color: #000; }
 
+        /* Enhanced Quality Issues Styles */
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .issue-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .impact-badge, .confidence-badge, .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .impact-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .confidence-badge {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .status-badge.status-ready { background: #00ff88; color: #000; }
+        .status-badge.status-conditional { background: #ffa500; color: #000; }
+        .status-badge.status-not_ready { background: #ff6b6b; color: #fff; }
+
+        .issue-description {
+            margin: 12px 0;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        .issue-files {
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .files-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .files-header:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .files-toggle {
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+
+        .files-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .expanded-files-list {
+            padding: 15px;
+        }
+
+        .affected-file {
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .file-path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .file-path-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+
+        .file-status-indicator {
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-analysis-details {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .file-analysis-content {
+            display: grid;
+            gap: 15px;
+        }
+
+        .analysis-section h6 {
+            color: #00ff88;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .analysis-section p {
+            margin: 5px 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .analysis-section ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .analysis-section li {
+            margin: 3px 0;
+            font-size: 0.85rem;
+        }
+
+        .no-analysis {
+            color: #888;
+            font-style: italic;
+        }
+
+        .analysis-placeholder {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Issue item coloring based on worst file status */
+        .issue-item.worst-status-not_ready {
+            border-left-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .issue-item.worst-status-conditional {
+            border-left-color: #ffa500;
+            background: rgba(255, 165, 0, 0.1);
+        }
+
+        .issue-item.worst-status-ready {
+            border-left-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .issue-recommendation {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+            border-radius: 4px;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .header { padding: 20px; }
@@ -241,11 +419,11 @@
     <div class="container">
         <div class="header">
             <h1>🔍 PR Analysis Dashboard</h1>
-            <div class="branch-info">unknown → unknown</div>
+            <div class="branch-info">test-projects → main</div>
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-label">Quality Score</div>
-                    <div class="metric-value">0/10</div>
+                    <div class="metric-value">5.5/10</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">Files Analyzed</div>
@@ -257,7 +435,7 @@
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">Issues Found</div>
-                    <div class="metric-value">0</div>
+                    <div class="metric-value">10</div>
                 </div>
             </div>
         </div>
@@ -277,11 +455,11 @@
         <div class="overview-section">
             <div class="pr-stats">
                 <div class="stat-item">
-                    <h4>0</h4>
+                    <h4>9606</h4>
                     <p>Files Changed</p>
                 </div>
                 <div class="stat-item">
-                    <h4>0</h4>
+                    <h4>192,380</h4>
                     <p>Lines Added</p>
                 </div>
                 <div class="stat-item">
@@ -289,12 +467,12 @@
                     <p>Lines Removed</p>
                 </div>
                 <div class="stat-item">
-                    <h4>0/10</h4>
+                    <h4>5.5/10</h4>
                     <p>Quality Score</p>
                 </div>
             </div>
             <div class="recommendation-box">
-                <h4>Recommendation: UNKNOWN</h4>
+                <h4>Recommendation: REQUIRES_ATTENTION</h4>
                 <p>Overall assessment based on code quality, merge readiness, and potential issues.</p>
             </div>
         </div>
@@ -339,20 +517,573 @@
             <div id="issues" class="tab-content">
                 <h2>⚠️ Quality Issues</h2>
                 <div class="issue-list">
-                    <div class='no-issues'><p>No quality issues identified.</p></div>
+                    <div class='quality-issues-list'><h4 class='priority-critical'>CRITICAL Priority (2 issues)</h4>
+                    <div class='issue-item priority-critical' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent shebang usage: Some Python files use ...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 4.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent shebang usage: Some Python files use `#!/usr/bin/env python3` while others use `#!/usr/bin/env python`</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-critical' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent import path handling: Different appro...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 4.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent import path handling: Different approaches used for adding source directories to Python path</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    <h4 class='priority-high'>HIGH Priority (3 issues)</h4>
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Script files lack consistent naming convention (e....</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Script files lack consistent naming convention (e.g., `fix_script.py` vs `create_sample_video.py`)</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Module docstring format varies across files - some...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Module docstring format varies across files - some use triple quotes with detailed descriptions, others have minimal or no documentation</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-high' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: System path modifications done differently across ...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.8/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>System path modifications done differently across files (`sys.path.insert()` vs relative imports)</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    <h4 class='priority-medium'>MEDIUM Priority (5 issues)</h4>
+                    <div class='issue-item priority-medium' data-worst-status='not_ready'>
+                        <div class='issue-header'>
+                            <h5>Debug/Test Scripts</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 8.8/10</span>
+                                <span class='confidence-badge'>Confidence: 93%</span>
+                                <span class='status-badge status-not_ready'>NOT_READY</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>- `debug_actual_render.py`
+- `test_extract_clips.py`
+- `test_same_size.py`
+These files all handle video/image processing testing with similar debugging approaches.</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>3 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <div class='expanded-files-list'>
+            <div class='affected-file' data-file-path='debug_actual_render.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>debug_actual_render.py</span>
+                    <span class='file-status-indicator' data-file='debug_actual_render.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='debug_actual_render.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='affected-file' data-file-path='test_extract_clips.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>test_extract_clips.py</span>
+                    <span class='file-status-indicator' data-file='test_extract_clips.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='test_extract_clips.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='affected-file' data-file-path='test_same_size.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>test_same_size.py</span>
+                    <span class='file-status-indicator' data-file='test_same_size.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='test_same_size.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate file status and details after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const affectedFiles = document.querySelectorAll('.affected-file');
+            
+            affectedFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    
+                    // Update analysis details
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Overall Assessment</h6>
+                                <p>${fileAnalysis.overall_assessment?.purpose || 'No purpose information'}</p>
+                                <p><strong>Business Impact:</strong> ${fileAnalysis.overall_assessment?.business_impact || 'Not assessed'}</p>
+                                <p><strong>Risk Assessment:</strong> ${fileAnalysis.overall_assessment?.risk_assessment || 'Not assessed'}</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Feedback</h6>
+                                <p>${fileAnalysis.detailed_feedback || 'No feedback available'}</p>
+                            </div>
+                            ${fileAnalysis.recommendations && fileAnalysis.recommendations.length > 0 ? `
+                            <div class='analysis-section'>
+                                <h6>Recommendations</h6>
+                                <ul>
+                                    ${fileAnalysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+            
+            // Update issue header colors based on worst file status
+            const issueItems = document.querySelectorAll('.issue-item');
+            issueItems.forEach(issueItem => {
+                const fileIndicators = issueItem.querySelectorAll('.file-status-indicator');
+                let worstStatus = 'ready';
+                
+                fileIndicators.forEach(indicator => {
+                    const status = indicator.textContent.toLowerCase();
+                    if (status === 'not_ready') worstStatus = 'not_ready';
+                    else if (status === 'conditional' && worstStatus !== 'not_ready') worstStatus = 'conditional';
+                });
+                
+                // Update issue item styling
+                issueItem.classList.add(`worst-status-${worstStatus}`);
+            });
+        });
+        </script>
+        
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Consolidate or remove duplicates
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-medium' data-worst-status='not_ready'>
+                        <div class='issue-header'>
+                            <h5>Automation Scripts</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 7.4/10</span>
+                                <span class='confidence-badge'>Confidence: 76%</span>
+                                <span class='status-badge status-not_ready'>NOT_READY</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>- `create_sample_video.py`
+- `generate_images.py`
+Both handle media generation with similar patterns and could potentially be consolidated into a unified media generation utility.</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>2 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <div class='expanded-files-list'>
+            <div class='affected-file' data-file-path='create_sample_video.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>create_sample_video.py</span>
+                    <span class='file-status-indicator' data-file='create_sample_video.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='create_sample_video.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='affected-file' data-file-path='generate_images.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>generate_images.py</span>
+                    <span class='file-status-indicator' data-file='generate_images.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='generate_images.py'>
+                    <div class='analysis-placeholder'>
+                        Loading file analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate file status and details after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const affectedFiles = document.querySelectorAll('.affected-file');
+            
+            affectedFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    
+                    // Update analysis details
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Overall Assessment</h6>
+                                <p>${fileAnalysis.overall_assessment?.purpose || 'No purpose information'}</p>
+                                <p><strong>Business Impact:</strong> ${fileAnalysis.overall_assessment?.business_impact || 'Not assessed'}</p>
+                                <p><strong>Risk Assessment:</strong> ${fileAnalysis.overall_assessment?.risk_assessment || 'Not assessed'}</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Feedback</h6>
+                                <p>${fileAnalysis.detailed_feedback || 'No feedback available'}</p>
+                            </div>
+                            ${fileAnalysis.recommendations && fileAnalysis.recommendations.length > 0 ? `
+                            <div class='analysis-section'>
+                                <h6>Recommendations</h6>
+                                <ul>
+                                    ${fileAnalysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+            
+            // Update issue header colors based on worst file status
+            const issueItems = document.querySelectorAll('.issue-item');
+            issueItems.forEach(issueItem => {
+                const fileIndicators = issueItem.querySelectorAll('.file-status-indicator');
+                let worstStatus = 'ready';
+                
+                fileIndicators.forEach(indicator => {
+                    const status = indicator.textContent.toLowerCase();
+                    if (status === 'not_ready') worstStatus = 'not_ready';
+                    else if (status === 'conditional' && worstStatus !== 'not_ready') worstStatus = 'conditional';
+                });
+                
+                // Update issue item styling
+                issueItem.classList.add(`worst-status-${worstStatus}`);
+            });
+        });
+        </script>
+        
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Consolidate or remove duplicates
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent approach to command line argument par...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent approach to command line argument parsing (sys.argv vs argparse)</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Variable levels of error handling and input valida...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Variable levels of error handling and input validation across scripts</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    
+                    <div class='issue-item priority-medium' data-worst-status='unknown'>
+                        <div class='issue-header'>
+                            <h5>Pattern Issue: Inconsistent import grouping and ordering (standar...</h5>
+                            <div class='issue-badges'>
+                                <span class='impact-badge'>Impact: 3.2/10</span>
+                                <span class='confidence-badge'>Confidence: 60%</span>
+                                <span class='status-badge status-unknown'>UNKNOWN</span>
+                            </div>
+                        </div>
+                        <p class='issue-description'>Inconsistent import grouping and ordering (standard lib vs third-party vs local)</p>
+                        <div class='issue-files'>
+                            <div class='files-header' onclick='toggleIssueFiles(this)'>
+                                <span class='files-toggle'>▼</span>
+                                <span>0 Files Affected</span>
+                            </div>
+                            <div class='files-content'>
+                                <p>No files affected</p>
+                            </div>
+                        </div>
+                        <div class='issue-recommendation'>
+                            <strong>Recommendation:</strong> Establish and follow consistent patterns
+                        </div>
+                    </div>
+                    </div>
+        <script>
+        function toggleIssueFiles(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.files-toggle');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // Initialize file data lookup
+        function getFileAnalysis(filePath) {
+            const file = fileData.find(f => f.file_path === filePath);
+            return file || null;
+        }
+        </script>
+        
                 </div>
             </div>
 
             <div id="duplicates" class="tab-content">
                 <h2>🔄 Duplicate Analysis</h2>
                 <div class="duplicate-list">
-                    <div class='duplicate-item'><h3>No Duplicates Found</h3><p>No duplicate analysis available.</p></div>
+                    
+            <div class='duplicate-item'>
+                <h3>Duplicate Analysis Summary</h3>
+                <div class='duplicate-details'>
+                    <p>Let me analyze the files for duplicates based on the provided data.</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>CRITICAL:</h3>
+                <div class='duplicate-details'>
+                    <p>- No exact duplicate files found in the dataset</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Spline Testing Duplicates:</h3>
+                <div class='duplicate-details'>
+                    <p>- `test_spline_direct.py`</p>
+<p>- `tests/test_spline_compatibility.py`</p>
+<p>Both test spline functionality but from different angles - direct testing vs compatibility testing. Evidence: Both import spline utilities and create test data for validation.</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Test Runner Duplicates:</h3>
+                <div class='duplicate-details'>
+                    <p>- `tests/run_all_tests.py`</p>
+<p>- `tests/test_base.py`</p>
+<p>Both provide test infrastructure, with test_base.py containing more comprehensive setup that could eliminate need for separate runner.</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Script Testing Group:</h3>
+                <div class='duplicate-details'>
+                    <p>- `test_ollama_backend.py`</p>
+<p>- `test_extract_clips.py`</p>
+<p>- `test_same_size.py`</p>
+<p>These files follow similar patterns for testing different components and could potentially be consolidated into a unified test framework.</p>
+
+                </div>
+            </div>
+            
                 </div>
             </div>
 
             <div id="recommendations" class="tab-content">
                 <h2>💡 Recommendations</h2>
-                <div class='no-recommendations'><p>No specific recommendations available.</p></div>
+                <div class='recommendations-list'>
+            <div class='recommendation-item'>
+                <h5>1. Recommendation</h5>
+                <p>🔴 **CRITICAL**: Address 2 critical issues before merging</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>2. Recommendation</h5>
+                <p>   • Pattern Issue: Inconsistent shebang usage: Some Python files use ...</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>3. Recommendation</h5>
+                <p>   • Pattern Issue: Inconsistent import path handling: Different appro...</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>4. Recommendation</h5>
+                <p>🟡 **HIGH PRIORITY**: Consider fixing 3 high-priority issues</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>5. Recommendation</h5>
+                <p>🔄 **DUPLICATES**: Remove 5 duplicate/redundant files to reduce repository bloat</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>6. Recommendation</h5>
+                <p>📐 **CONSISTENCY**: Establish coding standards to address 8 pattern inconsistencies</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>7. Recommendation</h5>
+                <p>❌ **OVERALL**: Significant issues found, major cleanup needed</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>8. Recommendation</h5>
+                <p>⏱️ **ESTIMATED EFFORT**: ~10 hours hours to address all issues</p>
+            </div>
+            </div>
             </div>
         </div>
     </div>
