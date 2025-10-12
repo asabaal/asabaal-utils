@@ -1,0 +1,163 @@
+You are a senior software architect detecting duplicate files.
+
+Here is the detailed file analysis data:
+
+```json
+{
+  "pr_summary": {
+    "from_branch": "feature/image_transcription",
+    "to_branch": "main",
+    "total_files_changed": 10,
+    "total_lines_added": 460,
+    "total_lines_removed": 0,
+    "total_files_changed_all": 10,
+    "total_lines_added_all": 460,
+    "total_lines_removed_all": 0,
+    "commit_messages": [
+      "Add test projects for PR analyzer validation"
+    ]
+  },
+  "categories": {
+    "SCRIPTS_AUTOMATION": 6,
+    "CORE_BUSINESS_LOGIC": 4
+  },
+  "file_details": [
+    {
+      "path": "data_pipeline/good/processors/data_transformer.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "size": 3153,
+      "content_sample": "from typing import Iterator, Dict, List, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass TransformResult:\n    processed_count: int\n    errors: List[str]\n    processing_time: float\n\nclass DataTransformer:\n    def __init__(self, batch_size: int = 1000):\n        self.batch_size = batch_size\n        \n    def transform_large_dataset(self, data: Iterator[Dict]) -> Iterator[Dict]:\n        \"\"\"Memory-efficient data transformation using batches\"\"\"\n        total_processed = 0\n        \n        for batch in self._batch_generator(data):\n            try:\n                yield from self._process_batch(batch)\n                total_processed += len(batch)\n            except Exception as e:\n                print(f\"Error processing batch: {e}\")\n                continue\n                \n    def _batch_generator(self, data: Iterator[Dict]) -> Iterator[List[Dict]]:\n        \"\"\"Split data into memory-efficient batches\"\"\"\n        batch = []\n        for item in data:\n            batch.append(item)\n      ",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "data_pipeline/bad/helpers/data_processor.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "size": 2431,
+      "content_sample": "# DUPLICATE LOGIC WITH MEMORY ISSUES - BAD CODE\n\ndef handle_dataset(dataset):\n    \"\"\"Handle dataset processing - DUPLICATE OF data_helper.py\"\"\"\n    output = []\n    \n    # Same memory issue as process_all_data\n    print(f\"Processing dataset with {len(dataset)} items...\")\n    \n    for data_point in dataset:\n        # Same expensive transformation - duplicate code\n        transformed = expensive_transformation(data_point)\n        output.append(transformed)\n        \n    return output\n\ndef expensive_transformation(item):\n    \"\"\"DUPLICATE expensive operation - same as data_helper.py\"\"\"\n    # Identical inefficient implementation\n    result = {}\n    \n    for key in item.keys():\n        upper_key = str(key).upper()\n        lower_key = str(key).lower()\n        title_key = str(key).title()\n        \n        result[f'upper_{upper_key}'] = str(item[key]).upper()\n        result[f'lower_{lower_key}'] = str(item[key]).lower()\n        result[f'title_{title_key}'] = str(item[key]).title()\n    \n    result",
+      "has_functions": true,
+      "has_classes": false
+    },
+    {
+      "path": "data_pipeline/bad/utils/data_helper.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "size": 2307,
+      "content_sample": "# MEMORY INEFFICIENT DATA PROCESSING - BAD CODE\n\ndef process_all_data(data_list):\n    \"\"\"Process all data at once - MEMORY INTENSIVE ANTI-PATTERN\"\"\"\n    results = []\n    \n    # Load entire dataset into memory at once\n    print(f\"Loading {len(data_list)} items into memory...\")\n    \n    for item in data_list:\n        # Process each item without batching - memory intensive\n        processed = expensive_transformation(item)\n        results.append(processed)\n        \n        # No memory cleanup - will cause issues with large datasets\n        if len(results) % 10000 == 0:\n            print(f\"Processed {len(results)} items - memory growing...\")\n    \n    return results\n\ndef expensive_transformation(item):\n    \"\"\"Expensive operation that should be optimized\"\"\"\n    # Simulate expensive processing that creates many temporary objects\n    result = {}\n    \n    # Inefficient string operations\n    for key in item.keys():\n        # Create multiple intermediate strings\n        upper_key = str(key).upper",
+      "has_functions": true,
+      "has_classes": false
+    },
+    {
+      "path": "auth_service/good/auth/auth_service.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "size": 3609,
+      "content_sample": "import bcrypt\nimport jwt\nfrom datetime import datetime, timedelta\nfrom typing import Optional, Dict, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass User:\n    id: int\n    username: str\n    email: str\n    password_hash: str\n    is_active: bool = True\n    created_at: Optional[datetime] = None\n\n@dataclass\nclass AuthToken:\n    token: str\n    expires_at: datetime\n    user_id: int\n\nclass AuthService:\n    def __init__(self, secret_key: str, token_expiry_hours: int = 24):\n        self.secret_key = secret_key\n        self.token_expiry = timedelta(hours=token_expiry_hours)\n        \n    def hash_password(self, password: str) -> str:\n        \"\"\"Secure password hashing using bcrypt\"\"\"\n        if not password or len(password) < 8:\n            raise ValueError(\"Password must be at least 8 characters long\")\n            \n        salt = bcrypt.gensalt()\n        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)\n        return hashed.decode('utf-8')\n        \n    def verify_password(self, pass",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "auth_service/bad/security/user_auth.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "size": 1917,
+      "content_sample": "# CRITICAL SECURITY VULNERABILITIES - BAD CODE\n\nclass SimpleDatabase:\n    def __init__(self):\n        self.users = {}\n        \n    def get_user(self, username):\n        return self.users.get(username)\n\ndb = SimpleDatabase()\n\ndef authenticate_user(username, password):\n    \"\"\"PLAIN TEXT PASSWORD COMPARISON - CRITICAL SECURITY FLAW\"\"\"\n    user = db.get_user(username)\n    \n    # CRITICAL: Comparing plain text passwords\n    if user and user.password == password:  # NEVER DO THIS!\n        return generate_token(username)\n    return None\n\ndef generate_token(username):\n    \"\"\"Insecure token generation\"\"\"\n    # Predictable token - can be easily guessed\n    import time\n    token = f\"{username}_{int(time.time())}\"\n    return token\n\ndef create_user(username, password, email):\n    \"\"\"Store password in plain text - CRITICAL SECURITY ISSUE\"\"\"\n    if username in db.users:\n        raise ValueError(\"User already exists\")\n    \n    # CRITICAL: Storing plain text password\n    user = {\n        'username': us",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "auth_service/bad/auth/login_handler.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "size": 2841,
+      "content_sample": "# DUPLICATE AUTHENTICATION LOGIC WITH SAME SECURITY ISSUES - BAD CODE\n\nclass UserDatabase:\n    def __init__(self):\n        self.accounts = {}\n        \n    def find_user(self, user):\n        return self.accounts.get(user)\n\nuser_db = UserDatabase()\n\ndef login_user(user, passw):\n    \"\"\"Handle user login - DUPLICATE LOGIC WITH SAME SECURITY FLAWS\"\"\"\n    account = user_db.find_user(user)\n    \n    # SAME CRITICAL SECURITY ISSUE: Plain text password comparison\n    if account and account.password == passw:  # IDENTICAL VULNERABILITY\n        return create_jwt_token(user)\n    return None\n\ndef create_jwt_token(username):\n    \"\"\"Create JWT token - duplicate insecure implementation\"\"\"\n    import time\n    import hashlib\n    \n    # Predictable token using MD5 (insecure hash)\n    timestamp = str(int(time.time()))\n    token_data = f\"{username}:{timestamp}\"\n    token = hashlib.md5(token_data.encode()).hexdigest()\n    \n    return f\"bearer_{token}\"\n\ndef register_user(username, password, email):\n    \"\"\"Reg",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "ecommerce_api/good/services/product_service.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "size": 3489,
+      "content_sample": "from typing import List, Dict, Optional\nfrom ..models.product import Product\n\nclass MockDatabase:\n    \"\"\"Mock database for testing\"\"\"\n    def __init__(self):\n        self.products = []\n        \n    def query(self, model_class):\n        return MockQuery(self.products, model_class)\n        \n    def add(self, obj):\n        self.products.append(obj)\n        \n    def commit(self):\n        pass\n        \n    def refresh(self, obj):\n        pass\n\nclass MockQuery:\n    def __init__(self, data, model_class):\n        self.data = [item for item in data if isinstance(item, model_class)]\n        self.filters = []\n        \n    def filter(self, condition):\n        # Simple mock filter - in real implementation this would handle SQLAlchemy conditions\n        if hasattr(condition, '__call__'):\n            self.data = [item for item in self.data if condition(item)]\n        return self\n        \n    def ilike(self, pattern):\n        # Mock ilike functionality\n        def contains_pattern(item):\n            i",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "ecommerce_api/good/models/product.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "size": 473,
+      "content_sample": "from dataclasses import dataclass\nfrom typing import Optional\nfrom datetime import datetime\n\n@dataclass\nclass Product:\n    id: int\n    name: str\n    description: str\n    price: float\n    category: str\n    is_active: bool = True\n    created_at: Optional[datetime] = None\n    updated_at: Optional[datetime] = None\n    \n    def __post_init__(self):\n        if self.created_at is None:\n            self.created_at = datetime.utcnow()\n        self.updated_at = datetime.utcnow()",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "ecommerce_api/bad/services/product_search.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "size": 1073,
+      "content_sample": "# SQL INJECTION VULNERABILITY - BAD CODE\nimport sqlite3\n\nclass Database:\n    def __init__(self, db_path):\n        self.conn = sqlite3.connect(db_path)\n        \n    def query(self, sql):\n        \"\"\"Execute raw SQL query\"\"\"\n        cursor = self.conn.cursor()\n        cursor.execute(sql)\n        return cursor\n\ndb = Database(\"products.db\")\n\ndef search_products(query, filters):\n    \"\"\"Search products - VULNERABLE TO SQL INJECTION\"\"\"\n    products = db.query(\"SELECT * FROM products WHERE active = 1\")\n    \n    if query:\n        # SQL INJECTION VULNERABILITY\n        sql = \"SELECT * FROM products WHERE active = 1 AND name LIKE '%\" + query + \"%'\"\n        products = db.query(sql)\n    \n    if filters.get('category'):\n        # Another SQL injection vulnerability\n        sql += \" AND category = '\" + filters['category'] + \"'\"\n        products = db.query(sql)\n        \n    return products.fetchall()\n\ndef get_product(product_id):\n    \"\"\"Get single product - also vulnerable\"\"\"\n    sql = \"SELECT * FROM pr",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "ecommerce_api/bad/services/product_finder.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "size": 1256,
+      "content_sample": "# DUPLICATE CODE WITH SQL INJECTION - BAD CODE\nimport sqlite3\n\nclass ProductDB:\n    def __init__(self, path):\n        self.connection = sqlite3.connect(path)\n        \n    def execute(self, sql):\n        cursor = self.connection.cursor()\n        cursor.execute(sql)\n        return cursor\n\nproduct_db = ProductDB(\"ecommerce.db\")\n\ndef find_products(search_term, options):\n    \"\"\"Find products - DUPLICATE LOGIC WITH SAME SQL INJECTION\"\"\"\n    sql = \"SELECT * FROM products WHERE active = 1\"\n    \n    if search_term:\n        # SAME SQL INJECTION VULNERABILITY as product_search.py\n        sql += \" AND name LIKE '%\" + search_term + \"%'\"\n    \n    if options.get('category'):\n        # Another injection point\n        sql += \" AND category = '\" + options['category'] + \"'\"\n        \n    return product_db.execute(sql).fetchall()\n\ndef lookup_product(item_id):\n    \"\"\"Lookup product - duplicate vulnerability\"\"\"\n    query = \"SELECT * FROM products WHERE id = \" + str(item_id)\n    return product_db.execute(quer",
+      "has_functions": true,
+      "has_classes": true
+    }
+  ]
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains PR summary, file categories, and detailed file information
+2. Analyze file content samples and purposes to find duplicates
+3. Focus on functional duplicates - files that solve the same problems
+
+Expected duplicates based on manual analysis:
+- Blog processing scripts in content/ directory
+- Database setup files (supabase-setup.sql, etc.) 
+- Deployment guides (VERCEL-DEPLOY.md variants)
+
+Provide your response in this exact format:
+
+## CRITICAL:
+[Exact duplicates or abandoned implementations with specific file paths]
+
+## HIGH:
+[Functional duplicates with different implementations and file paths]
+
+## MEDIUM:
+[Similar purpose, potentially consolidatable files]
+
+## Summary:
+[Brief summary of duplicate analysis findings]
+
+Be specific about which files and provide evidence from the content samples.

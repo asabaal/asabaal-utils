@@ -140,6 +140,64 @@ OVERALL RESULTS:
                 
         return report
     
+    def _ensure_all_files_analyzed(self, analysis_data: Dict[str, Any], files_array: List[Dict]) -> Dict[str, Any]:
+        """Ensure all files from Stage 1 are included in the analysis"""
+        
+        # Get all files from Stage 1
+        stage1_files = set()
+        for file_data in files_array:
+            stage1_files.add(file_data.get('path', ''))
+        
+        # Get files analyzed by Stage 7
+        file_analyses = analysis_data.get('file_analyses', [])
+        if isinstance(file_analyses, dict):
+            analyzed_files = set(file_analyses.keys())
+        else:
+            analyzed_files = set(f.get('file_path', '') for f in file_analyses)
+        
+        # Find missing files
+        missing_files = stage1_files - analyzed_files
+        
+        if missing_files:
+            print(f"⚠️  AI agent missed {len(missing_files)} files - adding default analysis")
+            for missing_file in missing_files:
+                print(f"   Adding missing file: {missing_file}")
+                
+                # Create default analysis for missing files
+                default_analysis = {
+                    "merge_readiness": "conditional",
+                    "overall_assessment": {
+                        "purpose": "File requires manual review - AI analysis missed",
+                        "business_impact": "Unknown - requires assessment",
+                        "risk_assessment": "Unknown - requires assessment"
+                    },
+                    "feedback": "This file was not analyzed by the AI agent and requires manual review.",
+                    "code_elements": {
+                        "classes": [],
+                        "functions": []
+                    }
+                }
+                
+                # Add to analysis data
+                if isinstance(file_analyses, dict):
+                    file_analyses[missing_file] = default_analysis
+                else:
+                    file_analyses.append({
+                        "file_path": missing_file,
+                        **default_analysis
+                    })
+            
+            # Update the analysis data
+            analysis_data['file_analyses'] = file_analyses
+            
+            # Update metadata
+            if 'analysis_metadata' in analysis_data:
+                analysis_data['analysis_metadata']['total_files_analyzed'] = len(stage1_files)
+            
+            print(f"✅ Added {len(missing_files)} missing files to analysis")
+        
+        return analysis_data
+    
     def run_detailed_analysis(self) -> bool:
         """Execute complete detailed file-level analysis using the batch processing toolkit"""
         
@@ -172,6 +230,9 @@ OVERALL RESULTS:
                 if self.batch_processor.results_file.exists():
                     with open(self.batch_processor.results_file, 'r') as f:
                         final_analysis = json.load(f)
+                    
+                    # VALIDATION: Ensure all files from Stage 1 are included
+                    final_analysis = self._ensure_all_files_analyzed(final_analysis, files_array)
                     
                     # Save results in the format expected by other stages
                     analysis_file = self.output_dir / "detailed_analysis_results.json"

@@ -251,6 +251,7 @@ class DuplicateReportGenerator:
             html_parts.append('<h2>📝 Interactive Transcript</h2>')
             html_parts.append('<p>Click any highlighted segment to play or edit. Duplicate segments are color-coded and can be grouped/ungrouped.</p>')
             html_parts.append('<div class="transcript-controls">')
+            html_parts.append('<button class="multi-select-btn" onclick="toggleMultiSelectMode()">✅ Multi-Select</button>')
             html_parts.append('<button class="create-group-button" onclick="createNewGroup()">➕ Create New Group</button>')
             html_parts.append('<button class="edit-groups-button" onclick="openGroupEditor()">📝 Edit Groups</button>')
             html_parts.append('<button class="toggle-edit-mode" onclick="toggleEditMode()">✏️ Toggle Edit Mode</button>')
@@ -279,11 +280,11 @@ class DuplicateReportGenerator:
                 segment_html = f'''
                 <div class="transcript-line" data-segment-id="{segment_id}">
                     <div class="segment-controls">
-                        <button class="segment-group-btn" onclick="openSegmentGroupMenu('{segment_id}', event)" title="Assign to group">📋</button>
-                        <button class="segment-play-btn" onclick="playSegment({segment['start']}, {segment['end']})" title="Play segment">▶️</button>
-                        <button class="segment-edit-btn" onclick="enableInlineEdit('{segment_id}', event)" title="Edit text">✏️</button>
-                        <button class="segment-merge-previous-btn" onclick="mergeWithPrevious('{segment_id}', event)" title="Merge with previous">⬅️</button>
-                        <button class="segment-merge-next-btn" onclick="mergeWithNext('{segment_id}', event)" title="Merge with next">➡️</button>
+                        <button class="segment-group-btn" onclick="event.stopPropagation(); openSegmentGroupMenu('{segment_id}', event)" title="Assign to group">📋</button>
+                        <button class="segment-play-btn" onclick="event.stopPropagation(); playSegment({segment['start']}, {segment['end']})" title="Play segment">▶️</button>
+                        <button class="segment-edit-btn" onclick="event.stopPropagation(); enableInlineEdit('{segment_id}', event)" title="Edit text">✏️</button>
+                        <button class="segment-merge-previous-btn" onclick="event.stopPropagation(); mergeWithPrevious('{segment_id}', event)" title="Merge with previous">⬅️</button>
+                        <button class="segment-merge-next-btn" onclick="event.stopPropagation(); mergeWithNext('{segment_id}', event)" title="Merge with next">➡️</button>
                     </div>
                     <span class="transcript-segment {group_class}" 
                           {group_info}
@@ -292,7 +293,7 @@ class DuplicateReportGenerator:
                           data-segment-id="{segment_id}"
                           data-words-count="{len(segment.get('words', []))}"
                           title="{format_time(segment['start'])} - {format_time(segment['end'])}"
-                          onclick="handleSegmentClick(this, {segment['start']}, {segment['end']}, '{segment_id}')"
+                          onclick="handleSegmentClick(this, {segment['start']}, {segment['end']}, '{segment_id}'); handleSegmentSelection(event, '{segment_id}'); handleDirectTextEdit(event, '{segment_id}')"
                           contenteditable="false">{segment['text']}</span>
                     <div class="segment-timestamp">{format_time(segment['start'])}</div>
                 </div>'''
@@ -953,6 +954,54 @@ class DuplicateReportGenerator:
         }}
         
         /* Old merge instructions removed - now using specific merge buttons */
+        
+        /* Multi-Selection Styles */
+        .multi-select-btn {{
+            background: #4299e1; color: white; border: none; padding: 10px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+            transition: background 0.2s; margin-right: 8px;
+        }}
+        
+        .multi-select-btn:hover {{
+            background: #3182ce;
+        }}
+        
+        .multi-select-instructions {{
+            background: #edf2f7; border: 2px solid #4299e1; border-radius: 8px;
+            padding: 16px; margin-bottom: 20px; text-align: center;
+        }}
+        
+        .multi-select-content {{
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; flex-wrap: wrap;
+        }}
+        
+        .clear-selection-btn, .exit-multi-select-btn {{
+            background: #48bb78; color: white; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 0.9rem; transition: background 0.2s;
+        }}
+        
+        .clear-selection-btn:hover:not(:disabled) {{
+            background: #38a169;
+        }}
+        
+        .exit-multi-select-btn {{
+            background: #e53e3e;
+        }}
+        
+        .exit-multi-select-btn:hover {{
+            background: #c53030;
+        }}
+        
+        .transcript-line.multi-selected {{
+            background: rgba(66, 153, 225, 0.1); border-radius: 6px;
+            border: 2px solid #4299e1; box-shadow: 0 2px 8px rgba(66, 153, 225, 0.2);
+        }}
+        
+        .transcript-line.multi-selected .transcript-segment {{
+            background: rgba(66, 153, 225, 0.05);
+        }}
         
         .master-pause-btn {{ background: #ed8936; }}
         .master-reset-btn {{ background: #718096; }}
@@ -1726,6 +1775,314 @@ class DuplicateReportGenerator:
             }}
         }});
         
+        // Global functions that need to be accessible from onclick handlers
+        
+        function playSegment(startTime, endTime) {{
+            // Create a temporary video element if it doesn't exist
+            let video = document.getElementById('tempVideoPlayer');
+            if (!video) {{
+                video = document.createElement('video');
+                video.id = 'tempVideoPlayer';
+                video.style.display = 'none';
+                video.src = "{video_file}";
+                document.body.appendChild(video);
+            }}
+            
+            // Set video time and play
+            video.currentTime = startTime;
+            video.play();
+            
+            // Stop at end time
+            const checkTime = () => {{
+                if (video.currentTime >= endTime) {{
+                    video.pause();
+                    video.currentTime = startTime;
+                }} else {{
+                    requestAnimationFrame(checkTime);
+                }}
+            }};
+            requestAnimationFrame(checkTime);
+        }}
+        
+        function enableInlineEdit(segmentId, event) {{
+            event.stopPropagation();
+            
+            const segmentElement = document.querySelector(`[data-segment-id="${{segmentId}}"] .transcript-segment`);
+            if (!segmentElement) return;
+            
+            // Check if already editing
+            if (segmentElement.contentEditable === 'true') {{
+                // Finish editing
+                finishInlineEdit(segmentId);
+                return;
+            }}
+            
+            // Store original content
+            segmentElement.setAttribute('data-original-text', segmentElement.textContent);
+            
+            // Enable inline editing
+            segmentElement.contentEditable = 'true';
+            segmentElement.style.background = 'white';
+            segmentElement.style.border = '2px solid #4299e1';
+            segmentElement.style.padding = '4px 8px';
+            segmentElement.style.borderRadius = '4px';
+            segmentElement.style.outline = 'none';
+            segmentElement.focus();
+            
+            // Select all text for easy editing
+            const range = document.createRange();
+            range.selectNodeContents(segmentElement);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            // Add edit event listeners
+            segmentElement.addEventListener('blur', () => finishInlineEdit(segmentId));
+            segmentElement.addEventListener('keydown', (e) => {{
+                if (e.key === 'Enter') {{
+                    e.preventDefault();
+                    // Check if cursor is in the middle (for splitting) or at end (for saving)
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {{
+                        const range = selection.getRangeAt(0);
+                        const text = segmentElement.textContent;
+                        const cursorPosition = range.startOffset;
+                        
+                        // If cursor is not at the end, split the segment
+                        if (cursorPosition < text.length) {{
+                            splitSegmentAtCursorPosition(segmentId, cursorPosition);
+                        }} else {{
+                            // At the end, just save the edit
+                            finishInlineEdit(segmentId);
+                        }}
+                    }}
+                }} else if (e.key === 'Escape') {{
+                    cancelInlineEdit(segmentId);
+                }}
+            }});
+        }}
+        
+        function finishInlineEdit(segmentId) {{
+            const segmentElement = document.querySelector(`[data-segment-id="${{segmentId}}"] .transcript-segment`);
+            if (!segmentElement || segmentElement.contentEditable !== 'true') return;
+            
+            const newText = segmentElement.textContent.trim();
+            const originalText = segmentElement.getAttribute('data-original-text');
+            
+            if (newText !== originalText) {{
+                // Update the segment with new text and redistribute timings
+                updateSegmentWithNewText(segmentId, newText);
+            }}
+            
+            // Reset editing state
+            segmentElement.contentEditable = 'false';
+            segmentElement.style.background = '';
+            segmentElement.style.border = '';
+            segmentElement.style.padding = '';
+            segmentElement.removeAttribute('data-original-text');
+            
+            // Reset button
+            const line = segmentElement.closest('.transcript-line');
+            const splitBtn = line.querySelector('.segment-split-btn');
+            if (splitBtn) {{
+                splitBtn.textContent = '✂️';
+                splitBtn.setAttribute('title', 'Edit text');
+                splitBtn.onclick = (e) => enableInlineEdit(segmentId, e);
+            }}
+            
+            // Auto-save
+            autoSaveToStorage();
+        }}
+        
+        function cancelInlineEdit(segmentId) {{
+            const segmentElement = document.querySelector(`[data-segment-id="${{segmentId}}"] .transcript-segment`);
+            if (!segmentElement) return;
+            
+            // Restore original text
+            const originalText = segmentElement.getAttribute('data-original-text');
+            if (originalText) {{
+                segmentElement.textContent = originalText;
+            }}
+            
+            finishInlineEdit(segmentId);
+        }}
+        
+        function updateSegmentWithNewText(segmentId, newText) {{
+            const segment = transcriptSegments.find(seg => seg.segment_id === segmentId);
+            if (!segment) return;
+            
+            // Split new text into words
+            const newWords = newText.trim().split(/\\s+/).filter(word => word.length > 0);
+            
+            if (newWords.length === 0) return;
+            
+            // Redistribute timing across new words
+            const totalDuration = segment.end - segment.start;
+            const wordDuration = totalDuration / newWords.length;
+            
+            const updatedWords = newWords.map((word, index) => ({{
+                text: word,
+                start: segment.start + (index * wordDuration),
+                end: segment.start + ((index + 1) * wordDuration)
+            }}));
+            
+            // Update segment data
+            segment.text = newText;
+            segment.words = updatedWords;
+            
+            // Update display
+            segmentElement.textContent = newText;
+            
+            console.log('Updated segment:', segment);
+        }}
+        
+        function splitSegmentAtCursorPosition(segmentId, cursorPosition) {{
+            const segment = transcriptSegments.find(seg => seg.segment_id === segmentId);
+            if (!segment) return;
+            
+            const text = segment.text;
+            const beforeText = text.substring(0, cursorPosition).trim();
+            const afterText = text.substring(cursorPosition).trim();
+            
+            if (!beforeText || !afterText) {{
+                // Nothing to split, just save the edit
+                finishInlineEdit(segmentId);
+                return;
+            }}
+            
+            // Calculate split timing based on character position
+            const totalDuration = segment.end - segment.start;
+            const splitRatio = cursorPosition / text.length;
+            const splitTime = segment.start + (totalDuration * splitRatio);
+            
+            // Create two new segments
+            const part1Segment = {{
+                segment_id: `${{segmentId}}_part1_${{Date.now()}}`,
+                text: beforeText,
+                start: segment.start,
+                end: splitTime,
+                words: segment.words ? segment.words.filter(w => w.end <= splitTime) : []
+            }};
+            
+            const part2Segment = {{
+                segment_id: `${{segmentId}}_part2_${{Date.now()}}`,
+                text: afterText,
+                start: splitTime,
+                end: segment.end,
+                words: segment.words ? segment.words.filter(w => w.start >= splitTime) : []
+            }};
+            
+            // Update transcript data
+            const segmentIndex = transcriptSegments.findIndex(seg => seg.segment_id === segmentId);
+            transcriptSegments.splice(segmentIndex, 1, part1Segment, part2Segment);
+            
+            // Update UI
+            updateTranscriptDisplay();
+            
+            // Auto-save
+            autoSaveToStorage();
+        }}
+        
+        function mergeWithPrevious(segmentId, event) {{
+            event.stopPropagation();
+            
+            const segmentIndex = transcriptSegments.findIndex(seg => seg.segment_id === segmentId);
+            if (segmentIndex <= 0) {{
+                alert('No previous segment to merge with.');
+                return;
+            }}
+            
+            const previousSegment = transcriptSegments[segmentIndex - 1];
+            const currentSegment = transcriptSegments[segmentIndex];
+            
+            if (confirm(`Merge "${{previousSegment.text}}" with "${{currentSegment.text}}"?`)) {{
+                const mergedSegment = mergeSegments([previousSegment, currentSegment]);
+                
+                // Replace both segments with merged one
+                transcriptSegments.splice(segmentIndex - 1, 2, mergedSegment);
+                
+                // Update UI
+                updateTranscriptDisplay();
+                
+                // Auto-save
+                autoSaveToStorage();
+            }}
+        }}
+        
+        function mergeWithNext(segmentId, event) {{
+            event.stopPropagation();
+            
+            const segmentIndex = transcriptSegments.findIndex(seg => seg.segment_id === segmentId);
+            if (segmentIndex >= transcriptSegments.length - 1) {{
+                alert('No next segment to merge with.');
+                return;
+            }}
+            
+            const currentSegment = transcriptSegments[segmentIndex];
+            const nextSegment = transcriptSegments[segmentIndex + 1];
+            
+            if (confirm(`Merge "${{currentSegment.text}}" with "${{nextSegment.text}}"?`)) {{
+                const mergedSegment = mergeSegments([currentSegment, nextSegment]);
+                
+                // Replace both segments with merged one
+                transcriptSegments.splice(segmentIndex, 2, mergedSegment);
+                
+                // Update UI
+                updateTranscriptDisplay();
+                
+                // Auto-save
+                autoSaveToStorage();
+            }}
+        }}
+        
+        function mergeSegments(segments) {{
+            const allWords = segments.flatMap(seg => seg.words || []);
+            const mergedText = segments.map(seg => seg.text).join(' ');
+            
+            return {{
+                segment_id: `merged_${{Date.now()}}`,
+                text: mergedText,
+                start: segments[0].start,
+                end: segments[segments.length - 1].end,
+                words: allWords
+            }};
+        }}
+        
+        function updateTranscriptDisplay() {{
+            // Dynamically update the transcript display without page reload
+            const transcriptContainer = document.querySelector('.transcript-paragraph');
+            if (!transcriptContainer) return;
+            
+            transcriptContainer.innerHTML = '';
+            
+            transcriptSegments.forEach((segment, index) => {{
+                const segmentHtml = `
+                    <div class="transcript-line" data-segment-id="${{segment.segment_id}}">
+                        <div class="segment-controls">
+                            <button class="segment-group-btn" onclick="event.stopPropagation(); openSegmentGroupMenu('${{segment.segment_id}}', event)" title="Assign to group">📋</button>
+                            <button class="segment-play-btn" onclick="event.stopPropagation(); playSegment(${{segment.start}}, ${{segment.end}})" title="Play segment">▶️</button>
+                            <button class="segment-edit-btn" onclick="event.stopPropagation(); enableInlineEdit('${{segment.segment_id}}', event)" title="Edit text">✏️</button>
+                            <button class="segment-merge-previous-btn" onclick="event.stopPropagation(); mergeWithPrevious('${{segment.segment_id}}', event)" title="Merge with previous">⬅️</button>
+                            <button class="segment-merge-next-btn" onclick="event.stopPropagation(); mergeWithNext('${{segment.segment_id}}', event)" title="Merge with next">➡️</button>
+                        </div>
+                        <span class="transcript-segment" 
+                              data-start="${{segment.start}}" 
+                              data-end="${{segment.end}}"
+                              data-segment-id="${{segment.segment_id}}"
+                              data-words-count="${{segment.words ? segment.words.length : 0}}"
+                              title="${{formatTime(segment.start)}} - ${{formatTime(segment.end)}}. Press Enter in the middle of text to split, or at end to save."
+                              onclick="handleSegmentClick(this, ${{segment.start}}, ${{segment.end}}, '${{segment.segment_id}}'); handleSegmentSelection(event, '${{segment.segment_id}}'); handleDirectTextEdit(event, '${{segment.segment_id}}')"
+                              contenteditable="false">${{segment.text}}</span>
+                        <div class="segment-timestamp">${{formatTime(segment.start)}}</div>
+                    </div>
+                `;
+                transcriptContainer.insertAdjacentHTML('beforeend', segmentHtml);
+            }});
+            
+            // Update video grid options
+            updateVideoGridOptions();
+        }}
+        
         // Initialize editor and playback mode listeners
         document.addEventListener('DOMContentLoaded', () => {{
             // Load any unsaved draft
@@ -1777,10 +2134,17 @@ class DuplicateReportGenerator:
             updatePlaylistDisplay();
         }});
         
+        // Multi-selection state
+        let multiSelectMode = false;
+        let selectedSegments = [];
+        
         // Group Management Functions
         
         function openSegmentGroupMenu(segmentId, event) {{
             event.stopPropagation();
+            
+            // Check if we have multiple segments selected
+            const segmentsToAssign = selectedSegments.length > 0 ? [...selectedSegments] : [segmentId];
             
             // Create or get the group menu
             let menu = document.getElementById('segmentGroupMenu');
@@ -1791,10 +2155,11 @@ class DuplicateReportGenerator:
                 document.body.appendChild(menu);
             }}
             
-            // Get current groups
+            // Get current groups - fix the selector to match actual HTML structure
             const currentGroups = new Set();
-            document.querySelectorAll('.transcript-segment[data-group]').forEach(seg => {{
-                currentGroups.add(seg.getAttribute('data-group'));
+            document.querySelectorAll('[data-group]').forEach(seg => {{
+                const groupId = seg.getAttribute('data-group');
+                if (groupId) currentGroups.add(groupId);
             }});
             
             // Get current segment's group
@@ -1803,12 +2168,14 @@ class DuplicateReportGenerator:
             
             // Build menu HTML
             let menuHTML = `
-                <div class="group-menu-header">Assign to Group:</div>
-                <div class="group-menu-item" onclick="assignSegmentToGroup('${{segmentId}}', null)">
+                <div class="group-menu-header">
+                    Assign ${{segmentsToAssign.length}} segment${{segmentsToAssign.length > 1 ? 's' : ''}} to Group:
+                </div>
+                <div class="group-menu-item" onclick="assignSegmentsToGroup(${{JSON.stringify(segmentsToAssign)}}, null)">
                     🚫 Remove from Group
                 </div>
                 <div class="group-menu-divider"></div>
-                <div class="group-menu-item" onclick="createNewGroupForSegment('${{segmentId}}')">
+                <div class="group-menu-item" onclick="createNewGroupForSegments(${{JSON.stringify(segmentsToAssign)}})">
                     ➕ Create New Group
                 </div>
                 <div class="group-menu-divider"></div>
@@ -1819,7 +2186,7 @@ class DuplicateReportGenerator:
                 const isSelected = currentGroup === groupId;
                 menuHTML += `
                     <div class="group-menu-item ${{isSelected ? 'selected' : ''}}" 
-                         onclick="assignSegmentToGroup('${{segmentId}}', '${{groupId}}')">
+                         onclick="assignSegmentsToGroup(${{JSON.stringify(segmentsToAssign)}}, '${{groupId}}')">
                         📁 Group ${{groupId}} ${{isSelected ? '✓' : ''}}
                     </div>
                 `;
@@ -1848,21 +2215,26 @@ class DuplicateReportGenerator:
             }}
         }}
         
-        function assignSegmentToGroup(segmentId, groupId) {{
-            const segment = document.querySelector(`[data-segment-id="${{segmentId}}"]`);
-            if (!segment) return;
+        function assignSegmentsToGroup(segmentIds, groupId) {{
+            segmentIds.forEach(segmentId => {{
+                const segment = document.querySelector(`[data-segment-id="${{segmentId}}"]`);
+                if (!segment) return;
+                
+                // Remove existing group classes
+                segment.className = segment.className.replace(/duplicate-group-\d+/g, '').replace(/duplicate-highlight/g, '').trim();
+                
+                if (groupId) {{
+                    // Assign to group
+                    segment.setAttribute('data-group', groupId);
+                    segment.classList.add('duplicate-highlight', `duplicate-group-${{groupId}}`);
+                }} else {{
+                    // Remove from group
+                    segment.removeAttribute('data-group');
+                }}
+            }});
             
-            // Remove existing group classes
-            segment.className = segment.className.replace(/duplicate-group-\d+/g, '').replace(/duplicate-highlight/g, '').trim();
-            
-            if (groupId) {{
-                // Assign to group
-                segment.setAttribute('data-group', groupId);
-                segment.classList.add('duplicate-highlight', `duplicate-group-${{groupId}}`);
-            }} else {{
-                // Remove from group
-                segment.removeAttribute('data-group');
-            }}
+            // Clear selection after assigning
+            clearSelection();
             
             // Update video grid if needed
             updateVideoGridOptions();
@@ -1873,7 +2245,11 @@ class DuplicateReportGenerator:
             hideSegmentGroupMenu();
         }}
         
-        function createNewGroupForSegment(segmentId) {{
+        function assignSegmentToGroup(segmentId, groupId) {{
+            assignSegmentsToGroup([segmentId], groupId);
+        }}
+        
+        function createNewGroupForSegments(segmentIds) {{
             const newGroupId = prompt('Enter new group number (or leave empty for auto-assignment):');
             if (newGroupId === null) return; // User cancelled
             
@@ -1881,8 +2257,9 @@ class DuplicateReportGenerator:
             if (!groupId) {{
                 // Auto-assign next available group number
                 const existingGroups = new Set();
-                document.querySelectorAll('.transcript-segment[data-group]').forEach(seg => {{
-                    existingGroups.add(parseInt(seg.getAttribute('data-group')));
+                document.querySelectorAll('[data-group]').forEach(seg => {{
+                    const groupId = seg.getAttribute('data-group');
+                    if (groupId) existingGroups.add(parseInt(groupId));
                 }});
                 
                 groupId = '1';
@@ -1891,7 +2268,133 @@ class DuplicateReportGenerator:
                 }}
             }}
             
-            assignSegmentToGroup(segmentId, groupId);
+            assignSegmentsToGroup(segmentIds, groupId);
+        }}
+        
+        function createNewGroupForSegment(segmentId) {{
+            createNewGroupForSegments([segmentId]);
+        }}
+        
+        // Multi-selection functions
+        function toggleMultiSelectMode() {{
+            multiSelectMode = !multiSelectMode;
+            const button = document.querySelector('.multi-select-btn');
+            
+            if (multiSelectMode) {{
+                button.textContent = '🔒 Lock Selection';
+                button.style.background = '#e53e3e';
+                document.body.style.cursor = 'crosshair';
+                showMultiSelectInstructions();
+            }} else {{
+                button.textContent = '✅ Multi-Select';
+                button.style.background = '#4299e1';
+                document.body.style.cursor = 'default';
+                clearSelection();
+                hideMultiSelectInstructions();
+            }}
+        }}
+        
+        function showMultiSelectInstructions() {{
+            const instructions = document.createElement('div');
+            instructions.id = 'multiSelectInstructions';
+            instructions.className = 'multi-select-instructions';
+            instructions.innerHTML = `
+                <div class="multi-select-content">
+                    <strong>📋 Multi-Select Mode</strong><br>
+                    • Click segments to select/deselect them<br>
+                    • Ctrl+Click for single selection<br>
+                    • Shift+Click for range selection<br>
+                    • Use 📋 button to assign selected segments to a group
+                    <button class="clear-selection-btn" onclick="clearSelection()">Clear Selection (0)</button>
+                    <button class="exit-multi-select-btn" onclick="toggleMultiSelectMode()">Exit Multi-Select</button>
+                </div>
+            `;
+            document.querySelector('.transcript-section').appendChild(instructions);
+        }}
+        
+        function hideMultiSelectInstructions() {{
+            const instructions = document.getElementById('multiSelectInstructions');
+            if (instructions) instructions.remove();
+        }}
+        
+        function clearSelection() {{
+            selectedSegments = [];
+            document.querySelectorAll('.transcript-line').forEach(line => {{
+                line.classList.remove('multi-selected');
+            }});
+            updateSelectionCount();
+        }}
+        
+        function updateSelectionCount() {{
+            const countElement = document.querySelector('.clear-selection-btn');
+            if (countElement) {{
+                countElement.textContent = `Clear Selection (${{selectedSegments.length}})`;
+            }}
+        }}
+        
+        function handleSegmentSelection(event, segmentId) {{
+            // Don't handle if clicking on buttons or if not in multi-select mode
+            if (!multiSelectMode || event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
+            
+            event.stopPropagation();
+            const line = event.currentTarget;
+            
+            if (event.ctrlKey || event.metaKey) {{
+                // Ctrl+Click: Single selection mode
+                clearSelection();
+                selectedSegments = [segmentId];
+                line.classList.add('multi-selected');
+            }} else if (event.shiftKey && selectedSegments.length > 0) {{
+                // Shift+Click: Range selection
+                const allLines = Array.from(document.querySelectorAll('.transcript-line'));
+                const lastSelectedIndex = allLines.findIndex(l => 
+                    l.getAttribute('data-segment-id') === selectedSegments[selectedSegments.length - 1]
+                );
+                const currentIndex = allLines.findIndex(l => 
+                    l.getAttribute('data-segment-id') === segmentId
+                );
+                
+                if (lastSelectedIndex !== -1 && currentIndex !== -1) {{
+                    const start = Math.min(lastSelectedIndex, currentIndex);
+                    const end = Math.max(lastSelectedIndex, currentIndex);
+                    
+                    clearSelection();
+                    for (let i = start; i <= end; i++) {{
+                        const lineSegmentId = allLines[i].getAttribute('data-segment-id');
+                        selectedSegments.push(lineSegmentId);
+                        allLines[i].classList.add('multi-selected');
+                    }}
+                }}
+            }} else {{
+                // Normal click: Toggle selection
+                if (selectedSegments.includes(segmentId)) {{
+                    selectedSegments = selectedSegments.filter(id => id !== segmentId);
+                    line.classList.remove('multi-selected');
+                }} else {{
+                    selectedSegments.push(segmentId);
+                    line.classList.add('multi-selected');
+                }}
+            }}
+            
+            updateSelectionCount();
+        }}
+        
+        function handleDirectTextEdit(event, segmentId) {{
+            // Don't handle if clicking on buttons or already editing
+            if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
+            
+            const segmentElement = event.target.closest('.transcript-segment');
+            if (!segmentElement || segmentElement.contentEditable === 'true') return;
+            
+            // Check if we're not in multi-select mode and it's a simple click
+            if (!multiSelectMode && !event.ctrlKey && !event.shiftKey && !event.metaKey) {{
+                // Small delay to distinguish from double-click
+                setTimeout(() => {{
+                    if (segmentElement.contentEditable === 'false') {{
+                        enableInlineEdit(segmentId, event);
+                    }}
+                }}, 200);
+            }}
         }}
         
         function openGroupEditor() {{
@@ -2042,47 +2545,7 @@ class DuplicateReportGenerator:
             }}
         }}
         
-        // Playback Functions
-        
-        function playSegment(startTime, endTime) {{
-            // Create a temporary video element if it doesn't exist
-            let video = document.getElementById('tempVideoPlayer');
-            if (!video) {{
-                video = document.createElement('video');
-                video.id = 'tempVideoPlayer';
-                video.style.display = 'none';
-                video.src = "{video_file}";
-                document.body.appendChild(video);
-            }}
-            
-            // Set video time and play
-            video.currentTime = startTime;
-            video.play();
-            
-            // Stop at end time
-            const checkTime = () => {{
-                if (video.currentTime >= endTime) {{
-                    video.pause();
-                    video.currentTime = startTime;
-                }} else {{
-                    requestAnimationFrame(checkTime);
-                }}
-            }};
-            requestAnimationFrame(checkTime);
-        }}
-        
-        // Playback Functions
-        
-        function playSegment(startTime, endTime) {{
-            // Create a temporary video element if it doesn't exist
-            let video = document.getElementById('tempVideoPlayer');
-            if (!video) {{
-                video = document.createElement('video');
-                video.id = 'tempVideoPlayer';
-                video.style.display = 'none';
-                video.src = "{video_file}";
-                document.body.appendChild(video);
-            }}
+        // All global functions moved outside DOMContentLoaded
             
             // Set video time and play
             video.currentTime = startTime;
@@ -2359,11 +2822,11 @@ class DuplicateReportGenerator:
                 const segmentHtml = `
                     <div class="transcript-line" data-segment-id="${{segment.segment_id}}">
                         <div class="segment-controls">
-                            <button class="segment-group-btn" onclick="openSegmentGroupMenu('${{segment.segment_id}}', event)" title="Assign to group">📋</button>
-                            <button class="segment-play-btn" onclick="playSegment(${{segment.start}}, ${{segment.end}})" title="Play segment">▶️</button>
-                            <button class="segment-edit-btn" onclick="enableInlineEdit('${{segment.segment_id}}', event)" title="Edit text">✏️</button>
-                            <button class="segment-merge-previous-btn" onclick="mergeWithPrevious('${{segment.segment_id}}', event)" title="Merge with previous">⬅️</button>
-                            <button class="segment-merge-next-btn" onclick="mergeWithNext('${{segment.segment_id}}', event)" title="Merge with next">➡️</button>
+                            <button class="segment-group-btn" onclick="event.stopPropagation(); openSegmentGroupMenu('${{segment.segment_id}}', event)" title="Assign to group">📋</button>
+                            <button class="segment-play-btn" onclick="event.stopPropagation(); playSegment(${{segment.start}}, ${{segment.end}})" title="Play segment">▶️</button>
+                            <button class="segment-edit-btn" onclick="event.stopPropagation(); enableInlineEdit('${{segment.segment_id}}', event)" title="Edit text">✏️</button>
+                            <button class="segment-merge-previous-btn" onclick="event.stopPropagation(); mergeWithPrevious('${{segment.segment_id}}', event)" title="Merge with previous">⬅️</button>
+                            <button class="segment-merge-next-btn" onclick="event.stopPropagation(); mergeWithNext('${{segment.segment_id}}', event)" title="Merge with next">➡️</button>
                         </div>
                         <span class="transcript-segment" 
                               data-start="${{segment.start}}" 
@@ -2371,7 +2834,7 @@ class DuplicateReportGenerator:
                               data-segment-id="${{segment.segment_id}}"
                               data-words-count="${{segment.words ? segment.words.length : 0}}"
                               title="${{formatTime(segment.start)}} - ${{formatTime(segment.end)}}. Press Enter in the middle of text to split, or at end to save."
-                              onclick="handleSegmentClick(this, ${{segment.start}}, ${{segment.end}}, '${{segment.segment_id}}')"
+                              onclick="handleSegmentClick(this, ${{segment.start}}, ${{segment.end}}, '${{segment.segment_id}}'); handleSegmentSelection(event, '${{segment.segment_id}}'); handleDirectTextEdit(event, '${{segment.segment_id}}')"
                               contenteditable="false">${{segment.text}}</span>
                         <div class="segment-timestamp">${{formatTime(segment.start)}}</div>
                     </div>

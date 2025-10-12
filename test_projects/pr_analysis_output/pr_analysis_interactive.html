@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Analysis Dashboard - feature/image_transcription → main</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a3a 0%, #2a2a4a 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #00ff88;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+
+        .branch-info {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .tabs {
+            margin-bottom: 30px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tab-button.active {
+            background: #00ff88;
+            color: #0f0f23;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        /* File Analysis Styles */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .file-tree {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .file-item.ready { border-left-color: #00ff88; }
+        .file-item.conditional { border-left-color: #ffaa00; }
+        .file-item.not_ready { border-left-color: #ff4444; }
+
+        .file-header {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-path {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-badge.ready { background: #00ff88; color: #000; }
+        .status-badge.conditional { background: #ffaa00; color: #000; }
+        .status-badge.not_ready { background: #ff4444; color: #fff; }
+
+        .file-details {
+            display: none;
+            padding: 0 15px 15px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-details.expanded {
+            display: block;
+        }
+
+        /* Issue and Duplicate Styles */
+        .issue-list, .duplicate-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .issue-item, .duplicate-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid transparent;
+        }
+
+        .issue-item.critical { border-left-color: #ff4444; }
+        .issue-item.high { border-left-color: #ff8800; }
+        .issue-item.medium { border-left-color: #ffaa00; }
+
+        .duplicate-item.critical { border-left-color: #ff4444; }
+        .duplicate-item.high { border-left-color: #ff8800; }
+        .duplicate-item.medium { border-left-color: #ffaa00; }
+
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .priority-badge.critical { background: #ff4444; color: #fff; }
+        .priority-badge.high { background: #ff8800; color: #fff; }
+        .priority-badge.medium { background: #ffaa00; color: #000; }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header { padding: 20px; }
+            .header h1 { font-size: 2rem; }
+            .search-container { flex-direction: column; }
+            .tab-buttons { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 PR Analysis Dashboard</h1>
+            <div class="branch-info">feature/image_transcription → main</div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Quality Score</div>
+                    <div class="metric-value">4.3/10</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Files Analyzed</div>
+                    <div class="metric-value">10</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Ready Files</div>
+                    <div class="metric-value">1</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Issues Found</div>
+                    <div class="metric-value">25</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('overview')">📊 Overview</button>
+                <button class="tab-button" onclick="showTab('files')">📁 File Analysis</button>
+                <button class="tab-button" onclick="showTab('issues')">⚠️ Quality Issues</button>
+                <button class="tab-button" onclick="showTab('duplicates')">🔄 Duplicates</button>
+                <button class="tab-button" onclick="showTab('recommendations')">💡 Recommendations</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <h2>📊 Executive Summary</h2>
+                
+        <div class="overview-section">
+            <div class="pr-stats">
+                <div class="stat-item">
+                    <h4>10</h4>
+                    <p>Files Changed</p>
+                </div>
+                <div class="stat-item">
+                    <h4>460</h4>
+                    <p>Lines Added</p>
+                </div>
+                <div class="stat-item">
+                    <h4>0</h4>
+                    <p>Lines Removed</p>
+                </div>
+                <div class="stat-item">
+                    <h4>4.3/10</h4>
+                    <p>Quality Score</p>
+                </div>
+            </div>
+            <div class="recommendation-box">
+                <h4>Recommendation: MAJOR_ISSUES_FOUND</h4>
+                <p>Overall assessment based on code quality, merge readiness, and potential issues.</p>
+            </div>
+        </div>
+        
+            </div>
+
+            <div id="files" class="tab-content">
+                <h2>📁 Detailed File Analysis</h2>
+                <div class="search-container">
+                    <input type="text" class="search-input" id="fileSearch" placeholder="Search files..." onkeyup="filterFiles()">
+                    <select class="filter-select" id="statusFilter" onchange="filterFiles()">
+                        <option value="all">All Files</option>
+                        <option value="ready">Ready</option>
+                        <option value="conditional">Conditional</option>
+                        <option value="not_ready">Not Ready</option>
+                    </select>
+                </div>
+                <div class="file-tree" id="fileTree">
+                    
+        <div class="search-container">
+            <input type="text" class="search-input" id="fileSearch" placeholder="Search files..." onkeyup="filterFiles()">
+            <select class="filter-select" id="statusFilter" onchange="filterFiles()">
+                <option value="all">All Files</option>
+                <option value="ready">Ready</option>
+                <option value="conditional">Conditional</option>
+                <option value="not_ready">Not Ready</option>
+            </select>
+        </div>
+        <div class="quick-filters">
+            <button class="quick-filter-btn" onclick="clearFilters()">Show All</button>
+            <button class="quick-filter-btn" onclick="showOnlyProblems()">Problems Only</button>
+            <button class="quick-filter-btn" onclick="showOnlyReady()">Ready Files</button>
+        </div>
+        <div class="filter-stats" id="filterStats">
+            Showing all files
+        </div>
+        <!-- Files will be rendered here by JavaScript -->
+        
+                </div>
+            </div>
+
+            <div id="issues" class="tab-content">
+                <h2>⚠️ Quality Issues</h2>
+                <div class="issue-list">
+                    <div class='quality-issues-list'><h4 class='priority-critical'>CRITICAL Priority (5 issues)</h4>
+                    <div class='issue-item priority-critical'>
+                        <h5>Authentication Logic Duplicates</h5>
+                        <p><strong>Impact:</strong> 10.0/10</p>
+                        <p><strong>Files:</strong> 2</p>
+                        <p><strong>Recommendation:</strong> Consolidate or remove duplicates</p>
+                    </div>
+                    
+                    <div class='issue-item priority-critical'>
+                        <h5>Pattern Issue: SQL injection vulnerabilities in `product_search.p...</h5>
+                        <p><strong>Impact:</strong> 4.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-critical'>
+                        <h5>Pattern Issue: Plain text password handling in `user_auth.py` vs ...</h5>
+                        <p><strong>Impact:</strong> 4.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-critical'>
+                        <h5>Pattern Issue: Duplicate data processing logic between `data_proc...</h5>
+                        <p><strong>Impact:</strong> 4.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-critical'>
+                        <h5>Pattern Issue: Direct database connection management without prop...</h5>
+                        <p><strong>Impact:</strong> 4.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    <h4 class='priority-high'>HIGH Priority (9 issues)</h4>
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: Inconsistent database access patterns:...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: `MockDatabase` in product_service.py...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: `SimpleDatabase` in user_auth.py...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: `Database` in product_search.py...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: `ProductDB` in product_finder.py...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: Inconsistent naming conventions:...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: `handle_dataset` vs `process_all_data` for similar...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: `query` vs `execute` for database operations...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-high'>
+                        <h5>Pattern Issue: Missing type hints in "bad" implementations while ...</h5>
+                        <p><strong>Impact:</strong> 3.8/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    <h4 class='priority-medium'>MEDIUM Priority (11 issues)</h4>
+                    <div class='issue-item priority-medium'>
+                        <h5>Authentication Services</h5>
+                        <p><strong>Impact:</strong> 5.7/10</p>
+                        <p><strong>Files:</strong> 1</p>
+                        <p><strong>Recommendation:</strong> Consolidate or remove duplicates</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Inconsistent file naming patterns:...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: `data_transformer.py` vs `data_processor.py` vs `d...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: `auth_service.py` vs `user_auth.py`...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: `product_service.py` vs `product_search.py` vs `pr...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Inconsistent use of dataclasses:...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Some files use `@dataclass` for data structures...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Others use plain classes or dictionaries...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Documentation inconsistency:...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Some files have detailed docstrings...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    
+                    <div class='issue-item priority-medium'>
+                        <h5>Pattern Issue: Others have minimal or no documentation...</h5>
+                        <p><strong>Impact:</strong> 3.2/10</p>
+                        <p><strong>Files:</strong> 0</p>
+                        <p><strong>Recommendation:</strong> Establish and follow consistent patterns</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="duplicates" class="tab-content">
+                <h2>🔄 Duplicate Analysis</h2>
+                <div class="duplicate-list">
+                    
+            <div class='duplicate-item'>
+                <h3>Duplicate Analysis Summary</h3>
+                <div class='duplicate-details'>
+                    <p>Based on the provided JSON data, here is my duplicate analysis:</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Data Processing Duplicates:</h3>
+                <div class='duplicate-details'>
+                    <p>- data_pipeline/bad/helpers/data_processor.py</p>
+<p>- data_pipeline/bad/utils/data_helper.py</p>
+<p>Both contain identical expensive_transformation() function and nearly identical data processing logic with the same memory issues.</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Authentication Logic Duplicates:</h3>
+                <div class='duplicate-details'>
+                    <p>- auth_service/bad/security/user_auth.py</p>
+<p>- auth_service/bad/auth/login_handler.py</p>
+<p>Both implement the same insecure authentication with plain text password comparison and similar token generation.</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Product Search Implementation:</h3>
+                <div class='duplicate-details'>
+                    <p>- ecommerce_api/bad/services/product_search.py</p>
+<p>- ecommerce_api/bad/services/product_finder.py</p>
+<p>Both implement product search with SQL injection vulnerabilities and nearly identical database handling patterns.</p>
+
+                </div>
+            </div>
+            
+            <div class='duplicate-item'>
+                <h3>Data Transformation Services:</h3>
+                <div class='duplicate-details'>
+                    <p>- data_pipeline/good/processors/data_transformer.py could potentially consolidate functionality from the duplicate data processing implementations in the bad/ directory.</p>
+
+                </div>
+            </div>
+            
+                </div>
+            </div>
+
+            <div id="recommendations" class="tab-content">
+                <h2>💡 Recommendations</h2>
+                <div class='recommendations-list'>
+            <div class='recommendation-item'>
+                <h5>1. Recommendation</h5>
+                <p>🔴 **CRITICAL**: Address 5 critical issues before merging</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>2. Recommendation</h5>
+                <p>   • Authentication Logic Duplicates</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>3. Recommendation</h5>
+                <p>   • Pattern Issue: SQL injection vulnerabilities in `product_search.p...</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>4. Recommendation</h5>
+                <p>   • Pattern Issue: Plain text password handling in `user_auth.py` vs ...</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>5. Recommendation</h5>
+                <p>🟡 **HIGH PRIORITY**: Consider fixing 9 high-priority issues</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>6. Recommendation</h5>
+                <p>🔄 **DUPLICATES**: Remove 3 duplicate/redundant files to reduce repository bloat</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>7. Recommendation</h5>
+                <p>📐 **CONSISTENCY**: Establish coding standards to address 23 pattern inconsistencies</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>8. Recommendation</h5>
+                <p>❌ **OVERALL**: Significant issues found, major cleanup needed</p>
+            </div>
+            
+            <div class='recommendation-item'>
+                <h5>9. Recommendation</h5>
+                <p>⏱️ **ESTIMATED EFFORT**: ~24 hours hours to address all issues</p>
+            </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                const fileData = [
+{
+            "file_path": "auth_service/bad/security/user_auth.py",
+            "merge_readiness": "not_ready",
+            "business_impact_score": 4,
+            "technical_risk_score": 7,
+            "overall_assessment": {
+                        "purpose": "User authentication and token generation service implementation",
+                        "business_impact": "Critical - handles core user authentication and security",
+                        "risk_assessment": "Severe security vulnerabilities that could lead to data breaches and unauthorized access"
+            },
+            "detailed_feedback": "This file contains multiple critical security vulnerabilities that must be addressed before merge:\n1. Plain text password storage and comparison\n2. Predictable token generation\n3. Lack of password hashing\n4. No input validation\n5. Insecure database implementation\n6. Missing proper error handling",
+            "recommendations": [
+                        "Complete missing content",
+                        "Review file completeness"
+            ]
+},
+{
+            "file_path": "ecommerce_api/bad/services/product_search.py",
+            "merge_readiness": "not_ready",
+            "business_impact_score": 4,
+            "technical_risk_score": 7,
+            "overall_assessment": {
+                        "purpose": "Provides product search functionality for an ecommerce system through database queries",
+                        "business_impact": "Critical - This is core search functionality that directly impacts product discovery and sales",
+                        "risk_assessment": "Severe security vulnerabilities present through multiple SQL injection points that could lead to data breach or system compromise"
+            },
+            "detailed_feedback": "This file contains multiple critical security vulnerabilities and must be completely refactored before merge. Key issues:\n- Direct SQL string concatenation creating SQL injection vulnerabilities\n- Lack of input validation and sanitization\n- No prepared statements usage\n- Missing error handling\n- No connection management or resource cleanup",
+            "recommendations": [
+                        "Complete missing content",
+                        "Review file completeness"
+            ]
+},
+{
+            "file_path": "data_pipeline/good/processors/data_transformer.py",
+            "merge_readiness": "conditional",
+            "business_impact_score": 4,
+            "technical_risk_score": 5,
+            "overall_assessment": {
+                        "purpose": "Provides a memory-efficient data transformation pipeline using batch processing for large datasets",
+                        "business_impact": "Critical component for scalable data processing, enabling handling of large datasets with controlled memory usage",
+                        "risk_assessment": "Medium - While core functionality appears sound, missing error handling details and logging could impact production reliability"
+            },
+            "detailed_feedback": "Requires the following improvements before merge:\n1. Add comprehensive logging instead of print statements\n2. Implement detailed error handling and recovery strategy\n3. Add input validation for batch_size\n4. Include unit tests coverage\n5. Add documentation for transformation rules",
+            "recommendations": [
+                        "Add input validation",
+                        "Implement rate limiting"
+            ]
+},
+{
+            "file_path": "ecommerce_api/bad/services/product_finder.py",
+            "merge_readiness": "not_ready",
+            "business_impact_score": 4,
+            "technical_risk_score": 7,
+            "overall_assessment": {
+                        "purpose": "Product search and lookup functionality for e-commerce system",
+                        "business_impact": "Critical - handles core product discovery functionality",
+                        "risk_assessment": "Severe security vulnerabilities present with multiple SQL injection points that could lead to data breaches or system compromise"
+            },
+            "detailed_feedback": "Multiple critical issues prevent merge readiness:\n1. SQL injection vulnerabilities in all database queries\n2. Duplicate code that should be consolidated\n3. Poor error handling and connection management\n4. Lack of input validation\n5. Hard-coded database path\n6. Missing documentation and type hints",
+            "recommendations": [
+                        "Complete missing content",
+                        "Review file completeness"
+            ]
+},
+{
+            "file_path": "auth_service/bad/auth/login_handler.py",
+            "merge_readiness": "not_ready",
+            "business_impact_score": 4,
+            "technical_risk_score": 7,
+            "overall_assessment": {
+                        "purpose": "Handles user authentication including login, token generation, and user registration",
+                        "business_impact": "Critical - this code handles core authentication functionality that impacts security of entire system",
+                        "risk_assessment": "Severe security vulnerabilities present including plaintext password storage, weak token generation, and lack of proper authentication controls"
+            },
+            "detailed_feedback": "This file contains multiple critical security issues that must be addressed before merging:\n1. Passwords stored and compared in plaintext\n2. Insecure token generation using MD5\n3. No input validation or sanitization\n4. Lack of proper session management\n5. Missing error handling\n6. No rate limiting on authentication attempts",
+            "recommendations": [
+                        "Complete missing content",
+                        "Review file completeness"
+            ]
+},
+{
+            "file_path": "auth_service/good/auth/auth_service.py",
+            "merge_readiness": "not_ready",
+            "business_impact_score": 4,
+            "technical_risk_score": 5,
+            "overall_assessment": {
+                        "purpose": "Provides core authentication functionality including user management, password hashing, and JWT token handling",
+                        "business_impact": "Critical component for application security and user authentication",
+                        "risk_assessment": "Medium - While core functionality appears sound, some security hardening is recommended"
+            },
+            "detailed_feedback": "The code needs the following adjustments before merge:\n1. Add input validation for email format\n2. Implement password complexity requirements\n3. Add rate limiting mechanism for auth attempts\n4. Consider adding token refresh functionality\n5. Add logging for security events",
+            "recommendations": [
+                        "File is ready for merge"
+            ]
+},
+{
+            "file_path": "ecommerce_api/good/services/product_service.py",
+            "merge_readiness": "conditional",
+            "business_impact_score": 4,
+            "technical_risk_score": 5,
+            "overall_assessment": {
+                        "purpose": "Provides mocking infrastructure for product-related database operations, likely used for testing the e-commerce product service",
+                        "business_impact": "Critical for testing reliability of product operations, but mock implementation suggests this is test infrastructure rather than production code",
+                        "risk_assessment": "Medium - Mock implementations need verification against actual database behavior"
+            },
+            "detailed_feedback": "Before merging, needs:\n1. Complete implementation of MockQuery.ilike (appears truncated)\n2. Documentation of expected behavior vs actual database\n3. Validation that mock behavior matches production database behavior\n4. Unit tests to verify mock functionality",
+            "recommendations": [
+                        "Review conditions mentioned in feedback",
+                        "Test thoroughly before merge"
+            ]
+},
+{
+            "file_path": "ecommerce_api/good/models/product.py",
+            "merge_readiness": "ready",
+            "business_impact_score": 5,
+            "technical_risk_score": 2,
+            "overall_assessment": {
+                        "purpose": "Defines the core Product data model using Python's dataclass pattern for the ecommerce system",
+                        "business_impact": "Critical - represents fundamental product data structure used throughout the ecommerce platform",
+                        "risk_assessment": "Low - implementation follows best practices with appropriate type hints and automated timestamp management"
+            },
+            "detailed_feedback": "",
+            "recommendations": [
+                        "File is ready for merge"
+            ]
+},
+{
+            "file_path": "data_pipeline/bad/utils/data_helper.py",
+            "merge_readiness": "conditional",
+            "business_impact_score": 4,
+            "technical_risk_score": 5,
+            "overall_assessment": {
+                        "purpose": "File requires manual review - AI analysis missed",
+                        "business_impact": "Unknown - requires assessment",
+                        "risk_assessment": "Unknown - requires assessment"
+            },
+            "detailed_feedback": "This file was not analyzed by the AI agent and requires manual review.",
+            "recommendations": [
+                        "Review conditions mentioned in feedback",
+                        "Test thoroughly before merge"
+            ]
+},
+{
+            "file_path": "data_pipeline/bad/helpers/data_processor.py",
+            "merge_readiness": "conditional",
+            "business_impact_score": 4,
+            "technical_risk_score": 5,
+            "overall_assessment": {
+                        "purpose": "File requires manual review - AI analysis missed",
+                        "business_impact": "Unknown - requires assessment",
+                        "risk_assessment": "Unknown - requires assessment"
+            },
+            "detailed_feedback": "This file was not analyzed by the AI agent and requires manual review.",
+            "recommendations": [
+                        "Review conditions mentioned in feedback",
+                        "Test thoroughly before merge"
+            ]
+}
+        ];
+
+        // Initialize variables after fileData is defined
+        let filteredFiles = [...fileData];
+        let currentFilter = 'all';
+
+        // Function to render files into the DOM
+        function renderFileTree() {
+            const fileTree = document.getElementById('fileTree');
+            fileTree.innerHTML = '';
+
+            filteredFiles.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = `file-item ${file.merge_readiness}`;
+
+                const statusColor = file.merge_readiness === 'ready' ? '#00ff88' : 
+                                   file.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+
+                fileItem.innerHTML = `
+                    <div class='file-header'>
+                        <div class='file-path'>${file.file_path}</div>
+                        <div class='file-status' style='color: ${statusColor}'>${file.merge_readiness.toUpperCase()}</div>
+                    </div>
+                    <div class='file-details'>
+                        <div class='score-grid'>
+                            <div class='score-item'>
+                                <span class='score-label'>Business Impact:</span>
+                                <span class='score-value'>${file.business_impact_score}/10</span>
+                            </div>
+                            <div class='score-item'>
+                                <span class='score-label'>Technical Risk:</span>
+                                <span class='score-value'>${file.technical_risk_score}/10</span>
+                            </div>
+                        </div>
+                        <div class='file-purpose'>
+                            <strong>Purpose:</strong> ${file.overall_assessment.purpose || 'Not specified'}
+                        </div>
+                        <div class='file-recommendations'>
+                            <strong>Recommendations:</strong>
+                            <ul>${file.recommendations.map(rec => `<li>${rec}</li>`).join('')}</ul>
+                        </div>
+                    </div>
+                `;
+
+                fileTree.appendChild(fileItem);
+            });
+        }
+
+        // Function to filter files - replaces any existing filterFiles function
+        function filterFiles() {
+            const searchTerm = document.getElementById('fileSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            console.log('Filtering files:', { searchTerm, statusFilter, totalFiles: fileData.length });
+
+            // Filter the data first
+            filteredFiles = fileData.filter(file => {
+                const matchesSearch = file.file_path.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || file.merge_readiness === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            console.log('Filtered to:', filteredFiles.length, 'files');
+
+            // Update filter stats
+            updateFilterStats();
+
+            // Re-render the tree
+            renderFileTree();
+        }
+
+        function updateFilterStats() {
+            const statsEl = document.getElementById('filterStats');
+            const total = fileData.length;
+            const filtered = filteredFiles.length;
+            const ready = filteredFiles.filter(f => f.merge_readiness === 'ready').length;
+            const conditional = filteredFiles.filter(f => f.merge_readiness === 'conditional').length;
+            const notReady = filteredFiles.filter(f => f.merge_readiness === 'not_ready').length;
+
+            if (filtered === total) {
+                statsEl.innerHTML = `Showing all ${total} files (${ready} ready, ${conditional} conditional, ${notReady} not ready)`;
+            } else {
+                statsEl.innerHTML = `Showing ${filtered} of ${total} files (${ready} ready, ${conditional} conditional, ${notReady} not ready)`;
+            }
+        }
+
+        // Add some additional filtering capabilities
+        function clearFilters() {
+            document.getElementById('fileSearch').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            filterFiles();
+        }
+
+        function showOnlyProblems() {
+            document.getElementById('statusFilter').value = 'not_ready';
+            filterFiles();
+        }
+
+        function showOnlyReady() {
+            document.getElementById('statusFilter').value = 'ready';
+            filterFiles();
+        }
+
+        // Initial render when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            renderFileTree();
+            updateFilterStats();
+        });
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab and mark button as active
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function filterFiles() {
+            const searchTerm = document.getElementById('fileSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const fileItems = document.querySelectorAll('.file-item');
+            
+            fileItems.forEach(item => {
+                const filePath = item.querySelector('.file-path').textContent.toLowerCase();
+                const status = item.classList.contains('ready') ? 'ready' : 
+                              item.classList.contains('conditional') ? 'conditional' : 'not_ready';
+                
+                const matchesSearch = filePath.includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                
+                item.style.display = (matchesSearch && matchesStatus) ? 'block' : 'none';
+            });
+        }
+
+        function toggleFileDetails(element) {
+            const details = element.nextElementSibling;
+            details.classList.toggle('expanded');
+        }
+
+        // Add click handlers for file items
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileHeaders = document.querySelectorAll('.file-header');
+            fileHeaders.forEach(header => {
+                header.addEventListener('click', () => toggleFileDetails(header));
+            });
+        });
+    </script>
+</body>
+</html>

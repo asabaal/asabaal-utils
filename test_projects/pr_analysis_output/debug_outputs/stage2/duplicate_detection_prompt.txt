@@ -1,0 +1,1659 @@
+You are a senior software architect with expertise in detecting duplicate implementations by analyzing actual code content and functional purpose. Your task is to DISCOVER duplicate or similar files by reading and understanding what each file actually does.
+
+## PR Context
+- Analyzing: 259 files (+3539/-49761)
+- Branch: main → brand-integration
+
+## File Content & Functional Analysis
+
+### CONFIGURATION FILES (2 files)
+
+#### .env.example
+- Change: D (+0/-26)
+- Size: 974 bytes
+- Content analysis:
+```
+# Environment Configuration for Asabaal Ventures Website
+# Copy this file to .env and fill in your actual values
+# Get Supabase values from your project dashboard -> Settings -> API
+
+# Supabase Configuration (required for contact forms)
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-anon-key-here
+
+# Optional: Service role key for admin operations (keep this secret!)
+# Only needed if you plan to add admin functionality later
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-service-role-key-here
+
+# Development Environment
+NODE_ENV=development
+
+# Optional: Email configuration (for future use)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Optional: Analytics
+GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# Optional: Allowed origins (for CORS if needed)
+ALLOWED_ORIGINS=https://yourdomain.com,http://localhost:3000,http://localhost:8080
+```
+
+#### config/supabase-keys.template.js
+- Change: D (+0/-16)
+- Size: 710 bytes
+- Content analysis:
+```
+// Supabase Configuration Template
+// Copy this to 'supabase-keys.js' and add your actual credentials
+// This file should NOT be committed to git - it's in .gitignore
+
+window.VITE_SUPABASE_URL = 'https://your-project-id.supabase.co';
+window.VITE_SUPABASE_ANON_KEY = 'your-anon-key-here';
+
+// Instructions:
+// 1. Go to your Supabase project dashboard
+// 2. Navigate to Settings → API  
+// 3. Copy your Project URL and anon/public key
+// 4. Replace the values above with your actual credentials
+// 5. Save this file as 'supabase-keys.js' (not .template.js)
+//
+// Security Note: The anon key is safe to expose publicly - it's designed for frontend use
+// Never commit the service role key to your frontend code!
+```
+
+### UNCATEGORIZED FILES (21 files)
+
+#### .gitignore
+- Change: D (+0/-40)
+- Size: 710 bytes
+- Content analysis:
+```
+**/.claude/settings.local.json
+*.pdf
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Local Supabase configuration (keep your keys private!)
+config/supabase-keys.js
+
+# Content Management
+# Note: You can choose to track or ignore blog content
+# Option 1: Track everything (recommended for backup)
+# content/
+
+# Option 2: Ignore drafts only (track published content)
+content/blog/drafts/
+
+# Option 3: Ignore all content (if you prefer external storage)
+# content/blog/
+
+# Migration script outputs
+content/migrate-posts.log
+
+# Image processing
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows development artifacts
+*:Zone.Identifier
+
+```
+
+#### blog.html
+- Change: M (+408/-329)
+- Size: 11268 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Asabaal Ventures</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 25%, #2d1b69 50%, #4c1d95 75%, #6b21a8 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: 70px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 
+```
+
+#### database-archive/supabase-keys.prod.js
+- Change: D (+0/-13)
+- Size: 589 bytes
+- Content analysis:
+```
+// Production Supabase Configuration for Vercel
+// This file should be renamed to supabase-keys.js for production deployment
+// Replace these values with your actual Supabase credentials
+
+window.VITE_SUPABASE_URL = 'https://your-actual-project-id.supabase.co';
+window.VITE_SUPABASE_ANON_KEY = 'your-actual-anon-key-here';
+
+// Instructions:
+// 1. Replace the values above with your real Supabase project URL and anon key
+// 2. Rename this file to 'supabase-keys.js' 
+// 3. Deploy to Vercel
+//
+// For security: These values are safe to expose publicly (anon key is designed for frontend use)
+```
+
+#### development-archive/test-forms.html
+- Change: D (+0/-344)
+- Size: 11686 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Testing - Asabaal Ventures</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1, h2 {
+            color: #fbbf24;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #d1d5db;
+        }
+        
+        input, textarea {
+            width: 100%;
+      
+```
+
+#### development-archive/test_site.html
+- Change: D (+0/-1659)
+- Size: 59391 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### index.html
+- Change: M (+337/-1540)
+- Size: 55548 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### links.html
+- Change: D (+0/-451)
+- Size: 16494 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect with Asabaal - All Links</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/icons/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 25%, #2d1b69 50%, #4c1d95 75%, #6b21a8 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            margin-bottom: 40px;
+        }
+
+        .
+```
+
+#### open-source-model.html
+- Change: D (+0/-623)
+- Size: 22192 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingdom Cooperative Business Model - Asabaal Ventures</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/icons/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 25%, #2d1b69 50%, #4c1d95 75%, #6b21a8 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 0;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-bottom: 
+```
+
+#### prototypes/Pitch Deck Updated 20250714.html
+- Change: D (+0/-1545)
+- Size: 91705 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### prototypes/ecosystem-diagram.html
+- Change: D (+0/-523)
+- Size: 19770 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asabaal Ventures Multimedia Ecosystem</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100vh;
+            overflow-x: auto;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #ffd700, #ff6b6b);
+            -webk
+```
+
+### DOCUMENTATION FILES (19 files)
+
+#### AGENTIC_SYSTEM_TECHNICAL_WALKTHROUGH.md
+- Change: D (+0/-345)
+- Size: 16437 bytes
+- Content analysis:
+```
+# Agentic PR Analysis System - Technical Walkthrough
+
+*Visual guide to how the agent-calling-agents architecture works*
+
+---
+
+## System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PR ANALYZER ORCHESTRATOR                     │
+│                        (pr_analyzer.py)                         │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ANALYSIS PIPELINE                            │
+│  1. Git Analysis    2. File Classification    3. Impact Scoring │
+│  4. Agentic Quality Analysis    5. Report Generation            │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 AGENTIC QUALITY ANALYZER                   
+```
+
+#### DEPLOYMENT.md
+- Change: D (+0/-233)
+- Size: 7252 bytes
+- Content analysis:
+```
+# 🚀 Deployment Guide
+
+Your website is ready to deploy! This guide covers deployment to multiple platforms with full backend functionality.
+
+## ✅ What's Already Ready
+- ✅ Blog system (static files, no database needed)
+- ✅ All website pages and styling
+- ✅ Contact forms and email subscription forms
+- ✅ Responsive design and professional layout
+
+## 🔧 Step 1: Setup Supabase Backend (5 minutes)
+
+### 1.1 Create Supabase Project
+1. Go to [supabase.com](https://supabase.com) → Sign up/Login
+2. Click **"New Project"**
+3. Project details:
+   - **Name**: `asabaal-ventures`
+   - **Password**: Generate and **save this password!**
+   - **Region**: Choose closest to your users
+4. Click **"Create project"** (takes 2-3 minutes)
+
+### 1.2 Setup Database Tables
+1. In Supabase dashboard → **SQL Editor**
+2. Copy ALL contents from `supabase-minimal-setup.sql`
+3. Paste → Click **"Run"**
+4. ✅ Done! You now have `contact_messages` and `email_subscribers` tables
+
+### 1.3 Get Your API Keys
+1. Go to **Settings** →
+```
+
+#### SUPABASE_SETUP.md
+- Change: D (+0/-232)
+- Size: 6368 bytes
+- Content analysis:
+```
+# Supabase Backend Setup Guide
+
+This guide will help you set up the backend infrastructure for the Asabaal Ventures website using Supabase.
+
+## 🚀 Quick Start
+
+### Step 1: Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com)
+2. Sign up/Login with your account
+3. Click "New Project"
+4. Choose your organization
+5. Fill in project details:
+   - **Name**: `asabaal-ventures-backend`
+   - **Database Password**: Generate a secure password (save this!)
+   - **Region**: Choose closest to your users
+6. Click "Create new project"
+
+### Step 2: Set Up Database
+
+1. Wait for your project to be ready (2-3 minutes)
+2. Go to the **SQL Editor** in your Supabase dashboard
+3. Copy the entire contents of `supabase-minimal-setup.sql`
+4. Paste it into the SQL Editor
+5. Click **Run** to execute all commands
+
+### Step 3: Get Your API Keys
+
+1. Go to **Settings** → **API** in your Supabase dashboard
+2. Copy these values (you'll need them later):
+   - **Project URL** (e.g., `https://your-project.s
+```
+
+#### TECHNICAL_SPECIFICATION.md
+- Change: D (+0/-309)
+- Size: 9752 bytes
+- Content analysis:
+```
+# Asabaal Ventures Multimedia Ecosystem - Technical Specification
+
+## 🎯 Project Overview
+
+**Goal**: Build a revolutionary multimedia ecosystem combining Discord community management, tiered content access, live events, gaming integration, and music experience platform.
+
+**Timeline**: 
+- Soft Launch: Winter 2024/2025 (with 4th demo EP)
+- Full Launch: July 2026 (with debut professional album)
+
+## 🏗️ System Architecture
+
+### Core Components
+
+#### 1. Website Platform (Content Hub)
+- **Current**: Static website with contact forms
+- **Target**: Dynamic content platform with user authentication and tiered access
+- **Tech Stack**: 
+  - Frontend: HTML/CSS/JavaScript (current) → React/Next.js (future)
+  - Backend: Supabase (database + auth + real-time)
+  - Hosting: Vercel
+  - CDN: Vercel Edge Network
+
+#### 2. Discord Community Hub
+- **Role**: Primary community interaction platform
+- **Features**: Live events, voice channels, gaming sessions, educational workshops
+- **Integration**: Discord API f
+```
+
+#### database-archive/README.md
+- Change: D (+0/-70)
+- Size: 3693 bytes
+- Content analysis:
+```
+# Database Archive
+
+This directory contains archived database setup files that are no longer actively used in the current deployment process.
+
+## Current Active Setup
+- **Primary**: `supabase-minimal-setup.sql` (in root directory)
+- **Referenced by**: All deployment guides (`DEPLOY-READY.md`, `VERCEL-DEPLOY.md`, `VERCEL-DEPLOY-SIMPLE.md`)
+
+## Archived Files
+
+### `supabase-setup.sql`
+- **Purpose**: Comprehensive database setup with additional tables and features
+- **Size**: 228 lines, more complex than minimal setup
+- **Status**: Superseded by minimal setup for production deployments
+
+### `supabase-community-migration.sql` 
+- **Purpose**: Experimental Discord integration migration
+- **Features**: Replaces email_subscribers with community_members table
+- **Status**: Experimental feature, not used in current production
+
+### `blog-database/` Directory
+- **Purpose**: Complete blog database implementation with advanced features
+- **Files**: 
+  - `supabase/schema.sql` - Complete database sche
+```
+
+#### database-design.md
+- Change: D (+0/-153)
+- Size: 7982 bytes
+- Content analysis:
+```
+# Simple Blog Database Design
+
+## Current Requirements
+- Store blog posts for website recreation
+- Simple cloud storage and backend
+- Just need to recreate the blog page functionality
+- Keep it minimal and manageable
+
+## Option 1: Single Table Approach (SIMPLEST)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        blog_posts                           │
+├─────────────────────────────────────────────────────────────┤
+│ id (UUID, Primary Key)                                      │
+│ title (Text)                                                │
+│ slug (Text, Unique)                                         │
+│ excerpt (Text)                                              │
+│ cover_image_url (Text)                                      │
+│ content_html (Text) ← Full HTML content as string          │
+│ tags (Text) ← Comma-separated: "AI,Creativity,Future"      │
+│ published (Boolean)                                         │
+│ published_date (Date)       
+```
+
+#### deployment-archive/DEPLOY-READY.md
+- Change: D (+0/-102)
+- Size: 3193 bytes
+- Content analysis:
+```
+# 🚀 Ready to Deploy Guide
+
+Your website is ready to deploy! Here's the minimal setup to get contact forms and email subscriptions working.
+
+## ✅ What Works Right Now (No Database Needed)
+- ✅ Blog system (static files in `/blog/` + `blog-data.js`)
+- ✅ All website pages and navigation
+- ✅ All styling and responsive design
+- ✅ Blog post display and navigation
+
+## 🔧 5-Minute Supabase Setup (Only for Contact Forms)
+
+### Step 1: Create Supabase Project
+1. Go to [supabase.com](https://supabase.com) → Sign up/Login
+2. Click "New Project"
+3. Name it `asabaal-ventures` 
+4. Generate password → **Save this password!**
+5. Choose region → Create project (takes 2-3 minutes)
+
+### Step 2: Setup Database
+1. In Supabase dashboard → Go to **SQL Editor**
+2. Copy ALL the contents of `supabase-minimal-setup.sql`
+3. Paste into SQL Editor → Click **Run**
+4. Done! ✅
+
+### Step 3: Get Your Keys
+1. Go to **Settings** → **API**
+2. Copy these two values:
+   - **Project URL**: `https://xyz.supabase.co`
+   - **anon pu
+```
+
+#### deployment-archive/README.md
+- Change: D (+0/-44)
+- Size: 2074 bytes
+- Content analysis:
+```
+# Deployment Archive
+
+This directory contains archived deployment guides that have been consolidated into the main `DEPLOYMENT.md` file in the root directory.
+
+## Current Active Guide
+- **Primary**: `DEPLOYMENT.md` (in root directory)
+- **Comprehensive**: Covers multiple platforms (Vercel, Netlify, GitHub Pages)
+- **Maintained**: Single source of truth for all deployment instructions
+
+## Archived Files
+
+### `VERCEL-DEPLOY.md`
+- **Purpose**: Detailed Vercel-specific deployment instructions
+- **Size**: 159 lines, comprehensive with environment variable setup
+- **Status**: Consolidated into main deployment guide
+- **Notable Features**: Detailed HTML configuration, production setup steps
+
+### `VERCEL-DEPLOY-SIMPLE.md` 
+- **Purpose**: Streamlined Vercel deployment guide
+- **Size**: 98 lines, simplified instructions
+- **Status**: Best practices incorporated into main guide
+- **Notable Features**: Quick deploy steps, simple configuration
+
+### `DEPLOY-READY.md`
+- **Purpose**: Platform-agnostic
+```
+
+#### deployment-archive/VERCEL-DEPLOY-SIMPLE.md
+- Change: D (+0/-98)
+- Size: 3071 bytes
+- Content analysis:
+```
+# 🚀 Simple Vercel Deployment Guide
+
+The easiest way to deploy your website with working contact forms!
+
+## ✅ What's Ready
+- ✅ Blog system (static files, no database needed)
+- ✅ All pages, styling, and responsive design
+- ✅ Contact forms and email subscription ready for backend
+
+## 🔧 Step 1: Setup Supabase Backend (5 minutes)
+
+### Create Your Database
+1. Go to [supabase.com](https://supabase.com) → Sign up/Login
+2. **"New Project"** → Name: `asabaal-ventures` → Generate password (save it!)
+3. Choose region → **"Create project"** (wait 2-3 minutes)
+
+### Setup Tables
+1. **SQL Editor** tab → Copy ALL of `supabase-minimal-setup.sql` → Paste → **"Run"**
+2. ✅ Done! Tables created.
+
+### Get Your Keys
+1. **Settings** → **API** tab
+2. Copy these:
+   - **Project URL**: `https://xyz.supabase.co`
+   - **anon public key**: `eyJhbGciOi...` (long string)
+
+## 🔧 Step 2: Configure Your Site
+
+### For Local Testing (Optional)
+1. Edit `config/supabase-keys.js`
+2. Replace the placeholders with your real valu
+```
+
+#### deployment-archive/VERCEL-DEPLOY.md
+- Change: D (+0/-159)
+- Size: 4597 bytes
+- Content analysis:
+```
+# 🚀 Vercel Deployment Guide
+
+Your website is ready to deploy with Vercel! Here's the complete setup.
+
+## ✅ What's Already Ready
+- ✅ Blog system (static files)
+- ✅ All website pages and styling
+- ✅ Contact forms and email subscription forms
+- ✅ Responsive design
+
+## 🔧 Step 1: Setup Supabase (5 minutes)
+
+### 1.1 Create Supabase Project
+1. Go to [supabase.com](https://supabase.com) → Sign up/Login
+2. Click **"New Project"**
+3. Name: `asabaal-ventures`
+4. Generate password → **Save this password!**
+5. Choose region → **Create project** (2-3 minutes)
+
+### 1.2 Setup Database Tables
+1. In Supabase dashboard → **SQL Editor**
+2. Copy ALL contents from `supabase-minimal-setup.sql`
+3. Paste → Click **"Run"**
+4. ✅ Done! You now have contact_messages and email_subscribers tables
+
+### 1.3 Get Your API Keys
+1. Go to **Settings** → **API**
+2. Copy these two values:
+   - **Project URL**: `https://xyz.supabase.co`
+   - **anon public key**: `eyJhbGciOi...` (long string)
+
+## 🔧 Step 2: Configure Local Deve
+```
+
+### BLOG_CONTENT FILES (156 files)
+
+#### assets/images/blog/20250512-cover-image.jpg
+- Change: D (+0/-0)
+- Size: 203669 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/asabaal-ventures.jpg
+- Change: D (+0/-0)
+- Size: 288052 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/by-my-hand.jpg
+- Change: D (+0/-0)
+- Size: 336708 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/charting-a-course.jpg
+- Change: D (+0/-0)
+- Size: 349764 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/collaborative-business-models.jpg
+- Change: D (+0/-0)
+- Size: 617667 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/electric-pulse.jpg
+- Change: D (+0/-0)
+- Size: 363565 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/ethical-advocacy.jpg
+- Change: D (+0/-0)
+- Size: 331221 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/free-as-a-bird.jpg
+- Change: D (+0/-0)
+- Size: 378557 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/human-creativity.jpg
+- Change: D (+0/-0)
+- Size: 504186 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/blog/keep-it-simple.jpg
+- Change: D (+0/-0)
+- Size: 617444 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+### ASSETS_MEDIA FILES (36 files)
+
+#### assets/images/icons/cosmic_nebula.svg
+- Change: D (+0/-1)
+- Size: 1718864 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/icons/favicon.svg
+- Change: D (+0/-1)
+- Size: 228029 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/logos/Asabaal Ventures.png
+- Change: D (+0/-0)
+- Size: 67620 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/logos/Lehigh-University-logo.png
+- Change: D (+0/-0)
+- Size: 4422 bytes
+- Content analysis:
+```
+PNG
+
+
+IHDR]UE'PLTEV V V V V M8տV ŁDR2d.NtRNS˅F.IDATx?oH8
++(
+-b؍+DRF@8NM rC^!N`l]n-,-3$)
+9CLD"ޛ7o+*J(^x)^(^x)^*x)^*x)^fsZTWX,O^JU-P◈ڮԸZ*Jە<V)ۉ<a~8V!SqV)fWcx9ːmT+yoj|]Pk$/CE:/cp5v\?~Y~Z	JE8Yay^ݜxo^]E4f7%ƴf^5Vۇ_Lګ.\t7yK\*zh-ET>II2;ǆTGq!'H3x^^XxE¤TK/DTZ	/ViIg魝;Yq,/
+cY /Kb7|IE9)>:K>O29:/k쯓;RcT!zMziN^Z`g:+«eJ[kx5d(W#y>u=kKKOIc:\%G{65o< #ybއl^^^ymŘx^^23ExyykK>6`v=v W^zFCb-(C%xm_|v4s2r$>.^'{h75M>Ƣ5oq
+^Ķ`?/C0 \%/ddyɣ
+kll*myճ+*_XGd<Ʀ?!6l"=kmO꧞/~soĜ!V&ni^^W1s_טc
+GBٿ&N/p SLC̰ї:(x9aeD)|&JM0FDi!a{</u*~oW"nOdʛR/OdH!VESf9xy
+}!!cy	/`4^U
+2xyȳGd$S^厇LiWQ^py+bxmM''RyK{/Qlܦ=!22み8Ra.vEU4WP$vJxaBr&o|/
+(^^ތMW'j'A+z
+TcPX&,H5:dnǍsY|'+՟2xytqbQ?@{C<_gA$_o8,
+ψr:Jo	SK+ߗ?~.l3Uq56$)ga$4bskDԐ|C
+O9xEb9v46j.'A3t'D5ſy~(?Nl)8c]O
+G.in_I^"[bD"NfaO6W+eGr#+5TUGx+s>c╚Ok-cZeG4ݧ+4
+&2\1*k/9ˋKo<^{mMрlsKJ1~r2ayP7DS79O@&gߓ/&ԏ;Έ/℀dn~Goy,5C0č8tϫtiq
+(k.>
+```
+
+#### assets/images/logos/argus_logo.svg
+- Change: D (+0/-1)
+- Size: 12871 bytes
+- Content analysis:
+```
+<?xml version="1.0" encoding="UTF-8"?><svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1113.62 245.98"><defs><style>.b{fill:#006ba6;}.c{fill:#707070;}</style></defs><g><path class="b" d="M69.49,6.07l46.19,118.21h-17.38l-12.91-35.6H35.39l-13.24,35.6H6.08L52.11,6.07h17.38Zm10.93,69.37L60.72,20.31h-.33l-20.03,55.13h40.07Z"/><path class="b" d="M137.5,38.69v18.05h.33c3.42-6.95,7.62-12.09,12.58-15.4,4.96-3.31,11.26-4.85,18.87-4.63v14.9c-5.63,0-10.43,.77-14.4,2.32-3.98,1.55-7.18,3.81-9.6,6.79-2.43,2.98-4.19,6.59-5.3,10.84-1.1,4.25-1.65,9.13-1.65,14.65v38.08h-14.07V38.69h13.24Z"/><path class="b" d="M241.76,148.45c-6.4,6.95-16.45,10.43-30.13,10.43-3.97,0-8.03-.44-12.17-1.32-4.14-.89-7.89-2.32-11.26-4.3-3.37-1.99-6.15-4.58-8.36-7.78s-3.42-7.12-3.64-11.75h14.07c.11,2.54,.91,4.69,2.4,6.46,1.49,1.76,3.31,3.2,5.46,4.3,2.15,1.1,4.5,1.91,7.04,2.4,2.54,.5,4.96,.74,7.28,.74,4.64,0,8.55-.8,11.76-2.4,3.2-1.6,5.85-3.81,7.95-6.62,2.09-2.82,3.61-6.21,4.55-10.18,.94-3.97,1.41-8.33,1.41-13.08v-5.63h
+```
+
+#### assets/images/logos/logo-white.svg
+- Change: D (+0/-1)
+- Size: 57676 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/logos/plu_logo.png
+- Change: D (+0/-0)
+- Size: 50758 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/logos/sift_logo.png
+- Change: D (+0/-0)
+- Size: 9407 bytes
+- Content analysis:
+```
+PNG
+
+
+IHDRV	pHYs~PLTEGpL4=GpL
+K844	BGpL444646844 
+76,44454484444444444444455544445444464444464444444444444444644344544444444454444444444445" " " 84" 4444" " 4" 4" " " " " :# 8" " " " $  # " &""" " " $  " " " " " 4 Yp5468::0tRNSx|<,8NHiYJ&s15$Q
+e*DA\Y,L$
+Ťm_>Ǒ~TK".Fzb:7(q/ `
+
+^=pCa>vGE(UUeϼV\xv]m}t",kR20z3qeM4~*i
+.@$ՙL<%u IDATx]	|Tչb~
+
+
+*a	K0$(P]V!A
+uEPqHjVKV_.}̝	4}Ν;wsg&I{2w{ι;<p8G#p8G#p8G#p8G#)]#A<E/_U_^tlf{W\m-U}iwRka(1˺ۋB=q>JQOTkK{@y[եr_]0s<#zYN}ٯ]e }lEe.??uIM.Ű'DYO7*VZ9r\;/Rӂ!4$l.AX(xǯMz!,q>ؙKsmXGam-
+```
+
+#### assets/images/logos/springboard.png
+- Change: D (+0/-0)
+- Size: 370259 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### assets/images/logos/tgr-logo.svg
+- Change: D (+0/-1)
+- Size: 1606958 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+### USER_INTERFACE FILES (10 files)
+
+#### content/templates/post-template.json
+- Change: D (+0/-69)
+- Size: 1749 bytes
+- Content analysis:
+```
+{
+  "metadata": {
+    "title": "Your Post Title Here",
+    "slug": "your-post-slug-here",
+    "publishDate": "2024-MM-DD",
+    "tags": ["tag1", "tag2", "tag3"],
+    "excerpt": "A compelling summary of your post that draws readers in...",
+    "coverImage": "cover.jpg",
+    "featured": false,
+    "status": "draft"
+  },
+  "content": {
+    "subtitle": "An optional subtitle that expands on the title",
+    "sections": [
+      {
+        "type": "intro",
+        "content": {
+          "text": "Your introductory paragraph that hooks the reader..."
+        },
+        "order": 1
+      },
+      {
+        "type": "text",
+        "title": "Section Title",
+        "content": {
+          "paragraphs": [
+            "First paragraph of this section...",
+            "Second paragraph continuing the thought..."
+          ]
+        },
+        "order": 2
+      },
+      {
+        "type": "quote",
+        "content": {
+          "text": "An inspiring or thought-provoking quote",
+          "author": "Attributi
+```
+
+#### css/components/buttons.css
+- Change: A (+158/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### css/components/cards.css
+- Change: A (+299/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### css/components/footer.css
+- Change: A (+140/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### css/components/forms.css
+- Change: A (+185/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### css/components/header.css
+- Change: A (+164/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### css/pages/blog.css
+- Change: A (+451/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### css/pages/home.css
+- Change: A (+388/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### js/pages/blog.js
+- Change: A (+137/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+#### templates/template.html
+- Change: A (+141/-0)
+- Size: 0 bytes
+- Content analysis:
+```
+[File missing]
+```
+
+### DATABASE FILES (10 files)
+
+#### database-archive/blog-database/README-SUPABASE.md
+- Change: D (+0/-89)
+- Size: 3111 bytes
+- Content analysis:
+```
+# Supabase Blog Backend Setup
+
+This document explains how to set up the Supabase backend for your multisensory blog.
+
+## Quick Start
+
+1. **Create a Supabase Project**
+   - Go to [supabase.com](https://supabase.com)
+   - Create a new project
+   - Note your project URL and anon key
+
+2. **Run Database Migrations**
+   - In your Supabase dashboard, go to SQL Editor
+   - Run the migration files in order:
+     1. `supabase/migrations/001_initial_setup.sql`
+     2. `supabase/migrations/002_rls_policies.sql`
+     3. `supabase/migrations/003_views_functions.sql`
+     4. `supabase/seed_data.sql` (optional - adds sample data)
+
+3. **Configure Your Site**
+   - Copy `.env.example` to `.env`
+   - Update `config/supabase-config.js` with your project details
+   - Replace `your-project-id` and `your-anon-key-here` with actual values
+
+## Database Structure
+
+### Tables Created
+
+- **authors**: Blog authors/users
+- **blog_posts**: Main blog posts table
+- **tags**: Post tags/categories
+- **blog_post_tags**: M
+```
+
+#### database-archive/blog-database/supabase-config.js
+- Change: D (+0/-62)
+- Size: 1736 bytes
+- Content analysis:
+```
+// Supabase Configuration
+// This file manages environment variables and configuration for Supabase
+
+// Development/Production Configuration
+const SupabaseConfig = {
+    // Replace these with your actual Supabase project details
+    url: 'https://your-project-id.supabase.co',
+    anonKey: 'your-anon-key-here',
+    
+    // API endpoints
+    apiUrl: function() {
+        return `${this.url}/rest/v1`;
+    },
+    
+    // Storage configuration
+    storage: {
+        bucketName: 'blog-assets',
+        publicUrl: function(path) {
+            return `${SupabaseConfig.url}/storage/v1/object/public/${this.bucketName}/${path}`;
+        }
+    },
+    
+    // Database table names
+    tables: {
+        blogPosts: 'blog_posts',
+        tags: 'tags',
+        authors: 'authors',
+        blogPostTags: 'blog_post_tags',
+        contentSections: 'content_sections'
+    },
+    
+    // Views and functions
+    views: {
+        blogPostsWithDetails: 'blog_posts_with_details'
+    },
+    
+    functions: {
+        
+```
+
+#### database-archive/blog-database/supabase/migrations/001_initial_setup.sql
+- Change: D (+0/-95)
+- Size: 3274 bytes
+- Content analysis:
+```
+-- Initial Blog Setup Migration
+-- Run this in your Supabase SQL editor to set up the blog infrastructure
+
+-- First, ensure UUID extension is enabled
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create authors table first (referenced by blog_posts)
+CREATE TABLE IF NOT EXISTS authors (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    bio TEXT,
+    avatar_url TEXT,
+    website_url TEXT,
+    social_links JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create blog_posts table
+CREATE TABLE IF NOT EXISTS blog_posts (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    excerpt TEXT,
+    cover_image_url TEXT,
+    content JSONB NOT NULL DEFAULT '{}',
+    published BOOLEAN DEFAULT false,
+    featured BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TI
+```
+
+#### database-archive/blog-database/supabase/migrations/002_rls_policies.sql
+- Change: D (+0/-31)
+- Size: 1021 bytes
+- Content analysis:
+```
+-- Row Level Security Policies Migration
+-- Run this after the initial setup to configure security
+
+-- Enable RLS on all tables
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_post_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE authors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE content_sections ENABLE ROW LEVEL SECURITY;
+
+-- Public read policies
+CREATE POLICY "Public can view published posts" ON blog_posts
+    FOR SELECT USING (published = true);
+
+CREATE POLICY "Public can view tags" ON tags
+    FOR SELECT USING (true);
+
+CREATE POLICY "Public can view post tags" ON blog_post_tags
+    FOR SELECT USING (true);
+
+CREATE POLICY "Public can view authors" ON authors
+    FOR SELECT USING (true);
+
+CREATE POLICY "Public can view content sections" ON content_sections
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM blog_posts 
+            WHERE blog_posts.id = content_sections.post_id 
+            AND blog_posts.published = 
+```
+
+#### database-archive/blog-database/supabase/migrations/003_views_functions.sql
+- Change: D (+0/-70)
+- Size: 2264 bytes
+- Content analysis:
+```
+-- Views and Functions Migration
+-- Run this to create helpful views and functions
+
+-- Create view for blog posts with tags and author info
+CREATE OR REPLACE VIEW blog_posts_with_details AS
+SELECT 
+    bp.*,
+    a.name as author_name,
+    a.avatar_url as author_avatar,
+    COALESCE(
+        JSON_AGG(
+            JSON_BUILD_OBJECT(
+                'id', t.id,
+                'name', t.name,
+                'slug', t.slug,
+                'color', t.color
+            )
+        ) FILTER (WHERE t.id IS NOT NULL),
+        '[]'::json
+    ) as tags
+FROM blog_posts bp
+LEFT JOIN authors a ON bp.author_id = a.id
+LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
+LEFT JOIN tags t ON bpt.tag_id = t.id
+GROUP BY bp.id, a.name, a.avatar_url;
+
+-- Function to get post with full content
+CREATE OR REPLACE FUNCTION get_post_with_content(post_slug TEXT)
+RETURNS JSON AS $$
+DECLARE
+    result JSON;
+BEGIN
+    SELECT JSON_BUILD_OBJECT(
+        'post', row_to_json(bp),
+        'content_sections', COALESCE(
+   
+```
+
+#### database-archive/blog-database/supabase/schema.sql
+- Change: D (+0/-192)
+- Size: 6700 bytes
+- Content analysis:
+```
+-- Supabase Database Schema for Multisensory Blog
+-- This schema supports the blog functionality with posts, tags, and content sections
+
+-- Enable necessary extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create blog_posts table
+CREATE TABLE IF NOT EXISTS blog_posts (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    excerpt TEXT,
+    cover_image_url TEXT,
+    content JSONB NOT NULL DEFAULT '{}',
+    published BOOLEAN DEFAULT false,
+    featured BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    published_at TIMESTAMP WITH TIME ZONE,
+    author_id UUID,
+    meta_title TEXT,
+    meta_description TEXT,
+    reading_time_minutes INTEGER,
+    view_count INTEGER DEFAULT 0
+);
+
+-- Create tags table
+CREATE TABLE IF NOT EXISTS tags (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    slug TEXT UNIQUE NOT
+```
+
+#### database-archive/blog-database/supabase/seed_data.sql
+- Change: D (+0/-127)
+- Size: 6421 bytes
+- Content analysis:
+```
+-- Seed Data for Blog
+-- Run this to populate initial data from your existing blog posts
+
+-- Insert default author (Asabaal Horan)
+INSERT INTO authors (id, name, email, bio, avatar_url, website_url, social_links) 
+VALUES (
+    '550e8400-e29b-41d4-a716-446655440000',
+    'Asabaal Horan',
+    'asabaal@asabaalventures.me',
+    'Data Scientist | Entrepreneur | Educator. Co-Founder & Creative Visionary at Asabaal Ventures, building AI-native infrastructure for human flourishing in the post-scarcity economy.',
+    '../assets/images/profiles/in-love-and-unity.png',
+    'https://asabaalventures.me',
+    '{"linkedin": "https://www.linkedin.com/in/asabaal-horan-phd-2144b689/"}'::jsonb
+) ON CONFLICT (id) DO NOTHING;
+
+-- Insert initial tags
+INSERT INTO tags (name, slug, description, color) VALUES
+    ('Creativity', 'creativity', 'Posts about creative expression and innovation', '#f472b6'),
+    ('AI', 'ai', 'Artificial Intelligence and its impact on humanity', '#8b5cf6'),
+    ('Personal Journey', '
+```
+
+#### database-archive/supabase-community-migration.sql
+- Change: D (+0/-246)
+- Size: 8276 bytes
+- Content analysis:
+```
+-- Supabase Community Migration for Asabaal Ventures Discord Integration
+-- This replaces the email_subscribers table with a community_members system
+
+-- =====================================================
+-- BACKUP AND DROP OLD TABLE
+-- =====================================================
+
+-- First, backup existing email subscribers if any exist
+CREATE TABLE IF NOT EXISTS email_subscribers_backup AS 
+SELECT * FROM email_subscribers;
+
+-- Drop the old email_subscribers table
+DROP TABLE IF EXISTS email_subscribers;
+
+-- =====================================================
+-- NEW COMMUNITY MEMBERS TABLE
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS community_members (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(255),
+    discord_username VARCHAR(255),
+    discord_id VARCHAR(255),
+    discord_invite_code VARCHAR(255),
+    
+    -- Tracking fields
+    invite_source VARCHAR(100) DEFAULT 'website
+```
+
+#### database-archive/supabase-setup.sql
+- Change: D (+0/-228)
+- Size: 7707 bytes
+- Content analysis:
+```
+-- Supabase Database Setup for Asabaal Ventures Website
+-- Execute these SQL commands in your Supabase SQL Editor
+
+-- =====================================================
+-- TABLES SETUP
+-- =====================================================
+
+-- 1. Contact Messages Table
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(500),
+    message TEXT NOT NULL,
+    source VARCHAR(100) DEFAULT 'website', -- Track where message came from
+    status VARCHAR(50) DEFAULT 'unread', -- unread, read, replied, archived
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Email Subscribers Table
+CREATE TABLE IF NOT EXISTS email_subscribers (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255),
+    subscription_source VARCHAR(100) DEFAULT 'website'
+```
+
+#### supabase-minimal-setup.sql
+- Change: D (+0/-55)
+- Size: 1845 bytes
+- Content analysis:
+```
+-- Minimal Supabase Setup for Asabaal Ventures
+-- Only includes contact forms and email subscriptions (no blog database needed!)
+
+-- =====================================================
+-- CONTACT MESSAGES TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(500),
+    message TEXT NOT NULL,
+    source VARCHAR(100) DEFAULT 'website',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- EMAIL SUBSCRIBERS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS email_subscribers (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255),
+    subscription_source VARCHAR(100) DEFAULT 'website',
+    status VARCHAR(50) DEFAULT 'active',
+    subscribed_
+```
+
+### SCRIPTS_AUTOMATION FILES (1 files)
+
+#### start-server.sh
+- Change: D (+0/-11)
+- Size: 349 bytes
+- Content analysis:
+```
+#!/bin/bash
+
+# Simple script to start a local server for testing the blog
+echo "Starting local server for Multisensory Blog..."
+echo "Navigate to http://localhost:8000 to view the site"
+echo "Visit http://localhost:8000/blog.html to see the blog"
+echo ""
+echo "Press Ctrl+C to stop the server"
+
+# Start Python HTTP server
+python3 -m http.server 8000
+```
+
+### VISUALIZATIONS FILES (4 files)
+
+#### visualizations/complete-implementation-timeline.html
+- Change: D (+0/-822)
+- Size: 34845 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Implementation Timeline - Music + Gaming + Finance Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 25%, #2d1b89 50%, #4c1d95 75%, #6b21a8 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #f
+```
+
+#### visualizations/cooperative-kingdom-ecosystem-fixed.html
+- Change: D (+0/-800)
+- Size: 34417 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingdom Cooperative Ecosystem - Engineering Global Peace Through Distributed Power</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 25%, #2d1b89 50%, #4c1d95 75%, #6b21a8 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 3.2rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #ffd700, #10b981, #ff6b6b, #8b5cf6);
+            -web
+```
+
+#### visualizations/implementation-timeline.html
+- Change: D (+0/-651)
+- Size: 26006 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Implementation Timeline - Music + Gaming Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 25%, #2d1b89 50%, #4c1d95 75%, #6b21a8 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #ffd700, #10
+```
+
+#### visualizations/kingdom-power-distribution-model.html
+- Change: D (+0/-540)
+- Size: 19432 bytes
+- Content analysis:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingdom Power Distribution Model - Engineering Global Peace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 25%, #2d1b89 50%, #4c1d95 75%, #6b21a8 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ffd700, #10b981, #8b5
+```
+
+## DISCOVERY OBJECTIVES
+
+**Find files that serve similar/identical purposes by analyzing their actual functionality:**
+
+### 1. **FUNCTIONAL DUPLICATES**
+Look for files that accomplish the same goal through similar or different approaches:
+- Scripts that process the same type of data (e.g., blog posts, configurations)
+- Functions with similar logic but different implementations
+- Components that render similar UI elements
+- Multiple solutions to the same business problem
+
+### 2. **VERSION VARIATIONS** 
+Identify files that appear to be different versions of the same functionality:
+- Scripts with suffixes like "_verbose", "_simple", "_v2", etc.
+- Files with similar core functionality but different levels of detail
+- Experimental vs production versions of the same feature
+
+### 3. **PARTIAL IMPLEMENTATIONS**
+Find incomplete or abandoned implementations:
+- Files that seem to be early versions of functionality found elsewhere
+- Partial migrations or refactoring attempts
+- Template files that were customized but not fully completed
+
+### 4. **CONFIGURATION REDUNDANCY**
+Discover multiple config files serving similar purposes:
+- Database setup scripts with overlapping functionality
+- Environment configurations with similar variables
+- Build/deployment files that configure the same systems
+
+## ANALYSIS METHOD
+1. **Read the actual code content** - don't just look at filenames
+2. **Understand what each file DOES** - what problem does it solve?
+3. **Compare functional purposes** - which files solve similar problems?
+4. **Identify relationships** - are some files variations of others?
+5. **Provide evidence** - quote specific code/content that shows similarity
+
+## OUTPUT REQUIREMENTS
+Respond with specific discoveries in this format:
+
+### CRITICAL Issues (Exact duplicates or abandoned implementations)
+**Issue:** [Brief title]
+**Files:** file1.py, file2.py, file3.py
+**Evidence:** [Specific code quotes showing similarity]
+**Recommendation:** [Specific action needed]
+
+### HIGH Issues (Functional duplicates with different implementations)
+**Issue:** [Brief title]  
+**Files:** file1.py, file2.py
+**Evidence:** [Specific code quotes showing similarity]
+**Recommendation:** [Specific action needed]
+
+### MEDIUM Issues (Similar purpose, potentially consolidatable)
+**Issue:** [Brief title]
+**Files:** file1.py, file2.py
+**Evidence:** [Specific code quotes showing similarity]
+**Recommendation:** [Specific action needed]
+
+Focus on DISCOVERING actual content-based duplicates, not generic observations.

@@ -286,6 +286,9 @@ Return ONLY valid JSON in the exact format specified in the output format templa
             # Parse JSON response
             analysis_data = json.loads(json_str)
             
+            # VALIDATION: Ensure all files from Stage 1 are included
+            analysis_data = self._ensure_all_files_analyzed(analysis_data)
+            
             # Save main analysis result to root output directory
             analysis_file = self.output_dir / "detailed_analysis_results.json"
             with open(analysis_file, 'w') as f:
@@ -311,6 +314,77 @@ Return ONLY valid JSON in the exact format specified in the output format templa
                     f.write(analysis_response)
                 print(f"💾 Raw response saved for debugging: {raw_file}")
             raise
+    
+    def _ensure_all_files_analyzed(self, analysis_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure all files from Stage 1 are included in the analysis"""
+        
+        # Load Stage 1 context to get the complete file list
+        try:
+            context_file = self.output_dir / "final_analysis_context.json"
+            if not context_file.exists():
+                print("⚠️  Cannot validate file completeness - Stage 1 context not found")
+                return analysis_data
+                
+            with open(context_file, 'r') as f:
+                stage1_context = json.load(f)
+            
+            # Get all files from Stage 1
+            stage1_files = set()
+            for file_data in stage1_context.get('files', []):
+                stage1_files.add(file_data.get('path', ''))
+            
+            # Get files analyzed by Stage 7
+            file_analyses = analysis_data.get('file_analyses', [])
+            if isinstance(file_analyses, dict):
+                analyzed_files = set(file_analyses.keys())
+            else:
+                analyzed_files = set(f.get('file_path', '') for f in file_analyses)
+            
+            # Find missing files
+            missing_files = stage1_files - analyzed_files
+            
+            if missing_files:
+                print(f"⚠️  AI agent missed {len(missing_files)} files - adding default analysis")
+                for missing_file in missing_files:
+                    print(f"   Adding missing file: {missing_file}")
+                    
+                    # Create default analysis for missing files
+                    default_analysis = {
+                        "merge_readiness": "conditional",
+                        "overall_assessment": {
+                            "purpose": "File requires manual review - AI analysis missed",
+                            "business_impact": "Unknown - requires assessment",
+                            "risk_assessment": "Unknown - requires assessment"
+                        },
+                        "feedback": "This file was not analyzed by the AI agent and requires manual review.",
+                        "code_elements": {
+                            "classes": [],
+                            "functions": []
+                        }
+                    }
+                    
+                    # Add to analysis data
+                    if isinstance(file_analyses, dict):
+                        file_analyses[missing_file] = default_analysis
+                    else:
+                        file_analyses.append({
+                            "file_path": missing_file,
+                            **default_analysis
+                        })
+                
+                # Update the analysis data
+                analysis_data['file_analyses'] = file_analyses
+                
+                # Update metadata
+                if 'analysis_metadata' in analysis_data:
+                    analysis_data['analysis_metadata']['total_files_analyzed'] = len(stage1_files)
+                
+                print(f"✅ Added {len(missing_files)} missing files to analysis")
+            
+        except Exception as e:
+            print(f"⚠️  Error validating file completeness: {e}")
+            
+        return analysis_data
             
     def generate_analysis_summary(self, analysis_data: Dict[str, Any]) -> str:
         """Generate human-readable summary of detailed analysis"""

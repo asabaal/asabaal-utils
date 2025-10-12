@@ -148,7 +148,8 @@ class ResponseParser:
         groups = []
         
         # Look for numbered sections (1. Title: patterns)
-        subsections = re.split(r'\n\d+\.\s*(.*?):', section_text)
+        # Handle both with and without preceding newline
+        subsections = re.split(r'(?:\n|^)\d+\.\s*(.*?):', section_text)
         
         for i in range(1, len(subsections), 2):  # Skip first empty part, then take pairs
             if i + 1 < len(subsections):

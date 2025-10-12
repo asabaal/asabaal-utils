@@ -1,0 +1,89 @@
+You are a software architect analyzing code patterns and consistency.
+
+Here is the pattern analysis data:
+
+```json
+{
+  "file_categories": [
+    "SCRIPTS_AUTOMATION",
+    "CORE_BUSINESS_LOGIC"
+  ],
+  "sample_files_by_category": {
+    "SCRIPTS_AUTOMATION": [
+      {
+        "path": "data_pipeline/good/processors/data_transformer.py",
+        "change_type": "A",
+        "content_preview": "from typing import Iterator, Dict, List, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass TransformResult:\n    processed_count: int\n    errors: List[str]\n    processing_time: float\n\nclass DataTransformer:\n    def __init__(self, batch_size: int = 1000):\n        self.batch_size = batch_size\n   "
+      },
+      {
+        "path": "data_pipeline/bad/helpers/data_processor.py",
+        "change_type": "A",
+        "content_preview": "# DUPLICATE LOGIC WITH MEMORY ISSUES - BAD CODE\n\ndef handle_dataset(dataset):\n    \"\"\"Handle dataset processing - DUPLICATE OF data_helper.py\"\"\"\n    output = []\n    \n    # Same memory issue as process_all_data\n    print(f\"Processing dataset with {len(dataset)} items...\")\n    \n    for data_point in da"
+      },
+      {
+        "path": "data_pipeline/bad/utils/data_helper.py",
+        "change_type": "A",
+        "content_preview": "# MEMORY INEFFICIENT DATA PROCESSING - BAD CODE\n\ndef process_all_data(data_list):\n    \"\"\"Process all data at once - MEMORY INTENSIVE ANTI-PATTERN\"\"\"\n    results = []\n    \n    # Load entire dataset into memory at once\n    print(f\"Loading {len(data_list)} items into memory...\")\n    \n    for item in da"
+      },
+      {
+        "path": "auth_service/good/auth/auth_service.py",
+        "change_type": "A",
+        "content_preview": "import bcrypt\nimport jwt\nfrom datetime import datetime, timedelta\nfrom typing import Optional, Dict, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass User:\n    id: int\n    username: str\n    email: str\n    password_hash: str\n    is_active: bool = True\n    created_at: Optional[datetime] = None\n"
+      },
+      {
+        "path": "auth_service/bad/security/user_auth.py",
+        "change_type": "A",
+        "content_preview": "# CRITICAL SECURITY VULNERABILITIES - BAD CODE\n\nclass SimpleDatabase:\n    def __init__(self):\n        self.users = {}\n        \n    def get_user(self, username):\n        return self.users.get(username)\n\ndb = SimpleDatabase()\n\ndef authenticate_user(username, password):\n    \"\"\"PLAIN TEXT PASSWORD COMPA"
+      }
+    ],
+    "CORE_BUSINESS_LOGIC": [
+      {
+        "path": "ecommerce_api/good/services/product_service.py",
+        "change_type": "A",
+        "content_preview": "from typing import List, Dict, Optional\nfrom ..models.product import Product\n\nclass MockDatabase:\n    \"\"\"Mock database for testing\"\"\"\n    def __init__(self):\n        self.products = []\n        \n    def query(self, model_class):\n        return MockQuery(self.products, model_class)\n        \n    def ad"
+      },
+      {
+        "path": "ecommerce_api/good/models/product.py",
+        "change_type": "A",
+        "content_preview": "from dataclasses import dataclass\nfrom typing import Optional\nfrom datetime import datetime\n\n@dataclass\nclass Product:\n    id: int\n    name: str\n    description: str\n    price: float\n    category: str\n    is_active: bool = True\n    created_at: Optional[datetime] = None\n    updated_at: Optional[datet"
+      },
+      {
+        "path": "ecommerce_api/bad/services/product_search.py",
+        "change_type": "A",
+        "content_preview": "# SQL INJECTION VULNERABILITY - BAD CODE\nimport sqlite3\n\nclass Database:\n    def __init__(self, db_path):\n        self.conn = sqlite3.connect(db_path)\n        \n    def query(self, sql):\n        \"\"\"Execute raw SQL query\"\"\"\n        cursor = self.conn.cursor()\n        cursor.execute(sql)\n        return"
+      },
+      {
+        "path": "ecommerce_api/bad/services/product_finder.py",
+        "change_type": "A",
+        "content_preview": "# DUPLICATE CODE WITH SQL INJECTION - BAD CODE\nimport sqlite3\n\nclass ProductDB:\n    def __init__(self, path):\n        self.connection = sqlite3.connect(path)\n        \n    def execute(self, sql):\n        cursor = self.connection.cursor()\n        cursor.execute(sql)\n        return cursor\n\nproduct_db ="
+      }
+    ]
+  }
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains file categories and content samples
+2. Look for naming convention inconsistencies
+3. Identify different approaches to similar problems
+4. Note architectural pattern inconsistencies
+
+Focus areas:
+- File naming patterns across categories
+- Code style consistency within categories  
+- Similar functionality implemented differently
+- Missing architectural patterns
+
+Provide your response in this exact format:
+
+## CRITICAL:
+[Critical pattern issues that must be fixed]
+
+## HIGH:
+[High priority consistency issues]
+
+## MEDIUM:
+[Medium priority improvements]
+
+## Summary:
+[Brief summary of pattern analysis findings]

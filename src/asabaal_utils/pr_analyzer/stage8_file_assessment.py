@@ -255,14 +255,24 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
     def create_comprehensive_assessment(self, stage7_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create comprehensive assessment by enhancing Stage 7 data with detailed scoring"""
         
+        # Load Stage 4 issues to override merge readiness based on severity
+        stage4_issues = self._load_stage4_issues()
+        
         file_analyses = stage7_data.get('file_analyses', [])
         enhanced_assessments = []
         
         for file_analysis in file_analyses:
+            file_path = file_analysis.get('file_path', '')
+            
+            # Determine merge readiness based on Stage 4 issues
+            original_readiness = file_analysis.get('merge_readiness', 'unknown')
+            corrected_readiness = self._determine_merge_readiness(file_path, stage4_issues, original_readiness)
+            
             # Enhance each file with detailed assessment scores
             enhanced_file = {
-                "file_path": file_analysis.get('file_path', ''),
-                "merge_readiness": file_analysis.get('merge_readiness', 'unknown'),
+                "file_path": file_path,
+                "merge_readiness": corrected_readiness,
+                "original_merge_readiness": original_readiness,  # Keep original for reference
                 "business_impact_score": self._calculate_business_impact_score(file_analysis),
                 "technical_risk_score": self._calculate_technical_risk_score(file_analysis),
                 "overall_assessment": file_analysis.get('overall_assessment', {}),
@@ -292,6 +302,31 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
         }
         
         return comprehensive_data
+    
+    def _load_stage4_issues(self) -> List[Dict[str, Any]]:
+        """Load Stage 4 issues from all_issues.json"""
+        try:
+            issues_file = Path("pr_analysis_output/debug_outputs/stage4/all_issues.json")
+            if issues_file.exists():
+                with open(issues_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"⚠️  Warning: Could not load Stage 4 issues: {e}")
+        return []
+    
+    def _determine_merge_readiness(self, file_path: str, stage4_issues: List[Dict[str, Any]], original_readiness: str) -> str:
+        """Determine merge readiness based on Stage 4 issues"""
+        if not stage4_issues:
+            return original_readiness
+        
+        # Check if this file has any CRITICAL, HIGH, or DUPLICATE issues
+        for issue in stage4_issues:
+            if issue.get('priority') in ['CRITICAL', 'HIGH'] or issue.get('type') == 'duplicate':
+                affected_files = issue.get('files_affected', [])
+                if file_path in affected_files:
+                    return 'not_ready'
+        
+        return original_readiness
     
     def _calculate_business_impact_score(self, file_analysis: Dict[str, Any]) -> int:
         """Calculate business impact score based on file analysis"""
@@ -508,7 +543,24 @@ IMPORTANT: Return ONLY the JSON response. No explanations or markdown formatting
             return False
 
 def main():
-    generator = FileAssessmentGenerator()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Stage 8: File-Level Merge Readiness Assessment')
+    parser.add_argument('repo_path', nargs='?', default='.', help='Path to the repository to analyze')
+    parser.add_argument('output_dir', nargs='?', default=None, help='Output directory for results')
+    parser.add_argument('--config', help='Configuration file or JSON string')
+    
+    args = parser.parse_args()
+    
+    # Parse config if provided
+    config = None
+    if args.config:
+        try:
+            config = json.loads(args.config) if args.config.startswith('{') else json.load(open(args.config))
+        except Exception as e:
+            print(f"⚠️  Warning: Could not parse config: {e}")
+    
+    generator = FileAssessmentGenerator(args.repo_path, args.output_dir, config)
     success = generator.run_stage8_file_assessment()
     sys.exit(0 if success else 1)
 

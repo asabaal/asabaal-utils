@@ -1,0 +1,122 @@
+You are a software architect analyzing code patterns and consistency.
+
+Here is the pattern analysis data:
+
+```json
+{
+  "file_categories": [
+    "SCRIPTS_AUTOMATION",
+    "TESTING",
+    "CORE_BUSINESS_LOGIC"
+  ],
+  "sample_files_by_category": {
+    "SCRIPTS_AUTOMATION": [
+      {
+        "path": "test_ollama_backend.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"Test script for Ollama backend integration.\"\"\"\n\nimport sys\nimport os\nfrom pathlib import Path\n\n# Add src to path\nsys.path.insert(0, str(Path(__file__).parent / \"src\"))\n\ndef test_backend_imports():\n    \"\"\"Test that we can import the backend modules.\"\"\"\n    print(\"Testing bac"
+      },
+      {
+        "path": "create_sample_video.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"\nSimple script to create a 30-second sample from a video for faster iteration.\n\"\"\"\n\nimport argparse\nimport subprocess\nimport sys\nfrom pathlib import Path\n\n\ndef create_sample_video(input_video: str, output_video: str = None, duration: int = 30, start_time: int = 0):\n    \"\"\"\n"
+      },
+      {
+        "path": "fix_script.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python\nimport sys\n\ndef main():\n    # Get the target file from command-line arguments\n    if len(sys.argv) < 2:\n        print('Usage: {} TARGET_FILE'.format(sys.argv[0]))\n        return 1\n\n    target_file = sys.argv[1]\n\n    # Read the file content\n    with open(target_file, 'r') as f:\n"
+      },
+      {
+        "path": "demo_fallback_mechanism.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"\nDemonstration of the deleted files fallback mechanism in action.\n\"\"\"\n\nimport sys\nimport json\nfrom pathlib import Path\n\n# Add the project root to Python path\nproject_root = Path(__file__).parent.parent\nsys.path.insert(0, str(project_root))\n\ndef demo_fallback_mechanism():\n  "
+      },
+      {
+        "path": "debug_actual_render.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"\nDebug the ACTUAL lyric video rendering to compare with our simplified tests.\nThis will use the real render_lyric_line function to see the difference.\n\"\"\"\n\nimport numpy as np\nimport cv2\nfrom pathlib import Path\nimport matplotlib.pyplot as plt\nimport matplotlib.patches as pa"
+      }
+    ],
+    "TESTING": [
+      {
+        "path": "tests/test_performance.py",
+        "change_type": "A",
+        "content_preview": "\"\"\"\nPerformance tests for transcript processors.\n\nThis module tests the performance characteristics of the transcript\nenhancement pipeline under various loads.\n\"\"\"\n\nimport unittest\nimport time\nfrom asabaal_utils.video_processing.transcript_processors import (\n    TranscriptEnhancementPipeline,\n    F"
+      },
+      {
+        "path": "tests/test_transcript_processors.py",
+        "change_type": "A",
+        "content_preview": "\"\"\"\nTest suite for transcript enhancement pipeline.\n\nThis module tests the transcript enhancement functionality in the\ntranscript_processors module.\n\"\"\"\n\nimport unittest\nimport os\nfrom pathlib import Path\nfrom asabaal_utils.video_processing.transcript_processors import (\n    TranscriptEnhancementPip"
+      },
+      {
+        "path": "tests/test_base.py",
+        "change_type": "A",
+        "content_preview": "import json\nimport os\nimport pytest\nimport types\nimport shutil\n\nfrom pathlib import Path\nfrom typing import List\nfrom unittest.mock import Mock, MagicMock, patch\nfrom asabaal_utils import find_package_location, download_youtube_video, WebScraper, DatabaseManager, Album\n\nclass TestWebScraper:\n    \"\"\""
+      },
+      {
+        "path": "tests/conftest.py",
+        "change_type": "A",
+        "content_preview": "\"\"\"\nConfiguration for pytest.\n\nThis module provides fixtures and configuration for the test suite.\n\"\"\"\n\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\n\n# Add src directory to path for imports\nsys.path.insert(0, str(Path(__file__).parent.parent))\n\n# Sample transcript data for testing\n@py"
+      },
+      {
+        "path": "tests/test_gradient_blend.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"\nTest script for gradient blending functionality.\n\"\"\"\n\nimport os\nimport sys\nimport tempfile\nfrom pathlib import Path\n\n# Add the src directory to the path\nsys.path.insert(0, str(Path(__file__).parent.parent / \"src\"))\n\nfrom asabaal_utils.image_processing.gradient_blend import"
+      }
+    ],
+    "CORE_BUSINESS_LOGIC": [
+      {
+        "path": "venv/lib/python3.12/site-packages/decorator.py",
+        "change_type": "A",
+        "content_preview": "# #########################     LICENSE     ############################ #\n\n# Copyright (c) 2005-2025, Michele Simionato\n# All rights reserved.\n\n# Redistribution and use in source and binary forms, with or without\n# modification, are permitted provided that the following conditions are\n# met:\n\n#   R"
+      },
+      {
+        "path": "venv/lib/python3.12/site-packages/_soundfile.py",
+        "change_type": "A",
+        "content_preview": "# auto-generated file\nimport _cffi_backend\n\nffi = _cffi_backend.FFI('_soundfile',\n    _version = 0x2601,\n    _types = b'\\x00\\x00\\x12\\x0D\\x00\\x00\\x68\\x03\\x00\\x00\\x07\\x01\\x00\\x00\\x67\\x03\\x00\\x00\\x75\\x03\\x00\\x00\\x00\\x0F\\x00\\x00\\x12\\x0D\\x00\\x00\\x6A\\x03\\x00\\x00\\x07\\x01\\x00\\x00\\x03\\x11\\x00\\x00\\x00\\x0F\\x00"
+      },
+      {
+        "path": "venv/lib/python3.12/site-packages/pylab.py",
+        "change_type": "A",
+        "content_preview": "from matplotlib.pylab import *  # noqa: F401, F403\nimport matplotlib.pylab\n__doc__ = matplotlib.pylab.__doc__\n"
+      },
+      {
+        "path": "venv/lib/python3.12/site-packages/threadpoolctl.py",
+        "change_type": "A",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "venv/lib/python3.12/site-packages/six.py",
+        "change_type": "A",
+        "content_preview": "# Copyright (c) 2010-2024 Benjamin Peterson\n#\n# Permission is hereby granted, free of charge, to any person obtaining a copy\n# of this software and associated documentation files (the \"Software\"), to deal\n# in the Software without restriction, including without limitation the rights\n# to use, copy, "
+      }
+    ]
+  }
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains file categories and content samples
+2. Look for naming convention inconsistencies
+3. Identify different approaches to similar problems
+4. Note architectural pattern inconsistencies
+
+Focus areas:
+- File naming patterns across categories
+- Code style consistency within categories  
+- Similar functionality implemented differently
+- Missing architectural patterns
+
+Provide your response in this exact format:
+
+## CRITICAL:
+[Critical pattern issues that must be fixed]
+
+## HIGH:
+[High priority consistency issues]
+
+## MEDIUM:
+[Medium priority improvements]
+
+## Summary:
+[Brief summary of pattern analysis findings]

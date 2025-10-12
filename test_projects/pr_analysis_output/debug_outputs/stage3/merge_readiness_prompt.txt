@@ -1,0 +1,128 @@
+You are a senior engineering manager evaluating merge readiness.
+
+Here is the PR analysis data:
+
+```json
+{
+  "pr_summary": {
+    "from_branch": "feature/image_transcription",
+    "to_branch": "main",
+    "total_files_changed": 10,
+    "total_lines_added": 460,
+    "total_lines_removed": 0,
+    "total_files_changed_all": 10,
+    "total_lines_added_all": 460,
+    "total_lines_removed_all": 0,
+    "commit_messages": [
+      "Add test projects for PR analyzer validation"
+    ]
+  },
+  "category_breakdown": {
+    "SCRIPTS_AUTOMATION": 6,
+    "CORE_BUSINESS_LOGIC": 4
+  },
+  "sample_files": [
+    {
+      "path": "data_pipeline/good/processors/data_transformer.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "content_preview": "from typing import Iterator, Dict, List, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass TransformResult:\n    processed_count: int\n    errors: List[str]\n    processing_time: float\n\nclass DataT"
+    },
+    {
+      "path": "data_pipeline/bad/helpers/data_processor.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "content_preview": "# DUPLICATE LOGIC WITH MEMORY ISSUES - BAD CODE\n\ndef handle_dataset(dataset):\n    \"\"\"Handle dataset processing - DUPLICATE OF data_helper.py\"\"\"\n    output = []\n    \n    # Same memory issue as process_"
+    },
+    {
+      "path": "data_pipeline/bad/utils/data_helper.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "content_preview": "# MEMORY INEFFICIENT DATA PROCESSING - BAD CODE\n\ndef process_all_data(data_list):\n    \"\"\"Process all data at once - MEMORY INTENSIVE ANTI-PATTERN\"\"\"\n    results = []\n    \n    # Load entire dataset int"
+    },
+    {
+      "path": "auth_service/good/auth/auth_service.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "content_preview": "import bcrypt\nimport jwt\nfrom datetime import datetime, timedelta\nfrom typing import Optional, Dict, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass User:\n    id: int\n    username: str\n    ema"
+    },
+    {
+      "path": "auth_service/bad/security/user_auth.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "content_preview": "# CRITICAL SECURITY VULNERABILITIES - BAD CODE\n\nclass SimpleDatabase:\n    def __init__(self):\n        self.users = {}\n        \n    def get_user(self, username):\n        return self.users.get(username)"
+    },
+    {
+      "path": "auth_service/bad/auth/login_handler.py",
+      "category": "SCRIPTS_AUTOMATION",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "content_preview": "# DUPLICATE AUTHENTICATION LOGIC WITH SAME SECURITY ISSUES - BAD CODE\n\nclass UserDatabase:\n    def __init__(self):\n        self.accounts = {}\n        \n    def find_user(self, user):\n        return sel"
+    },
+    {
+      "path": "ecommerce_api/good/services/product_service.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "content_preview": "from typing import List, Dict, Optional\nfrom ..models.product import Product\n\nclass MockDatabase:\n    \"\"\"Mock database for testing\"\"\"\n    def __init__(self):\n        self.products = []\n        \n    de"
+    },
+    {
+      "path": "ecommerce_api/good/models/product.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 40,
+      "lines_removed": 0,
+      "content_preview": "from dataclasses import dataclass\nfrom typing import Optional\nfrom datetime import datetime\n\n@dataclass\nclass Product:\n    id: int\n    name: str\n    description: str\n    price: float\n    category: str"
+    },
+    {
+      "path": "ecommerce_api/bad/services/product_search.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "content_preview": "# SQL INJECTION VULNERABILITY - BAD CODE\nimport sqlite3\n\nclass Database:\n    def __init__(self, db_path):\n        self.conn = sqlite3.connect(db_path)\n        \n    def query(self, sql):\n        \"\"\"Exe"
+    },
+    {
+      "path": "ecommerce_api/bad/services/product_finder.py",
+      "category": "CORE_BUSINESS_LOGIC",
+      "change_type": "A",
+      "lines_added": 50,
+      "lines_removed": 0,
+      "content_preview": "# DUPLICATE CODE WITH SQL INJECTION - BAD CODE\nimport sqlite3\n\nclass ProductDB:\n    def __init__(self, path):\n        self.connection = sqlite3.connect(path)\n        \n    def execute(self, sql):\n     "
+    }
+  ]
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains PR summary, categories, and sample files
+2. Evaluate completeness, code quality, and risks
+3. This is a massive PR with 257 files and significant line changes
+
+Assessment criteria:
+- COMPLETENESS: Unfinished work, TODOs, placeholders
+- CODE QUALITY: Consistency, obvious issues, appropriate scope  
+- RISK: Large-scale changes, breaking changes, deployment risks
+- ORGANIZATION: Mixed concerns, experimental code
+
+Provide your response in this exact JSON format:
+{
+  "merge_readiness_score": <number 0-100>,
+  "status": "<READY|REVIEW_NEEDED|NOT_READY>", 
+  "blocking_issues": <number>,
+  "warning_issues": <number>,
+  "recommendation": "<brief summary>",
+  "key_concerns": ["<concern1>", "<concern2>"]
+}
