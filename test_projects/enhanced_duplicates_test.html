@@ -1,0 +1,646 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Duplicates Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #0f0f23; color: #e0e0e0; }
+        .container { background: #1a1a2e; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔄 Enhanced Duplicates Test</h2>
+        <div class='duplicates-list'><h4 class='priority-critical'>CRITICAL Priority Duplicates (2 groups)</h4>
+        <div class='duplicate-item priority-critical' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Data Processing Duplicates 
+                    <span class='similarity-score similarity-high'>88% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge critical'>CRITICAL</span>
+                    <span class='confidence-badge'>Confidence: 83%</span>
+                    <span class='files-badge'>2 Files</span>
+                </div>
+            </div>
+            
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>88%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>277</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>High</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- data_pipeline/bad/helpers/data_processor.py
+- data_pipeline/bad/utils/data_helper.py
+Both contain identical expensive_transformation() function and nearly identical data processing logic with the same memory issues.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>2 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='data_pipeline/bad/helpers/data_processor.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>data_pipeline/bad/helpers/data_processor.py</span>
+                    <span class='file-status-indicator' data-file='data_pipeline/bad/helpers/data_processor.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='data_pipeline/bad/helpers/data_processor.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='duplicate-file' data-file-path='data_pipeline/bad/utils/data_helper.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>data_pipeline/bad/utils/data_helper.py</span>
+                    <span class='file-status-indicator' data-file='data_pipeline/bad/utils/data_helper.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='data_pipeline/bad/utils/data_helper.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
+                    
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
+                </div>
+            </div>
+            
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
+            </div>
+        </div>
+        
+        <div class='duplicate-item priority-critical' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Authentication Logic Duplicates 
+                    <span class='similarity-score similarity-high'>84% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge critical'>CRITICAL</span>
+                    <span class='confidence-badge'>Confidence: 79%</span>
+                    <span class='files-badge'>2 Files</span>
+                </div>
+            </div>
+            
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>84%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>268</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>High</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- auth_service/bad/security/user_auth.py 
+- auth_service/bad/auth/login_handler.py
+Both implement the same insecure authentication with plain text password comparison and similar token generation.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>2 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='auth_service/bad/security/user_auth.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/bad/security/user_auth.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/bad/security/user_auth.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/bad/security/user_auth.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='duplicate-file' data-file-path='auth_service/bad/auth/login_handler.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/bad/auth/login_handler.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/bad/auth/login_handler.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/bad/auth/login_handler.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
+                    
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
+                </div>
+            </div>
+            
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
+            </div>
+        </div>
+        <h4 class='priority-high'>HIGH Priority Duplicates (1 groups)</h4>
+        <div class='duplicate-item priority-high' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Product Search Implementation 
+                    <span class='similarity-score similarity-high'>86% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge high'>HIGH</span>
+                    <span class='confidence-badge'>Confidence: 81%</span>
+                    <span class='files-badge'>2 Files</span>
+                </div>
+            </div>
+            
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>86%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>273</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>Medium</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- ecommerce_api/bad/services/product_search.py
+- ecommerce_api/bad/services/product_finder.py
+Both implement product search with SQL injection vulnerabilities and nearly identical database handling patterns.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>2 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='ecommerce_api/bad/services/product_search.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>ecommerce_api/bad/services/product_search.py</span>
+                    <span class='file-status-indicator' data-file='ecommerce_api/bad/services/product_search.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='ecommerce_api/bad/services/product_search.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='duplicate-file' data-file-path='ecommerce_api/bad/services/product_finder.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>ecommerce_api/bad/services/product_finder.py</span>
+                    <span class='file-status-indicator' data-file='ecommerce_api/bad/services/product_finder.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='ecommerce_api/bad/services/product_finder.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
+                    
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
+                </div>
+            </div>
+            
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
+            </div>
+        </div>
+        <h4 class='priority-medium'>MEDIUM Priority Duplicates (2 groups)</h4>
+        <div class='duplicate-item priority-medium' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Data Transformation Services 
+                    <span class='similarity-score similarity-low'>54% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge medium'>MEDIUM</span>
+                    <span class='confidence-badge'>Confidence: 54%</span>
+                    <span class='files-badge'>1 Files</span>
+                </div>
+            </div>
+            
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>54%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>158</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>Low</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- data_pipeline/good/processors/data_transformer.py could potentially consolidate functionality from the duplicate data processing implementations in the bad/ directory.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>1 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='data_pipeline/good/processors/data_transformer.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>data_pipeline/good/processors/data_transformer.py</span>
+                    <span class='file-status-indicator' data-file='data_pipeline/good/processors/data_transformer.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='data_pipeline/good/processors/data_transformer.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
+                    
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
+                </div>
+            </div>
+            
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
+            </div>
+        </div>
+        
+        <div class='duplicate-item priority-medium' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Authentication Services 
+                    <span class='similarity-score similarity-low'>48% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge medium'>MEDIUM</span>
+                    <span class='confidence-badge'>Confidence: 48%</span>
+                    <span class='files-badge'>1 Files</span>
+                </div>
+            </div>
+            
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>48%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>145</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>Low</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- auth_service/good/auth/auth_service.py provides a secure implementation that could replace both duplicate insecure auth implementations.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>1 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='auth_service/good/auth/auth_service.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/good/auth/auth_service.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/good/auth/auth_service.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/good/auth/auth_service.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
+                    
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
+                </div>
+            </div>
+            
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
+            </div>
+        </div>
+        </div>
+        <script>
+        function toggleDuplicateFiles(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.files-toggle');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // Initialize file data lookup
+        function getFileAnalysis(filePath) {
+            const file = fileData.find(f => f.file_path === filePath);
+            return file || null;
+        }
+        </script>
+        
+    </div>
+</body>
+</html>
+    

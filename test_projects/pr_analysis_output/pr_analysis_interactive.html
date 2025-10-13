@@ -120,6 +120,308 @@
             font-size: 1.8rem;
         }
 
+        /* Enhanced Overview Styles */
+        .executive-summary {
+            background: linear-gradient(135deg, #2a2a4a 0%, #3a3a5a 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .executive-summary h2 {
+            color: #00ff88;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--card-color, #00ff88);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .summary-card.critical {
+            --card-color: #ff4444;
+        }
+
+        .summary-card.high {
+            --card-color: #ff8800;
+        }
+
+        .summary-card.medium {
+            --card-color: #ffaa00;
+        }
+
+        .summary-card.low {
+            --card-color: #00ff88;
+        }
+
+        .summary-card.info {
+            --card-color: #4488ff;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--card-color, #00ff88);
+        }
+
+        .card-description {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .key-findings {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .key-findings h3 {
+            color: #ff8800;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .finding-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--finding-color, #ff8800);
+        }
+
+        .finding-item.critical {
+            --finding-color: #ff4444;
+        }
+
+        .finding-item.high {
+            --finding-color: #ff8800;
+        }
+
+        .finding-item.medium {
+            --finding-color: #ffaa00;
+        }
+
+        .finding-item.info {
+            --finding-color: #4488ff;
+        }
+
+        .finding-icon {
+            font-size: 1.2rem;
+            color: var(--finding-color, #ff8800);
+            flex-shrink: 0;
+        }
+
+        .finding-content {
+            flex: 1;
+        }
+
+        .finding-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .finding-description {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .recommendations-preview {
+            background: linear-gradient(135deg, #1a1a3a 0%, #2a2a4a 100%);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .recommendations-preview h3 {
+            color: #00ff88;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .recommendation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .recommendation-number {
+            background: #00ff88;
+            color: #0f0f23;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .recommendation-text {
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quick-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 5px;
+        }
+
+        .quick-stat-label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator.not-ready {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .status-indicator.needs-work {
+            background: rgba(255, 136, 0, 0.2);
+            color: #ff8800;
+            border: 1px solid rgba(255, 136, 0, 0.3);
+        }
+
+        .status-indicator.almost-ready {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+            border: 1px solid rgba(255, 170, 0, 0.3);
+        }
+
+        .status-indicator.ready {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444 0%, #ff8800 35%, #ffaa00 70%, #00ff88 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
         /* File Analysis Styles */
         .search-container {
             margin-bottom: 20px;
@@ -406,6 +708,131 @@
             border-radius: 4px;
         }
 
+        /* Enhanced Duplicates Styles */
+        .duplicate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .duplicate-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .severity-badge, .files-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .severity-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .severity-badge.critical { background: #ff4444; color: #fff; }
+        .severity-badge.high { background: #ff8800; color: #fff; }
+        .severity-badge.medium { background: #ffaa00; color: #000; }
+        .severity-badge.low { background: #4169e1; color: #fff; }
+
+        .files-badge {
+            background: rgba(100, 149, 237, 0.2);
+            color: #6495ed;
+        }
+
+        .duplicate-description {
+            margin: 12px 0;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        .duplicate-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .metric-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .similarity-score {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .similarity-high { background: #ff4444; color: #fff; }
+        .similarity-medium { background: #ff8800; color: #fff; }
+        .similarity-low { background: #ffaa00; color: #000; }
+
+        .duplicate-files {
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .duplicate-files-list {
+            padding: 15px;
+        }
+
+        .duplicate-file {
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .duplicate-recommendation {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 165, 0, 0.1);
+            border-left: 3px solid #ffa500;
+            border-radius: 4px;
+        }
+
+        /* Duplicate item coloring based on worst file status */
+        .duplicate-item.worst-status-not_ready {
+            border-left-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .duplicate-item.worst-status-conditional {
+            border-left-color: #ffa500;
+            background: rgba(255, 165, 0, 0.1);
+        }
+
+        .duplicate-item.worst-status-ready {
+            border-left-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .header { padding: 20px; }
@@ -452,30 +879,126 @@
             <div id="overview" class="tab-content active">
                 <h2>📊 Executive Summary</h2>
                 
-        <div class="overview-section">
-            <div class="pr-stats">
-                <div class="stat-item">
-                    <h4>10</h4>
-                    <p>Files Changed</p>
+        <div class="executive-summary">
+            <h2>🎯 Executive Summary</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 25px; color: #d0d0d0;">
+                This PR introduces <strong>significant functionality</strong> but requires <strong>important attention</strong> before merging. The analysis reveals 0 critical issues that must be addressed, including security vulnerabilities and code duplicates.
+            </p>
+            
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <div class="quick-stat-value">10</div>
+                    <div class="quick-stat-label">Files Changed</div>
                 </div>
-                <div class="stat-item">
-                    <h4>460</h4>
-                    <p>Lines Added</p>
+                <div class="quick-stat">
+                    <div class="quick-stat-value">5</div>
+                    <div class="quick-stat-label">Critical Issues</div>
                 </div>
-                <div class="stat-item">
-                    <h4>0</h4>
-                    <p>Lines Removed</p>
+                <div class="quick-stat">
+                    <div class="quick-stat-value">2</div>
+                    <div class="quick-stat-label">Duplicates Found</div>
                 </div>
-                <div class="stat-item">
-                    <h4>4.3/10</h4>
-                    <p>Quality Score</p>
+                <div class="quick-stat">
+                    <div class="quick-stat-value">460</div>
+                    <div class="quick-stat-label">Lines Changed</div>
                 </div>
-            </div>
-            <div class="recommendation-box">
-                <h4>Recommendation: MAJOR_ISSUES_FOUND</h4>
-                <p>Overall assessment based on code quality, merge readiness, and potential issues.</p>
             </div>
         </div>
+
+        <div class="summary-grid">
+            <div class="summary-card critical">
+                <div class="card-header">
+                    <div class="card-title">🚨 Critical Issues</div>
+                    <div class="card-value">5</div>
+                </div>
+                <div class="card-description">
+                    Security vulnerabilities and critical flaws that must be fixed immediately.
+                </div>
+            </div>
+
+            <div class="summary-card high">
+                <div class="card-header">
+                    <div class="card-title">⚠️ High Priority</div>
+                    <div class="card-value">9</div>
+                </div>
+                <div class="card-description">
+                    Important issues that should be addressed to improve code quality.
+                </div>
+            </div>
+
+            <div class="summary-card medium">
+                <div class="card-header">
+                    <div class="card-title">📝 Medium Priority</div>
+                    <div class="card-value">11</div>
+                </div>
+                <div class="card-description">
+                    Code consistency and style improvements for better maintainability.
+                </div>
+            </div>
+
+            <div class="summary-card info">
+                <div class="card-header">
+                    <div class="card-title">📊 Code Quality</div>
+                    <div class="card-value">4.3/10</div>
+                </div>
+                <div class="card-description">
+                    Overall code quality score based on security, maintainability, and consistency.
+                </div>
+            </div>
+
+            <div class="summary-card low">
+                <div class="card-header">
+                    <div class="card-title">🔄 Duplicates</div>
+                    <div class="card-value">2</div>
+                </div>
+                <div class="card-description">
+                    Duplicate code blocks that should be refactored to reduce maintenance overhead.
+                </div>
+            </div>
+
+            <div class="summary-card info">
+                <div class="card-header">
+                    <div class="card-title">📈 Merge Readiness</div>
+                    <div class="card-value">43.0%</div>
+                </div>
+                <div class="card-description">
+                    Current readiness score based on all analysis factors.
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="key-findings">
+            <h3>🔍 Key Findings</h3>
+        
+            <div class="finding-item high">
+                <div class="finding-icon">🔄</div>
+                <div class="finding-content">
+                    <div class="finding-title">Code Duplication Issues</div>
+                    <div class="finding-description">
+                        2 duplicate code blocks identified with high similarity scores. 
+                        These should be refactored to reduce maintenance overhead and improve code consistency.
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        
+        <div class="recommendations-preview">
+            <h3>🎯 Priority Recommendations</h3>
+            <div class="recommendation-list">
+        
+                <div class="recommendation-item">
+                    <div class="recommendation-number">1</div>
+                    <div class="recommendation-text">
+                        <strong>HIGH PRIORITY:</strong> Refactor 2 duplicate code blocks to eliminate 
+                        redundancy and centralize shared functionality.
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+        
         
             </div>
 
@@ -1323,53 +1846,268 @@ Both implement the same insecure authentication with plain text password compari
             <div id="duplicates" class="tab-content">
                 <h2>🔄 Duplicate Analysis</h2>
                 <div class="duplicate-list">
+                    <div class='duplicates-list'><h4 class='priority-critical'>CRITICAL Priority Duplicates (1 groups)</h4>
+        <div class='duplicate-item priority-critical' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Authentication Logic Duplicates 
+                    <span class='similarity-score similarity-high'>84% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge critical'>CRITICAL</span>
+                    <span class='confidence-badge'>Confidence: 79%</span>
+                    <span class='files-badge'>2 Files</span>
+                </div>
+            </div>
+            
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>84%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>268</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>Critical</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- auth_service/bad/security/user_auth.py 
+- auth_service/bad/auth/login_handler.py
+Both implement the same insecure authentication with plain text password comparison and similar token generation.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>2 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='auth_service/bad/security/user_auth.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/bad/security/user_auth.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/bad/security/user_auth.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/bad/security/user_auth.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='duplicate-file' data-file-path='auth_service/bad/auth/login_handler.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/bad/auth/login_handler.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/bad/auth/login_handler.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/bad/auth/login_handler.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
                     
-            <div class='duplicate-item'>
-                <h3>Duplicate Analysis Summary</h3>
-                <div class='duplicate-details'>
-                    <p>Based on the provided JSON data, here is my duplicate analysis:</p>
-
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
                 </div>
             </div>
             
-            <div class='duplicate-item'>
-                <h3>Data Processing Duplicates:</h3>
-                <div class='duplicate-details'>
-                    <p>- data_pipeline/bad/helpers/data_processor.py</p>
-<p>- data_pipeline/bad/utils/data_helper.py</p>
-<p>Both contain identical expensive_transformation() function and nearly identical data processing logic with the same memory issues.</p>
-
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
+            </div>
+        </div>
+        <h4 class='priority-medium'>MEDIUM Priority Duplicates (1 groups)</h4>
+        <div class='duplicate-item priority-medium' data-worst-status='not_ready'>
+            <div class='duplicate-header'>
+                <h3>Authentication Services 
+                    <span class='similarity-score similarity-low'>48% Similar</span>
+                </h3>
+                <div class='duplicate-badges'>
+                    <span class='severity-badge medium'>MEDIUM</span>
+                    <span class='confidence-badge'>Confidence: 48%</span>
+                    <span class='files-badge'>1 Files</span>
                 </div>
             </div>
             
-            <div class='duplicate-item'>
-                <h3>Authentication Logic Duplicates:</h3>
-                <div class='duplicate-details'>
-                    <p>- auth_service/bad/security/user_auth.py</p>
-<p>- auth_service/bad/auth/login_handler.py</p>
-<p>Both implement the same insecure authentication with plain text password comparison and similar token generation.</p>
-
+            
+        <div class='duplicate-metrics'>
+            <div class='metric-item'>
+                <div class='metric-value'>48%</div>
+                <div class='metric-label'>Similarity</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>146</div>
+                <div class='metric-label'>Lines Duplicated</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>1</div>
+                <div class='metric-label'>Functions</div>
+            </div>
+            <div class='metric-item'>
+                <div class='metric-value'>Medium</div>
+                <div class='metric-label'>Impact</div>
+            </div>
+        </div>
+        
+            
+            <p class='duplicate-description'>- auth_service/good/auth/auth_service.py provides a secure implementation that could replace both duplicate insecure auth implementations.</p>
+            
+            <div class='duplicate-files'>
+                <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                    <span class='files-toggle'>▶</span>
+                    <span>1 Duplicate Files (Click to Expand)</span>
+                </div>
+                <div class='files-content'>
+                    <div class='duplicate-files-list'>
+            <div class='duplicate-file' data-file-path='auth_service/good/auth/auth_service.py'>
+                <div class='file-path-header'>
+                    <span class='file-path-text'>auth_service/good/auth/auth_service.py</span>
+                    <span class='file-status-indicator' data-file='auth_service/good/auth/auth_service.py'>Loading...</span>
+                </div>
+                <div class='file-analysis-details' data-file='auth_service/good/auth/auth_service.py'>
+                    <div class='analysis-placeholder'>
+                        Loading duplicate analysis...
+                    </div>
+                </div>
+            </div>
+            </div>
+        <script>
+        // Populate duplicate file analysis after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const duplicateFiles = document.querySelectorAll('.duplicate-file');
+            
+            duplicateFiles.forEach(fileElement => {
+                const filePath = fileElement.dataset.filePath;
+                const fileAnalysis = getFileAnalysis(filePath);
+                
+                if (fileAnalysis) {
+                    // Update status indicator
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    const statusColor = fileAnalysis.merge_readiness === 'ready' ? '#00ff88' : 
+                                       fileAnalysis.merge_readiness === 'conditional' ? '#ffa500' : '#ff6b6b';
+                    statusIndicator.style.color = statusColor;
+                    statusIndicator.textContent = fileAnalysis.merge_readiness.toUpperCase();
+                    statusIndicator.className = 'file-status-indicator ' + fileAnalysis.merge_readiness;
+                    
+                    // Update analysis details with duplicate-specific information
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = `
+                        <div class='file-analysis-content'>
+                            <div class='analysis-section'>
+                                <h6>Duplicate Code Analysis</h6>
+                                <p><strong>Functions Duplicated:</strong> Multiple functions with similar implementations</p>
+                                <p><strong>Lines Duplicated:</strong> Significant code duplication detected</p>
+                                <p><strong>Anti-patterns:</strong> Code redundancy, maintenance overhead</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Business Impact</h6>
+                                <p>Code duplication increases maintenance burden and risk of inconsistencies</p>
+                            </div>
+                            <div class='analysis-section'>
+                                <h6>Consolidation Opportunity</h6>
+                                <p>This file can be consolidated with other duplicates into a single optimized implementation</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // File not found in analysis
+                    const statusIndicator = fileElement.querySelector('.file-status-indicator');
+                    statusIndicator.style.color = '#888';
+                    statusIndicator.textContent = 'NOT ANALYZED';
+                    
+                    const detailsDiv = fileElement.querySelector('.file-analysis-details');
+                    detailsDiv.innerHTML = '<p class="no-analysis">No analysis available for this file</p>';
+                }
+            });
+        });
+        </script>
+        
                 </div>
             </div>
             
-            <div class='duplicate-item'>
-                <h3>Product Search Implementation:</h3>
-                <div class='duplicate-details'>
-                    <p>- ecommerce_api/bad/services/product_search.py</p>
-<p>- ecommerce_api/bad/services/product_finder.py</p>
-<p>Both implement product search with SQL injection vulnerabilities and nearly identical database handling patterns.</p>
-
-                </div>
+            <div class='duplicate-recommendation'>
+                <strong>Recommendation:</strong> Consolidate or remove duplicates
             </div>
+        </div>
+        </div>
+        <script>
+        function toggleDuplicateFiles(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.files-toggle');
             
-            <div class='duplicate-item'>
-                <h3>Data Transformation Services:</h3>
-                <div class='duplicate-details'>
-                    <p>- data_pipeline/good/processors/data_transformer.py could potentially consolidate functionality from the duplicate data processing implementations in the bad/ directory.</p>
-
-                </div>
-            </div>
-            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // Initialize file data lookup
+        function getFileAnalysis(filePath) {
+            const file = fileData.find(f => f.file_path === filePath);
+            return file || null;
+        }
+        </script>
+        
                 </div>
             </div>
 

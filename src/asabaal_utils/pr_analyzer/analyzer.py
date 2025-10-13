@@ -75,8 +75,8 @@ class UnifiedPRAnalyzer:
             # Add agentic backend configuration if not present
             if 'agentic_backend' not in config:
                 config['agentic_backend'] = {
-                    'provider': 'openrouter',
-                    'model': 'anthropic/claude-3.5-sonnet'
+                    'provider': 'ollama',
+                    'model': 'llama3.1:8b'
                 }
             
             return config
@@ -85,8 +85,8 @@ class UnifiedPRAnalyzer:
             # Return default configuration
             return {
                 'agentic_backend': {
-                    'provider': 'openrouter',
-                    'model': 'anthropic/claude-3.5-sonnet'
+                    'provider': 'ollama',
+                    'model': 'llama3.1:8b'
                 }
             }
     

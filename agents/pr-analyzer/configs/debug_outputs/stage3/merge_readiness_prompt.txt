@@ -1,0 +1,224 @@
+You are a senior engineering manager evaluating merge readiness.
+
+Here is the PR analysis data:
+
+```json
+{
+  "pr_summary": {
+    "from_branch": "main",
+    "to_branch": "brand-integration",
+    "total_files_changed": 259,
+    "total_lines_added": 3539,
+    "total_lines_removed": 49761,
+    "total_files_changed_all": 318,
+    "total_lines_added_all": 3539,
+    "total_lines_removed_all": 79209,
+    "commit_messages": [
+      "Consolidate project structure and resolve PR quality issues",
+      "added pr analysis output for convenience",
+      "prep for deployment!",
+      "added some vision session work",
+      "Standardize navigation order across all website pages",
+      "Fix Vision 2054 navigation text to display on one line",
+      "Update homepage blog section to link to integrated blog",
+      "Complete blog system overhaul with automated pipeline",
+      "system now handles no featured video content",
+      "blog post preparer tested and working"
+    ]
+  },
+  "category_breakdown": {
+    "CONFIGURATION": 2,
+    "UNCATEGORIZED": 21,
+    "DOCUMENTATION": 19,
+    "BLOG_CONTENT": 156,
+    "ASSETS_MEDIA": 36,
+    "USER_INTERFACE": 10,
+    "DATABASE": 10,
+    "SCRIPTS_AUTOMATION": 1,
+    "VISUALIZATIONS": 4
+  },
+  "sample_files": [
+    {
+      "path": ".env.example",
+      "category": "CONFIGURATION",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 26,
+      "content_preview": "# Environment Configuration for Asabaal Ventures Website\n# Copy this file to .env and fill in your actual values\n# Get Supabase values from your project dashboard -> Settings -> API\n\n# Supabase Config"
+    },
+    {
+      "path": ".gitignore",
+      "category": "UNCATEGORIZED",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 40,
+      "content_preview": "**/.claude/settings.local.json\n*.pdf\n\n# Environment variables\n.env\n.env.local\n.env.production\n\n# Local Supabase configuration (keep your keys private!)\nconfig/supabase-keys.js\n\n# Content Management\n# "
+    },
+    {
+      "path": "AGENTIC_SYSTEM_TECHNICAL_WALKTHROUGH.md",
+      "category": "DOCUMENTATION",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 345,
+      "content_preview": "# Agentic PR Analysis System - Technical Walkthrough\n\n*Visual guide to how the agent-calling-agents architecture works*\n\n---\n\n## System Architecture Overview\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+    },
+    {
+      "path": "DEPLOYMENT.md",
+      "category": "DOCUMENTATION",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 233,
+      "content_preview": "# \ud83d\ude80 Deployment Guide\n\nYour website is ready to deploy! This guide covers deployment to multiple platforms with full backend functionality.\n\n## \u2705 What's Already Ready\n- \u2705 Blog system (static files, no "
+    },
+    {
+      "path": "SUPABASE_SETUP.md",
+      "category": "DOCUMENTATION",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 232,
+      "content_preview": "# Supabase Backend Setup Guide\n\nThis guide will help you set up the backend infrastructure for the Asabaal Ventures website using Supabase.\n\n## \ud83d\ude80 Quick Start\n\n### Step 1: Create Supabase Project\n\n1. G"
+    },
+    {
+      "path": "TECHNICAL_SPECIFICATION.md",
+      "category": "DOCUMENTATION",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 309,
+      "content_preview": "# Asabaal Ventures Multimedia Ecosystem - Technical Specification\n\n## \ud83c\udfaf Project Overview\n\n**Goal**: Build a revolutionary multimedia ecosystem combining Discord community management, tiered content ac"
+    },
+    {
+      "path": "assets/images/blog/20250512-cover-image.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/asabaal-ventures.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/by-my-hand.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/charting-a-course.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/collaborative-business-models.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/electric-pulse.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/ethical-advocacy.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/free-as-a-bird.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/human-creativity.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/keep-it-simple.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/logical-fallacies.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/microaggression.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/more-than-me.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "assets/images/blog/no.jpg",
+      "category": "BLOG_CONTENT",
+      "change_type": "D",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    }
+  ]
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains PR summary, categories, and sample files
+2. Evaluate completeness, code quality, and risks
+3. This is a massive PR with 257 files and significant line changes
+
+Assessment criteria:
+- COMPLETENESS: Unfinished work, TODOs, placeholders
+- CODE QUALITY: Consistency, obvious issues, appropriate scope  
+- RISK: Large-scale changes, breaking changes, deployment risks
+- ORGANIZATION: Mixed concerns, experimental code
+
+Provide your response in this exact JSON format:
+{
+  "merge_readiness_score": <number 0-100>,
+  "status": "<READY|REVIEW_NEEDED|NOT_READY>", 
+  "blocking_issues": <number>,
+  "warning_issues": <number>,
+  "recommendation": "<brief summary>",
+  "key_concerns": ["<concern1>", "<concern2>"]
+}

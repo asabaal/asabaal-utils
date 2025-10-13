@@ -1,0 +1,250 @@
+You are a software architect analyzing code patterns and consistency.
+
+Here is the pattern analysis data:
+
+```json
+{
+  "file_categories": [
+    "CONFIGURATION",
+    "UNCATEGORIZED",
+    "DOCUMENTATION",
+    "BLOG_CONTENT",
+    "ASSETS_MEDIA",
+    "USER_INTERFACE",
+    "DATABASE",
+    "SCRIPTS_AUTOMATION",
+    "VISUALIZATIONS"
+  ],
+  "sample_files_by_category": {
+    "CONFIGURATION": [
+      {
+        "path": ".env.example",
+        "change_type": "D",
+        "content_preview": "# Environment Configuration for Asabaal Ventures Website\n# Copy this file to .env and fill in your actual values\n# Get Supabase values from your project dashboard -> Settings -> API\n\n# Supabase Configuration (required for contact forms)\nVITE_SUPABASE_URL=https://your-project-id.supabase.co\nVITE_SUPA"
+      },
+      {
+        "path": "config/supabase-keys.template.js",
+        "change_type": "D",
+        "content_preview": "// Supabase Configuration Template\n// Copy this to 'supabase-keys.js' and add your actual credentials\n// This file should NOT be committed to git - it's in .gitignore\n\nwindow.VITE_SUPABASE_URL = 'https://your-project-id.supabase.co';\nwindow.VITE_SUPABASE_ANON_KEY = 'your-anon-key-here';\n\n// Instruct"
+      }
+    ],
+    "UNCATEGORIZED": [
+      {
+        "path": ".gitignore",
+        "change_type": "D",
+        "content_preview": "**/.claude/settings.local.json\n*.pdf\n\n# Environment variables\n.env\n.env.local\n.env.production\n\n# Local Supabase configuration (keep your keys private!)\nconfig/supabase-keys.js\n\n# Content Management\n# Note: You can choose to track or ignore blog content\n# Option 1: Track everything (recommended for b"
+      },
+      {
+        "path": "blog.html",
+        "change_type": "M",
+        "content_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Blog | Asabaal Ventures</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        "
+      },
+      {
+        "path": "database-archive/supabase-keys.prod.js",
+        "change_type": "D",
+        "content_preview": "// Production Supabase Configuration for Vercel\n// This file should be renamed to supabase-keys.js for production deployment\n// Replace these values with your actual Supabase credentials\n\nwindow.VITE_SUPABASE_URL = 'https://your-actual-project-id.supabase.co';\nwindow.VITE_SUPABASE_ANON_KEY = 'your-a"
+      },
+      {
+        "path": "development-archive/test-forms.html",
+        "change_type": "D",
+        "content_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Form Testing - Asabaal Ventures</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background: #0f172a;\n   "
+      },
+      {
+        "path": "development-archive/test_site.html",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      }
+    ],
+    "DOCUMENTATION": [
+      {
+        "path": "AGENTIC_SYSTEM_TECHNICAL_WALKTHROUGH.md",
+        "change_type": "D",
+        "content_preview": "# Agentic PR Analysis System - Technical Walkthrough\n\n*Visual guide to how the agent-calling-agents architecture works*\n\n---\n\n## System Architecture Overview\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502                    PR ANALYZER ORCHESTRATOR                     \u2502\n\u2502"
+      },
+      {
+        "path": "DEPLOYMENT.md",
+        "change_type": "D",
+        "content_preview": "# \ud83d\ude80 Deployment Guide\n\nYour website is ready to deploy! This guide covers deployment to multiple platforms with full backend functionality.\n\n## \u2705 What's Already Ready\n- \u2705 Blog system (static files, no database needed)\n- \u2705 All website pages and styling\n- \u2705 Contact forms and email subscription forms\n- "
+      },
+      {
+        "path": "SUPABASE_SETUP.md",
+        "change_type": "D",
+        "content_preview": "# Supabase Backend Setup Guide\n\nThis guide will help you set up the backend infrastructure for the Asabaal Ventures website using Supabase.\n\n## \ud83d\ude80 Quick Start\n\n### Step 1: Create Supabase Project\n\n1. Go to [supabase.com](https://supabase.com)\n2. Sign up/Login with your account\n3. Click \"New Project\"\n"
+      },
+      {
+        "path": "TECHNICAL_SPECIFICATION.md",
+        "change_type": "D",
+        "content_preview": "# Asabaal Ventures Multimedia Ecosystem - Technical Specification\n\n## \ud83c\udfaf Project Overview\n\n**Goal**: Build a revolutionary multimedia ecosystem combining Discord community management, tiered content access, live events, gaming integration, and music experience platform.\n\n**Timeline**: \n- Soft Launch:"
+      },
+      {
+        "path": "database-archive/README.md",
+        "change_type": "D",
+        "content_preview": "# Database Archive\n\nThis directory contains archived database setup files that are no longer actively used in the current deployment process.\n\n## Current Active Setup\n- **Primary**: `supabase-minimal-setup.sql` (in root directory)\n- **Referenced by**: All deployment guides (`DEPLOY-READY.md`, `VERCE"
+      }
+    ],
+    "BLOG_CONTENT": [
+      {
+        "path": "assets/images/blog/20250512-cover-image.jpg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/blog/asabaal-ventures.jpg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/blog/by-my-hand.jpg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/blog/charting-a-course.jpg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/blog/collaborative-business-models.jpg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      }
+    ],
+    "ASSETS_MEDIA": [
+      {
+        "path": "assets/images/icons/cosmic_nebula.svg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/icons/favicon.svg",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/logos/Asabaal Ventures.png",
+        "change_type": "D",
+        "content_preview": "[File too large]"
+      },
+      {
+        "path": "assets/images/logos/Lehigh-University-logo.png",
+        "change_type": "D",
+        "content_preview": "PNG\n\u001a\n\nIHDR\u0002]\u0004\u0003UE'PLTEV V V V V M\u001a8\u057fV \u0141D\u007fR2d.\bN\u0005tRNS\u02c5\u001eF\u000f.\u0010IDATx?oH\u00168\n+(\n-b\u060d+DRF\u001f@8NM rC\u0016\u000b^!N`l]n-,-3$\u001f\u000f)\n9C\u001cLD\"\u0019\u079b7o\f+*\u0005J\u0018(^x)^(^x)^*x)^*x)^f\u0017sZT\u0017\u0007W\u000eX,O^JU-P\u25c8\u001d\u06ae\u0538Z*J\u0002\u06d5<V\u000f)\u06c9<a~8V!\fSqV\u0016)\u0005fW\u001ccx9\u02d0mT+yoj|]P\u0006\u001dk$/CE:\u0003/cp5v\u001a\\\u0012?~Y~Z\tJE8Yay^\u075cx\u0018o^\u001a]E\u001b4f7%\u01b4f^\u0013\u00075V\u06c7_L\u06ab\u001f.\\t7yK\u0018\\*\u000bzh-ET>II2;\u01c6\u0010T\u0019Gq!\u0011'H3\u0006x^\u001f^XxE\u00a4TK\u001f\u0014/D"
+      },
+      {
+        "path": "assets/images/logos/argus_logo.svg",
+        "change_type": "D",
+        "content_preview": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg id=\"a\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1113.62 245.98\"><defs><style>.b{fill:#006ba6;}.c{fill:#707070;}</style></defs><g><path class=\"b\" d=\"M69.49,6.07l46.19,118.21h-17.38l-12.91-35.6H35.39l-13.24,35.6H6.08L52.11,6.07h17.38Zm10.93,69.37L60.72"
+      }
+    ],
+    "USER_INTERFACE": [
+      {
+        "path": "content/templates/post-template.json",
+        "change_type": "D",
+        "content_preview": "{\n  \"metadata\": {\n    \"title\": \"Your Post Title Here\",\n    \"slug\": \"your-post-slug-here\",\n    \"publishDate\": \"2024-MM-DD\",\n    \"tags\": [\"tag1\", \"tag2\", \"tag3\"],\n    \"excerpt\": \"A compelling summary of your post that draws readers in...\",\n    \"coverImage\": \"cover.jpg\",\n    \"featured\": false,\n    \"sta"
+      },
+      {
+        "path": "css/components/buttons.css",
+        "change_type": "A",
+        "content_preview": "[File missing]"
+      },
+      {
+        "path": "css/components/cards.css",
+        "change_type": "A",
+        "content_preview": "[File missing]"
+      },
+      {
+        "path": "css/components/footer.css",
+        "change_type": "A",
+        "content_preview": "[File missing]"
+      },
+      {
+        "path": "css/components/forms.css",
+        "change_type": "A",
+        "content_preview": "[File missing]"
+      }
+    ],
+    "DATABASE": [
+      {
+        "path": "database-archive/blog-database/README-SUPABASE.md",
+        "change_type": "D",
+        "content_preview": "# Supabase Blog Backend Setup\n\nThis document explains how to set up the Supabase backend for your multisensory blog.\n\n## Quick Start\n\n1. **Create a Supabase Project**\n   - Go to [supabase.com](https://supabase.com)\n   - Create a new project\n   - Note your project URL and anon key\n\n2. **Run Database "
+      },
+      {
+        "path": "database-archive/blog-database/supabase-config.js",
+        "change_type": "D",
+        "content_preview": "// Supabase Configuration\n// This file manages environment variables and configuration for Supabase\n\n// Development/Production Configuration\nconst SupabaseConfig = {\n    // Replace these with your actual Supabase project details\n    url: 'https://your-project-id.supabase.co',\n    anonKey: 'your-anon"
+      },
+      {
+        "path": "database-archive/blog-database/supabase/migrations/001_initial_setup.sql",
+        "change_type": "D",
+        "content_preview": "-- Initial Blog Setup Migration\n-- Run this in your Supabase SQL editor to set up the blog infrastructure\n\n-- First, ensure UUID extension is enabled\nCREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n\n-- Create authors table first (referenced by blog_posts)\nCREATE TABLE IF NOT EXISTS authors (\n    id UUID"
+      },
+      {
+        "path": "database-archive/blog-database/supabase/migrations/002_rls_policies.sql",
+        "change_type": "D",
+        "content_preview": "-- Row Level Security Policies Migration\n-- Run this after the initial setup to configure security\n\n-- Enable RLS on all tables\nALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;\nALTER TABLE tags ENABLE ROW LEVEL SECURITY;\nALTER TABLE blog_post_tags ENABLE ROW LEVEL SECURITY;\nALTER TABLE authors ENAB"
+      },
+      {
+        "path": "database-archive/blog-database/supabase/migrations/003_views_functions.sql",
+        "change_type": "D",
+        "content_preview": "-- Views and Functions Migration\n-- Run this to create helpful views and functions\n\n-- Create view for blog posts with tags and author info\nCREATE OR REPLACE VIEW blog_posts_with_details AS\nSELECT \n    bp.*,\n    a.name as author_name,\n    a.avatar_url as author_avatar,\n    COALESCE(\n        JSON_AGG"
+      }
+    ],
+    "SCRIPTS_AUTOMATION": [
+      {
+        "path": "start-server.sh",
+        "change_type": "D",
+        "content_preview": "#!/bin/bash\n\n# Simple script to start a local server for testing the blog\necho \"Starting local server for Multisensory Blog...\"\necho \"Navigate to http://localhost:8000 to view the site\"\necho \"Visit http://localhost:8000/blog.html to see the blog\"\necho \"\"\necho \"Press Ctrl+C to stop the server\"\n\n# Sta"
+      }
+    ],
+    "VISUALIZATIONS": [
+      {
+        "path": "visualizations/complete-implementation-timeline.html",
+        "change_type": "D",
+        "content_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Complete Implementation Timeline - Music + Gaming + Finance Integration</title>\n    <style>\n        * {\n            margin: 0;\n            padding:"
+      },
+      {
+        "path": "visualizations/cooperative-kingdom-ecosystem-fixed.html",
+        "change_type": "D",
+        "content_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Kingdom Cooperative Ecosystem - Engineering Global Peace Through Distributed Power</title>\n    <style>\n        * {\n            margin: 0;\n         "
+      },
+      {
+        "path": "visualizations/implementation-timeline.html",
+        "change_type": "D",
+        "content_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Enhanced Implementation Timeline - Music + Gaming Integration</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n      "
+      },
+      {
+        "path": "visualizations/kingdom-power-distribution-model.html",
+        "change_type": "D",
+        "content_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Kingdom Power Distribution Model - Engineering Global Peace</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n        "
+      }
+    ]
+  }
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains file categories and content samples
+2. Look for naming convention inconsistencies
+3. Identify different approaches to similar problems
+4. Note architectural pattern inconsistencies
+
+Focus areas:
+- File naming patterns across categories
+- Code style consistency within categories  
+- Similar functionality implemented differently
+- Missing architectural patterns
+
+Provide your response in this exact format:
+
+## CRITICAL:
+[Critical pattern issues that must be fixed]
+
+## HIGH:
+[High priority consistency issues]
+
+## MEDIUM:
+[Medium priority improvements]
+
+## Summary:
+[Brief summary of pattern analysis findings]

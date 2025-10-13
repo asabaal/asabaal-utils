@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Duplicates Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .demo-title {
+            color: #ff6b6b;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .demo-subtitle {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        /* Enhanced Duplicates Styles */
+        .duplicates-list {
+            margin-top: 20px;
+        }
+
+        .duplicate-item {
+            background: #1e1e2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .duplicate-item:hover {
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .duplicate-item.priority-critical {
+            border-left: 5px solid #ff4444;
+        }
+
+        .duplicate-item.priority-high {
+            border-left: 5px solid #ff8800;
+        }
+
+        .duplicate-item.priority-medium {
+            border-left: 5px solid #ffaa00;
+        }
+
+        .duplicate-item.priority-low {
+            border-left: 5px solid #44ff44;
+        }
+
+        .duplicate-header {
+            padding: 20px;
+            background: #252538;
+            border-bottom: 1px solid #333;
+        }
+
+        .duplicate-header h3 {
+            color: #ff6b6b;
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .similarity-score {
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .similarity-high {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .similarity-medium {
+            background: rgba(255, 136, 0, 0.2);
+            color: #ff8800;
+        }
+
+        .similarity-low {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+
+        .duplicate-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .severity-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .severity-badge.critical {
+            background: #ff4444;
+            color: white;
+        }
+
+        .severity-badge.high {
+            background: #ff8800;
+            color: white;
+        }
+
+        .severity-badge.medium {
+            background: #ffaa00;
+            color: #333;
+        }
+
+        .severity-badge.low {
+            background: #44ff44;
+            color: #333;
+        }
+
+        .confidence-badge, .files-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        .duplicate-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #2a2a3e;
+            border-bottom: 1px solid #333;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 15px;
+            background: #1e1e2e;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+
+        .metric-value.positive {
+            color: #44ff44;
+        }
+
+        .metric-value.negative {
+            color: #ff4444;
+        }
+
+        .metric-value.neutral {
+            color: #ffaa00;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .duplicate-description {
+            padding: 20px;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .duplicate-files {
+            border-top: 1px solid #333;
+        }
+
+        .files-header {
+            padding: 15px 20px;
+            background: #252538;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .files-header:hover {
+            background: #2a2a3e;
+        }
+
+        .files-toggle {
+            font-weight: bold;
+            color: #ff6b6b;
+            transition: transform 0.3s ease;
+        }
+
+        .files-content {
+            display: none;
+            padding: 20px;
+            background: #1a1a2e;
+        }
+
+        .files-content.expanded {
+            display: block;
+        }
+
+        .duplicate-files-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .duplicate-file {
+            background: #1e1e2e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .file-path-header {
+            padding: 15px;
+            background: #252538;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-path-text {
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+        }
+
+        .file-status-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .file-status-indicator.ready {
+            background: #44ff44;
+            color: #333;
+        }
+
+        .file-status-indicator.conditional {
+            background: #ffaa00;
+            color: #333;
+        }
+
+        .file-status-indicator.not_ready {
+            background: #ff4444;
+            color: white;
+        }
+
+        .file-analysis-details {
+            padding: 20px;
+            background: #1a1a2e;
+        }
+
+        .file-analysis-content {
+            display: grid;
+            gap: 20px;
+        }
+
+        .analysis-section {
+            background: #1e1e2e;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .analysis-section h6 {
+            color: #ff6b6b;
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+        }
+
+        .analysis-section p {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+
+        .analysis-section ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .analysis-section li {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+
+        .duplicate-recommendation {
+            padding: 20px;
+            background: #252538;
+            border-top: 1px solid #333;
+            color: #e0e0e0;
+        }
+
+        .duplicate-recommendation strong {
+            color: #ff6b6b;
+        }
+
+        .no-duplicates {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="demo-title">🔄 Enhanced Duplicates Demo</h1>
+        <p class="demo-subtitle">Beautiful, interactive duplicate code analysis with rich metrics and expandable file details</p>
+
+        <div class="duplicates-list">
+            <!-- Critical Priority Duplicate -->
+            <div class='duplicate-item priority-critical'>
+                <div class='duplicate-header'>
+                    <h3>Authentication Logic Duplicated 
+                        <span class='similarity-score similarity-high'>95% Similar</span>
+                    </h3>
+                    <div class='duplicate-badges'>
+                        <span class='severity-badge critical'>CRITICAL</span>
+                        <span class='confidence-badge'>Confidence: 92%</span>
+                        <span class='files-badge'>2 Files</span>
+                    </div>
+                </div>
+                
+                <div class='duplicate-metrics'>
+                    <div class='metric-item'>
+                        <div class='metric-value'>95%</div>
+                        <div class='metric-label'>Similarity</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value'>290</div>
+                        <div class='metric-label'>Lines Duplicated</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value'>1</div>
+                        <div class='metric-label'>Functions</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value negative'>Critical</div>
+                        <div class='metric-label'>Impact</div>
+                    </div>
+                </div>
+                
+                <p class='duplicate-description'>Both implement the same insecure authentication with plain text password comparison and similar token generation, creating critical security vulnerabilities.</p>
+                
+                <div class='duplicate-files'>
+                    <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                        <span class='files-toggle'>▶</span>
+                        <span>2 Duplicate Files (Click to Expand)</span>
+                    </div>
+                    <div class='files-content'>
+                        <div class='duplicate-files-list'>
+                            <div class='duplicate-file'>
+                                <div class='file-path-header'>
+                                    <span class='file-path-text'>auth_service/bad/security/user_auth.py</span>
+                                    <span class='file-status-indicator not_ready'>NOT_READY</span>
+                                </div>
+                                <div class='file-analysis-details'>
+                                    <div class='file-analysis-content'>
+                                        <div class='analysis-section'>
+                                            <h6>Duplicate Code Analysis</h6>
+                                            <p><strong>Functions Duplicated:</strong> authenticate_user(), generate_token()</p>
+                                            <p><strong>Lines Duplicated:</strong> 145 lines of authentication logic</p>
+                                            <p><strong>Anti-patterns:</strong> Plain text password storage, insecure token generation</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Business Impact</h6>
+                                            <p>Critical security vulnerability with plain text password handling and weak authentication mechanisms.</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Consolidation Opportunity</h6>
+                                            <p>Consolidate into a secure authentication service with proper password hashing and JWT token management.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class='duplicate-file'>
+                                <div class='file-path-header'>
+                                    <span class='file-path-text'>auth_service/bad/auth/login_handler.py</span>
+                                    <span class='file-status-indicator not_ready'>NOT_READY</span>
+                                </div>
+                                <div class='file-analysis-details'>
+                                    <div class='file-analysis-content'>
+                                        <div class='analysis-section'>
+                                            <h6>Duplicate Code Analysis</h6>
+                                            <p><strong>Functions Duplicated:</strong> authenticate_user(), generate_token()</p>
+                                            <p><strong>Lines Duplicated:</strong> 145 lines of authentication logic</p>
+                                            <p><strong>Anti-patterns:</strong> Plain text password storage, insecure token generation</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Business Impact</h6>
+                                            <p>Critical security vulnerability with plain text password handling and weak authentication mechanisms.</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Consolidation Opportunity</h6>
+                                            <p>Consolidate into a secure authentication service with proper password hashing and JWT token management.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='duplicate-recommendation'>
+                    <strong>Recommendation:</strong> Consolidate into a secure authentication service with proper password hashing and JWT token management.
+                </div>
+            </div>
+
+            <!-- High Priority Duplicate -->
+            <div class='duplicate-item priority-high'>
+                <div class='duplicate-header'>
+                    <h3>Data Processing Duplicates
+                        <span class='similarity-score similarity-high'>88% Similar</span>
+                    </h3>
+                    <div class='duplicate-badges'>
+                        <span class='severity-badge high'>HIGH</span>
+                        <span class='confidence-badge'>Confidence: 85%</span>
+                        <span class='files-badge'>2 Files</span>
+                    </div>
+                </div>
+                
+                <div class='duplicate-metrics'>
+                    <div class='metric-item'>
+                        <div class='metric-value'>88%</div>
+                        <div class='metric-label'>Similarity</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value'>226</div>
+                        <div class='metric-label'>Lines Duplicated</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value'>1</div>
+                        <div class='metric-label'>Functions</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value negative'>High</div>
+                        <div class='metric-label'>Impact</div>
+                    </div>
+                </div>
+                
+                <p class='duplicate-description'>Both contain identical expensive_transformation() function and nearly identical data processing logic with the same memory issues.</p>
+                
+                <div class='duplicate-files'>
+                    <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                        <span class='files-toggle'>▶</span>
+                        <span>2 Duplicate Files (Click to Expand)</span>
+                    </div>
+                    <div class='files-content'>
+                        <div class='duplicate-files-list'>
+                            <div class='duplicate-file'>
+                                <div class='file-path-header'>
+                                    <span class='file-path-text'>data_pipeline/bad/helpers/data_processor.py</span>
+                                    <span class='file-status-indicator not_ready'>NOT_READY</span>
+                                </div>
+                                <div class='file-analysis-details'>
+                                    <div class='file-analysis-content'>
+                                        <div class='analysis-section'>
+                                            <h6>Duplicate Code Analysis</h6>
+                                            <p><strong>Functions Duplicated:</strong> expensive_transformation(), process_all_data()</p>
+                                            <p><strong>Lines Duplicated:</strong> 113 lines of data processing logic</p>
+                                            <p><strong>Anti-patterns:</strong> Memory-intensive operations, inefficient algorithms</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Business Impact</h6>
+                                            <p>Performance issues and memory consumption problems affecting data processing pipeline efficiency.</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Consolidation Opportunity</h6>
+                                            <p>Refactor into a single optimized data processing service with proper memory management.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class='duplicate-file'>
+                                <div class='file-path-header'>
+                                    <span class='file-path-text'>data_pipeline/bad/utils/data_helper.py</span>
+                                    <span class='file-status-indicator not_ready'>NOT_READY</span>
+                                </div>
+                                <div class='file-analysis-details'>
+                                    <div class='file-analysis-content'>
+                                        <div class='analysis-section'>
+                                            <h6>Duplicate Code Analysis</h6>
+                                            <p><strong>Functions Duplicated:</strong> expensive_transformation(), process_all_data()</p>
+                                            <p><strong>Lines Duplicated:</strong> 113 lines of data processing logic</p>
+                                            <p><strong>Anti-patterns:</strong> Memory-intensive operations, inefficient algorithms</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Business Impact</h6>
+                                            <p>Performance issues and memory consumption problems affecting data processing pipeline efficiency.</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Consolidation Opportunity</h6>
+                                            <p>Refactor into a single optimized data processing service with proper memory management.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='duplicate-recommendation'>
+                    <strong>Recommendation:</strong> Refactor into a single optimized data processing service with proper memory management.
+                </div>
+            </div>
+
+            <!-- Medium Priority Duplicate -->
+            <div class='duplicate-item priority-medium'>
+                <div class='duplicate-header'>
+                    <h3>Product Search Implementation
+                        <span class='similarity-score similarity-medium'>75% Similar</span>
+                    </h3>
+                    <div class='duplicate-badges'>
+                        <span class='severity-badge medium'>MEDIUM</span>
+                        <span class='confidence-badge'>Confidence: 78%</span>
+                        <span class='files-badge'>2 Files</span>
+                    </div>
+                </div>
+                
+                <div class='duplicate-metrics'>
+                    <div class='metric-item'>
+                        <div class='metric-value'>75%</div>
+                        <div class='metric-label'>Similarity</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value'>150</div>
+                        <div class='metric-label'>Lines Duplicated</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value'>1</div>
+                        <div class='metric-label'>Functions</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-value neutral'>Medium</div>
+                        <div class='metric-label'>Impact</div>
+                    </div>
+                </div>
+                
+                <p class='duplicate-description'>Both implement product search with SQL injection vulnerabilities and nearly identical database handling patterns.</p>
+                
+                <div class='duplicate-files'>
+                    <div class='files-header' onclick='toggleDuplicateFiles(this)'>
+                        <span class='files-toggle'>▶</span>
+                        <span>2 Duplicate Files (Click to Expand)</span>
+                    </div>
+                    <div class='files-content'>
+                        <div class='duplicate-files-list'>
+                            <div class='duplicate-file'>
+                                <div class='file-path-header'>
+                                    <span class='file-path-text'>ecommerce_api/bad/services/product_search.py</span>
+                                    <span class='file-status-indicator not_ready'>NOT_READY</span>
+                                </div>
+                                <div class='file-analysis-details'>
+                                    <div class='file-analysis-content'>
+                                        <div class='analysis-section'>
+                                            <h6>Duplicate Code Analysis</h6>
+                                            <p><strong>Functions Duplicated:</strong> search_products(), find_products()</p>
+                                            <p><strong>Lines Duplicated:</strong> 75 lines of search logic</p>
+                                            <p><strong>Anti-patterns:</strong> SQL injection vulnerabilities, duplicate database patterns</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Business Impact</h6>
+                                            <p>Security vulnerabilities and code duplication increasing maintenance burden.</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Consolidation Opportunity</h6>
+                                            <p>Create a secure product search service with parameterized queries and unified interface.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class='duplicate-file'>
+                                <div class='file-path-header'>
+                                    <span class='file-path-text'>ecommerce_api/bad/services/product_finder.py</span>
+                                    <span class='file-status-indicator not_ready'>NOT_READY</span>
+                                </div>
+                                <div class='file-analysis-details'>
+                                    <div class='file-analysis-content'>
+                                        <div class='analysis-section'>
+                                            <h6>Duplicate Code Analysis</h6>
+                                            <p><strong>Functions Duplicated:</strong> search_products(), find_products()</p>
+                                            <p><strong>Lines Duplicated:</strong> 75 lines of search logic</p>
+                                            <p><strong>Anti-patterns:</strong> SQL injection vulnerabilities, duplicate database patterns</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Business Impact</h6>
+                                            <p>Security vulnerabilities and code duplication increasing maintenance burden.</p>
+                                        </div>
+                                        <div class='analysis-section'>
+                                            <h6>Consolidation Opportunity</h6>
+                                            <p>Create a secure product search service with parameterized queries and unified interface.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='duplicate-recommendation'>
+                    <strong>Recommendation:</strong> Create a secure product search service with parameterized queries and unified interface.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDuplicateFiles(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.files-toggle');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+    </script>
+</body>
+</html>

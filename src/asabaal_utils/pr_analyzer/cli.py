@@ -38,8 +38,8 @@ def main():
     # Model selection
     parser.add_argument('--model', dest='model',
                        help='AI model to use for analysis (e.g., anthropic/claude-3.5-sonnet, openai/gpt-4o)')
-    parser.add_argument('--provider', dest='provider', choices=['openrouter', 'claude_cli'],
-                       help='AI provider to use (default: openrouter)')
+    parser.add_argument('--provider', dest='provider', choices=['ollama', 'openrouter', 'claude_cli'],
+                       help='AI provider to use (default: ollama)')
     
     args = parser.parse_args()
     

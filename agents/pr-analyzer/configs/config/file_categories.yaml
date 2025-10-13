@@ -1,0 +1,170 @@
+# File Classification Rules for PR Analysis
+file_categories:
+  CORE_BUSINESS_LOGIC:
+    patterns:
+      - "models/"
+      - "services/"
+      - "controllers/"
+      - "business/"
+      - "core/"
+      - "lib/"
+    importance: "HIGH"
+    description: "Core application logic and business rules"
+    icon: "🏛️"
+    
+  USER_INTERFACE:
+    patterns:
+      - "components/"
+      - "pages/"
+      - "templates/"
+      - "views/"
+      - "ui/"
+      - "frontend/"
+    importance: "HIGH"
+    description: "User-facing interface components"
+    icon: "🎨"
+    
+  API_INTEGRATION:
+    patterns:
+      - "api/"
+      - "endpoints/"
+      - "routes/"
+      - "handlers/"
+      - "controllers/"
+    importance: "HIGH"
+    description: "API definitions and integration logic"
+    icon: "🔗"
+    
+  DATABASE:
+    patterns:
+      - "migrations/"
+      - "schema/"
+      - "queries/"
+      - "supabase/"
+      - "database/"
+      - "*.sql"
+    importance: "HIGH"
+    description: "Database structure and data access"
+    icon: "🗄️"
+    
+  CONFIGURATION:
+    patterns:
+      - "config/"
+      - ".env"
+      - "settings.py"
+      - "*.json"
+      - "*.yaml"
+      - "*.yml"
+      - "vercel.json"
+    importance: "MEDIUM"
+    description: "Application and deployment configuration"
+    icon: "⚙️"
+    
+  DOCUMENTATION:
+    patterns:
+      - "README"
+      - "*.md"
+      - "docs/"
+      - "documentation/"
+      - "CHANGELOG"
+      - "LICENSE"
+    importance: "MEDIUM"  
+    description: "Project documentation and guides"
+    icon: "📚"
+    
+  TESTING:
+    patterns:
+      - "test/"
+      - "tests/"
+      - "spec/"
+      - "__test__"
+      - "*.test.*"
+      - "*.spec.*"
+    importance: "MEDIUM"
+    description: "Test suites and testing utilities"
+    icon: "🧪"
+    
+  BUILD_DEPLOYMENT:
+    patterns:
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - ".github/"
+      - "deploy/"
+      - ".vercel/"
+      - "netlify.toml"
+    importance: "MEDIUM"
+    description: "Build and deployment infrastructure"
+    icon: "🚀"
+    
+  SCRIPTS_AUTOMATION:
+    patterns:
+      - "scripts/"
+      - "automation/"
+      - "*.py"
+      - "*.sh"
+      - "content/"
+    importance: "MEDIUM"
+    description: "Automation scripts and utilities"
+    icon: "🤖"
+    
+  ASSETS_MEDIA:
+    patterns:
+      - "assets/"
+      - "static/"
+      - "images/"
+      - "css/"
+      - "js/"
+      - "fonts/"
+      - "icons/"
+      - "qr/"
+      - "*.png"
+      - "*.jpg"
+      - "*.jpeg"
+      - "*.svg"
+      - "*.gif"
+    importance: "LOW"
+    description: "Static assets and media files"
+    icon: "🖼️"
+    
+  BLOG_CONTENT:
+    patterns:
+      - "blog/"
+      - "posts/"
+      - "content/"
+      - "raw-input/"
+    importance: "MEDIUM"
+    description: "Blog posts and content files"
+    icon: "📝"
+    
+  VISUALIZATIONS:
+    patterns:
+      - "visualizations/"
+      - "charts/"
+      - "diagrams/"
+    importance: "MEDIUM"
+    description: "Data visualizations and diagrams"
+    icon: "📊"
+    
+  PROTOTYPE_DEVELOPMENT:
+    patterns:
+      - "prototypes/"
+      - "prototype/"
+    importance: "IGNORE"
+    description: "Prototype development files - exclude from PR analysis"
+    icon: "🚧"
+    
+  GENERATED_IRRELEVANT:
+    patterns:
+      - "dist/"
+      - "build/"
+      - "__pycache__/"
+      - "node_modules/"
+      - ".git/"
+      - "*.pyc"
+      - ".DS_Store"
+      - "*.Zone.Identifier"
+      - ".vscode/"
+      - ".idea/"
+    importance: "IGNORE"
+    description: "Generated or irrelevant files to exclude"
+    icon: "🗑️"
