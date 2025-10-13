@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 # Add the shared utilities to Python path
-shared_root = Path(__file__).parent.parent.parent.parent / "shared"
+shared_root = Path(__file__).parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
 sys.path.insert(0, str(shared_root))
 
 from . import UnifiedPRAnalyzer

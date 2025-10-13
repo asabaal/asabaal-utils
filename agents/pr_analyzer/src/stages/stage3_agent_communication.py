@@ -19,12 +19,15 @@ if TYPE_CHECKING:
 
 # Add the parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add shared utilities to path
+shared_path = Path(__file__).parent.parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
+sys.path.insert(0, str(shared_path))
 
-from .api_confirmation import require_paid_api_confirmation
+from ..api_confirmation import require_paid_api_confirmation
 
 # Import backend manager
 try:
-    from asabaal_utils.agentic_toolkit.backend_config import BackendManager, list_available_backends
+    from agentic_toolkit.backend_config import BackendManager, list_available_backends
     BACKEND_MANAGER_AVAILABLE = True
 except ImportError:
     BACKEND_MANAGER_AVAILABLE = False
