@@ -1,0 +1,66 @@
+You are a software architect analyzing code patterns and consistency.
+
+Here is the pattern analysis data:
+
+```json
+{
+  "file_categories": [
+    "UNCATEGORIZED"
+  ],
+  "sample_files_by_category": {
+    "UNCATEGORIZED": [
+      {
+        "path": "__init__.py",
+        "change_type": "A",
+        "content_preview": "\"\"\"\nPR Analyzer Agent\n\nA comprehensive tool for analyzing pull requests with visual exploration \ncapabilities and detailed impact assessment.\n\"\"\"\n\n__version__ = \"1.0.0\""
+      },
+      {
+        "path": "run_analyzer.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"\nPR Analyzer CLI Entry Point\n\"\"\"\n\nimport sys\nfrom pathlib import Path\n\n# Add src directory to Python path\nsrc_dir = Path(__file__).parent / \"src\"\nsys.path.insert(0, str(src_dir))\n\nfrom src.cli import main\n\nif __name__ == \"__main__\":\n    main()"
+      },
+      {
+        "path": "src/__init__.py",
+        "change_type": "A",
+        "content_preview": "\"\"\"\nPR Analyzer - Intelligent Pull Request Analysis Tool\n\nComprehensive PR analysis with AI-powered duplicate detection, quality assessment,\nand interactive feedback system for continuous improvement.\n\"\"\"\n\nfrom .analyzer import UnifiedPRAnalyzer\nfrom .stages.stage3_agent_communication import RobustA"
+      },
+      {
+        "path": "src/analyzer.py",
+        "change_type": "A",
+        "content_preview": "#!/usr/bin/env python3\n\"\"\"\nUnified PR Analyzer - Main analyzer class\n\"\"\"\n\nimport subprocess\nimport shutil\nimport time\nimport yaml\nfrom pathlib import Path\nfrom typing import Optional, Dict, Any\n\nfrom .stages.stage1_context_prep import ContextPreparationTester\nfrom .stages.stage2_agent_prompts import"
+      },
+      {
+        "path": "src/api_confirmation.py",
+        "change_type": "A",
+        "content_preview": "\"\"\"\nShared API confirmation module for all PR analyzer stages\nProvides centralized paid API confirmation functionality\n\"\"\"\n\nimport sys\n\n# Global flag to track if user has confirmed paid API usage for this run\n_paid_api_confirmed = False\n\ndef require_paid_api_confirmation(backend_type: str) -> bool:\n"
+      }
+    ]
+  }
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains file categories and content samples
+2. Look for naming convention inconsistencies
+3. Identify different approaches to similar problems
+4. Note architectural pattern inconsistencies
+
+Focus areas:
+- File naming patterns across categories
+- Code style consistency within categories  
+- Similar functionality implemented differently
+- Missing architectural patterns
+
+Provide your response in this exact format:
+
+## CRITICAL:
+[Critical pattern issues that must be fixed]
+
+## HIGH:
+[High priority consistency issues]
+
+## MEDIUM:
+[Medium priority improvements]
+
+## Summary:
+[Brief summary of pattern analysis findings]

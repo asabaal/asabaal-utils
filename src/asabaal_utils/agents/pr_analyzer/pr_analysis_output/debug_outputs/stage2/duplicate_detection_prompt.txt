@@ -1,0 +1,384 @@
+You are a senior software architect with expertise in detecting duplicate implementations by analyzing actual code content and functional purpose. Your task is to DISCOVER duplicate or similar files by reading and understanding what each file actually does.
+
+## PR Context
+- Analyzing: 29 files (+580/-0)
+- Branch: feature/image_transcription → main
+
+## File Content & Functional Analysis
+
+### UNCATEGORIZED FILES (29 files)
+
+#### __init__.py
+- Change: A (+20/-0)
+- Size: 168 bytes
+- Content analysis:
+```
+"""
+PR Analyzer Agent
+
+A comprehensive tool for analyzing pull requests with visual exploration 
+capabilities and detailed impact assessment.
+"""
+
+__version__ = "1.0.0"
+```
+
+#### run_analyzer.py
+- Change: A (+20/-0)
+- Size: 269 bytes
+- Content analysis:
+```
+#!/usr/bin/env python3
+"""
+PR Analyzer CLI Entry Point
+"""
+
+import sys
+from pathlib import Path
+
+# Add src directory to Python path
+src_dir = Path(__file__).parent / "src"
+sys.path.insert(0, str(src_dir))
+
+from src.cli import main
+
+if __name__ == "__main__":
+    main()
+```
+
+#### src/__init__.py
+- Change: A (+20/-0)
+- Size: 1002 bytes
+- Content analysis:
+```
+"""
+PR Analyzer - Intelligent Pull Request Analysis Tool
+
+Comprehensive PR analysis with AI-powered duplicate detection, quality assessment,
+and interactive feedback system for continuous improvement.
+"""
+
+from .analyzer import UnifiedPRAnalyzer
+from .stages.stage3_agent_communication import RobustAgentCaller
+from .stages.stage4_response_parsing import ResponseParser
+from .stages.stage5_issue_extraction import IssueValidator
+from .stages.stage6_filtering_combination import ResultCombiner
+from .stages.stage7_detailed_analysis import DetailedAnalysisEngine
+from .stages.stage8_file_assessment import FileAssessmentGenerator
+from .stages.stage9_html_generator import Stage9HTMLGenerator
+from .stages.stage10_feedback_updates import FeedbackUpdateSystem
+
+__all__ = [
+    'UnifiedPRAnalyzer',
+    'RobustAgentCaller', 
+    'ResponseParser',
+    'IssueValidator',
+    'ResultCombiner',
+    'DetailedAnalysisEngine',
+    'FileAssessmentGenerator',
+    'Stage9HTMLGenerator',
+    'FeedbackUpdateSystem'
+```
+
+#### src/analyzer.py
+- Change: A (+20/-0)
+- Size: 21060 bytes
+- Content analysis:
+```
+#!/usr/bin/env python3
+"""
+Unified PR Analyzer - Main analyzer class
+"""
+
+import subprocess
+import shutil
+import time
+import yaml
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+from .stages.stage1_context_prep import ContextPreparationTester
+from .stages.stage2_agent_prompts import AgentPromptTester
+from .stages.stage3_agent_communication import RobustAgentCaller
+from .stages.stage4_response_parsing import ResponseParser
+from .stages.stage5_issue_extraction import IssueValidator
+from .stages.stage6_filtering_combination import ResultCombiner
+from .stages.stage7_detailed_analysis import DetailedAnalysisEngine as DetailedAnalysisEngineV1
+from .stages.stage8_file_assessment import FileAssessmentGenerator
+from .stages.stage9_html_generator import Stage9HTMLGenerator
+from .stages.stage10_feedback_updates import FeedbackUpdateSystem
+
+from .stages.stage7_detailed_analysis import DetailedAnalysisEngine as DetailedAnalysisEngineV1
+
+# Try to import V2 toolkit version
+TOOLKIT_VE
+```
+
+#### src/api_confirmation.py
+- Change: A (+20/-0)
+- Size: 1940 bytes
+- Content analysis:
+```
+"""
+Shared API confirmation module for all PR analyzer stages
+Provides centralized paid API confirmation functionality
+"""
+
+import sys
+
+# Global flag to track if user has confirmed paid API usage for this run
+_paid_api_confirmed = False
+
+def require_paid_api_confirmation(backend_type: str) -> bool:
+    """Require user confirmation before making paid API calls
+    
+    Args:
+        backend_type: The type of backend being used (e.g., 'openrouter', 'claude', 'ollama')
+        
+    Returns:
+        bool: True if API calls should proceed, False if they should be blocked
+    """
+    global _paid_api_confirmed
+    
+    # Only require confirmation for paid APIs
+    if backend_type.lower() not in ['openrouter', 'claude']:
+        return True
+    
+    if _paid_api_confirmed:
+        return True
+    
+    print("\n" + "="*60)
+    print("🚨 PAID API CONFIRMATION REQUIRED")
+    print("="*60)
+    print(f"You are about to use the {backend_type.upper()} API, which costs money.")
+    print("This will ma
+```
+
+#### src/cli.py
+- Change: A (+20/-0)
+- Size: 5527 bytes
+- Content analysis:
+```
+#!/usr/bin/env python3
+"""PR Analyzer CLI wrapper for toolmgr installation"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+# Add the shared utilities to Python path
+shared_root = Path(__file__).parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
+sys.path.insert(0, str(shared_root))
+
+from . import UnifiedPRAnalyzer
+
+
+def main():
+    """Main entry point with argparse."""
+    parser = argparse.ArgumentParser(description='PR Analyzer - Comprehensive pull request analysis tool')
+    parser.add_argument('--from', dest='from_branch', default=None,
+                       help='Source branch (default: current branch)')
+    parser.add_argument('--to', dest='to_branch', default='main',
+                       help='Target branch (default: main)')
+    parser.add_argument('--repo', dest='repo_path', default='.',
+                       help='Repository path (default: current directory)')
+    
+    # Stage control
+    parser.add_argument('--start-stage', type=int
+```
+
+#### src/stages/stage3_agent_communication.py
+- Change: A (+20/-0)
+- Size: 31267 bytes
+- Content analysis:
+```
+#!/usr/bin/env python3
+"""
+Stage 3: Agent Communication Testing
+Test robust agent communication with file-based prompts and clean formatting
+"""
+
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from dataclasses import dataclass
+from enum import Enum
+
+if TYPE_CHECKING:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add shared utilities to path
+shared_path = Path(__file__).parent.parent.parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
+sys.path.insert(0, str(shared_path))
+
+from ..api_confirmation import require_paid_api_confirmation
+
+# Import backend manager
+try:
+    from asabaal_utils.shared.agentic_toolkit.backend_config import BackendManager, list_available_backends
+    BACKEND_MANAGER_AVAILABLE = True
+except ImportError:
+    BACKEND_MANAGER
+```
+
+#### src/stages/stage1_context_prep.py
+- Change: A (+20/-0)
+- Size: 24960 bytes
+- Content analysis:
+```
+#!/usr/bin/env python3
+"""
+Stage 1: Context Preparation Testing
+Test the context preparation stage with full visibility and debugging
+"""
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any
+from dataclasses import dataclass, asdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+from ..core.git_analyzer import GitAnalyzer
+from ..classifiers.file_classifier import FileClassifier
+
+
+@dataclass
+class ContextTestResult:
+    """Results from context preparation testing"""
+    success: bool
+    total_files: int
+    files_with_content: int
+    files_by_category: Dict[str, int]
+    sample_files: List[Dict]
+    errors: List[str]
+    performance_ms: float
+
+
+class ContextPreparationTester:
+    """Test Stage 1: Context Preparation with full visibility"""
+    
+    def __init__(self, repo_path: str, output_dir: str = None):
+        self.repo_path = Path(repo_path).resolve()
+        if output_dir:
+    
+```
+
+#### src/stages/stage9_html_generator.py
+- Change: A (+20/-0)
+- Size: 83131 bytes
+- Content analysis:
+```
+[File too large]
+```
+
+#### src/stages/stage6_filtering_combination.py
+- Change: A (+20/-0)
+- Size: 33997 bytes
+- Content analysis:
+```
+#!/usr/bin/env python3
+"""
+Stage 6: Filtering and Result Combination
+Final filtering, result combination, and output formatting for complete PR analysis
+"""
+
+import json
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, asdict
+from enum import Enum
+from datetime import datetime
+from collections import defaultdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Import from previous stages
+from .stage4_response_parsing import QualityIssue, IssueType, Priority
+from .stage5_issue_extraction import ValidatedIssue, ValidationResult
+
+
+@dataclass
+class PRAnalysisReport:
+    """Complete PR analysis report"""
+    pr_summary: Dict[str, Any]
+    overall_assessment: Dict[str, Any]
+    quality_issues: List[Dict[str, Any]]
+    recommendations: List[str]
+    merge_readiness: Dict[str, Any]
+    technical_metrics: Dict[str, Any]
+    generated_at: str
+    analysis_metadata: Dict[str,
+```
+
+## DISCOVERY OBJECTIVES
+
+**Find files that serve similar/identical purposes by analyzing their actual functionality:**
+
+### 1. **FUNCTIONAL DUPLICATES**
+Look for files that accomplish the same goal through similar or different approaches:
+- Scripts that process the same type of data (e.g., blog posts, configurations)
+- Functions with similar logic but different implementations
+- Components that render similar UI elements
+- Multiple solutions to the same business problem
+
+### 2. **VERSION VARIATIONS** 
+Identify files that appear to be different versions of the same functionality:
+- Scripts with suffixes like "_verbose", "_simple", "_v2", etc.
+- Files with similar core functionality but different levels of detail
+- Experimental vs production versions of the same feature
+
+### 3. **PARTIAL IMPLEMENTATIONS**
+Find incomplete or abandoned implementations:
+- Files that seem to be early versions of functionality found elsewhere
+- Partial migrations or refactoring attempts
+- Template files that were customized but not fully completed
+
+### 4. **CONFIGURATION REDUNDANCY**
+Discover multiple config files serving similar purposes:
+- Database setup scripts with overlapping functionality
+- Environment configurations with similar variables
+- Build/deployment files that configure the same systems
+
+## ANALYSIS METHOD
+1. **Read the actual code content** - don't just look at filenames
+2. **Understand what each file DOES** - what problem does it solve?
+3. **Compare functional purposes** - which files solve similar problems?
+4. **Identify relationships** - are some files variations of others?
+5. **Provide evidence** - quote specific code/content that shows similarity
+
+## OUTPUT REQUIREMENTS
+Respond with specific discoveries in this format:
+
+### CRITICAL Issues (Exact duplicates or abandoned implementations)
+**Issue:** [Brief title]
+**Files:** file1.py, file2.py, file3.py
+**Evidence:** [Specific code quotes showing similarity]
+**Recommendation:** [Specific action needed]
+
+### HIGH Issues (Functional duplicates with different implementations)
+**Issue:** [Brief title]  
+**Files:** file1.py, file2.py
+**Evidence:** [Specific code quotes showing similarity]
+**Recommendation:** [Specific action needed]
+
+### MEDIUM Issues (Similar purpose, potentially consolidatable)
+**Issue:** [Brief title]
+**Files:** file1.py, file2.py
+**Evidence:** [Specific code quotes showing similarity]
+**Recommendation:** [Specific action needed]
+
+Focus on DISCOVERING actual content-based duplicates, not generic observations.

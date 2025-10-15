@@ -1,0 +1,77 @@
+# OpenSpec-to-Code Generator Configuration
+
+# Model Configuration
+model:
+  model: "llama3.1:8b"
+  base_url: "http://localhost:11434"
+  temperature: 0.1  # Low temperature for reproducibility
+  max_tokens: 2048
+  top_p: 0.9
+  top_k: 40
+
+# Generation Configuration
+generation:
+  output_dir: "../output"
+  reference_dir: "../reference"
+  overwrite: true
+  validate_after_generation: true
+
+# Prompt Templates
+prompts:
+  system_prompt: |
+    You are an expert Python developer specializing in implementing OpenSpec specifications.
+    Generate clean, well-documented, and testable code that exactly matches the requirements.
+    Follow Python best practices and include comprehensive error handling.
+
+  source_code_prompt: |
+    Generate complete Python implementation for the following OpenSpec specification:
+    
+    Specification ID: {spec_id}
+    Title: {title}
+    Version: {version}
+    
+    Requirements:
+    {requirements}
+    
+    Generate a single Python file that implements ALL requirements. Include:
+    - Complete function implementations
+    - Type hints
+    - Docstrings
+    - Error handling
+    - Import statements
+    - No TODO comments - everything must be implemented
+
+  test_prompt: |
+    Generate comprehensive pytest tests for the following requirement:
+    
+    Requirement ID: {req_id}
+    Title: {req_title}
+    Description: {req_description}
+    Validation: {validation}
+    
+    Generate tests that verify:
+    - Correct functionality
+    - Edge cases
+    - Error conditions
+    - Type safety
+
+  documentation_prompt: |
+    Generate markdown documentation for the following specification:
+    
+    Specification ID: {spec_id}
+    Title: {title}
+    Requirements: {requirements}
+    
+    Include:
+    - Project overview
+    - Installation instructions
+    - Usage examples
+    - API documentation
+    - Requirements traceability
+
+# Validation Configuration
+validation:
+  run_tests: true
+  lint_code: true
+  type_check: true
+  compare_to_reference: true

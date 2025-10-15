@@ -1,0 +1,63 @@
+spec_id: rhythmic_pulse_generator
+title: Rhythmic Pulse Generator
+version: 1.0.0
+
+requirements:
+  - id: RPG-001
+    title: Generate Time Grid
+    description: Create a deterministic sequence of beat timestamps for a given tempo and duration.
+    interface:
+      function: generate_time_grid
+      parameters:
+        tempo_bpm: float  # beats per minute
+        duration_sec: float  # total time in seconds
+      returns: list[float]  # beat timestamps in seconds
+    example:
+      input:
+        tempo_bpm: 120
+        duration_sec: 2
+      output: [0.0, 0.5, 1.0, 1.5]
+    validation:
+      - type: unit
+        file: test_timegrid.py
+        target: "pass"
+
+  - id: RPG-002
+    title: Apply Accent Pattern
+    description: Overlay a binary pattern (1=accent, 0=no accent) over the generated time grid.
+    interface:
+      function: apply_accent_pattern
+      parameters:
+        time_grid: list[float]
+        pattern: list[int]
+      returns: list[tuple[float, int]]
+    example:
+      input:
+        time_grid: [0.0, 0.5, 1.0, 1.5]
+        pattern: [1, 0, 1, 0]
+      output: [(0.0,1), (0.5,0), (1.0,1), (1.5,0)]
+    validation:
+      - type: unit
+        file: test_accents.py
+        target: "pass"
+
+  - id: RPG-003
+    title: Export as MIDI
+    description: Convert rhythmic data into a valid MIDI file.
+    interface:
+      function: export_as_midi
+      parameters:
+        time_grid: list[float]
+        accents: list[tuple[float,int]]
+        outfile: str
+      returns: bool  # success/failure
+    example:
+      input:
+        time_grid: [0.0, 0.5, 1.0, 1.5]
+        accents: [(0.0,1),(0.5,0),(1.0,1),(1.5,0)]
+        outfile: "pattern.mid"
+      output: true
+    validation:
+      - type: unit
+        file: test_midi_export.py
+        target: "pass"

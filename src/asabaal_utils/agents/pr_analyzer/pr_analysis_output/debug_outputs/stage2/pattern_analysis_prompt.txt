@@ -1,0 +1,269 @@
+You are a senior software architect analyzing code patterns and consistency across this PR.
+
+## PR Context
+- Analyzing: 29 files
+- Categories: 1 different types
+
+## Analysis Focus
+Look for patterns and consistency issues:
+
+1. **Naming Conventions**
+   - File naming patterns
+   - Variable and function naming
+   - Directory structure consistency
+
+2. **Architecture Patterns**
+   - Similar functionality implemented differently
+   - Inconsistent approaches to the same problems
+   - Missing architectural patterns
+
+3. **Code Style**
+   - Formatting inconsistencies
+   - Different coding patterns for similar tasks
+   - Inconsistent error handling approaches
+
+## Sample File Analysis
+## __init__.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 168 bytes, 8 lines
+- Content sample:
+```
+"""
+PR Analyzer Agent
+
+A comprehensive tool for analyzing pull requests with visual exploration 
+capabilities and detailed impact assessment.
+"""
+
+__version__ = "1.0.0"
+```
+
+## run_analyzer.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 269 bytes, 16 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+PR Analyzer CLI Entry Point
+"""
+
+import sys
+from pathlib import Path
+
+# Add src directory to Python path
+src_dir = Path(__file__).parent / "src"
+sys.path.insert(0, str(src_dir))
+
+from src.cli import main
+
+if __name__ == "__main__":
+    main()
+```
+
+## src/__init__.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 1002 bytes, 28 lines
+- Content sample:
+```
+"""
+PR Analyzer - Intelligent Pull Request Analysis Tool
+
+Comprehensive PR analysis with AI-powered duplicate detection, quality assessment,
+and interactive feedback system for continuous improvement.
+"""
+
+from .analyzer import UnifiedPRAnalyzer
+from .stages.stage3_agent_communication import RobustAgentCaller
+from .stages.stage4_response_parsing import ResponseParser
+from .stages.stage5_issue_extraction import IssueValidator
+from .stages.stage6_filtering_combination import ResultCombiner
+from .s
+... [truncated]
+```
+
+## src/analyzer.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 21060 bytes, 484 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Unified PR Analyzer - Main analyzer class
+"""
+
+import subprocess
+import shutil
+import time
+import yaml
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+from .stages.stage1_context_prep import ContextPreparationTester
+from .stages.stage2_agent_prompts import AgentPromptTester
+from .stages.stage3_agent_communication import RobustAgentCaller
+from .stages.stage4_response_parsing import ResponseParser
+from .stages.stage5_issue_extraction import IssueValidato
+... [truncated]
+```
+
+## src/api_confirmation.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 1940 bytes, 61 lines
+- Content sample:
+```
+"""
+Shared API confirmation module for all PR analyzer stages
+Provides centralized paid API confirmation functionality
+"""
+
+import sys
+
+# Global flag to track if user has confirmed paid API usage for this run
+_paid_api_confirmed = False
+
+def require_paid_api_confirmation(backend_type: str) -> bool:
+    """Require user confirmation before making paid API calls
+    
+    Args:
+        backend_type: The type of backend being used (e.g., 'openrouter', 'claude', 'ollama')
+        
+    Returns:
+       
+... [truncated]
+```
+
+## src/cli.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 5527 bytes, 124 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""PR Analyzer CLI wrapper for toolmgr installation"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+# Add the shared utilities to Python path
+shared_root = Path(__file__).parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
+sys.path.insert(0, str(shared_root))
+
+from . import UnifiedPRAnalyzer
+
+
+def main():
+    """Main entry point with argparse."""
+    parser = argparse.ArgumentParser(description='PR Analyzer - Comprehensive pull reque
+... [truncated]
+```
+
+## src/stages/stage3_agent_communication.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 31267 bytes, 754 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 3: Agent Communication Testing
+Test robust agent communication with file-based prompts and clean formatting
+"""
+
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from dataclasses import dataclass
+from enum import Enum
+
+if TYPE_CHECKING:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager
+
+# Add the parent directory to path for imports
+sys.pat
+... [truncated]
+```
+
+## src/stages/stage1_context_prep.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 24960 bytes, 559 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 1: Context Preparation Testing
+Test the context preparation stage with full visibility and debugging
+"""
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any
+from dataclasses import dataclass, asdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+from ..core.git_analyzer import GitAnalyzer
+from ..classifiers.file_classifier import FileClassifier
+
+
+@dataclass
+clas
+... [truncated]
+```
+
+## src/stages/stage9_html_generator.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 83131 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## src/stages/stage6_filtering_combination.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 33997 bytes, 763 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 6: Filtering and Result Combination
+Final filtering, result combination, and output formatting for complete PR analysis
+"""
+
+import json
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, asdict
+from enum import Enum
+from datetime import datetime
+from collections import defaultdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Import from pr
+... [truncated]
+```
+
+
+## Output Format
+Identify specific pattern issues with recommendations for improvement.

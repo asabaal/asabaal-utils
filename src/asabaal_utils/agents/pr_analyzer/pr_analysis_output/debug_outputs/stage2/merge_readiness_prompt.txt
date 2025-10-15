@@ -1,0 +1,564 @@
+You are a senior engineering manager evaluating whether this PR is ready to merge. Consider code quality, completeness, and potential risks.
+
+## PR Overview
+- Scope: 29 files, +580/-0 lines
+- Categories affected: 1 different types of files
+
+## Recent Commit Messages
+Add test projects for PR analyzer validation
+
+## File Categories Analysis
+- UNCATEGORIZED: 29 files
+  • __init__.py (A, +20/-0)
+  • run_analyzer.py (A, +20/-0)
+  • src/__init__.py (A, +20/-0)
+  • ... and 26 more files
+
+## Sample Files (First 20 for review)
+## __init__.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 168 bytes, 8 lines
+- Content sample:
+```
+"""
+PR Analyzer Agent
+
+A comprehensive tool for analyzing pull requests with visual exploration 
+capabilities and detailed impact assessment.
+"""
+
+__version__ = "1.0.0"
+```
+
+## run_analyzer.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 269 bytes, 16 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+PR Analyzer CLI Entry Point
+"""
+
+import sys
+from pathlib import Path
+
+# Add src directory to Python path
+src_dir = Path(__file__).parent / "src"
+sys.path.insert(0, str(src_dir))
+
+from src.cli import main
+
+if __name__ == "__main__":
+    main()
+```
+
+## src/__init__.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 1002 bytes, 28 lines
+- Content sample:
+```
+"""
+PR Analyzer - Intelligent Pull Request Analysis Tool
+
+Comprehensive PR analysis with AI-powered duplicate detection, quality assessment,
+and interactive feedback system for continuous improvement.
+"""
+
+from .analyzer import UnifiedPRAnalyzer
+from .stages.stage3_agent_communication import RobustAgentCaller
+from .stages.stage4_response_parsing import ResponseParser
+from .stages.stage5_issue_extraction import IssueValidator
+from .stages.stage6_filtering_combination import ResultCombiner
+from .s
+... [truncated]
+```
+
+## src/analyzer.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 21060 bytes, 484 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Unified PR Analyzer - Main analyzer class
+"""
+
+import subprocess
+import shutil
+import time
+import yaml
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+from .stages.stage1_context_prep import ContextPreparationTester
+from .stages.stage2_agent_prompts import AgentPromptTester
+from .stages.stage3_agent_communication import RobustAgentCaller
+from .stages.stage4_response_parsing import ResponseParser
+from .stages.stage5_issue_extraction import IssueValidato
+... [truncated]
+```
+
+## src/api_confirmation.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 1940 bytes, 61 lines
+- Content sample:
+```
+"""
+Shared API confirmation module for all PR analyzer stages
+Provides centralized paid API confirmation functionality
+"""
+
+import sys
+
+# Global flag to track if user has confirmed paid API usage for this run
+_paid_api_confirmed = False
+
+def require_paid_api_confirmation(backend_type: str) -> bool:
+    """Require user confirmation before making paid API calls
+    
+    Args:
+        backend_type: The type of backend being used (e.g., 'openrouter', 'claude', 'ollama')
+        
+    Returns:
+       
+... [truncated]
+```
+
+## src/cli.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 5527 bytes, 124 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""PR Analyzer CLI wrapper for toolmgr installation"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+# Add the shared utilities to Python path
+shared_root = Path(__file__).parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
+sys.path.insert(0, str(shared_root))
+
+from . import UnifiedPRAnalyzer
+
+
+def main():
+    """Main entry point with argparse."""
+    parser = argparse.ArgumentParser(description='PR Analyzer - Comprehensive pull reque
+... [truncated]
+```
+
+## src/stages/stage3_agent_communication.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 31267 bytes, 754 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 3: Agent Communication Testing
+Test robust agent communication with file-based prompts and clean formatting
+"""
+
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from dataclasses import dataclass
+from enum import Enum
+
+if TYPE_CHECKING:
+    from asabaal_utils.agentic_toolkit.backend_config import BackendManager
+
+# Add the parent directory to path for imports
+sys.pat
+... [truncated]
+```
+
+## src/stages/stage1_context_prep.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 24960 bytes, 559 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 1: Context Preparation Testing
+Test the context preparation stage with full visibility and debugging
+"""
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any
+from dataclasses import dataclass, asdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+from ..core.git_analyzer import GitAnalyzer
+from ..classifiers.file_classifier import FileClassifier
+
+
+@dataclass
+clas
+... [truncated]
+```
+
+## src/stages/stage9_html_generator.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 83131 bytes, 0 lines
+- Content sample:
+```
+[File too large]
+```
+
+## src/stages/stage6_filtering_combination.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 33997 bytes, 763 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 6: Filtering and Result Combination
+Final filtering, result combination, and output formatting for complete PR analysis
+"""
+
+import json
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, asdict
+from enum import Enum
+from datetime import datetime
+from collections import defaultdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Import from pr
+... [truncated]
+```
+
+## src/stages/__init__.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 37 bytes, 3 lines
+- Content sample:
+```
+"""
+PR Analyzer Processing Stages
+"""
+```
+
+## src/stages/stage2_agent_prompts.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 26294 bytes, 606 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 2: Agent Prompt Generation Testing
+Test prompt generation for each specialized agent with full visibility
+"""
+
+import json
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any
+from dataclasses import dataclass
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+
+@dataclass
+class PromptTestResult:
+    """Results from prompt generation testing"""
+    agent_name: str
+    prompt_length: int
+   
+... [truncated]
+```
+
+## src/stages/stages.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 1005 bytes, 27 lines
+- Content sample:
+```
+"""
+PR Analyzer Stages - Import all stage classes for easy access
+"""
+
+from .stage1_context_prep import ContextPreparationTester as ContextPreparer
+from .stage2_agent_prompts import AgentPromptTester as AgentPromptGenerator
+from .stage3_agent_communication import RobustAgentCaller
+from .stage4_response_parsing import ResponseParser
+from .stage5_issue_extraction import IssueValidator as IssueExtractor
+from .stage6_filtering_combination import ResultCombiner as FilteringAndCombination
+from .stage7
+... [truncated]
+```
+
+## src/stages/stage5_issue_extraction.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 27679 bytes, 631 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 5: Issue Extraction with Validation
+Validate parsed issues, remove duplicates, apply business logic, and prepare final results
+"""
+
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Set, Tuple
+from dataclasses import dataclass, asdict
+from enum import Enum
+from collections import defaultdict
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Import from Stage 4
+fr
+... [truncated]
+```
+
+## src/stages/stage10_feedback_updates_fixed.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 21954 bytes, 430 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+
+import os
+import sys
+import json
+import re
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+
+# Import score calculation utilities
+try:
+    from asabaal_utils.pr_analyzer.score_utils import recalculate_assessment_summary
+    SCORE_UTILS_AVAILABLE = True
+except ImportError:
+    SCORE_UTILS_AVAILABLE = False
+    def recalculate_assessment_summary(assessment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Fallback impleme
+... [truncated]
+```
+
+## src/stages/stage10_feedback_updates.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 49040 bytes, 1018 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+
+import os
+import sys
+import json
+import re
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add shared utilities to path
+shared_path = Path(__file__).parent.parent.parent.parent.parent / "src" / "asabaal_utils" / "shared"
+sys.path.insert(0, str(shared_path))
+
+from ..api_confirmation import require_paid_api_confirmation
+
+... [truncated]
+```
+
+## src/stages/stage4_response_parsing.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 27223 bytes, 650 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 4: Response Parsing Testing
+Parse agent responses into structured QualityIssue objects with full debugging visibility
+"""
+
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, asdict
+from enum import Enum
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+
+class IssueType(Enum):
+    """Quality issue types"""
+    DUPLICATE = "dup
+... [truncated]
+```
+
+## src/stages/stage7_detailed_analysis.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 42035 bytes, 955 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 7: Detailed File-Level Analysis
+Comprehensive code review at file, class, and function levels for merge readiness
+"""
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add shared utilities to path
+shared_path = Path(__file__).parent.parent.parent.parent.parent / 
+... [truncated]
+```
+
+## src/stages/stage7_detailed_analysis_v2.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 13626 bytes, 316 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 7: Detailed File-Level Analysis (Version 2)
+Refactored to use the Agentic Batch Processing Toolkit
+
+This version provides the same interface as the original but leverages the 
+generalized batch processing framework for better maintainability and consistency.
+"""
+
+import json
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+
+# Import the generalized toolkit
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.paren
+... [truncated]
+```
+
+## src/stages/stage8_file_assessment.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+20/-0)
+- Size: 27218 bytes, 590 lines
+- Content sample:
+```
+#!/usr/bin/env python3
+"""
+Stage 8: File-Level Merge Readiness Assessment
+
+This stage performs detailed file-level analysis to determine merge readiness,
+business impact, risk assessment, and code element analysis for each file.
+Saves structured outputs that Stage 9 (HTML generation) can quickly read.
+"""
+
+import os
+import sys
+import json
+from pathlib import Path
+from typing import Dict, Any, List, Optional
+
+# Add the parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).par
+... [truncated]
+```
+
+
+## Merge Readiness Assessment
+
+Evaluate this PR across these dimensions:
+
+1. **COMPLETENESS**: Are there signs of unfinished work?
+   - TODO comments, placeholder text
+   - Incomplete implementations
+   - Missing corresponding changes (e.g., CSS without HTML updates)
+
+2. **CODE QUALITY**: Does this meet merge standards?
+   - Consistent patterns and conventions
+   - No obvious bugs or issues
+   - Appropriate scope (not mixing unrelated changes)
+
+3. **RISK ASSESSMENT**: What are the deployment risks?
+   - Large-scale changes to critical systems
+   - Changes to multiple high-impact areas
+   - Potential breaking changes
+
+4. **ORGANIZATIONAL ISSUES**: Are there process problems?
+   - Mixed concerns in single PR
+   - Experimental code left in
+   - Poor commit organization
+
+## Response Format
+```json
+{
+    "merge_readiness_score": 85,  // 0-100
+    "status": "READY|REVIEW_NEEDED|NEEDS_WORK|NOT_READY",
+    "blocking_issues": 0,
+    "warning_issues": 2,
+    "info_issues": 1,
+    "recommendation": "Specific recommendation for next steps",
+    "issues": [
+        {
+            "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+            "category": "INCOMPLETE|MIXED_CONCERNS|RISK",
+            "title": "Issue title",
+            "description": "Detailed description",
+            "affected_files": ["file1", "file2"],
+            "recommendation": "How to fix this",
+            "agent_reasoning": "Why this is an issue"
+        }
+    ],
+    "confidence": "HIGH|MEDIUM|LOW",
+    "analysis_notes": "Key observations about this PR"
+}
+```
+
+Be thorough but practical - focus on issues that genuinely impact merge safety.

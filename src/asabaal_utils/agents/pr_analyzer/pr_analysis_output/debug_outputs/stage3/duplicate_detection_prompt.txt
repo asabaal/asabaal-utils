@@ -1,0 +1,162 @@
+You are a senior software architect detecting duplicate files.
+
+Here is the detailed file analysis data:
+
+```json
+{
+  "pr_summary": {
+    "from_branch": "feature/image_transcription",
+    "to_branch": "main",
+    "total_files_changed": 29,
+    "total_lines_added": 580,
+    "total_lines_removed": 0,
+    "total_files_changed_all": 29,
+    "total_lines_added_all": 580,
+    "total_lines_removed_all": 0,
+    "commit_messages": [
+      "Add test projects for PR analyzer validation"
+    ]
+  },
+  "categories": {
+    "UNCATEGORIZED": 29
+  },
+  "file_details": [
+    {
+      "path": "__init__.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 168,
+      "content_sample": "\"\"\"\nPR Analyzer Agent\n\nA comprehensive tool for analyzing pull requests with visual exploration \ncapabilities and detailed impact assessment.\n\"\"\"\n\n__version__ = \"1.0.0\"",
+      "has_functions": false,
+      "has_classes": false
+    },
+    {
+      "path": "run_analyzer.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 269,
+      "content_sample": "#!/usr/bin/env python3\n\"\"\"\nPR Analyzer CLI Entry Point\n\"\"\"\n\nimport sys\nfrom pathlib import Path\n\n# Add src directory to Python path\nsrc_dir = Path(__file__).parent / \"src\"\nsys.path.insert(0, str(src_dir))\n\nfrom src.cli import main\n\nif __name__ == \"__main__\":\n    main()",
+      "has_functions": false,
+      "has_classes": false
+    },
+    {
+      "path": "src/__init__.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 1002,
+      "content_sample": "\"\"\"\nPR Analyzer - Intelligent Pull Request Analysis Tool\n\nComprehensive PR analysis with AI-powered duplicate detection, quality assessment,\nand interactive feedback system for continuous improvement.\n\"\"\"\n\nfrom .analyzer import UnifiedPRAnalyzer\nfrom .stages.stage3_agent_communication import RobustAgentCaller\nfrom .stages.stage4_response_parsing import ResponseParser\nfrom .stages.stage5_issue_extraction import IssueValidator\nfrom .stages.stage6_filtering_combination import ResultCombiner\nfrom .stages.stage7_detailed_analysis import DetailedAnalysisEngine\nfrom .stages.stage8_file_assessment import FileAssessmentGenerator\nfrom .stages.stage9_html_generator import Stage9HTMLGenerator\nfrom .stages.stage10_feedback_updates import FeedbackUpdateSystem\n\n__all__ = [\n    'UnifiedPRAnalyzer',\n    'RobustAgentCaller', \n    'ResponseParser',\n    'IssueValidator',\n    'ResultCombiner',\n    'DetailedAnalysisEngine',\n    'FileAssessmentGenerator',\n    'Stage9HTMLGenerator',\n    'FeedbackUpdateSystem'",
+      "has_functions": false,
+      "has_classes": false
+    },
+    {
+      "path": "src/analyzer.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 21060,
+      "content_sample": "#!/usr/bin/env python3\n\"\"\"\nUnified PR Analyzer - Main analyzer class\n\"\"\"\n\nimport subprocess\nimport shutil\nimport time\nimport yaml\nfrom pathlib import Path\nfrom typing import Optional, Dict, Any\n\nfrom .stages.stage1_context_prep import ContextPreparationTester\nfrom .stages.stage2_agent_prompts import AgentPromptTester\nfrom .stages.stage3_agent_communication import RobustAgentCaller\nfrom .stages.stage4_response_parsing import ResponseParser\nfrom .stages.stage5_issue_extraction import IssueValidator\nfrom .stages.stage6_filtering_combination import ResultCombiner\nfrom .stages.stage7_detailed_analysis import DetailedAnalysisEngine as DetailedAnalysisEngineV1\nfrom .stages.stage8_file_assessment import FileAssessmentGenerator\nfrom .stages.stage9_html_generator import Stage9HTMLGenerator\nfrom .stages.stage10_feedback_updates import FeedbackUpdateSystem\n\nfrom .stages.stage7_detailed_analysis import DetailedAnalysisEngine as DetailedAnalysisEngineV1\n\n# Try to import V2 toolkit version\nTOOLKIT_VE",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "src/api_confirmation.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 1940,
+      "content_sample": "\"\"\"\nShared API confirmation module for all PR analyzer stages\nProvides centralized paid API confirmation functionality\n\"\"\"\n\nimport sys\n\n# Global flag to track if user has confirmed paid API usage for this run\n_paid_api_confirmed = False\n\ndef require_paid_api_confirmation(backend_type: str) -> bool:\n    \"\"\"Require user confirmation before making paid API calls\n    \n    Args:\n        backend_type: The type of backend being used (e.g., 'openrouter', 'claude', 'ollama')\n        \n    Returns:\n        bool: True if API calls should proceed, False if they should be blocked\n    \"\"\"\n    global _paid_api_confirmed\n    \n    # Only require confirmation for paid APIs\n    if backend_type.lower() not in ['openrouter', 'claude']:\n        return True\n    \n    if _paid_api_confirmed:\n        return True\n    \n    print(\"\\n\" + \"=\"*60)\n    print(\"\ud83d\udea8 PAID API CONFIRMATION REQUIRED\")\n    print(\"=\"*60)\n    print(f\"You are about to use the {backend_type.upper()} API, which costs money.\")\n    print(\"This will ma",
+      "has_functions": true,
+      "has_classes": false
+    },
+    {
+      "path": "src/cli.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 5527,
+      "content_sample": "#!/usr/bin/env python3\n\"\"\"PR Analyzer CLI wrapper for toolmgr installation\"\"\"\n\nimport argparse\nimport subprocess\nimport sys\nfrom pathlib import Path\n\n# Add the shared utilities to Python path\nshared_root = Path(__file__).parent.parent.parent.parent / \"src\" / \"asabaal_utils\" / \"shared\"\nsys.path.insert(0, str(shared_root))\n\nfrom . import UnifiedPRAnalyzer\n\n\ndef main():\n    \"\"\"Main entry point with argparse.\"\"\"\n    parser = argparse.ArgumentParser(description='PR Analyzer - Comprehensive pull request analysis tool')\n    parser.add_argument('--from', dest='from_branch', default=None,\n                       help='Source branch (default: current branch)')\n    parser.add_argument('--to', dest='to_branch', default='main',\n                       help='Target branch (default: main)')\n    parser.add_argument('--repo', dest='repo_path', default='.',\n                       help='Repository path (default: current directory)')\n    \n    # Stage control\n    parser.add_argument('--start-stage', type=int",
+      "has_functions": true,
+      "has_classes": false
+    },
+    {
+      "path": "src/stages/stage3_agent_communication.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 31267,
+      "content_sample": "#!/usr/bin/env python3\n\"\"\"\nStage 3: Agent Communication Testing\nTest robust agent communication with file-based prompts and clean formatting\n\"\"\"\n\nimport json\nimport os\nimport subprocess\nimport sys\nimport time\nfrom pathlib import Path\nfrom typing import Dict, List, Any, Optional, TYPE_CHECKING\nfrom dataclasses import dataclass\nfrom enum import Enum\n\nif TYPE_CHECKING:\n    from asabaal_utils.agentic_toolkit.backend_config import BackendManager\n\n# Add the parent directory to path for imports\nsys.path.insert(0, str(Path(__file__).parent.parent))\n# Add shared utilities to path\nshared_path = Path(__file__).parent.parent.parent.parent.parent.parent / \"src\" / \"asabaal_utils\" / \"shared\"\nsys.path.insert(0, str(shared_path))\n\nfrom ..api_confirmation import require_paid_api_confirmation\n\n# Import backend manager\ntry:\n    from asabaal_utils.shared.agentic_toolkit.backend_config import BackendManager, list_available_backends\n    BACKEND_MANAGER_AVAILABLE = True\nexcept ImportError:\n    BACKEND_MANAGER",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "src/stages/stage1_context_prep.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 24960,
+      "content_sample": "#!/usr/bin/env python3\n\"\"\"\nStage 1: Context Preparation Testing\nTest the context preparation stage with full visibility and debugging\n\"\"\"\n\nimport json\nimport os\nimport sys\nimport time\nfrom pathlib import Path\nfrom typing import Dict, List, Any\nfrom dataclasses import dataclass, asdict\n\n# Add the parent directory to path for imports\nsys.path.insert(0, str(Path(__file__).parent))\n\nfrom ..core.git_analyzer import GitAnalyzer\nfrom ..classifiers.file_classifier import FileClassifier\n\n\n@dataclass\nclass ContextTestResult:\n    \"\"\"Results from context preparation testing\"\"\"\n    success: bool\n    total_files: int\n    files_with_content: int\n    files_by_category: Dict[str, int]\n    sample_files: List[Dict]\n    errors: List[str]\n    performance_ms: float\n\n\nclass ContextPreparationTester:\n    \"\"\"Test Stage 1: Context Preparation with full visibility\"\"\"\n    \n    def __init__(self, repo_path: str, output_dir: str = None):\n        self.repo_path = Path(repo_path).resolve()\n        if output_dir:\n    ",
+      "has_functions": true,
+      "has_classes": true
+    },
+    {
+      "path": "src/stages/stage9_html_generator.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 83131,
+      "content_sample": "[File too large]",
+      "has_functions": false,
+      "has_classes": false
+    },
+    {
+      "path": "src/stages/stage6_filtering_combination.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "size": 33997,
+      "content_sample": "#!/usr/bin/env python3\n\"\"\"\nStage 6: Filtering and Result Combination\nFinal filtering, result combination, and output formatting for complete PR analysis\n\"\"\"\n\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Dict, List, Any, Optional, Tuple\nfrom dataclasses import dataclass, asdict\nfrom enum import Enum\nfrom datetime import datetime\nfrom collections import defaultdict\n\n# Add the parent directory to path for imports\nsys.path.insert(0, str(Path(__file__).parent))\n\n# Import from previous stages\nfrom .stage4_response_parsing import QualityIssue, IssueType, Priority\nfrom .stage5_issue_extraction import ValidatedIssue, ValidationResult\n\n\n@dataclass\nclass PRAnalysisReport:\n    \"\"\"Complete PR analysis report\"\"\"\n    pr_summary: Dict[str, Any]\n    overall_assessment: Dict[str, Any]\n    quality_issues: List[Dict[str, Any]]\n    recommendations: List[str]\n    merge_readiness: Dict[str, Any]\n    technical_metrics: Dict[str, Any]\n    generated_at: str\n    analysis_metadata: Dict[str,",
+      "has_functions": true,
+      "has_classes": true
+    }
+  ]
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains PR summary, file categories, and detailed file information
+2. Analyze file content samples and purposes to find duplicates
+3. Focus on functional duplicates - files that solve the same problems
+
+Expected duplicates based on manual analysis:
+- Blog processing scripts in content/ directory
+- Database setup files (supabase-setup.sql, etc.) 
+- Deployment guides (VERCEL-DEPLOY.md variants)
+
+Provide your response in this exact format:
+
+## CRITICAL:
+[Exact duplicates or abandoned implementations with specific file paths]
+
+## HIGH:
+[Functional duplicates with different implementations and file paths]
+
+## MEDIUM:
+[Similar purpose, potentially consolidatable files]
+
+## Summary:
+[Brief summary of duplicate analysis findings]
+
+Be specific about which files and provide evidence from the content samples.

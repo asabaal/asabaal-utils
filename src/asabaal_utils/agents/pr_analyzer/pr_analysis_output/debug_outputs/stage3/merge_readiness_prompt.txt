@@ -1,0 +1,207 @@
+You are a senior engineering manager evaluating merge readiness.
+
+Here is the PR analysis data:
+
+```json
+{
+  "pr_summary": {
+    "from_branch": "feature/image_transcription",
+    "to_branch": "main",
+    "total_files_changed": 29,
+    "total_lines_added": 580,
+    "total_lines_removed": 0,
+    "total_files_changed_all": 29,
+    "total_lines_added_all": 580,
+    "total_lines_removed_all": 0,
+    "commit_messages": [
+      "Add test projects for PR analyzer validation"
+    ]
+  },
+  "category_breakdown": {
+    "UNCATEGORIZED": 29
+  },
+  "sample_files": [
+    {
+      "path": "__init__.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "\"\"\"\nPR Analyzer Agent\n\nA comprehensive tool for analyzing pull requests with visual exploration \ncapabilities and detailed impact assessment.\n\"\"\"\n\n__version__ = \"1.0.0\""
+    },
+    {
+      "path": "run_analyzer.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nPR Analyzer CLI Entry Point\n\"\"\"\n\nimport sys\nfrom pathlib import Path\n\n# Add src directory to Python path\nsrc_dir = Path(__file__).parent / \"src\"\nsys.path.insert(0, str(src_d"
+    },
+    {
+      "path": "src/__init__.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "\"\"\"\nPR Analyzer - Intelligent Pull Request Analysis Tool\n\nComprehensive PR analysis with AI-powered duplicate detection, quality assessment,\nand interactive feedback system for continuous improvement."
+    },
+    {
+      "path": "src/analyzer.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nUnified PR Analyzer - Main analyzer class\n\"\"\"\n\nimport subprocess\nimport shutil\nimport time\nimport yaml\nfrom pathlib import Path\nfrom typing import Optional, Dict, Any\n\nfrom "
+    },
+    {
+      "path": "src/api_confirmation.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "\"\"\"\nShared API confirmation module for all PR analyzer stages\nProvides centralized paid API confirmation functionality\n\"\"\"\n\nimport sys\n\n# Global flag to track if user has confirmed paid API usage for "
+    },
+    {
+      "path": "src/cli.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"PR Analyzer CLI wrapper for toolmgr installation\"\"\"\n\nimport argparse\nimport subprocess\nimport sys\nfrom pathlib import Path\n\n# Add the shared utilities to Python path\nshared_r"
+    },
+    {
+      "path": "src/stages/stage3_agent_communication.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 3: Agent Communication Testing\nTest robust agent communication with file-based prompts and clean formatting\n\"\"\"\n\nimport json\nimport os\nimport subprocess\nimport sys\nimp"
+    },
+    {
+      "path": "src/stages/stage1_context_prep.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 1: Context Preparation Testing\nTest the context preparation stage with full visibility and debugging\n\"\"\"\n\nimport json\nimport os\nimport sys\nimport time\nfrom pathlib imp"
+    },
+    {
+      "path": "src/stages/stage9_html_generator.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "[File too large]"
+    },
+    {
+      "path": "src/stages/stage6_filtering_combination.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 6: Filtering and Result Combination\nFinal filtering, result combination, and output formatting for complete PR analysis\n\"\"\"\n\nimport json\nimport sys\nfrom pathlib import"
+    },
+    {
+      "path": "src/stages/__init__.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "\"\"\"\nPR Analyzer Processing Stages\n\"\"\""
+    },
+    {
+      "path": "src/stages/stage2_agent_prompts.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 2: Agent Prompt Generation Testing\nTest prompt generation for each specialized agent with full visibility\n\"\"\"\n\nimport json\nimport sys\nimport time\nfrom pathlib import P"
+    },
+    {
+      "path": "src/stages/stages.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "\"\"\"\nPR Analyzer Stages - Import all stage classes for easy access\n\"\"\"\n\nfrom .stage1_context_prep import ContextPreparationTester as ContextPreparer\nfrom .stage2_agent_prompts import AgentPromptTester "
+    },
+    {
+      "path": "src/stages/stage5_issue_extraction.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 5: Issue Extraction with Validation\nValidate parsed issues, remove duplicates, apply business logic, and prepare final results\n\"\"\"\n\nimport json\nimport re\nimport sys\nfr"
+    },
+    {
+      "path": "src/stages/stage10_feedback_updates_fixed.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\nimport os\nimport sys\nimport json\nimport re\nfrom pathlib import Path\nfrom typing import Dict, Any, Optional, List\nfrom datetime import datetime\n\n# Import score calculation utili"
+    },
+    {
+      "path": "src/stages/stage10_feedback_updates.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\nimport os\nimport sys\nimport json\nimport re\nfrom pathlib import Path\nfrom typing import Dict, Any, Optional, List\nfrom datetime import datetime\n\n# Add the parent directory to pa"
+    },
+    {
+      "path": "src/stages/stage4_response_parsing.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 4: Response Parsing Testing\nParse agent responses into structured QualityIssue objects with full debugging visibility\n\"\"\"\n\nimport json\nimport re\nimport sys\nfrom pathli"
+    },
+    {
+      "path": "src/stages/stage7_detailed_analysis.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 7: Detailed File-Level Analysis\nComprehensive code review at file, class, and function levels for merge readiness\n\"\"\"\n\nimport json\nimport os\nimport sys\nimport time\nfro"
+    },
+    {
+      "path": "src/stages/stage7_detailed_analysis_v2.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 7: Detailed File-Level Analysis (Version 2)\nRefactored to use the Agentic Batch Processing Toolkit\n\nThis version provides the same interface as the original but levera"
+    },
+    {
+      "path": "src/stages/stage8_file_assessment.py",
+      "category": "UNCATEGORIZED",
+      "change_type": "A",
+      "lines_added": 20,
+      "lines_removed": 0,
+      "content_preview": "#!/usr/bin/env python3\n\"\"\"\nStage 8: File-Level Merge Readiness Assessment\n\nThis stage performs detailed file-level analysis to determine merge readiness,\nbusiness impact, risk assessment, and code ele"
+    }
+  ]
+}
+```
+
+Instructions:
+1. Analyze the JSON data above which contains PR summary, categories, and sample files
+2. Evaluate completeness, code quality, and risks
+3. This is a massive PR with 257 files and significant line changes
+
+Assessment criteria:
+- COMPLETENESS: Unfinished work, TODOs, placeholders
+- CODE QUALITY: Consistency, obvious issues, appropriate scope  
+- RISK: Large-scale changes, breaking changes, deployment risks
+- ORGANIZATION: Mixed concerns, experimental code
+
+Provide your response in this exact JSON format:
+{
+  "merge_readiness_score": <number 0-100>,
+  "status": "<READY|REVIEW_NEEDED|NOT_READY>", 
+  "blocking_issues": <number>,
+  "warning_issues": <number>,
+  "recommendation": "<brief summary>",
+  "key_concerns": ["<concern1>", "<concern2>"]
+}
