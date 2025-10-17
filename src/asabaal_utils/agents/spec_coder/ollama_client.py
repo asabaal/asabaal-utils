@@ -78,7 +78,7 @@ class OllamaClient:
             response = self.session.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=120  # 2 minute timeout
+                timeout=300  # 5 minute timeout
             )
             response.raise_for_status()
             

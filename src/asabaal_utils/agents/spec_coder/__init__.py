@@ -12,7 +12,7 @@ This agent can autonomously:
 from .orchestrator import IntegrationOrchestrator as Orchestrator
 from .generator import CodeGenerator as Generator
 from .tester import TestAnalyzer as Tester
-from .healer import FailurePatcher as Healer
+from .healer import Healer as Healer
 from .organizer import CodeOrganizer as Organizer
 
 __all__ = ['Orchestrator', 'Generator', 'Tester', 'Healer', 'Organizer']

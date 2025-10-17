@@ -48,6 +48,9 @@ class TestAnalyzer:
         """Analyze all test files in a directory."""
         logger.info(f"Analyzing test directory: {test_dir}")
         
+        # Create output directory if it doesn't exist
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
         results = []
         test_files = list(test_dir.glob("test_*.py"))
         
@@ -140,6 +143,43 @@ class TestAnalyzer:
             f.write('\n'.join(report_lines))
         
         logger.info(f"Report saved to {output_path}")
+    
+    def run_tests(self) -> bool:
+        """Run test analysis for compatibility with CLI."""
+        try:
+            # Look for test directories in common locations
+            test_dirs = [
+                Path("spec_code/scaffolds/tests"),
+                Path("test_output/scaffolds/tests"),
+                Path("tests"),
+                Path("test")
+            ]
+            
+            test_dir = None
+            for td in test_dirs:
+                if td.exists():
+                    test_dir = td
+                    break
+            
+            if not test_dir:
+                logger.warning("No test directory found")
+                return False
+            
+            output_dir = Path("analysis")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            results = self.analyze_directory(test_dir, output_dir)
+            
+            # Generate report
+            report_path = output_dir / "test_analysis_report.md"
+            self.generate_report(results, report_path)
+            
+            # Return success if we analyzed at least one file
+            return len(results) > 0
+            
+        except Exception as e:
+            logger.error(f"Test analysis failed: {e}")
+            return False
 
 
 def main():
@@ -162,13 +202,13 @@ def main():
     spec_file = None
     source_file = None
     
-    # Look for spec file in reference directory
-    possible_spec = Path("../../reference/openspec/specs/rhythmic_pulse_generator.yml")
+    # Look for spec file in current directory
+    possible_spec = Path("test_spec.yml")
     if possible_spec.exists():
         spec_file = possible_spec
     
     # Look for source file in output directory
-    possible_source = Path("../output/scaffolds/src/rhythmic_pulse_generator.py")
+    possible_source = Path("output/scaffolds/src/test_module.py")
     if possible_source.exists():
         source_file = possible_source
     

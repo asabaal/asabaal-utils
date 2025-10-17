@@ -106,13 +106,26 @@ class SpecParser:
         
         # Parse validation criteria
         validation = []
-        for val_data in req_data.get('validation', []):
+        validation_data = req_data.get('validation', [])
+        
+        # Handle both string and list formats for validation
+        if isinstance(validation_data, str):
+            # Simple string validation
             criteria = ValidationCriteria(
-                type=val_data.get('type', 'unit'),
-                file=val_data.get('file', ''),
-                target=val_data.get('target', 'pass')
+                type='unit',
+                file='',
+                target=validation_data
             )
             validation.append(criteria)
+        elif isinstance(validation_data, list):
+            # List of validation criteria
+            for val_data in validation_data:
+                criteria = ValidationCriteria(
+                    type=val_data.get('type', 'unit'),
+                    file=val_data.get('file', ''),
+                    target=val_data.get('target', 'pass')
+                )
+                validation.append(criteria)
         
         return Requirement(
             id=req_id,

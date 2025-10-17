@@ -67,11 +67,11 @@ class CodeGenerator:
         import time
         start_time = time.time()
         
-        # Setup paths
+        # Setup paths - use the provided output_dir, or fall back to current directory
         if output_dir is None:
-            output_dir = Path(self.config['generation']['output_dir'])
-        
-        output_dir = Path(output_dir)
+            output_dir = Path.cwd() / "output"
+        else:
+            output_dir = Path(output_dir)
         
         errors = []
         warnings = []
@@ -252,6 +252,41 @@ class CodeGenerator:
         
         return test_files
     
+    def _strip_markdown_code_blocks(self, content: str) -> str:
+        """Strip markdown code block formatting and other non-Python content from generated content."""
+        import re
+        
+        # Remove ```python and ``` markers
+        content = re.sub(r'```python\s*', '', content)
+        content = re.sub(r'```\s*$', '', content)
+        content = re.sub(r'```\s*$', '', content, flags=re.MULTILINE)
+        
+        # Remove common AI-generated comments and notes
+        lines = content.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            # Skip lines that look like AI instructions or notes
+            if (line.strip().startswith('Note:') or 
+                line.strip().startswith('TODO:') or
+                line.strip().startswith('Replace') or
+                line.strip().startswith('your_module') or
+                'actual name of your module' in line.lower() or
+                line.strip().startswith('# Note:') or
+                line.strip().startswith('# TODO:')):
+                continue
+            cleaned_lines.append(line)
+        
+        # Remove any remaining empty lines at the beginning or end
+        while cleaned_lines and not cleaned_lines[0].strip():
+            cleaned_lines.pop(0)
+        while cleaned_lines and not cleaned_lines[-1].strip():
+            cleaned_lines.pop()
+        
+        content = '\n'.join(cleaned_lines)
+        
+        return content
+    
     def _generate_unit_test(self, requirement: Requirement, source_code: str, output_dir: Path) -> Optional[str]:
         """Generate a unit test for a specific requirement."""
         try:
@@ -264,6 +299,9 @@ class CodeGenerator:
             )
             
             generated_test = self.ollama_client.generate_tests(source_code, requirement.description)
+            
+            # Strip markdown code blocks if present
+            generated_test = self._strip_markdown_code_blocks(generated_test)
             
             # Extract filename from validation or create one
             if requirement.validation:
@@ -375,3 +413,104 @@ ruff>=0.1.0
         except Exception as e:
             logger.error(f"Failed to generate requirements file: {e}")
             return None
+    
+    def _generate_unit_test_with_retry(self, requirement: Requirement, source_code: str, max_retries: int = 3) -> str:
+        """Generate a unit test with retry logic when AI generation fails."""
+        for attempt in range(max_retries):
+            try:
+                if attempt == 0:
+                    # First attempt - normal generation
+                    generated_test = self.ollama_client.generate_tests(source_code, requirement.description)
+                else:
+                    # Retry attempts - with feedback about previous failure
+                    retry_prompt = f"""Generate pytest tests for the following requirement. 
+Your previous attempt had syntax errors or was incomplete. Please ensure the code is valid, complete Python.
+
+Requirement: {requirement.description}
+
+Code to test:
+```python
+{source_code}
+```
+
+Generate complete, syntactically valid pytest code. Return ONLY the Python code without explanations."""
+                    generated_test = self.ollama_client.generate(retry_prompt, 
+                        "You are an expert Python test developer. Generate complete, valid pytest code.")
+                
+                # Strip markdown code blocks if present
+                cleaned_test = self._clean_generated_code(generated_test)
+                
+                # Validate that the generated code is syntactically valid
+                if self._validate_python_code(cleaned_test):
+                    logger.info(f"Successfully generated valid test for {requirement.id} on attempt {attempt + 1}")
+                    return cleaned_test
+                else:
+                    logger.warning(f"Attempt {attempt + 1} failed for {requirement.id} - invalid Python syntax")
+                    
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} failed for {requirement.id} with error: {e}")
+        
+        # All retries failed - use fallback
+        logger.error(f"All {max_retries} attempts failed for {requirement.id}, using fallback test")
+        return self._generate_fallback_test(requirement)
+    
+    def _clean_generated_code(self, generated_code: str) -> str:
+        """Clean generated code by removing markdown formatting and fixing truncation."""
+        if not generated_code:
+            return ""
+        
+        # Remove markdown code blocks
+        lines = generated_code.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            # Skip markdown code block markers
+            if line.strip() in ['```python', '```']:
+                continue
+            cleaned_lines.append(line)
+        
+        cleaned_code = '\n'.join(cleaned_lines)
+        
+        # Fix common truncation issues
+        if cleaned_code.strip():
+            # Check if the last line is incomplete (common truncation pattern)
+            last_line = cleaned_lines[-1] if cleaned_lines else ""
+            
+            # If the last line looks like it was cut off mid-function, remove it
+            if (last_line.strip().startswith('def ') and 
+                '(' in last_line and ':' not in last_line):
+                cleaned_lines = cleaned_lines[:-1]
+                cleaned_code = '\n'.join(cleaned_lines)
+            
+            # Ensure the file ends properly
+            if cleaned_code.strip() and not cleaned_code.rstrip().endswith('\n'):
+                cleaned_code += '\n'
+        
+        return cleaned_code
+    
+    def _validate_python_code(self, code: str) -> bool:
+        """Validate that the generated code is syntactically valid Python."""
+        if not code.strip():
+            return False
+        
+        try:
+            import ast
+            ast.parse(code)
+            return True
+        except SyntaxError:
+            return False
+    
+    def _generate_fallback_test(self, requirement: Requirement) -> str:
+        """Generate a basic fallback test when AI generation fails."""
+        test_name = f"test_{requirement.id.lower().replace('-', '_')}"
+        
+        fallback_test = f'''import pytest
+
+def {test_name}():
+    """Fallback test for requirement: {requirement.title}"""
+    # TODO: Implement proper test for: {requirement.description}
+    # This is a placeholder generated due to AI generation failure
+    # FAIL the test to indicate that proper implementation is needed
+    pytest.fail(f"AI generation failed for requirement {{requirement.id}}. Manual test implementation required for: {{requirement.description}}")
+'''
+        return fallback_test

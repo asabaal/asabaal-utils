@@ -11,12 +11,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-try:
-    from .parse_tests import parse_test_file
-    from .summarize_tests import TestSummarizer
-except ImportError:
-    from parse_tests import parse_test_file
-    from summarize_tests import TestSummarizer
+from parse_tests import parse_test_file
+from summarize_tests import TestSummarizer
 
 logger = logging.getLogger(__name__)
 
@@ -162,13 +158,13 @@ def main():
     spec_file = None
     source_file = None
     
-    # Look for spec file in reference directory
-    possible_spec = Path("../../reference/openspec/specs/rhythmic_pulse_generator.yml")
+    # Look for spec file in current directory
+    possible_spec = Path("test_spec.yml")
     if possible_spec.exists():
         spec_file = possible_spec
     
     # Look for source file in output directory
-    possible_source = Path("../output/scaffolds/src/rhythmic_pulse_generator.py")
+    possible_source = Path("output/scaffolds/src/test_module.py")
     if possible_source.exists():
         source_file = possible_source
     

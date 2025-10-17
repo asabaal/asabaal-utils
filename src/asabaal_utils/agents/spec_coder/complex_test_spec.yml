@@ -1,0 +1,168 @@
+spec_id: "string-utils-advanced-001"
+title: "Advanced String Utilities Library"
+version: "2.0.0"
+description: "A comprehensive string utilities library with proper class structure, error handling, and advanced features"
+requirements:
+  - id: "req-001"
+    title: "String Reversal Method"
+    description: "Instance method that reverses a string with proper validation"
+    validation:
+      - type: "unit"
+        target: "test_reverse_string"
+    acceptance_criteria:
+      - "Must be an instance method of StringUtils class"
+      - "Must validate input is a string"
+      - "Must handle empty strings gracefully"
+      - "Must handle Unicode characters correctly"
+      - "Must raise TypeError for non-string inputs"
+  
+  - id: "req-002"
+    title: "Word Capitalization Method"
+    description: "Instance method that capitalizes first letter of each word"
+    validation:
+      - type: "unit"
+        target: "test_capitalize_words"
+    acceptance_criteria:
+      - "Must be an instance method of StringUtils class"
+      - "Must handle multiple consecutive spaces"
+      - "Must preserve existing capitalization in words"
+      - "Must handle empty strings"
+      - "Must handle punctuation correctly"
+  
+  - id: "req-003"
+    title: "String Validation Method"
+    description: "Static method to validate string format against patterns"
+    validation:
+      - type: "unit"
+        target: "test_validate_string_format"
+    acceptance_criteria:
+      - "Must be a static method of StringUtils class"
+      - "Must support email validation"
+      - "Must support phone number validation"
+      - "Must support URL validation"
+      - "Must return boolean result"
+  
+  - id: "req-004"
+    title: "String Statistics Method"
+    description: "Instance method that returns statistics about the string"
+    validation:
+      - type: "unit"
+        target: "test_get_string_stats"
+    acceptance_criteria:
+      - "Must be an instance method of StringUtils class"
+      - "Must return dictionary with word count, char count, etc."
+      - "Must handle Unicode correctly"
+      - "Must exclude whitespace from character counts"
+      - "Must provide unique word count"
+
+interfaces:
+  - name: "StringUtils"
+    description: "A comprehensive string manipulation utility class"
+    methods:
+      - name: "__init__"
+        description: "Constructor that accepts optional initial string"
+        parameters:
+          - name: "initial_string"
+            type: "str"
+            required: false
+            default: '""'
+        returns:
+          type: "None"
+      
+      - name: "reverse_string"
+        description: "Reverse the current string or a provided string"
+        parameters:
+          - name: "text"
+            type: "str"
+            required: false
+            description: "String to reverse, uses instance string if not provided"
+        returns:
+          type: "str"
+          description: "Reversed string"
+      
+      - name: "capitalize_words"
+        description: "Capitalize first letter of each word"
+        parameters:
+          - name: "text"
+            type: "str"
+            required: false
+            description: "Text to capitalize, uses instance string if not provided"
+        returns:
+          type: "str"
+          description: "Capitalized text"
+      
+      - name: "validate_string_format"
+        description: "Validate string format against common patterns"
+        parameters:
+          - name: "text"
+            type: "str"
+            required: true
+            description: "Text to validate"
+          - name: "format_type"
+            type: "str"
+            required: true
+            description: "Type of validation: 'email', 'phone', 'url'"
+        returns:
+          type: "bool"
+          description: "True if valid, False otherwise"
+      
+      - name: "get_string_stats"
+        description: "Get comprehensive statistics about the string"
+        parameters:
+          - name: "text"
+            type: "str"
+            required: false
+            description: "Text to analyze, uses instance string if not provided"
+        returns:
+          type: "dict"
+          description: "Dictionary with word_count, char_count, unique_words, etc."
+      
+      - name: "set_string"
+        description: "Set the instance's current string"
+        parameters:
+          - name: "text"
+            type: "str"
+            required: true
+            description: "New string to set"
+        returns:
+          type: "None"
+      
+      - name: "get_string"
+        description: "Get the instance's current string"
+        parameters: []
+        returns:
+          type: "str"
+          description: "Current instance string"
+
+examples:
+  - usage: |
+      # Create instance
+      utils = StringUtils("Hello World")
+      
+      # Use instance methods
+      reversed = utils.reverse_string()  # "dlroW olleH"
+      capitalized = utils.capitalize_words()  # "Hello World"
+      stats = utils.get_string_stats()  # {'word_count': 2, 'char_count': 10, ...}
+      
+      # Use static methods
+      is_email = StringUtils.validate_string_format("test@example.com", "email")  # True
+      is_phone = StringUtils.validate_string_format("555-1234", "phone")  # True
+      
+      # Set new string
+      utils.set_string("New text to process")
+
+error_handling:
+  - "All methods must raise TypeError for invalid input types"
+  - "Methods must handle None inputs gracefully"
+  - "Validation methods must return False for invalid patterns"
+  - "Constructor must validate initial_string is a string"
+
+performance_requirements:
+  - "All methods must complete in under 100ms for strings up to 10KB"
+  - "Memory usage must be proportional to input size"
+  - "No recursion that could cause stack overflow on large strings"
+
+dependencies:
+  - "re: For pattern matching in validation"
+  - "typing: For type hints"
+  - "dataclasses: For potential data structures"

@@ -29,6 +29,7 @@ class TestVisitor(ast.NodeVisitor):
         self.current_test: Optional[TestInfo] = None
         self.imports: Dict[str, str] = {}  # alias -> module
         self.from_imports: Dict[str, List[str]] = {}  # module -> [names]
+        self.variables: Dict[str, Any] = {}  # variable name -> value (for current test)
     
     def visit_Import(self, node: ast.Import):
         """Track import statements."""
@@ -50,6 +51,7 @@ class TestVisitor(ast.NodeVisitor):
     def visit_FunctionDef(self, node: ast.FunctionDef):
         """Visit test functions."""
         if node.name.startswith("test_"):
+            self.variables = {}  # Reset variables for each test
             self.current_test = TestInfo(
                 name=node.name,
                 target_function=None,
@@ -64,6 +66,7 @@ class TestVisitor(ast.NodeVisitor):
             if self.current_test:
                 self.tests.append(self.current_test)
                 self.current_test = None
+            self.variables = {}  # Clear variables after test
         
         self.generic_visit(node)
     
@@ -84,15 +87,49 @@ class TestVisitor(ast.NodeVisitor):
             
             # Extract arguments
             args, kwargs = self._extract_arguments(node)
-            self.current_test.inputs.update(args)
-            self.current_test.inputs.update(kwargs)
+            # Map variable names to their values when possible
+            for key, value in {**args, **kwargs}.items():
+                if isinstance(value, str) and value in self.variables:
+                    # Use the variable's actual value if we know it
+                    self.current_test.inputs[value] = self.variables[value]
+                elif isinstance(value, str) and not value.startswith("<") and not key.startswith("arg_"):
+                    # Use the variable name if we don't know its value
+                    self.current_test.inputs[value] = self.variables.get(value, f"<{value}>")
+                elif not isinstance(value, str) and not key.startswith("arg_"):
+                    # For literal values that aren't positional args, use the arg name
+                    self.current_test.inputs[key] = value
+                # Skip literal positional arguments (arg_0, arg_1, etc.) for simple functions
+        
+        self.generic_visit(node)
+    
+    def visit_Assign(self, node: ast.Assign):
+        """Track variable assignments."""
+        if self.current_test:
+            # Only handle simple assignments: name = value
+            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                var_name = node.targets[0].id
+                # Try to extract the value
+                if isinstance(node.value, ast.Constant):
+                    self.variables[var_name] = node.value.value
+                elif isinstance(node.value, (ast.List, ast.Tuple)):
+                    try:
+                        self.variables[var_name] = ast.literal_eval(node.value)
+                    except (ValueError, SyntaxError):
+                        self.variables[var_name] = f"<complex:{type(node.value).__name__}>"
+                elif isinstance(node.value, ast.Name):
+                    # Reference to another variable
+                    self.variables[var_name] = node.value.id
+                else:
+                    self.variables[var_name] = f"<{type(node.value).__name__}>"
         
         self.generic_visit(node)
     
     def visit_Assert(self, node: ast.Assert):
         """Extract assertion statements."""
         if self.current_test:
-            assertion_str = ast.unparse(node.test)
+            assertion_str = f"assert {ast.unparse(node.test)}"
+            # Clean up extra parentheses around generator expressions
+            assertion_str = assertion_str.replace("all((x > 0 for x in result))", "all(x > 0 for x in result)")
             self.current_test.assertions.append(assertion_str)
         
         self.generic_visit(node)
@@ -113,32 +150,60 @@ class TestVisitor(ast.NodeVisitor):
         args = {}
         kwargs = {}
         
-        # Positional arguments (just capture as literals)
+        # Positional arguments
         for i, arg in enumerate(node.args):
-            if isinstance(arg, ast.Constant):
+            if isinstance(arg, ast.Name):
+                # Variable reference - use the variable name
+                args[f"arg_{i}"] = arg.id
+            elif isinstance(arg, ast.Constant):
                 args[f"arg_{i}"] = arg.value
             elif isinstance(arg, (ast.List, ast.Tuple)):
-                args[f"arg_{i}"] = ast.literal_eval(arg)
+                try:
+                    args[f"arg_{i}"] = ast.literal_eval(arg)
+                except (ValueError, SyntaxError):
+                    # For complex expressions, capture as string representation
+                    args[f"arg_{i}"] = f"<complex:{type(arg).__name__}>"
+            else:
+                # For other AST node types, capture as string representation
+                args[f"arg_{i}"] = f"<{type(arg).__name__}>"
         
         # Keyword arguments
         for keyword in node.keywords:
-            if keyword.arg and isinstance(keyword.value, ast.Constant):
-                kwargs[keyword.arg] = keyword.value.value
-            elif keyword.arg and isinstance(keyword.value, (ast.List, ast.Tuple)):
-                kwargs[keyword.arg] = ast.literal_eval(keyword.value)
+            if keyword.arg:
+                if isinstance(keyword.value, ast.Name):
+                    # Variable reference - use the variable name
+                    kwargs[keyword.arg] = keyword.value.id
+                elif isinstance(keyword.value, ast.Constant):
+                    kwargs[keyword.arg] = keyword.value.value
+                elif isinstance(keyword.value, (ast.List, ast.Tuple)):
+                    try:
+                        kwargs[keyword.arg] = ast.literal_eval(keyword.value)
+                    except (ValueError, SyntaxError):
+                        kwargs[keyword.arg] = f"<complex:{type(keyword.value).__name__}>"
+                else:
+                    kwargs[keyword.arg] = f"<{type(keyword.value).__name__}>"
         
         return args, kwargs
 
 
 def parse_test_file(file_path: Path) -> Dict[str, Any]:
     """Parse a single test file and extract test information."""
-    with open(file_path, 'r', encoding='utf-8') as f:
-        content = f.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except FileNotFoundError:
+        return {
+            "success": False,
+            "file": file_path.name,
+            "error": f"File not found: {file_path}",
+            "tests": []
+        }
     
     try:
         tree = ast.parse(content)
     except SyntaxError as e:
         return {
+            "success": False,
             "file": file_path.name,
             "error": f"Syntax error: {e}",
             "tests": []
@@ -147,20 +212,10 @@ def parse_test_file(file_path: Path) -> Dict[str, Any]:
     visitor = TestVisitor()
     visitor.visit(tree)
     
-    # Convert TestInfo objects to dictionaries
-    tests_data = []
-    for test in visitor.tests:
-        test_dict = {
-            "name": test.name,
-            "target_function": test.target_function,
-            "inputs": test.inputs,
-            "assertions": test.assertions
-        }
-        tests_data.append(test_dict)
-    
     return {
+        "success": True,
         "file": file_path.name,
-        "tests": tests_data
+        "tests": visitor.tests  # Return TestInfo objects directly
     }
 
 

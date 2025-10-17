@@ -12,16 +12,11 @@ from dataclasses import dataclass
 import sys
 import os
 
-try:
-    from .ollama_client import OllamaClient, GenerationConfig
-    from .align_behaviors import BehavioralAligner, AlignmentMatch, TestBehavior
-    from .spec_parser import SpecParser, OpenSpec, Requirement
-except ImportError:
-    # Add parent directory to path for imports
-    sys.path.append(str(Path(__file__).parent))
-    from ollama_client import OllamaClient, GenerationConfig
-    from align_behaviors import BehavioralAligner, AlignmentMatch, TestBehavior
-    from spec_parser import SpecParser, OpenSpec, Requirement
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent))
+from ollama_client import OllamaClient, GenerationConfig
+from align_behaviors import BehavioralAligner, AlignmentMatch, TestBehavior
+from spec_parser import SpecParser, OpenSpec, Requirement
 
 
 @dataclass
@@ -353,9 +348,17 @@ def main():
     comparator = BehaviorComparator()
     
     # Load test behaviors
-    test_behaviors = comparator.aligner.load_test_behaviors(
-        Path('/home/asabaal/repos/music_creation/qa_test_project/generator/analysis/combined_analysis.json')
+    test_behaviors = comparator.load_test_behaviors(
+        Path('test_summaries.json')
     )
+    
+    # Load spec - use a configurable path or parameter
+    spec_path = Path('test_spec.yml')  # Default to local test spec
+    if not spec_path.exists():
+        print("No test spec found. Please provide a spec file path.")
+        return
+    
+    spec = comparator.spec_parser.parse_file(spec_path)
     
     # Load spec
     spec = comparator.spec_parser.parse_file(

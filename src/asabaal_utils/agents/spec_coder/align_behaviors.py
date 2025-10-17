@@ -9,10 +9,7 @@ import re
 from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
-try:
-    from .spec_parser import SpecParser, OpenSpec, Requirement
-except ImportError:
-    from spec_parser import SpecParser, OpenSpec, Requirement
+from spec_parser import SpecParser, OpenSpec, Requirement
 
 
 @dataclass
@@ -344,8 +341,16 @@ def main():
     
     # Load test behaviors
     test_behaviors = aligner.load_test_behaviors(
-        Path('/home/asabaal/repos/music_creation/qa_test_project/generator/analysis/combined_test_summary.json')
+        Path('test_summaries.json')
     )
+    
+    # Load spec - use a configurable path or parameter
+    spec_path = Path('test_spec.yml')  # Default to local test spec
+    if not spec_path.exists():
+        print("No test spec found. Please provide a spec file path.")
+        return
+    
+    spec = aligner.load_spec(spec_path)
     
     # Load spec
     spec = aligner.load_spec(

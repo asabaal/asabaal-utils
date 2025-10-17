@@ -14,11 +14,11 @@ class PromptTemplates:
     source_code_prompt: str = """Generate Python scaffolding code using the EXACT function interfaces provided.
 
 For specification {spec_id}, create a file with:
-- Module docstring: "Rhythmic Pulse Generator\\nImplements deterministic rhythmic pattern generation."
-- Import math only
+- Module docstring: "{title}\\nVersion {version}"
+- Import appropriate modules based on function requirements
 - Function stubs with TODO comments and pass statements
 - Use the EXACT function signatures provided below
-- Single-line docstrings format: \"\"\"TODO RPG-XXX: description.\"\"\"
+- Single-line docstrings format: \"\"\"TODO {spec_id}: description.\"\"\"
 
 FUNCTION INTERFACES (USE EXACTLY AS SPECIFIED):
 {interfaces}

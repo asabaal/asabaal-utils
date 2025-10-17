@@ -102,8 +102,20 @@ class TestSummarizer:
             logger.warning(f"Failed to load source context: {e}")
             return ""
     
-    def create_summary_prompt(self, test_data: Dict[str, Any]) -> str:
+    def create_summary_prompt(self, test_data) -> str:
         """Create a prompt for summarizing a single test."""
+        # Handle both TestInfo objects and dictionaries
+        if hasattr(test_data, 'name'):
+            name = test_data.name
+            target_function = test_data.target_function or 'Unknown'
+            inputs = test_data.inputs
+            assertions = test_data.assertions
+        else:
+            name = test_data.get('name', 'Unknown')
+            target_function = test_data.get('target_function', 'Unknown')
+            inputs = test_data.get('inputs', {})
+            assertions = test_data.get('assertions', [])
+        
         prompt = f"""You are analyzing a Python test to understand what behavior it requires from the function under test.
 
 Context:
@@ -112,10 +124,10 @@ Context:
 {self.source_context}
 
 Test Details:
-- Test name: {test_data['name']}
-- Target function: {test_data.get('target_function', 'Unknown')}
-- Inputs: {test_data['inputs']}
-- Assertions: {test_data['assertions']}
+- Test name: {name}
+- Target function: {target_function}
+- Inputs: {inputs}
+- Assertions: {assertions}
 
 Instructions:
 1. Describe in 1-2 sentences what this test expects the function to do
@@ -129,7 +141,7 @@ Example response:
 
         return prompt
     
-    def summarize_test(self, test_data: Dict[str, Any]) -> Optional[str]:
+    def summarize_test(self, test_data) -> Optional[str]:
         """Generate a behavior summary for a single test."""
         try:
             prompt = self.create_summary_prompt(test_data)
@@ -181,7 +193,8 @@ Example response:
             return "The function should handle edge cases and invalid inputs appropriately."
             
         except Exception as e:
-            logger.error(f"Failed to summarize test {test_data.get('name', 'unknown')}: {e}")
+            test_name = getattr(test_data, 'name', test_data.get('name', 'unknown'))
+            logger.error(f"Failed to summarize test {test_name}: {e}")
             return f"Error generating summary: {str(e)}"
     
     def summarize_test_file(self, parsed_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -191,11 +204,23 @@ Example response:
         for test in parsed_data.get('tests', []):
             summary = self.summarize_test(test)
             
+            # Handle both TestInfo objects and dictionaries
+            if hasattr(test, 'name'):
+                name = test.name
+                target_function = test.target_function
+                inputs = test.inputs
+                assertions = test.assertions
+            else:
+                name = test.get('name', 'Unknown')
+                target_function = test.get('target_function')
+                inputs = test.get('inputs', {})
+                assertions = test.get('assertions', [])
+            
             summarized_test = {
-                "name": test['name'],
-                "target_function": test.get('target_function'),
-                "inputs": test['inputs'],
-                "assertions": test['assertions'],
+                "name": name,
+                "target_function": target_function,
+                "inputs": inputs,
+                "assertions": assertions,
                 "implied_behavior": summary
             }
             summarized_tests.append(summarized_test)
