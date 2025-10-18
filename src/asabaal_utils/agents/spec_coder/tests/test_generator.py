@@ -601,5 +601,102 @@ class TestGenerationResult:
         assert result.execution_time == 0.5
 
 
+    def test_strip_markdown_code_blocks_basic(self):
+        """Test basic markdown code block stripping."""
+        generator = CodeGenerator()
+        
+        # Test with ```python wrapper
+        content = "```python\ndef test_function():\n    return True\n```"
+        result = generator._strip_markdown_code_blocks(content)
+        expected = "def test_function():\n    return True"
+        assert result == expected
+    
+    def test_strip_markdown_code_blocks_with_instructions(self):
+        """Test stripping instructional text that causes IndentationError."""
+        generator = CodeGenerator()
+        
+        # Test content that would cause IndentationError
+        content = """ pytest test code only.
+
+import pytest
+from unittest.mock import patch, MagicMock
+
+def test_generate_time_grid_happy_path():
+    result = generate_time_grid(120, 4)
+    assert len(result) > 0"""
+        
+        result = generator._strip_markdown_code_blocks(content)
+        
+        # Should remove the instructional line
+        lines = result.split('\n')
+        assert not any('pytest test code only' in line for line in lines)
+        assert 'import pytest' in result
+        assert 'def test_generate_time_grid_happy_path' in result
+        
+        # Should be valid Python that can be parsed
+        import ast
+        try:
+            ast.parse(result)
+        except SyntaxError:
+            pytest.fail("Stripped content should be valid Python")
+    
+    def test_strip_markdown_code_blocks_various_instructions(self):
+        """Test stripping various types of instructional text."""
+        generator = CodeGenerator()
+        
+        test_cases = [
+            ("The test code must be complete and executable as a single pytest file.\nimport pytest", "import pytest"),
+            ("Generate comprehensive pytest tests for the following:\nimport pytest", "import pytest"),
+            ("Note: This is a test file\nimport pytest", "import pytest"),
+            ("TODO: Add more tests\nimport pytest", "import pytest"),
+            ("Here is the test code:\nimport pytest", "import pytest"),
+            ("The following code implements:\nimport pytest", "import pytest"),
+        ]
+        
+        for input_content, expected_start in test_cases:
+            result = generator._strip_markdown_code_blocks(input_content)
+            assert result.strip().startswith(expected_start.strip()), f"Failed on: {input_content}"
+            
+            # Should be valid Python
+            import ast
+            try:
+                ast.parse(result)
+            except SyntaxError:
+                pytest.fail(f"Stripped content should be valid Python: {result}")
+    
+    def test_strip_markdown_code_blocks_preserve_valid_code(self):
+        """Test that valid code is preserved while stripping instructions."""
+        generator = CodeGenerator()
+        
+        content = """```python
+import pytest
+from unittest.mock import patch, MagicMock
+
+def test_function_happy_path():
+    result = some_function(1, 2)
+    assert result == 3
+
+def test_function_edge_case():
+    with pytest.raises(ValueError):
+        some_function(-1, 0)
+```"""
+        
+        result = generator._strip_markdown_code_blocks(content)
+        
+        # Should preserve all valid code
+        assert 'import pytest' in result
+        assert 'def test_function_happy_path' in result
+        assert 'def test_function_edge_case' in result
+        assert 'assert result == 3' in result
+        assert 'pytest.raises(ValueError)' in result
+        
+        # Should be valid Python
+        import ast
+        try:
+            ast.parse(result)
+        except SyntaxError:
+            pytest.fail("Stripped content should be valid Python")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

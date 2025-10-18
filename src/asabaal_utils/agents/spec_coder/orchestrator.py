@@ -28,6 +28,8 @@ try:
 except ImportError:
     from generator import CodeGenerator
 
+logger = logging.getLogger(__name__)
+
 class IntegrationOrchestrator:
     """Main integration orchestrator."""
     
@@ -76,6 +78,67 @@ class IntegrationOrchestrator:
             except Exception as e:
                 print(f"⚠️  Failed to load metadata: {e}")
         return False
+    
+    def _clean_test_file_content(self, content: str) -> str:
+        """Clean test file content to handle instructional text that causes IndentationError."""
+        import re
+        
+        # Remove ```python and ``` markers
+        content = re.sub(r'```python\s*', '', content)
+        content = re.sub(r'```\s*$', '', content)
+        content = re.sub(r'```\s*$', '', content, flags=re.MULTILINE)
+        
+        # Remove common AI-generated comments and notes
+        lines = content.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            stripped = line.strip()
+            
+            # Skip lines that look like AI instructions or notes
+            if (stripped.startswith('Note:') or 
+                stripped.startswith('TODO:') or
+                stripped.startswith('Replace') or
+                stripped.startswith('your_module') or
+                'actual name of your module' in stripped.lower() or
+                stripped.startswith('# Note:') or
+                stripped.startswith('# TODO:') or
+                stripped.startswith('pytest test code only') or
+                stripped.startswith('The test code must be complete') or
+                stripped.startswith('Generate comprehensive pytest tests') or
+                not stripped or
+                stripped.lower().startswith('here is') or
+                stripped.lower().startswith('this is') or
+                stripped.lower().startswith('the following')):
+                continue
+            
+            # Skip lines that are clearly instructions
+            if any(keyword in stripped.lower() for keyword in [
+                'generate tests', 'test code', 'pytest file', 'executable', 
+                'complete and executable', 'single pytest file', 'instruction',
+                'requirement:', 'code to test:', 'verify:'
+            ]):
+                continue
+            
+            cleaned_lines.append(line)
+        
+        # Remove any remaining empty lines at the beginning or end
+        while cleaned_lines and not cleaned_lines[0].strip():
+            cleaned_lines.pop(0)
+        while cleaned_lines and not cleaned_lines[-1].strip():
+            cleaned_lines.pop()
+        
+        # Fix indentation issues by removing leading spaces only from the first few lines
+        # that might have been incorrectly indented by AI generation
+        for i, line in enumerate(cleaned_lines):
+            if i < 5 and line.strip() and not line.startswith(' ' * 4):  # Not properly indented
+                # Remove leading spaces from lines that should start at column 0
+                if line.strip().startswith(('def ', 'class ', 'import ', 'from ', '@')):
+                    cleaned_lines[i] = line.lstrip()
+        
+        content = '\n'.join(cleaned_lines)
+        
+        return content
     
     def run(self, cmd: str, cwd: Optional[Path] = None, capture: bool = True) -> subprocess.CompletedProcess:
         """Run a command and return the result."""
@@ -292,7 +355,14 @@ class IntegrationOrchestrator:
                     with open(test_file, 'r') as f:
                         content = f.read()
                     
-                    tree = ast.parse(content)
+                    # Clean the content to handle instructional text that causes IndentationError
+                    content = self._clean_test_file_content(content)
+                    
+                    try:
+                        tree = ast.parse(content)
+                    except SyntaxError as e:
+                        logger.warning(f"Failed to parse test file {test_file} after cleaning: {e}")
+                        continue  # Skip this file and continue with others
                     visitor = TestVisitor()
                     visitor.visit(tree)
                     test_results.extend(visitor.tests)

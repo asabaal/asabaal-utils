@@ -264,17 +264,36 @@ class CodeGenerator:
         # Remove common AI-generated comments and notes
         lines = content.split('\n')
         cleaned_lines = []
+        in_python_code = False
         
         for line in lines:
+            stripped = line.strip()
+            
             # Skip lines that look like AI instructions or notes
-            if (line.strip().startswith('Note:') or 
-                line.strip().startswith('TODO:') or
-                line.strip().startswith('Replace') or
-                line.strip().startswith('your_module') or
-                'actual name of your module' in line.lower() or
-                line.strip().startswith('# Note:') or
-                line.strip().startswith('# TODO:')):
+            if (stripped.startswith('Note:') or 
+                stripped.startswith('TODO:') or
+                stripped.startswith('Replace') or
+                stripped.startswith('your_module') or
+                'actual name of your module' in stripped.lower() or
+                stripped.startswith('# Note:') or
+                stripped.startswith('# TODO:') or
+                stripped.startswith('pytest test code only') or
+                stripped.startswith('The test code must be complete') or
+                stripped.startswith('Generate comprehensive pytest tests') or
+                not stripped or
+                stripped.lower().startswith('here is') or
+                stripped.lower().startswith('this is') or
+                stripped.lower().startswith('the following')):
                 continue
+            
+            # Skip lines that are clearly instructions
+            if any(keyword in stripped.lower() for keyword in [
+                'generate tests', 'test code', 'pytest file', 'executable', 
+                'complete and executable', 'single pytest file', 'instruction',
+                'requirement:', 'code to test:', 'verify:'
+            ]):
+                continue
+            
             cleaned_lines.append(line)
         
         # Remove any remaining empty lines at the beginning or end
@@ -282,6 +301,14 @@ class CodeGenerator:
             cleaned_lines.pop(0)
         while cleaned_lines and not cleaned_lines[-1].strip():
             cleaned_lines.pop()
+        
+        # Fix indentation issues by removing leading spaces only from the first few lines
+        # that might have been incorrectly indented by AI generation
+        for i, line in enumerate(cleaned_lines):
+            if i < 5 and line.strip() and not line.startswith(' ' * 4):  # Not properly indented
+                # Remove leading spaces from lines that should start at column 0
+                if line.strip().startswith(('def ', 'class ', 'import ', 'from ', '@')):
+                    cleaned_lines[i] = line.lstrip()
         
         content = '\n'.join(cleaned_lines)
         

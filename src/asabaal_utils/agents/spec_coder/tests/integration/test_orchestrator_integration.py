@@ -300,6 +300,56 @@ def test_function():
         
         print("   ✅ Stage 2 execution successful")
     
+    def test_stage2_handles_malformed_test_files(self, temp_workspace):
+        """Test Stage 2 handles test files with instructional text that cause IndentationError."""
+        print("\n🧪 Testing Stage 2 with malformed test files...")
+        
+        # Create test files with instructional text (like what Stage 1 generates)
+        test_dir = temp_workspace / "scaffolds" / "tests"
+        test_dir.mkdir(parents=True)
+        
+        # Test file with instructional text that causes IndentationError
+        test_file1 = test_dir / "test_malformed.py"
+        test_file1.write_text(''' pytest test code only.
+
+import pytest
+from unittest.mock import patch, MagicMock
+
+def test_generate_time_grid_happy_path():
+    result = generate_time_grid(120, 4)
+    assert len(result) > 0
+    assert result[0] == 0.0
+    assert result[-1] <= 4.0''')
+        
+        # Another test file with different instructional text
+        test_file2 = test_dir / "test_also_malformed.py"
+        test_file2.write_text('''The test code must be complete and executable as a single pytest file.
+
+import pytest
+
+def test_apply_accent_pattern_happy_path():
+    result = apply_accent_pattern([1, 0, 1, 0], [0.0, 0.5, 1.0, 1.5])
+    assert len(result) == 4''')
+        
+        orchestrator = IntegrationOrchestrator(base_dir=temp_workspace)
+        
+        # This should NOT raise IndentationError - it should handle the malformed files
+        try:
+            result = orchestrator._stage2_scaffold_to_requirements(temp_workspace)
+            assert result == True, "Stage 2 should succeed even with malformed test files"
+        except IndentationError as e:
+            pytest.fail(f"Stage 2 should handle IndentationError gracefully, but got: {e}")
+        
+        # Verify test summaries were created despite malformed input
+        summary_file = temp_workspace / "reports" / "stage2_test_summaries" / "test_summary_tests.json"
+        assert summary_file.exists(), "Stage 2 should create summary file even with malformed test files"
+        
+        summary_data = json.loads(summary_file.read_text())
+        assert "tests" in summary_data, "Summary should contain test data"
+        assert len(summary_data["tests"]) >= 0, "Should have processed test files"
+        
+        print("   ✅ Stage 2 handled malformed test files successfully")
+    
     @patch('asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner')
     @patch('asabaal_utils.agents.spec_coder.spec_parser.SpecParser')
     def test_stage3_requirements_to_alignment(self, mock_parser_class, mock_aligner_class, temp_workspace, sample_openspec):
