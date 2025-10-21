@@ -251,7 +251,7 @@ requirements:
         
         print("   ✅ Stage 1 execution successful")
     
-    @patch('asabaal_utils.agents.spec_coder.parse_tests.TestVisitor')
+    @patch('asabaal_utils.agents.spec_coder.parse_tests.ASTVisitor')
     @patch('asabaal_utils.agents.spec_coder.summarize_tests.TestSummarizer')
     def test_stage2_scaffold_to_requirements(self, mock_summarizer_class, mock_visitor_class, temp_workspace):
         """Test Stage 2: Scaffold to requirements extraction."""
@@ -536,7 +536,7 @@ def test_apply_accent_pattern_happy_path():
         mock_generator_class.return_value = mock_generator
         
         # Mock other dependencies
-        with patch('asabaal_utils.agents.spec_coder.parse_tests.TestVisitor'), \
+        with patch('asabaal_utils.agents.spec_coder.parse_tests.ASTVisitor'), \
              patch('asabaal_utils.agents.spec_coder.summarize_tests.TestSummarizer'), \
              patch('asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner'), \
              patch('asabaal_utils.agents.spec_coder.spec_parser.SpecParser'), \
@@ -653,8 +653,8 @@ def test_generate_pattern():
     assert all(0 <= x <= 1 for x in result)
 '''
         
-        (tests_dir / "test_time_grid.py").write_text(sample_test_content)
-        (tests_dir / "test_pattern.py").write_text(sample_test_content)
+        (tests_dir / "test_generate_time_grid.py").write_text(sample_test_content)
+        (tests_dir / "test_generate_pattern.py").write_text(sample_test_content)
         
         # Set up metadata for Stage 2
         orchestrator.spec_file_path = sample_openspec.absolute()
@@ -687,7 +687,7 @@ def test_generate_pattern():
         assert "detailed_matches" in report_content, "Report should have detailed_matches"
         
         print(f"📈 Alignment rate: {report_content['summary'].get('alignment_rate', 'N/A')}")
-        print(f"📊 Analyzed {report_content['summary'].get('total_behaviors', 0)} behaviors against {report_content['summary'].get('total_requirements', 0)} requirements")
+        print(f"📊 Analyzed {report_content['summary'].get('total_tests', 0)} tests against {len(report_content.get('requirement_coverage', {}))} requirements")
         
         print("   ✅ Stage 2 + 3 integration successful with real AI")
     
@@ -706,23 +706,30 @@ def test_generate_pattern():
         stage2_dir = reports_dir / "stage2_test_summaries"
         stage2_dir.mkdir(parents=True, exist_ok=True)
         
-        # Create mock test behaviors data
+        # Create mock test behaviors data (matching real Stage 2 output format)
         mock_test_behaviors = [
             {
-                "test_name": "test_generate_time_grid",
-                "implied_behavior": "Generate time grid based on BPM and time signature",
-                "test_type": "unit",
-                "assertions": ["assert len(result) == 4", "assert result[0] == 0.0"]
+                "name": "test_generate_time_grid",
+                "target_function": "generate_time_grid",
+                "inputs": {"bpm": 120, "time_signature": "4/4"},
+                "assertions": ["assert len(result) == 4", "assert result[0] == 0.0"],
+                "implied_behavior": "Generate time grid based on BPM and time signature"
             },
             {
-                "test_name": "test_generate_pattern", 
-                "implied_behavior": "Generate rhythmic pattern with specified density",
-                "test_type": "unit",
-                "assertions": ["assert len(result) == 8", "assert all(0 <= x <= 1 for x in result)"]
+                "name": "test_generate_pattern",
+                "target_function": "generate_pattern", 
+                "inputs": {"density": 0.5, "length": 8},
+                "assertions": ["assert len(result) == 8", "assert all(0 <= x <= 1 for x in result)"],
+                "implied_behavior": "Generate rhythmic pattern with specified density"
             }
         ]
         
-        (stage2_dir / "test_summary_tests.json").write_text(json.dumps(mock_test_behaviors, indent=2))
+        # Create the correct format that Stage 3 expects: {"file": "...", "tests": [...]}
+        stage2_data = {
+            "file": "test_summary_tests.json",
+            "tests": mock_test_behaviors
+        }
+        (stage2_dir / "test_summary_tests.json").write_text(json.dumps(stage2_data, indent=2))
         
         # Set up metadata
         orchestrator.spec_file_path = sample_openspec.absolute()
