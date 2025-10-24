@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.parse_test_file", "label": "parse_test_file", "shape": "dot", "title": "Function: parse_tests.parse_test_file\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 189\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.main", "label": "main", "shape": "dot", "title": "Function: parse_tests.main\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 222\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.__init__", "label": "__init__", "shape": "dot", "title": "Function: parse_tests.__init__\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 27\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.visit_Import", "label": "visit_Import", "shape": "dot", "title": "Function: parse_tests.visit_Import\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.visit_ImportFrom", "label": "visit_ImportFrom", "shape": "dot", "title": "Function: parse_tests.visit_ImportFrom\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 41\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.visit_FunctionDef", "label": "visit_FunctionDef", "shape": "dot", "title": "Function: parse_tests.visit_FunctionDef\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 51\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.visit_Call", "label": "visit_Call", "shape": "dot", "title": "Function: parse_tests.visit_Call\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 73\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.visit_Assign", "label": "visit_Assign", "shape": "dot", "title": "Function: parse_tests.visit_Assign\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 105\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests.visit_Assert", "label": "visit_Assert", "shape": "dot", "title": "Function: parse_tests.visit_Assert\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 127\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests._get_function_name", "label": "_get_function_name", "shape": "dot", "title": "Function: parse_tests._get_function_name\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 137\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parse_tests._extract_arguments", "label": "_extract_arguments", "shape": "dot", "title": "Function: parse_tests._extract_arguments\nFile: src/asabaal_utils/agents/spec_coder/parse_tests.py\nLine: 148\nIn-degree: 0\nOut-degree: 37"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ASTVisitor", "label": "ASTVisitor", "shape": "dot", "title": "Function: ASTVisitor\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "visitor.visit", "label": "visit", "shape": "dot", "title": "Function: visitor.visit\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "path.is_file", "label": "is_file", "shape": "dot", "title": "Function: path.is_file\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "main", "label": "main", "shape": "dot", "title": "Function: main\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self.generic_visit", "label": "generic_visit", "shape": "dot", "title": "Function: self.generic_visit\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "node.name.startswith", "label": "startswith", "shape": "dot", "title": "Function: node.name.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._get_function_name", "label": "_get_function_name", "shape": "dot", "title": "Function: self._get_function_name\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "isinstance", "label": "isinstance", "shape": "dot", "title": "Function: isinstance\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "enumerate", "label": "enumerate", "shape": "dot", "title": "Function: enumerate\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ast.parse", "label": "parse", "shape": "dot", "title": "Function: ast.parse\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "sys.exit", "label": "exit", "shape": "dot", "title": "Function: sys.exit\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "parse_test_file", "label": "parse_test_file", "shape": "dot", "title": "Function: parse_test_file\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "path.is_dir", "label": "is_dir", "shape": "dot", "title": "Function: path.is_dir\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ParsedTestInfo", "label": "ParsedTestInfo", "shape": "dot", "title": "Function: ParsedTestInfo\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._extract_arguments", "label": "_extract_arguments", "shape": "dot", "title": "Function: self._extract_arguments\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "items", "label": "items", "shape": "dot", "title": "Function: items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "assertion_str.replace", "label": "replace", "shape": "dot", "title": "Function: assertion_str.replace\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self.current_test.assertions.append", "label": "append", "shape": "dot", "title": "Function: self.current_test.assertions.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "open", "label": "open", "shape": "dot", "title": "Function: open\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "f.read", "label": "read", "shape": "dot", "title": "Function: f.read\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "json.dumps", "label": "dumps", "shape": "dot", "title": "Function: json.dumps\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "path.glob", "label": "glob", "shape": "dot", "title": "Function: path.glob\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "append", "label": "append", "shape": "dot", "title": "Function: append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self.visit", "label": "visit", "shape": "dot", "title": "Function: self.visit\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self.tests.append", "label": "append", "shape": "dot", "title": "Function: self.tests.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "func_name.startswith", "label": "startswith", "shape": "dot", "title": "Function: func_name.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "py_file.name.startswith", "label": "startswith", "shape": "dot", "title": "Function: py_file.name.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ast.unparse", "label": "unparse", "shape": "dot", "title": "Function: ast.unparse\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "results.append", "label": "append", "shape": "dot", "title": "Function: results.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self.variables.get", "label": "get", "shape": "dot", "title": "Function: self.variables.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "value.startswith", "label": "startswith", "shape": "dot", "title": "Function: value.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "key.startswith", "label": "startswith", "shape": "dot", "title": "Function: key.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ast.literal_eval", "label": "literal_eval", "shape": "dot", "title": "Function: ast.literal_eval\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "type", "label": "type", "shape": "dot", "title": "Function: type\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 ASTVisitor", "to": "ASTVisitor"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 visitor.visit", "to": "visitor.visit"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 path.is_file", "to": "path.is_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 main", "to": "main"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self.generic_visit", "to": "self.generic_visit"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 node.name.startswith", "to": "node.name.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self._get_function_name", "to": "self._get_function_name"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 isinstance", "to": "isinstance"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 enumerate", "to": "enumerate"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 ast.parse", "to": "ast.parse"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 sys.exit", "to": "sys.exit"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 parse_test_file", "to": "parse_test_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 path.is_dir", "to": "path.is_dir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 ParsedTestInfo", "to": "ParsedTestInfo"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self._extract_arguments", "to": "self._extract_arguments"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 items", "to": "items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 assertion_str.replace", "to": "assertion_str.replace"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self.current_test.assertions.append", "to": "self.current_test.assertions.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 open", "to": "open"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 f.read", "to": "f.read"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 json.dumps", "to": "json.dumps"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 path.glob", "to": "path.glob"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 append", "to": "append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self.visit", "to": "self.visit"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self.tests.append", "to": "self.tests.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 func_name.startswith", "to": "func_name.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 py_file.name.startswith", "to": "py_file.name.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 ast.unparse", "to": "ast.unparse"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 results.append", "to": "results.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 self.variables.get", "to": "self.variables.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 value.startswith", "to": "value.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 key.startswith", "to": "key.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 ast.literal_eval", "to": "ast.literal_eval"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parse_tests._extract_arguments", "title": "parse_tests._extract_arguments \u2192 type", "to": "type"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Parse_TestsModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

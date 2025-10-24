@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches.main", "label": "main", "shape": "dot", "title": "Function: plan_patches.main\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 364\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches.__init__", "label": "__init__", "shape": "dot", "title": "Function: plan_patches.__init__\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 30\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._initialize_strategies", "label": "_initialize_strategies", "shape": "dot", "title": "Function: plan_patches._initialize_strategies\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 35\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._signature_mismatch_prompt", "label": "_signature_mismatch_prompt", "shape": "dot", "title": "Function: plan_patches._signature_mismatch_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 112\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._throws_on_smoke_prompt", "label": "_throws_on_smoke_prompt", "shape": "dot", "title": "Function: plan_patches._throws_on_smoke_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 140\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._logic_mismatch_prompt", "label": "_logic_mismatch_prompt", "shape": "dot", "title": "Function: plan_patches._logic_mismatch_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 169\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._import_error_prompt", "label": "_import_error_prompt", "shape": "dot", "title": "Function: plan_patches._import_error_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 193\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._syntax_error_prompt", "label": "_syntax_error_prompt", "shape": "dot", "title": "Function: plan_patches._syntax_error_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 214\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._type_error_prompt", "label": "_type_error_prompt", "shape": "dot", "title": "Function: plan_patches._type_error_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 235\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._attribute_error_prompt", "label": "_attribute_error_prompt", "shape": "dot", "title": "Function: plan_patches._attribute_error_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 256\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches._value_error_prompt", "label": "_value_error_prompt", "shape": "dot", "title": "Function: plan_patches._value_error_prompt\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 277\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches.create_repair_plan", "label": "create_repair_plan", "shape": "dot", "title": "Function: plan_patches.create_repair_plan\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 298\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches.save_repair_plans", "label": "save_repair_plans", "shape": "dot", "title": "Function: plan_patches.save_repair_plans\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 334\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches.load_repair_plans", "label": "load_repair_plans", "shape": "dot", "title": "Function: plan_patches.load_repair_plans\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 345\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "plan_patches.get_strategy_summary", "label": "get_strategy_summary", "shape": "dot", "title": "Function: plan_patches.get_strategy_summary\nFile: src/asabaal_utils/agents/spec_coder/healer/plan_patches.py\nLine: 352\nIn-degree: 0\nOut-degree: 26"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "PatchPlanner", "label": "PatchPlanner", "shape": "dot", "title": "Function: PatchPlanner\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "planner.create_repair_plan", "label": "create_repair_plan", "shape": "dot", "title": "Function: planner.create_repair_plan\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "planner.get_strategy_summary", "label": "get_strategy_summary", "shape": "dot", "title": "Function: planner.get_strategy_summary\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "main", "label": "main", "shape": "dot", "title": "Function: main\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._initialize_strategies", "label": "_initialize_strategies", "shape": "dot", "title": "Function: self._initialize_strategies\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "strategy.prompt_template.format", "label": "format", "shape": "dot", "title": "Function: strategy.prompt_template.format\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "data.get", "label": "get", "shape": "dot", "title": "Function: data.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "yaml.dump", "label": "dump", "shape": "dot", "title": "Function: yaml.dump\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "RepairStrategy", "label": "RepairStrategy", "shape": "dot", "title": "Function: RepairStrategy\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ValueError", "label": "ValueError", "shape": "dot", "title": "Function: ValueError\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "list", "label": "list", "shape": "dot", "title": "Function: list\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "open", "label": "open", "shape": "dot", "title": "Function: open\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "yaml.safe_load", "label": "safe_load", "shape": "dot", "title": "Function: yaml.safe_load\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "set", "label": "set", "shape": "dot", "title": "Function: set\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self.strategies.items", "label": "items", "shape": "dot", "title": "Function: self.strategies.items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._signature_mismatch_prompt", "label": "_signature_mismatch_prompt", "shape": "dot", "title": "Function: self._signature_mismatch_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._throws_on_smoke_prompt", "label": "_throws_on_smoke_prompt", "shape": "dot", "title": "Function: self._throws_on_smoke_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._logic_mismatch_prompt", "label": "_logic_mismatch_prompt", "shape": "dot", "title": "Function: self._logic_mismatch_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._import_error_prompt", "label": "_import_error_prompt", "shape": "dot", "title": "Function: self._import_error_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._syntax_error_prompt", "label": "_syntax_error_prompt", "shape": "dot", "title": "Function: self._syntax_error_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._type_error_prompt", "label": "_type_error_prompt", "shape": "dot", "title": "Function: self._type_error_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._attribute_error_prompt", "label": "_attribute_error_prompt", "shape": "dot", "title": "Function: self._attribute_error_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "self._value_error_prompt", "label": "_value_error_prompt", "shape": "dot", "title": "Function: self._value_error_prompt\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 PatchPlanner", "to": "PatchPlanner"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 planner.create_repair_plan", "to": "planner.create_repair_plan"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 planner.get_strategy_summary", "to": "planner.get_strategy_summary"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 main", "to": "main"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._initialize_strategies", "to": "self._initialize_strategies"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 strategy.prompt_template.format", "to": "strategy.prompt_template.format"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 data.get", "to": "data.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 yaml.dump", "to": "yaml.dump"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 RepairStrategy", "to": "RepairStrategy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 ValueError", "to": "ValueError"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 list", "to": "list"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 open", "to": "open"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 yaml.safe_load", "to": "yaml.safe_load"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 set", "to": "set"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self.strategies.items", "to": "self.strategies.items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._signature_mismatch_prompt", "to": "self._signature_mismatch_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._throws_on_smoke_prompt", "to": "self._throws_on_smoke_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._logic_mismatch_prompt", "to": "self._logic_mismatch_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._import_error_prompt", "to": "self._import_error_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._syntax_error_prompt", "to": "self._syntax_error_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._type_error_prompt", "to": "self._type_error_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._attribute_error_prompt", "to": "self._attribute_error_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "plan_patches.get_strategy_summary", "title": "plan_patches.get_strategy_summary \u2192 self._value_error_prompt", "to": "self._value_error_prompt"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Plan_PatchesModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

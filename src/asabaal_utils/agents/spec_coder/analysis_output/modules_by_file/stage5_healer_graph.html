@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "stage5_healer.analyze_python_file", "label": "analyze_python_file", "shape": "dot", "title": "Function: stage5_healer.analyze_python_file\nFile: src/asabaal_utils/agents/spec_coder/notebooks/stage_specific/stage5_healer.py\nLine: 171\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "stage5_healer.apply_healing_fixes", "label": "apply_healing_fixes", "shape": "dot", "title": "Function: stage5_healer.apply_healing_fixes\nFile: src/asabaal_utils/agents/spec_coder/notebooks/stage_specific/stage5_healer.py\nLine: 272\nIn-degree: 0\nOut-degree: 54"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "sys.path.insert", "label": "insert", "shape": "dot", "title": "Function: sys.path.insert\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_dir.mkdir", "label": "mkdir", "shape": "dot", "title": "Function: output_dir.mkdir\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "config.items", "label": "items", "shape": "dot", "title": "Function: config.items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage4_dir.exists", "label": "exists", "shape": "dot", "title": "Function: stage4_dir.exists\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "list", "label": "list", "shape": "dot", "title": "Function: list\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "sum", "label": "sum", "shape": "dot", "title": "Function: sum\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_dir.exists", "label": "exists", "shape": "dot", "title": "Function: output_dir.exists\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path.cwd", "label": "cwd", "shape": "dot", "title": "Function: Path.cwd\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "str", "label": "str", "shape": "dot", "title": "Function: str\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage4_dir.rglob", "label": "rglob", "shape": "dot", "title": "Function: stage4_dir.rglob\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_data.get", "label": "get", "shape": "dot", "title": "Function: spec_data.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyze_python_file", "label": "analyze_python_file", "shape": "dot", "title": "Function: analyze_python_file\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "isoformat", "label": "isoformat", "shape": "dot", "title": "Function: isoformat\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "apply_healing_fixes", "label": "apply_healing_fixes", "shape": "dot", "title": "Function: apply_healing_fixes\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_dir.rglob", "label": "rglob", "shape": "dot", "title": "Function: output_dir.rglob\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "validation_results.append", "label": "append", "shape": "dot", "title": "Function: validation_results.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "open", "label": "open", "shape": "dot", "title": "Function: open\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "f.write", "label": "write", "shape": "dot", "title": "Function: f.write\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "globals", "label": "globals", "shape": "dot", "title": "Function: globals\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generated_files.append", "label": "append", "shape": "dot", "title": "Function: generated_files.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "yaml.safe_load", "label": "safe_load", "shape": "dot", "title": "Function: yaml.safe_load\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "set", "label": "set", "shape": "dot", "title": "Function: set\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "extend", "label": "extend", "shape": "dot", "title": "Function: extend\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "issues.get", "label": "get", "shape": "dot", "title": "Function: issues.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ast.parse", "label": "parse", "shape": "dot", "title": "Function: ast.parse\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "json.dump", "label": "dump", "shape": "dot", "title": "Function: json.dump\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "strftime", "label": "strftime", "shape": "dot", "title": "Function: strftime\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "item.is_file", "label": "is_file", "shape": "dot", "title": "Function: item.is_file\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "strip", "label": "strip", "shape": "dot", "title": "Function: strip\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "expected_functions.append", "label": "append", "shape": "dot", "title": "Function: expected_functions.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "f.read", "label": "read", "shape": "dot", "title": "Function: f.read\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ast.walk", "label": "walk", "shape": "dot", "title": "Function: ast.walk\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "isinstance", "label": "isinstance", "shape": "dot", "title": "Function: isinstance\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "append", "label": "append", "shape": "dot", "title": "Function: append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "datetime.now", "label": "now", "shape": "dot", "title": "Function: datetime.now\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "content.replace", "label": "replace", "shape": "dot", "title": "Function: content.replace\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "fixes_applied.append", "label": "append", "shape": "dot", "title": "Function: fixes_applied.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "item.relative_to", "label": "relative_to", "shape": "dot", "title": "Function: item.relative_to\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "locals", "label": "locals", "shape": "dot", "title": "Function: locals\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "defined_functions.add", "label": "add", "shape": "dot", "title": "Function: defined_functions.add\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "content.split", "label": "split", "shape": "dot", "title": "Function: content.split\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "enumerate", "label": "enumerate", "shape": "dot", "title": "Function: enumerate\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "lines.insert", "label": "insert", "shape": "dot", "title": "Function: lines.insert\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "join", "label": "join", "shape": "dot", "title": "Function: join\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "item.stat", "label": "stat", "shape": "dot", "title": "Function: item.stat\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "file_path.relative_to", "label": "relative_to", "shape": "dot", "title": "Function: file_path.relative_to\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "req.get", "label": "get", "shape": "dot", "title": "Function: req.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "imports.add", "label": "add", "shape": "dot", "title": "Function: imports.add\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "split", "label": "split", "shape": "dot", "title": "Function: split\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "line.startswith", "label": "startswith", "shape": "dot", "title": "Function: line.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "dir", "label": "dir", "shape": "dot", "title": "Function: dir\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 sys.path.insert", "to": "sys.path.insert"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 output_dir.mkdir", "to": "output_dir.mkdir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 config.items", "to": "config.items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 stage4_dir.exists", "to": "stage4_dir.exists"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 list", "to": "list"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 sum", "to": "sum"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 output_dir.exists", "to": "output_dir.exists"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 Path.cwd", "to": "Path.cwd"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 str", "to": "str"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 stage4_dir.rglob", "to": "stage4_dir.rglob"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 spec_data.get", "to": "spec_data.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 analyze_python_file", "to": "analyze_python_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 isoformat", "to": "isoformat"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 apply_healing_fixes", "to": "apply_healing_fixes"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 output_dir.rglob", "to": "output_dir.rglob"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 validation_results.append", "to": "validation_results.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 open", "to": "open"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 f.write", "to": "f.write"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 globals", "to": "globals"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 generated_files.append", "to": "generated_files.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 yaml.safe_load", "to": "yaml.safe_load"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 set", "to": "set"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 extend", "to": "extend"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 issues.get", "to": "issues.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 ast.parse", "to": "ast.parse"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 json.dump", "to": "json.dump"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 strftime", "to": "strftime"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 item.is_file", "to": "item.is_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 strip", "to": "strip"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 expected_functions.append", "to": "expected_functions.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 f.read", "to": "f.read"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 ast.walk", "to": "ast.walk"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 isinstance", "to": "isinstance"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 append", "to": "append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 datetime.now", "to": "datetime.now"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 content.replace", "to": "content.replace"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 fixes_applied.append", "to": "fixes_applied.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 item.relative_to", "to": "item.relative_to"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 locals", "to": "locals"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 defined_functions.add", "to": "defined_functions.add"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 content.split", "to": "content.split"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 enumerate", "to": "enumerate"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 lines.insert", "to": "lines.insert"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 join", "to": "join"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 item.stat", "to": "item.stat"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 file_path.relative_to", "to": "file_path.relative_to"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 req.get", "to": "req.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 imports.add", "to": "imports.add"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 split", "to": "split"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 line.startswith", "to": "line.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage5_healer.apply_healing_fixes", "title": "stage5_healer.apply_healing_fixes \u2192 dir", "to": "dir"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "CallGraph:stage5_healer", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

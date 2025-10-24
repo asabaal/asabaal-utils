@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.temp_dir", "label": "temp_dir", "shape": "dot", "title": "Function: test_tester.temp_dir\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 27\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.mock_summarizer", "label": "mock_summarizer", "shape": "dot", "title": "Function: test_tester.mock_summarizer\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_init_default", "label": "test_init_default", "shape": "dot", "title": "Function: test_tester.test_init_default\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 44\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_init_custom_model", "label": "test_init_custom_model", "shape": "dot", "title": "Function: test_tester.test_init_custom_model\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 51\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_init_with_files", "label": "test_init_with_files", "shape": "dot", "title": "Function: test_tester.test_init_with_files\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 58\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_analyze_single_file_success", "label": "test_analyze_single_file_success", "shape": "dot", "title": "Function: test_tester.test_analyze_single_file_success\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 72\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_analyze_single_file_parse_error", "label": "test_analyze_single_file_parse_error", "shape": "dot", "title": "Function: test_tester.test_analyze_single_file_parse_error\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 112\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_analyze_directory", "label": "test_analyze_directory", "shape": "dot", "title": "Function: test_tester.test_analyze_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 129\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_analyze_directory_empty", "label": "test_analyze_directory_empty", "shape": "dot", "title": "Function: test_tester.test_analyze_directory_empty\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 165\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_tester.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_tester.test_main_function_exists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_tester.py\nLine: 176\nIn-degree: 0\nOut-degree: 19"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "str", "label": "str", "shape": "dot", "title": "Function: str\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "pytest.skip", "label": "skip", "shape": "dot", "title": "Function: pytest.skip\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "shutil.rmtree", "label": "rmtree", "shape": "dot", "title": "Function: shutil.rmtree\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Mock", "label": "Mock", "shape": "dot", "title": "Function: Mock\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tempfile.mkdtemp", "label": "mkdtemp", "shape": "dot", "title": "Function: tempfile.mkdtemp\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "patch", "label": "patch", "shape": "dot", "title": "Function: patch\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "AnalysisEngine", "label": "AnalysisEngine", "shape": "dot", "title": "Function: AnalysisEngine\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hasattr", "label": "hasattr", "shape": "dot", "title": "Function: hasattr\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "mock_summ_class.assert_called_once_with", "label": "assert_called_once_with", "shape": "dot", "title": "Function: mock_summ_class.assert_called_once_with\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "test_file.write_text", "label": "write_text", "shape": "dot", "title": "Function: test_file.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "test_file1.write_text", "label": "write_text", "shape": "dot", "title": "Function: test_file1.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "test_file2.write_text", "label": "write_text", "shape": "dot", "title": "Function: test_file2.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "non_test_file.write_text", "label": "write_text", "shape": "dot", "title": "Function: non_test_file.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_dir.mkdir", "label": "mkdir", "shape": "dot", "title": "Function: output_dir.mkdir\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.analyze_directory", "label": "analyze_directory", "shape": "dot", "title": "Function: analyzer.analyze_directory\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "callable", "label": "callable", "shape": "dot", "title": "Function: callable\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.analyze_single_file", "label": "analyze_single_file", "shape": "dot", "title": "Function: analyzer.analyze_single_file\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 str", "to": "str"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 pytest.skip", "to": "pytest.skip"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 shutil.rmtree", "to": "shutil.rmtree"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 Mock", "to": "Mock"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 tempfile.mkdtemp", "to": "tempfile.mkdtemp"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 patch", "to": "patch"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 AnalysisEngine", "to": "AnalysisEngine"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 hasattr", "to": "hasattr"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 mock_summ_class.assert_called_once_with", "to": "mock_summ_class.assert_called_once_with"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 test_file.write_text", "to": "test_file.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 test_file1.write_text", "to": "test_file1.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 test_file2.write_text", "to": "test_file2.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 non_test_file.write_text", "to": "non_test_file.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 output_dir.mkdir", "to": "output_dir.mkdir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 analyzer.analyze_directory", "to": "analyzer.analyze_directory"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 callable", "to": "callable"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 analyzer.analyze_single_file", "to": "analyzer.analyze_single_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_tester.test_main_function_exists", "title": "test_tester.test_main_function_exists \u2192 len", "to": "len"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Test_TesterModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

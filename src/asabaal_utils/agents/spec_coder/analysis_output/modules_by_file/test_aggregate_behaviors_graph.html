@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_module_import", "label": "test_module_import", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_module_import\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 19\nIn-degree: 0\nOut-degree: 1"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_empty_directory", "label": "test_load_empty_directory", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_empty_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_valid_reports", "label": "test_load_valid_reports", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_valid_reports\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 47\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_mixed_files", "label": "test_load_mixed_files", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_mixed_files\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 77\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_invalid_json", "label": "test_load_invalid_json", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_invalid_json\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 101\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_basic_test_names", "label": "test_basic_test_names", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_basic_test_names\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 123\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_suffix_test_names", "label": "test_suffix_test_names", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_suffix_test_names\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 136\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_edge_cases", "label": "test_edge_cases", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_edge_cases\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 147\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_common_patterns", "label": "test_common_patterns", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_common_patterns\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 163\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_extract_requirement_coverage", "label": "test_extract_requirement_coverage", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_extract_requirement_coverage\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 184\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_extract_additional_tests", "label": "test_extract_additional_tests", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_extract_additional_tests\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 217\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_extract_mixed_report", "label": "test_extract_mixed_report", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_extract_mixed_report\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 245\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_single_list", "label": "test_merge_single_list", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_single_list\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 290\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_multiple_lists", "label": "test_merge_multiple_lists", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_multiple_lists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 313\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_different_functions", "label": "test_merge_different_functions", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_different_functions\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 348\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_with_validation_rules", "label": "test_merge_with_validation_rules", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_with_validation_rules\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 382\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_average_alignment_score", "label": "test_merge_average_alignment_score", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_average_alignment_score\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 408\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_save_behaviors", "label": "test_save_behaviors", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_save_behaviors\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 444\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_main_function_exists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 486\nIn-degree: 0\nOut-degree: 21"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "sys.path.insert", "label": "insert", "shape": "dot", "title": "Function: sys.path.insert\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "str", "label": "str", "shape": "dot", "title": "Function: str\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "pytest.main", "label": "main", "shape": "dot", "title": "Function: pytest.main\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hasattr", "label": "hasattr", "shape": "dot", "title": "Function: hasattr\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "pytest.skip", "label": "skip", "shape": "dot", "title": "Function: pytest.skip\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.extract_behaviors_from_report", "label": "extract_behaviors_from_report", "shape": "dot", "title": "Function: aggregate_behaviors.extract_behaviors_from_report\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.merge_behaviors", "label": "merge_behaviors", "shape": "dot", "title": "Function: aggregate_behaviors.merge_behaviors\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "callable", "label": "callable", "shape": "dot", "title": "Function: callable\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tempfile.TemporaryDirectory", "label": "TemporaryDirectory", "shape": "dot", "title": "Function: tempfile.TemporaryDirectory\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.load_alignment_reports", "label": "load_alignment_reports", "shape": "dot", "title": "Function: aggregate_behaviors.load_alignment_reports\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "write_text", "label": "write_text", "shape": "dot", "title": "Function: write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.extract_function_name_from_test", "label": "extract_function_name_from_test", "shape": "dot", "title": "Function: aggregate_behaviors.extract_function_name_from_test\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "abs", "label": "abs", "shape": "dot", "title": "Function: abs\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tempfile.NamedTemporaryFile", "label": "NamedTemporaryFile", "shape": "dot", "title": "Function: tempfile.NamedTemporaryFile\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.save_aggregated_behaviors", "label": "save_aggregated_behaviors", "shape": "dot", "title": "Function: aggregate_behaviors.save_aggregated_behaviors\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_file.unlink", "label": "unlink", "shape": "dot", "title": "Function: output_file.unlink\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "json.dumps", "label": "dumps", "shape": "dot", "title": "Function: json.dumps\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "open", "label": "open", "shape": "dot", "title": "Function: open\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "json.load", "label": "load", "shape": "dot", "title": "Function: json.load\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_module_import", "title": "test_aggregate_behaviors.test_module_import \u2192 sys.path.insert", "to": "sys.path.insert"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 str", "to": "str"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 pytest.main", "to": "pytest.main"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 hasattr", "to": "hasattr"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 pytest.skip", "to": "pytest.skip"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.extract_behaviors_from_report", "to": "aggregate_behaviors.extract_behaviors_from_report"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.merge_behaviors", "to": "aggregate_behaviors.merge_behaviors"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 callable", "to": "callable"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 tempfile.TemporaryDirectory", "to": "tempfile.TemporaryDirectory"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.load_alignment_reports", "to": "aggregate_behaviors.load_alignment_reports"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 write_text", "to": "write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.extract_function_name_from_test", "to": "aggregate_behaviors.extract_function_name_from_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 abs", "to": "abs"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 tempfile.NamedTemporaryFile", "to": "tempfile.NamedTemporaryFile"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.save_aggregated_behaviors", "to": "aggregate_behaviors.save_aggregated_behaviors"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 output_file.unlink", "to": "output_file.unlink"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 json.dumps", "to": "json.dumps"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 open", "to": "open"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 json.load", "to": "json.load"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Test_Aggregate_BehaviorsModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

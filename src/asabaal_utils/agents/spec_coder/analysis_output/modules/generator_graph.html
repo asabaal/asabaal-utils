@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.spec_parser.parse_file", "label": "parse_file", "shape": "dot", "title": "Function: generator.spec_parser.parse_file\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_unit_test", "label": "_generate_unit_test", "shape": "dot", "title": "Function: generator._generate_unit_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 755\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_unit_test_with_retry", "label": "_generate_unit_test_with_retry", "shape": "dot", "title": "Function: generator._generate_unit_test_with_retry\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 881\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "shape": "dot", "title": "Function: generator._generate_requirements_file\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 737\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._clean_generated_code", "label": "_clean_generated_code", "shape": "dot", "title": "Function: generator._clean_generated_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 921\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "shape": "dot", "title": "Function: generator._generate_fallback_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 1041\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.__init__", "label": "__init__", "shape": "dot", "title": "Function: generator.__init__\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 66\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._sanitize_filename", "label": "_sanitize_filename", "shape": "dot", "title": "Function: generator._sanitize_filename\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 92\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.ollama_client.test_connection", "label": "test_connection", "shape": "dot", "title": "Function: generator.ollama_client.test_connection\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_ci_config", "label": "_generate_ci_config", "shape": "dot", "title": "Function: generator._generate_ci_config\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 668\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "shape": "dot", "title": "Function: generator._generate_github_workflow\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 689\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_validation_script", "label": "_generate_validation_script", "shape": "dot", "title": "Function: generator._generate_validation_script\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 710\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_source_code", "label": "_generate_source_code", "shape": "dot", "title": "Function: generator._generate_source_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 306\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._validate_python_code", "label": "_validate_python_code", "shape": "dot", "title": "Function: generator._validate_python_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 989\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_documentation", "label": "_generate_documentation", "shape": "dot", "title": "Function: generator._generate_documentation\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 368\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.spec_parser.format_interfaces_for_prompt", "label": "format_interfaces_for_prompt", "shape": "dot", "title": "Function: generator.spec_parser.format_interfaces_for_prompt\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_tests", "label": "_generate_tests", "shape": "dot", "title": "Function: generator._generate_tests\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 398\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_integration_test", "label": "_generate_integration_test", "shape": "dot", "title": "Function: generator._generate_integration_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 815\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "shape": "dot", "title": "Function: generator.spec_parser.format_requirements_for_prompt\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.generate_from_spec", "label": "generate_from_spec", "shape": "dot", "title": "Function: generator.generate_from_spec\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 172\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "shape": "dot", "title": "Function: generator._strip_markdown_code_blocks\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 493\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._load_config", "label": "_load_config", "shape": "dot", "title": "Function: generator._load_config\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 125\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "shape": "dot", "title": "Function: generator._clean_documentation_markdown\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 591\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "GeneratorModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

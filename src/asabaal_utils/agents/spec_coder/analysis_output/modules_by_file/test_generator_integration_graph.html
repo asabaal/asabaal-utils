@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.temp_dir", "label": "temp_dir", "shape": "dot", "title": "Function: test_generator_integration.temp_dir\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 27\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.real_config", "label": "real_config", "shape": "dot", "title": "Function: test_generator_integration.real_config\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.sample_spec", "label": "sample_spec", "shape": "dot", "title": "Function: test_generator_integration.sample_spec\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 51\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.complex_spec", "label": "complex_spec", "shape": "dot", "title": "Function: test_generator_integration.complex_spec\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 104\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.test_real_ai_generation_simple_spec", "label": "test_real_ai_generation_simple_spec", "shape": "dot", "title": "Function: test_generator_integration.test_real_ai_generation_simple_spec\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 173\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.test_real_ai_generation_complex_spec", "label": "test_real_ai_generation_complex_spec", "shape": "dot", "title": "Function: test_generator_integration.test_real_ai_generation_complex_spec\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 232\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.test_real_ai_generation_quality_metrics", "label": "test_real_ai_generation_quality_metrics", "shape": "dot", "title": "Function: test_generator_integration.test_real_ai_generation_quality_metrics\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 284\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.test_real_ai_generation_different_models", "label": "test_real_ai_generation_different_models", "shape": "dot", "title": "Function: test_generator_integration.test_real_ai_generation_different_models\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 324\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.test_real_ai_generation_error_handling", "label": "test_real_ai_generation_error_handling", "shape": "dot", "title": "Function: test_generator_integration.test_real_ai_generation_error_handling\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 370\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generator_integration.test_manual_simple_generation", "label": "test_manual_simple_generation", "shape": "dot", "title": "Function: test_generator_integration.test_manual_simple_generation\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_generator_integration.py\nLine: 400\nIn-degree: 0\nOut-degree: 27"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "shutil.rmtree", "label": "rmtree", "shape": "dot", "title": "Function: shutil.rmtree\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "config_file.write_text", "label": "write_text", "shape": "dot", "title": "Function: config_file.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_file.write_text", "label": "write_text", "shape": "dot", "title": "Function: spec_file.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "CodeGenerator", "label": "CodeGenerator", "shape": "dot", "title": "Function: CodeGenerator\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "time.time", "label": "time", "shape": "dot", "title": "Function: time.time\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator.generate_from_spec", "label": "generate_from_spec", "shape": "dot", "title": "Function: generator.generate_from_spec\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "read_text", "label": "read_text", "shape": "dot", "title": "Function: read_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "any", "label": "any", "shape": "dot", "title": "Function: any\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "source_content.split", "label": "split", "shape": "dot", "title": "Function: source_content.split\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "metrics.items", "label": "items", "shape": "dot", "title": "Function: metrics.items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "invalid_spec.write_text", "label": "write_text", "shape": "dot", "title": "Function: invalid_spec.write_text\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tempfile.mkdtemp", "label": "mkdtemp", "shape": "dot", "title": "Function: tempfile.mkdtemp\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "yaml.dump", "label": "dump", "shape": "dot", "title": "Function: yaml.dump\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "line.strip", "label": "strip", "shape": "dot", "title": "Function: line.strip\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "f.endswith", "label": "endswith", "shape": "dot", "title": "Function: f.endswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "source_content.lower", "label": "lower", "shape": "dot", "title": "Function: source_content.lower\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "source_content.splitlines", "label": "splitlines", "shape": "dot", "title": "Function: source_content.splitlines\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "re.findall", "label": "findall", "shape": "dot", "title": "Function: re.findall\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "results.items", "label": "items", "shape": "dot", "title": "Function: results.items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "line.startswith", "label": "startswith", "shape": "dot", "title": "Function: line.startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "min", "label": "min", "shape": "dot", "title": "Function: min\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "file_path.endswith", "label": "endswith", "shape": "dot", "title": "Function: file_path.endswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "startswith", "label": "startswith", "shape": "dot", "title": "Function: startswith\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "model.replace", "label": "replace", "shape": "dot", "title": "Function: model.replace\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 shutil.rmtree", "to": "shutil.rmtree"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 config_file.write_text", "to": "config_file.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 spec_file.write_text", "to": "spec_file.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 CodeGenerator", "to": "CodeGenerator"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 time.time", "to": "time.time"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 generator.generate_from_spec", "to": "generator.generate_from_spec"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 read_text", "to": "read_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 any", "to": "any"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 source_content.split", "to": "source_content.split"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 metrics.items", "to": "metrics.items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 invalid_spec.write_text", "to": "invalid_spec.write_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 tempfile.mkdtemp", "to": "tempfile.mkdtemp"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 yaml.dump", "to": "yaml.dump"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 line.strip", "to": "line.strip"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 f.endswith", "to": "f.endswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 source_content.lower", "to": "source_content.lower"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 source_content.splitlines", "to": "source_content.splitlines"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 re.findall", "to": "re.findall"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 results.items", "to": "results.items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 line.startswith", "to": "line.startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 min", "to": "min"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 file_path.endswith", "to": "file_path.endswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 startswith", "to": "startswith"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generator_integration.test_manual_simple_generation", "title": "test_generator_integration.test_manual_simple_generation \u2192 model.replace", "to": "model.replace"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Test_Generator_IntegrationModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

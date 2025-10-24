@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_load_test_behaviors_combined_format", "label": "test_load_test_behaviors_combined_format", "shape": "dot", "title": "Function: test_align_behaviors.test_load_test_behaviors_combined_format\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 200\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_test_behavior_defaults", "label": "test_test_behavior_defaults", "shape": "dot", "title": "Function: test_align_behaviors.test_test_behavior_defaults\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 57\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_alignment_match_creation", "label": "test_alignment_match_creation", "shape": "dot", "title": "Function: test_align_behaviors.test_alignment_match_creation\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 81\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_aligner_initialization", "label": "test_aligner_initialization", "shape": "dot", "title": "Function: test_align_behaviors.test_aligner_initialization\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 149\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_load_test_behaviors_single_file", "label": "test_load_test_behaviors_single_file", "shape": "dot", "title": "Function: test_align_behaviors.test_load_test_behaviors_single_file\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 161\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_align_test_to_requirement_comprehensive", "label": "test_align_test_to_requirement_comprehensive", "shape": "dot", "title": "Function: test_align_behaviors.test_align_test_to_requirement_comprehensive\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 403\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_module_import", "label": "test_module_import", "shape": "dot", "title": "Function: test_align_behaviors.test_module_import\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 19\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_calculate_keyword_match", "label": "test_calculate_keyword_match", "shape": "dot", "title": "Function: test_align_behaviors.test_calculate_keyword_match\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 290\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_align_all_tests", "label": "test_align_all_tests", "shape": "dot", "title": "Function: test_align_behaviors.test_align_all_tests\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 438\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_calculate_function_match", "label": "test_calculate_function_match", "shape": "dot", "title": "Function: test_align_behaviors.test_calculate_function_match\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 332\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_calculate_validation_match", "label": "test_calculate_validation_match", "shape": "dot", "title": "Function: test_align_behaviors.test_calculate_validation_match\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 374\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_load_test_behaviors_invalid_json", "label": "test_load_test_behaviors_invalid_json", "shape": "dot", "title": "Function: test_align_behaviors.test_load_test_behaviors_invalid_json\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 246\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_test_behavior_creation", "label": "test_test_behavior_creation", "shape": "dot", "title": "Function: test_align_behaviors.test_test_behavior_creation\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 35\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_align_behaviors.test_main_function_exists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 562\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_infer_test_type_comprehensive", "label": "test_infer_test_type_comprehensive", "shape": "dot", "title": "Function: test_align_behaviors.test_infer_test_type_comprehensive\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 265\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_alignment_match_types", "label": "test_alignment_match_types", "shape": "dot", "title": "Function: test_align_behaviors.test_alignment_match_types\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 113\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_align_behaviors.test_generate_alignment_report", "label": "test_generate_alignment_report", "shape": "dot", "title": "Function: test_align_behaviors.test_generate_alignment_report\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_align_behaviors.py\nLine: 491\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Test_Align_BehaviorsModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

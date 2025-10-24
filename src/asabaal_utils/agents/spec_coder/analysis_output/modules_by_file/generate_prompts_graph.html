@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.load_functional_catalog", "label": "load_functional_catalog", "shape": "dot", "title": "Function: generate_prompts.load_functional_catalog\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 12\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_function_prompt", "label": "generate_function_prompt", "shape": "dot", "title": "Function: generate_prompts.generate_function_prompt\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 17\nIn-degree: 1\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_metadata_summary", "label": "generate_metadata_summary", "shape": "dot", "title": "Function: generate_prompts.generate_metadata_summary\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 119\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.save_prompt", "label": "save_prompt", "shape": "dot", "title": "Function: generate_prompts.save_prompt\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 159\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.save_metadata_summary", "label": "save_metadata_summary", "shape": "dot", "title": "Function: generate_prompts.save_metadata_summary\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 166\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_prompts_index", "label": "generate_prompts_index", "shape": "dot", "title": "Function: generate_prompts.generate_prompts_index\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 173\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.main", "label": "main", "shape": "dot", "title": "Function: generate_prompts.main\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 210\nIn-degree: 0\nOut-degree: 39"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "function_data.get", "label": "get", "shape": "dot", "title": "Function: function_data.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "join", "label": "join", "shape": "dot", "title": "Function: join\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "catalog.get", "label": "get", "shape": "dot", "title": "Function: catalog.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "metadata.get", "label": "get", "shape": "dot", "title": "Function: metadata.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "categories.items", "label": "items", "shape": "dot", "title": "Function: categories.items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "functions.items", "label": "items", "shape": "dot", "title": "Function: functions.items\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "prompts_dir.exists", "label": "exists", "shape": "dot", "title": "Function: prompts_dir.exists\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "prompts_dir.mkdir", "label": "mkdir", "shape": "dot", "title": "Function: prompts_dir.mkdir\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "load_functional_catalog", "label": "load_functional_catalog", "shape": "dot", "title": "Function: load_functional_catalog\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_metadata_summary", "label": "generate_metadata_summary", "shape": "dot", "title": "Function: generate_metadata_summary\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "save_metadata_summary", "label": "save_metadata_summary", "shape": "dot", "title": "Function: save_metadata_summary\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts_index", "label": "generate_prompts_index", "shape": "dot", "title": "Function: generate_prompts_index\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "main", "label": "main", "shape": "dot", "title": "Function: main\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "open", "label": "open", "shape": "dot", "title": "Function: open\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "yaml.safe_load", "label": "safe_load", "shape": "dot", "title": "Function: yaml.safe_load\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "param.get", "label": "get", "shape": "dot", "title": "Function: param.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "f.write", "label": "write", "shape": "dot", "title": "Function: f.write\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "func_data.get", "label": "get", "shape": "dot", "title": "Function: func_data.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "append", "label": "append", "shape": "dot", "title": "Function: append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "os.environ.get", "label": "get", "shape": "dot", "title": "Function: os.environ.get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "catalog_file.exists", "label": "exists", "shape": "dot", "title": "Function: catalog_file.exists\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "param_signature_parts.append", "label": "append", "shape": "dot", "title": "Function: param_signature_parts.append\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "get", "label": "get", "shape": "dot", "title": "Function: get\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "isoformat", "label": "isoformat", "shape": "dot", "title": "Function: isoformat\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path.cwd", "label": "cwd", "shape": "dot", "title": "Function: Path.cwd\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_function_prompt", "label": "generate_function_prompt", "shape": "dot", "title": "Function: generate_function_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "save_prompt", "label": "save_prompt", "shape": "dot", "title": "Function: save_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "keys", "label": "keys", "shape": "dot", "title": "Function: keys\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "category.title", "label": "title", "shape": "dot", "title": "Function: category.title\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "list", "label": "list", "shape": "dot", "title": "Function: list\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "catalog_file.absolute", "label": "absolute", "shape": "dot", "title": "Function: catalog_file.absolute\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "prompts_dir.absolute", "label": "absolute", "shape": "dot", "title": "Function: prompts_dir.absolute\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "datetime.now", "label": "now", "shape": "dot", "title": "Function: datetime.now\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "iterdir", "label": "iterdir", "shape": "dot", "title": "Function: iterdir\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "chr", "label": "chr", "shape": "dot", "title": "Function: chr\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "prompts_dir.iterdir", "label": "iterdir", "shape": "dot", "title": "Function: prompts_dir.iterdir\nIn-degree: 1\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_generate_prompts.test_main_function_exists\nIn-degree: 0\nOut-degree: 2"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 function_data.get", "to": "function_data.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 join", "to": "join"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 catalog.get", "to": "catalog.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 metadata.get", "to": "metadata.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 categories.items", "to": "categories.items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 functions.items", "to": "functions.items"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 prompts_dir.exists", "to": "prompts_dir.exists"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 prompts_dir.mkdir", "to": "prompts_dir.mkdir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 load_functional_catalog", "to": "load_functional_catalog"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 generate_metadata_summary", "to": "generate_metadata_summary"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 save_metadata_summary", "to": "save_metadata_summary"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 generate_prompts_index", "to": "generate_prompts_index"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 main", "to": "main"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 open", "to": "open"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 yaml.safe_load", "to": "yaml.safe_load"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 param.get", "to": "param.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 f.write", "to": "f.write"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 func_data.get", "to": "func_data.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 append", "to": "append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 os.environ.get", "to": "os.environ.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 catalog_file.exists", "to": "catalog_file.exists"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 param_signature_parts.append", "to": "param_signature_parts.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 get", "to": "get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 isoformat", "to": "isoformat"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 Path.cwd", "to": "Path.cwd"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 generate_function_prompt", "to": "generate_function_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 save_prompt", "to": "save_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 keys", "to": "keys"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 category.title", "to": "category.title"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 list", "to": "list"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 catalog_file.absolute", "to": "catalog_file.absolute"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 prompts_dir.absolute", "to": "prompts_dir.absolute"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 datetime.now", "to": "datetime.now"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 iterdir", "to": "iterdir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 chr", "to": "chr"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generate_prompts.main", "title": "generate_prompts.main \u2192 prompts_dir.iterdir", "to": "prompts_dir.iterdir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 generate_prompts.generate_function_prompt", "to": "generate_prompts.generate_function_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 generate_prompts.load_functional_catalog", "to": "generate_prompts.load_functional_catalog"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Generate_PromptsModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

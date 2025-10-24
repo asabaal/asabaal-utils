@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_spec_parsing_error", "label": "simulate_spec_parsing_error", "shape": "dot", "title": "Function: 08_integration.simulate_spec_parsing_error\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 575\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.process", "label": "process", "shape": "dot", "title": "Function: 08_integration.process\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1725\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_code_generation_errors", "label": "simulate_code_generation_errors", "shape": "dot", "title": "Function: 08_integration.simulate_code_generation_errors\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 610\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.scalability_strategies_guide", "label": "scalability_strategies_guide", "shape": "dot", "title": "Function: 08_integration.scalability_strategies_guide\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1186\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.register_workflow", "label": "register_workflow", "shape": "dot", "title": "Function: 08_integration.register_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1625\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.demo_pipeline", "label": "demo_pipeline", "shape": "dot", "title": "Function: 08_integration.demo_pipeline\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1746\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.benchmark_performance", "label": "benchmark_performance", "shape": "dot", "title": "Function: 08_integration.benchmark_performance\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1031\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.validate", "label": "validate", "shape": "dot", "title": "Function: 08_integration.validate\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1729\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.run_demos", "label": "run_demos", "shape": "dot", "title": "Function: 08_integration.run_demos\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1799\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.compile_common_pitfalls", "label": "compile_common_pitfalls", "shape": "dot", "title": "Function: 08_integration.compile_common_pitfalls\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 2007\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration._execute_step", "label": "_execute_step", "shape": "dot", "title": "Function: 08_integration._execute_step\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1675\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.code_generated_handler", "label": "code_generated_handler", "shape": "dot", "title": "Function: 08_integration.code_generated_handler\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1766\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.generate_integration_report", "label": "generate_integration_report", "shape": "dot", "title": "Function: 08_integration.generate_integration_report\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 2063\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.spec_parsed_handler", "label": "spec_parsed_handler", "shape": "dot", "title": "Function: 08_integration.spec_parsed_handler\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1763\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.log_step", "label": "log_step", "shape": "dot", "title": "Function: 08_integration.log_step\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 539\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_code_generation", "label": "simulate_code_generation", "shape": "dot", "title": "Function: 08_integration.simulate_code_generation\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 350\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.optimize_file_operations", "label": "optimize_file_operations", "shape": "dot", "title": "Function: 08_integration.optimize_file_operations\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 969\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.execute_async", "label": "execute_async", "shape": "dot", "title": "Function: 08_integration.execute_async\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1522\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_spec_parsing", "label": "simulate_spec_parsing", "shape": "dot", "title": "Function: 08_integration.simulate_spec_parsing\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 332\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.create_deployment_script_template", "label": "create_deployment_script_template", "shape": "dot", "title": "Function: 08_integration.create_deployment_script_template\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1366\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.optimize_ai_requests", "label": "optimize_ai_requests", "shape": "dot", "title": "Function: 08_integration.optimize_ai_requests\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 932\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.compile_module_summary", "label": "compile_module_summary", "shape": "dot", "title": "Function: 08_integration.compile_module_summary\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1855\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_test_generation", "label": "simulate_test_generation", "shape": "dot", "title": "Function: 08_integration.simulate_test_generation\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 384\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.__init__", "label": "__init__", "shape": "dot", "title": "Function: 08_integration.__init__\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1844\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.deployment_checklist_generator", "label": "deployment_checklist_generator", "shape": "dot", "title": "Function: 08_integration.deployment_checklist_generator\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1285\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_code_organization", "label": "simulate_code_organization", "shape": "dot", "title": "Function: 08_integration.simulate_code_organization\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 448\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.publish", "label": "publish", "shape": "dot", "title": "Function: 08_integration.publish\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1578\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.stop", "label": "stop", "shape": "dot", "title": "Function: 08_integration.stop\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1613\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.add_middleware", "label": "add_middleware", "shape": "dot", "title": "Function: 08_integration.add_middleware\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1512\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.collect_system_metrics", "label": "collect_system_metrics", "shape": "dot", "title": "Function: 08_integration.collect_system_metrics\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 863\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.create_sample_spec", "label": "create_sample_spec", "shape": "dot", "title": "Function: 08_integration.create_sample_spec\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 268\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.compile_best_practices", "label": "compile_best_practices", "shape": "dot", "title": "Function: 08_integration.compile_best_practices\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1932\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.check_thresholds", "label": "check_thresholds", "shape": "dot", "title": "Function: 08_integration.check_thresholds\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 884\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.subscribe", "label": "subscribe", "shape": "dot", "title": "Function: 08_integration.subscribe\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1572\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.demonstrate_troubleshooting_workflow", "label": "demonstrate_troubleshooting_workflow", "shape": "dot", "title": "Function: 08_integration.demonstrate_troubleshooting_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 715\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration._simulate_component_call", "label": "_simulate_component_call", "shape": "dot", "title": "Function: 08_integration._simulate_component_call\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 176\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_test_execution", "label": "simulate_test_execution", "shape": "dot", "title": "Function: 08_integration.simulate_test_execution\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 427\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_organization_errors", "label": "simulate_organization_errors", "shape": "dot", "title": "Function: 08_integration.simulate_organization_errors\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 680\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.test_component_interaction", "label": "test_component_interaction", "shape": "dot", "title": "Function: 08_integration.test_component_interaction\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 145\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.add_error_handler", "label": "add_error_handler", "shape": "dot", "title": "Function: 08_integration.add_error_handler\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1517\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.security_hardening", "label": "security_hardening", "shape": "dot", "title": "Function: 08_integration.security_hardening\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1126\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.create_learning_path", "label": "create_learning_path", "shape": "dot", "title": "Function: 08_integration.create_learning_path\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 2093\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.optimize_memory_usage", "label": "optimize_memory_usage", "shape": "dot", "title": "Function: 08_integration.optimize_memory_usage\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1000\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.add_stage", "label": "add_stage", "shape": "dot", "title": "Function: 08_integration.add_stage\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1507\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.register_component", "label": "register_component", "shape": "dot", "title": "Function: 08_integration.register_component\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 135\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.monitoring_and_logging_setup", "label": "monitoring_and_logging_setup", "shape": "dot", "title": "Function: 08_integration.monitoring_and_logging_setup\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1239\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.log_error", "label": "log_error", "shape": "dot", "title": "Function: 08_integration.log_error\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 805\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.run_complete_workflow", "label": "run_complete_workflow", "shape": "dot", "title": "Function: 08_integration.run_complete_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 479\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_test_errors", "label": "simulate_test_errors", "shape": "dot", "title": "Function: 08_integration.simulate_test_errors\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 645\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.execute_workflow", "label": "execute_workflow", "shape": "dot", "title": "Function: 08_integration.execute_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1629\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.run_integration_tests", "label": "run_integration_tests", "shape": "dot", "title": "Function: 08_integration.run_integration_tests\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 186\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.analyze_trends", "label": "analyze_trends", "shape": "dot", "title": "Function: 08_integration.analyze_trends\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 900\nIn-degree: 0\nOut-degree: 0"}, {"color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.process_events", "label": "process_events", "shape": "dot", "title": "Function: 08_integration.process_events\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1588\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "08_IntegrationModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

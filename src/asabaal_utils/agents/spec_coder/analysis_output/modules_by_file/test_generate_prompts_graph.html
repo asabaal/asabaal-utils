@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_module_import", "label": "test_module_import", "shape": "dot", "title": "Function: test_generate_prompts.test_module_import\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 20\nIn-degree: 0\nOut-degree: 1"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_load_valid_yaml", "label": "test_load_valid_yaml", "shape": "dot", "title": "Function: test_generate_prompts.test_load_valid_yaml\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 36\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_load_invalid_yaml", "label": "test_load_invalid_yaml", "shape": "dot", "title": "Function: test_generate_prompts.test_load_invalid_yaml\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 64\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_load_nonexistent_file", "label": "test_load_nonexistent_file", "shape": "dot", "title": "Function: test_generate_prompts.test_load_nonexistent_file\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 82\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_complete_prompt", "label": "test_generate_complete_prompt", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_complete_prompt\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 97\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_minimal_prompt", "label": "test_generate_minimal_prompt", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_minimal_prompt\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 128\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_with_no_parameters", "label": "test_generate_with_no_parameters", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_with_no_parameters\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 145\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_with_complex_parameters", "label": "test_generate_with_complex_parameters", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_with_complex_parameters\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 165\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_with_validation_and_errors", "label": "test_generate_with_validation_and_errors", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_with_validation_and_errors\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 190\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_multiple_prompts", "label": "test_generate_multiple_prompts", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_multiple_prompts\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 226\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_generate_empty_catalog", "label": "test_generate_empty_catalog", "shape": "dot", "title": "Function: test_generate_prompts.test_generate_empty_catalog\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 285\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_save_prompts_to_json_file", "label": "test_save_prompts_to_json_file", "shape": "dot", "title": "Function: test_generate_prompts.test_save_prompts_to_json_file\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 317\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_save_empty_prompts", "label": "test_save_empty_prompts", "shape": "dot", "title": "Function: test_generate_prompts.test_save_empty_prompts\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 349\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_save_complex_prompts", "label": "test_save_complex_prompts", "shape": "dot", "title": "Function: test_generate_prompts.test_save_complex_prompts\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 377\nIn-degree: 0\nOut-degree: 0"}, {"color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_generate_prompts.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_generate_prompts.test_main_function_exists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_generate_prompts.py\nLine: 432\nIn-degree: 0\nOut-degree: 26"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "sys.path.insert", "label": "insert", "shape": "dot", "title": "Function: sys.path.insert\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "str", "label": "str", "shape": "dot", "title": "Function: str\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "pytest.main", "label": "main", "shape": "dot", "title": "Function: pytest.main\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hasattr", "label": "hasattr", "shape": "dot", "title": "Function: hasattr\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "print", "label": "print", "shape": "dot", "title": "Function: print\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "pytest.skip", "label": "skip", "shape": "dot", "title": "Function: pytest.skip\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_function_prompt", "label": "generate_function_prompt", "shape": "dot", "title": "Function: generate_prompts.generate_function_prompt\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "callable", "label": "callable", "shape": "dot", "title": "Function: callable\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "Path", "label": "Path", "shape": "dot", "title": "Function: Path\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tempfile.NamedTemporaryFile", "label": "NamedTemporaryFile", "shape": "dot", "title": "Function: tempfile.NamedTemporaryFile\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "yaml.dump", "label": "dump", "shape": "dot", "title": "Function: yaml.dump\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.load_functional_catalog", "label": "load_functional_catalog", "shape": "dot", "title": "Function: generate_prompts.load_functional_catalog\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "temp_file.unlink", "label": "unlink", "shape": "dot", "title": "Function: temp_file.unlink\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "f.write", "label": "write", "shape": "dot", "title": "Function: f.write\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "pytest.raises", "label": "raises", "shape": "dot", "title": "Function: pytest.raises\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tempfile.TemporaryDirectory", "label": "TemporaryDirectory", "shape": "dot", "title": "Function: tempfile.TemporaryDirectory\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_file.unlink", "label": "unlink", "shape": "dot", "title": "Function: output_file.unlink\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "catalog_file.unlink", "label": "unlink", "shape": "dot", "title": "Function: catalog_file.unlink\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.save_prompts_to_json", "label": "save_prompts_to_json", "shape": "dot", "title": "Function: generate_prompts.save_prompts_to_json\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_all_prompts", "label": "generate_all_prompts", "shape": "dot", "title": "Function: generate_prompts.generate_all_prompts\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "list", "label": "list", "shape": "dot", "title": "Function: list\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "open", "label": "open", "shape": "dot", "title": "Function: open\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "json.load", "label": "load", "shape": "dot", "title": "Function: json.load\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "output_dir.glob", "label": "glob", "shape": "dot", "title": "Function: output_dir.glob\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "len", "label": "len", "shape": "dot", "title": "Function: len\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "expected_file.exists", "label": "exists", "shape": "dot", "title": "Function: expected_file.exists\nIn-degree: 1\nOut-degree: 0"}, {"color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "expected_file.read_text", "label": "read_text", "shape": "dot", "title": "Function: expected_file.read_text\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_module_import", "title": "test_generate_prompts.test_module_import \u2192 sys.path.insert", "to": "sys.path.insert"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 str", "to": "str"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 pytest.main", "to": "pytest.main"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 hasattr", "to": "hasattr"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 print", "to": "print"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 pytest.skip", "to": "pytest.skip"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 generate_prompts.generate_function_prompt", "to": "generate_prompts.generate_function_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 callable", "to": "callable"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 Path", "to": "Path"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 tempfile.NamedTemporaryFile", "to": "tempfile.NamedTemporaryFile"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 yaml.dump", "to": "yaml.dump"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 generate_prompts.load_functional_catalog", "to": "generate_prompts.load_functional_catalog"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 temp_file.unlink", "to": "temp_file.unlink"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 f.write", "to": "f.write"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 pytest.raises", "to": "pytest.raises"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 tempfile.TemporaryDirectory", "to": "tempfile.TemporaryDirectory"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 output_file.unlink", "to": "output_file.unlink"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 catalog_file.unlink", "to": "catalog_file.unlink"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 generate_prompts.save_prompts_to_json", "to": "generate_prompts.save_prompts_to_json"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 generate_prompts.generate_all_prompts", "to": "generate_prompts.generate_all_prompts"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 list", "to": "list"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 open", "to": "open"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 json.load", "to": "json.load"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 output_dir.glob", "to": "output_dir.glob"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 len", "to": "len"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 expected_file.exists", "to": "expected_file.exists"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_generate_prompts.test_main_function_exists", "title": "test_generate_prompts.test_main_function_exists \u2192 expected_file.read_text", "to": "expected_file.read_text"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"title": {"text": "Test_Generate_PromptsModule-FunctionCallGraph", "hierarchical": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
