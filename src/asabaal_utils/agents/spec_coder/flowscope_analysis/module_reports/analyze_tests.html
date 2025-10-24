@@ -137,7 +137,7 @@
         </script>
     
 <script>
-window.functionFlowData = {"analyze_tests.main": {"nodes": [{"id": "analyze_tests.main", "label": "main", "title": "analyze_tests.main\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 144", "color": "#ff6b6b"}], "edges": []}, "analyze_tests.__init__": {"nodes": [{"id": "analyze_tests.__init__", "label": "__init__", "title": "analyze_tests.__init__\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 26", "color": "#ff6b6b"}], "edges": []}, "analyze_tests.analyze_single_file": {"nodes": [{"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "analyze_tests.analyze_single_file", "label": "analyze_single_file", "title": "analyze_tests.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 30", "color": "#ff6b6b"}], "edges": [{"from": "analyze_tests.analyze_single_file", "to": "summarizer.summarize_test_file"}]}, "analyze_tests.analyze_directory": {"nodes": [{"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "analyze_tests.analyze_directory", "label": "analyze_directory", "title": "analyze_tests.analyze_directory\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 46", "color": "#ff6b6b"}, {"id": "analyze_tests.analyze_single_file", "label": "analyze_single_file", "title": "analyze_tests.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 30", "color": "#97c2fc"}], "edges": [{"from": "analyze_tests.analyze_directory", "to": "analyze_tests.analyze_single_file"}, {"from": "analyze_tests.analyze_single_file", "to": "summarizer.summarize_test_file"}]}, "analyze_tests.generate_report": {"nodes": [{"id": "analyze_tests.generate_report", "label": "generate_report", "title": "analyze_tests.generate_report\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 98", "color": "#ff6b6b"}], "edges": []}};
+window.functionFlowData = {"analyze_tests.main": {"nodes": [{"id": "analyze_tests.main", "label": "main", "title": "analyze_tests.main\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 144", "color": "#ff6b6b"}], "edges": []}, "analyze_tests.__init__": {"nodes": [{"id": "analyze_tests.__init__", "label": "__init__", "title": "analyze_tests.__init__\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 26", "color": "#ff6b6b"}], "edges": []}, "analyze_tests.analyze_single_file": {"nodes": [{"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "analyze_tests.analyze_single_file", "label": "analyze_single_file", "title": "analyze_tests.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 30", "color": "#ff6b6b"}], "edges": [{"from": "analyze_tests.analyze_single_file", "to": "summarizer.summarize_test_file"}]}, "analyze_tests.analyze_directory": {"nodes": [{"id": "analyze_tests.analyze_directory", "label": "analyze_directory", "title": "analyze_tests.analyze_directory\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 46", "color": "#ff6b6b"}, {"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "analyze_tests.analyze_single_file", "label": "analyze_single_file", "title": "analyze_tests.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 30", "color": "#97c2fc"}], "edges": [{"from": "analyze_tests.analyze_directory", "to": "analyze_tests.analyze_single_file"}, {"from": "analyze_tests.analyze_single_file", "to": "summarizer.summarize_test_file"}]}, "analyze_tests.generate_report": {"nodes": [{"id": "analyze_tests.generate_report", "label": "generate_report", "title": "analyze_tests.generate_report\\nFile: src/asabaal_utils/agents/spec_coder/analyze_tests.py\\nLine: 98", "color": "#ff6b6b"}], "edges": []}};
 </script>
 
     <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
@@ -352,15 +352,20 @@ window.functionFlowData = {"analyze_tests.main": {"nodes": [{"id": "analyze_test
         
         const options = {
             layout: {
-                hierarchical: {
-                    direction: 'UD',
-                    sortMethod: 'directed',
-                    levelSeparation: 120,
-                    nodeSpacing: 100
-                }
+                // Use physics-based layout for free movement
+                randomSeed: 42,
+                improvedLayout: true
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 95,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.1
+                }
             },
             interaction: {
                 hover: true,

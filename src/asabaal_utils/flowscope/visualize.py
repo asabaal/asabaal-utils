@@ -783,15 +783,20 @@ def create_function_explorer_section(graph: nx.DiGraph, module_name: str) -> str
         
         const options = {
             layout: {
-                hierarchical: {
-                    direction: 'UD',
-                    sortMethod: 'directed',
-                    levelSeparation: 120,
-                    nodeSpacing: 100
-                }
+                // Use physics-based layout for free movement
+                randomSeed: 42,
+                improvedLayout: true
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 95,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.1
+                }
             },
             interaction: {
                 hover: true,
@@ -1282,15 +1287,20 @@ def _add_global_function_explorer_to_html(html_path: Path, graph: nx.DiGraph) ->
         
         const options = {
             layout: {
-                hierarchical: {
-                    direction: 'UD',
-                    sortMethod: 'directed',
-                    levelSeparation: 120,
-                    nodeSpacing: 100
-                }
+                // Use physics-based layout for free movement
+                randomSeed: 42,
+                improvedLayout: true
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 95,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.1
+                }
             },
             interaction: {
                 hover: true,

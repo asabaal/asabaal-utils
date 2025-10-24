@@ -137,7 +137,7 @@
         </script>
     
 <script>
-window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"nodes": [{"id": "02_code_generator.resolve_yaml_inside_package", "label": "resolve_yaml_inside_package", "title": "02_code_generator.resolve_yaml_inside_package\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 61", "color": "#ff6b6b"}], "edges": []}, "02_code_generator.try_generation": {"nodes": [{"id": "02_code_generator.try_generation", "label": "try_generation", "title": "02_code_generator.try_generation\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 118", "color": "#ff6b6b"}, {"id": "generator.generate_from_spec", "label": "generate_from_spec", "title": "generator.generate_from_spec\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "02_code_generator.try_generation", "to": "generator.generate_from_spec"}]}};
+window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"nodes": [{"id": "02_code_generator.resolve_yaml_inside_package", "label": "resolve_yaml_inside_package", "title": "02_code_generator.resolve_yaml_inside_package\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 61", "color": "#ff6b6b"}], "edges": []}, "02_code_generator.try_generation": {"nodes": [{"id": "generator.generate_from_spec", "label": "generate_from_spec", "title": "generator.generate_from_spec\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "02_code_generator.try_generation", "label": "try_generation", "title": "02_code_generator.try_generation\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 118", "color": "#ff6b6b"}], "edges": [{"from": "02_code_generator.try_generation", "to": "generator.generate_from_spec"}]}};
 </script>
 
     <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
@@ -292,15 +292,20 @@ window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"no
         
         const options = {
             layout: {
-                hierarchical: {
-                    direction: 'UD',
-                    sortMethod: 'directed',
-                    levelSeparation: 120,
-                    nodeSpacing: 100
-                }
+                // Use physics-based layout for free movement
+                randomSeed: 42,
+                improvedLayout: true
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 95,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.1
+                }
             },
             interaction: {
                 hover: true,

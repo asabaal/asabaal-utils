@@ -137,7 +137,7 @@
         </script>
     
 <script>
-window.functionFlowData = {"templates.get_test_generation_prompt": {"nodes": [{"id": "test_prompt.format", "label": "format", "title": "test_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "templates.get_test_generation_prompt", "label": "get_test_generation_prompt", "title": "templates.get_test_generation_prompt\\nFile: src/asabaal_utils/agents/spec_coder/templates.py\\nLine: 84", "color": "#ff6b6b"}], "edges": [{"from": "templates.get_test_generation_prompt", "to": "test_prompt.format"}]}};
+window.functionFlowData = {"templates.get_test_generation_prompt": {"nodes": [{"id": "templates.get_test_generation_prompt", "label": "get_test_generation_prompt", "title": "templates.get_test_generation_prompt\\nFile: src/asabaal_utils/agents/spec_coder/templates.py\\nLine: 84", "color": "#ff6b6b"}, {"id": "test_prompt.format", "label": "format", "title": "test_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "templates.get_test_generation_prompt", "to": "test_prompt.format"}]}};
 </script>
 
     <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
@@ -272,15 +272,20 @@ window.functionFlowData = {"templates.get_test_generation_prompt": {"nodes": [{"
         
         const options = {
             layout: {
-                hierarchical: {
-                    direction: 'UD',
-                    sortMethod: 'directed',
-                    levelSeparation: 120,
-                    nodeSpacing: 100
-                }
+                // Use physics-based layout for free movement
+                randomSeed: 42,
+                improvedLayout: true
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 95,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.1
+                }
             },
             interaction: {
                 hover: true,
