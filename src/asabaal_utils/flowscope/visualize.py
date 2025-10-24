@@ -44,8 +44,10 @@ def create_pyvis_graph(graph: nx.DiGraph,
         # Determine node color based on properties
         color = "#97c2fc"  # Default blue
         
-        if attrs.get("async_func"):
-            color = "#ff9999"  # Red for async functions
+        if attrs.get("cross_module"):
+            color = "#ff6b6b"  # Red for cross-module functions
+        elif attrs.get("async_func"):
+            color = "#ff9999"  # Light red for async functions
         elif graph.in_degree(node) == 0:
             color = "#90ee90"  # Light green for entry points
         elif graph.out_degree(node) == 0:
@@ -57,16 +59,31 @@ def create_pyvis_graph(graph: nx.DiGraph,
             tooltip_parts.append(f"File: {attrs['file']}")
         if "line" in attrs:
             tooltip_parts.append(f"Line: {attrs['line']}")
+        if "module" in attrs:
+            tooltip_parts.append(f"Module: {attrs['module']}")
+        
+        # Add cross-module information if applicable
+        if attrs.get("cross_module"):
+            tooltip_parts.append("🔗 CROSS-MODULE FUNCTION")
+            tooltip_parts.append(f"Target Module: {attrs.get('target_module', 'Unknown')}")
+            tooltip_parts.append(f"Called From: {attrs.get('source_module', 'Unknown')}")
+        
         tooltip_parts.append(f"In-degree: {graph.in_degree(node)}")
         tooltip_parts.append(f"Out-degree: {graph.out_degree(node)}")
         
         tooltip = "\n".join(tooltip_parts)
+        
+        # Add border for cross-module functions
+        border_width = 3 if attrs.get("cross_module") else 1
+        border_color = "#ff0000" if attrs.get("cross_module") else "#666666"
         
         net.add_node(
             node,
             label=node.split(".")[-1],  # Show only function name
             title=tooltip,
             color=color,
+            border=border_width,
+            borderColor=border_color,
             font={"size": 12, "color": "#333333"}
         )
     

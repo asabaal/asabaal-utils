@@ -71,14 +71,33 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
     
     graph = nx.DiGraph()
     local_modules = set()
+    module_imports = {}  # Track imports per module
     
-    # First pass: collect all local module names
+    # First pass: collect all local module names and imports
     for file in path.rglob("*.py"):
         if any(pattern in str(file) for pattern in exclude_patterns):
             continue
         local_modules.add(file.stem)
+        
+        # Extract imports for this module
+        try:
+            content = file.read_text(encoding="utf-8")
+            tree = ast.parse(content)
+            
+            imported_modules = set()
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        imported_modules.add(alias.name)
+                elif isinstance(node, ast.ImportFrom):
+                    if node.module:
+                        imported_modules.add(node.module)
+            
+            module_imports[file.stem] = imported_modules
+        except (SyntaxError, UnicodeDecodeError):
+            module_imports[file.stem] = set()
     
-    # Second pass: build graph with filtering
+    # Second pass: build graph with filtering and cross-module detection
     for file in path.rglob("*.py"):
         # Skip excluded patterns
         if any(pattern in str(file) for pattern in exclude_patterns):
@@ -92,6 +111,7 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
 
         current_func = None
         current_module = file.stem
+        imported_modules = module_imports.get(current_module, set())
         
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
@@ -105,8 +125,26 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
                 current_func = func_name
                 
             elif isinstance(node, ast.Call) and current_func:
-                called_name = _extract_called_name(node, set())  # No imports tracked for directory scan
+                called_name = _extract_called_name(node, imported_modules)
                 if called_name and not _is_external_function(called_name, local_modules):
+                    # Check if this is a cross-module call
+                    if "." in called_name:
+                        target_module = called_name.split(".")[0]
+                        if target_module != current_module and target_module in local_modules:
+                            # This is a cross-module call within the codebase
+                            if called_name not in graph.nodes():
+                                graph.add_node(
+                                    called_name, 
+                                    cross_module=True,
+                                    target_module=target_module,
+                                    source_module=current_module
+                                )
+                            else:
+                                # Update existing node with cross-module info
+                                graph.nodes[called_name]['cross_module'] = True
+                                graph.nodes[called_name]['target_module'] = target_module
+                                graph.nodes[called_name]['source_module'] = current_module
+                    
                     graph.add_edge(current_func, called_name)
     
     return graph
@@ -210,6 +248,24 @@ def scan_file(file_path: Path) -> nx.DiGraph:
         elif isinstance(node, ast.Call) and current_func:
             called_name = _extract_called_name(node, imported_modules)
             if called_name and not _is_external_function(called_name, local_modules):
+                # Check if this is a cross-module call
+                if "." in called_name:
+                    target_module = called_name.split(".")[0]
+                    if target_module != current_module and target_module in imported_modules:
+                        # This is a cross-module call
+                        if called_name not in graph.nodes():
+                            graph.add_node(
+                                called_name, 
+                                cross_module=True,
+                                target_module=target_module,
+                                source_module=current_module
+                            )
+                        else:
+                            # Update existing node with cross-module info
+                            graph.nodes[called_name]['cross_module'] = True
+                            graph.nodes[called_name]['target_module'] = target_module
+                            graph.nodes[called_name]['source_module'] = current_module
+                
                 graph.add_edge(current_func, called_name)
     
     return graph
