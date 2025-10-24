@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "created_at": "2025-10-24T09:53:52.436661",
+  "metadata": {
+    "source_path": "/home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/pipeline_notebook.py",
+    "description": null,
+    "scan_type": "file"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "pipeline_notebook.view_file",
+        "file": "src/asabaal_utils/agents/spec_coder/pipeline_notebook.py",
+        "line": 466
+      },
+      {
+        "id": "orchestrator._stage1_spec_to_scaffold",
+        "cross_module": true,
+        "target_module": "orchestrator",
+        "source_module": "pipeline_notebook"
+      },
+      {
+        "id": "orchestrator._stage2_scaffold_to_requirements",
+        "cross_module": true,
+        "target_module": "orchestrator",
+        "source_module": "pipeline_notebook"
+      },
+      {
+        "id": "orchestrator._stage3_requirements_to_alignment",
+        "cross_module": true,
+        "target_module": "orchestrator",
+        "source_module": "pipeline_notebook"
+      },
+      {
+        "id": "orchestrator._stage4_alignment_to_code",
+        "cross_module": true,
+        "target_module": "orchestrator",
+        "source_module": "pipeline_notebook"
+      }
+    ],
+    "edges": [
+      {
+        "source": "pipeline_notebook.view_file",
+        "target": "orchestrator._stage1_spec_to_scaffold"
+      },
+      {
+        "source": "pipeline_notebook.view_file",
+        "target": "orchestrator._stage2_scaffold_to_requirements"
+      },
+      {
+        "source": "pipeline_notebook.view_file",
+        "target": "orchestrator._stage3_requirements_to_alignment"
+      },
+      {
+        "source": "pipeline_notebook.view_file",
+        "target": "orchestrator._stage4_alignment_to_code"
+      }
+    ],
+    "directed": true,
+    "multigraph": false
+  }
+}
