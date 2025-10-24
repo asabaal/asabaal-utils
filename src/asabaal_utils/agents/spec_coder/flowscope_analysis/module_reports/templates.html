@@ -137,7 +137,7 @@
         </script>
     
 <script>
-window.functionFlowData = {"templates.get_test_generation_prompt": {"nodes": [{"id": "templates.get_test_generation_prompt", "label": "get_test_generation_prompt", "title": "templates.get_test_generation_prompt\\nFile: src/asabaal_utils/agents/spec_coder/templates.py\\nLine: 84", "color": "#ff6b6b"}, {"id": "test_prompt.format", "label": "format", "title": "test_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "templates.get_test_generation_prompt", "to": "test_prompt.format"}]}};
+window.functionFlowData = {"templates.get_test_generation_prompt": {"nodes": [{"id": "test_prompt.format", "label": "format", "title": "test_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "templates.get_test_generation_prompt", "label": "get_test_generation_prompt", "title": "templates.get_test_generation_prompt\\nFile: src/asabaal_utils/agents/spec_coder/templates.py\\nLine: 84", "color": "#ff6b6b"}], "edges": [{"from": "templates.get_test_generation_prompt", "to": "test_prompt.format"}]}};
 </script>
 
     <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
@@ -283,17 +283,23 @@ window.functionFlowData = {"templates.get_test_generation_prompt": {"nodes": [{"
                 enabled: true,
                 stabilization: {
                     enabled: true,
-                    iterations: 200,
-                    updateInterval: 25
+                    iterations: 1000,
+                    updateInterval: 50,
+                    onlyDynamicEdges: false,
+                    fit: true
                 },
                 barnesHut: {
-                    gravitationalConstant: -8000,
-                    centralGravity: 0.1,
-                    springLength: 100,
-                    springConstant: 0.08,
-                    damping: 0.5,
-                    avoidOverlap: 0.3
-                }
+                    gravitationalConstant: -50000,
+                    centralGravity: 0.05,
+                    springLength: 150,
+                    springConstant: 0.05,
+                    damping: 0.9,
+                    avoidOverlap: 1
+                },
+                minVelocity: 0.1,
+                maxVelocity: 5,
+                solver: 'barnesHut',
+                timestep: 0.5
             },
             interaction: {
                 hover: true,

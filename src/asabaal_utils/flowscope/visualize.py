@@ -794,17 +794,23 @@ def create_function_explorer_section(graph: nx.DiGraph, module_name: str) -> str
                 enabled: true,
                 stabilization: {
                     enabled: true,
-                    iterations: 200,
-                    updateInterval: 25
+                    iterations: 1000,
+                    updateInterval: 50,
+                    onlyDynamicEdges: false,
+                    fit: true
                 },
                 barnesHut: {
-                    gravitationalConstant: -8000,
-                    centralGravity: 0.1,
-                    springLength: 100,
-                    springConstant: 0.08,
-                    damping: 0.5,
-                    avoidOverlap: 0.3
-                }
+                    gravitationalConstant: -50000,
+                    centralGravity: 0.05,
+                    springLength: 150,
+                    springConstant: 0.05,
+                    damping: 0.9,
+                    avoidOverlap: 1
+                },
+                minVelocity: 0.1,
+                maxVelocity: 5,
+                solver: 'barnesHut',
+                timestep: 0.5
             },
             interaction: {
                 hover: true,
@@ -1306,17 +1312,23 @@ def _add_global_function_explorer_to_html(html_path: Path, graph: nx.DiGraph) ->
                 enabled: true,
                 stabilization: {
                     enabled: true,
-                    iterations: 200,
-                    updateInterval: 25
+                    iterations: 1000,
+                    updateInterval: 50,
+                    onlyDynamicEdges: false,
+                    fit: true
                 },
                 barnesHut: {
-                    gravitationalConstant: -8000,
-                    centralGravity: 0.1,
-                    springLength: 100,
-                    springConstant: 0.08,
-                    damping: 0.5,
-                    avoidOverlap: 0.3
-                }
+                    gravitationalConstant: -50000,
+                    centralGravity: 0.05,
+                    springLength: 150,
+                    springConstant: 0.05,
+                    damping: 0.9,
+                    avoidOverlap: 1
+                },
+                minVelocity: 0.1,
+                maxVelocity: 5,
+                solver: 'barnesHut',
+                timestep: 0.5
             },
             interaction: {
                 hover: true,
