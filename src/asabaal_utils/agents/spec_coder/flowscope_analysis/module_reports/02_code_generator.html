@@ -137,7 +137,7 @@
         </script>
     
 <script>
-window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"nodes": [{"id": "02_code_generator.resolve_yaml_inside_package", "label": "resolve_yaml_inside_package", "title": "02_code_generator.resolve_yaml_inside_package\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 61", "color": "#ff6b6b"}], "edges": []}, "02_code_generator.try_generation": {"nodes": [{"id": "generator.generate_from_spec", "label": "generate_from_spec", "title": "generator.generate_from_spec\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "02_code_generator.try_generation", "label": "try_generation", "title": "02_code_generator.try_generation\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 118", "color": "#ff6b6b"}], "edges": [{"from": "02_code_generator.try_generation", "to": "generator.generate_from_spec"}]}};
+window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"nodes": [{"id": "02_code_generator.resolve_yaml_inside_package", "label": "resolve_yaml_inside_package", "title": "02_code_generator.resolve_yaml_inside_package\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 61", "color": "#ff6b6b"}], "edges": []}, "02_code_generator.try_generation": {"nodes": [{"id": "02_code_generator.try_generation", "label": "try_generation", "title": "02_code_generator.try_generation\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/02_code_generator.py\\nLine: 118", "color": "#ff6b6b"}, {"id": "generator.generate_from_spec", "label": "generate_from_spec", "title": "generator.generate_from_spec\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "02_code_generator.try_generation", "to": "generator.generate_from_spec"}]}};
 </script>
 
     <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
@@ -194,8 +194,8 @@ window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"no
 
         </div>
         <div id="function-flow-container" style="margin-top: 20px; display: none;">
-            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
-            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph <small style="color: #666; font-size: 12px;">(drag bottom-right corner to resize)</small></h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 600px; background: white; resize: vertical; overflow: auto; min-height: 400px;"></div>
             <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
         </div>
     </div>
@@ -263,9 +263,12 @@ window.functionFlowData = {"02_code_generator.resolve_yaml_inside_package": {"no
         
         // Create network container
         const networkContainer = document.createElement('div');
-        networkContainer.style.height = '400px';
+        networkContainer.style.height = '600px';
         networkContainer.style.border = '1px solid #ddd';
         networkContainer.style.borderRadius = '4px';
+        networkContainer.style.resize = 'vertical';
+        networkContainer.style.overflow = 'auto';
+        networkContainer.style.minHeight = '400px';
         container.appendChild(networkContainer);
         
         // Create a vis.js network for the function flow

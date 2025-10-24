@@ -685,8 +685,8 @@ def create_function_explorer_section(graph: nx.DiGraph, module_name: str) -> str
     explorer_html += '''
         </div>
         <div id="function-flow-container" style="margin-top: 20px; display: none;">
-            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
-            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph <small style="color: #666; font-size: 12px;">(drag bottom-right corner to resize)</small></h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 600px; background: white; resize: vertical; overflow: auto; min-height: 400px;"></div>
             <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
         </div>
     </div>
@@ -754,9 +754,12 @@ def create_function_explorer_section(graph: nx.DiGraph, module_name: str) -> str
         
         // Create network container
         const networkContainer = document.createElement('div');
-        networkContainer.style.height = '400px';
+        networkContainer.style.height = '600px';
         networkContainer.style.border = '1px solid #ddd';
         networkContainer.style.borderRadius = '4px';
+        networkContainer.style.resize = 'vertical';
+        networkContainer.style.overflow = 'auto';
+        networkContainer.style.minHeight = '400px';
         container.appendChild(networkContainer);
         
         // Create a vis.js network for the function flow
@@ -1184,8 +1187,8 @@ def _add_global_function_explorer_to_html(html_path: Path, graph: nx.DiGraph) ->
         explorer_html += '''
         </div>
         <div id="function-flow-container" style="margin-top: 20px; display: none;">
-            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
-            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph <small style="color: #666; font-size: 12px;">(drag bottom-right corner to resize)</small></h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 600px; background: white; resize: vertical; overflow: auto; min-height: 400px;"></div>
             <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
         </div>
     </div>
@@ -1258,9 +1261,12 @@ def _add_global_function_explorer_to_html(html_path: Path, graph: nx.DiGraph) ->
         
         // Create network container
         const networkContainer = document.createElement('div');
-        networkContainer.style.height = '400px';
+        networkContainer.style.height = '600px';
         networkContainer.style.border = '1px solid #ddd';
         networkContainer.style.borderRadius = '4px';
+        networkContainer.style.resize = 'vertical';
+        networkContainer.style.overflow = 'auto';
+        networkContainer.style.minHeight = '400px';
         container.appendChild(networkContainer);
         
         // Create a vis.js network for the function flow
