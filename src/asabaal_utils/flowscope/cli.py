@@ -55,8 +55,11 @@ def cmd_scan(args) -> None:
         # Generate visualization if requested
         if args.visualize:
             viz_path = output_path.with_suffix(".html")
-            create_pyvis_graph(graph, viz_path, title=f"Call Graph: {path.name}")
+            module_reports_dir = Path(args.module_reports) if args.module_reports else None
+            create_pyvis_graph(graph, viz_path, title=f"Call Graph: {path.name}", module_reports_dir=module_reports_dir)
             print(f"Visualization saved to '{viz_path}'")
+            if module_reports_dir:
+                print(f"Cross-module nodes will link to reports in: {module_reports_dir}")
             
     except Exception as e:
         print(f"Error during scanning: {e}", file=sys.stderr)
@@ -133,7 +136,8 @@ def cmd_visualize(args) -> None:
         output_path = Path(args.output)
         
         if args.type == "interactive":
-            create_pyvis_graph(graph, output_path, title=args.title)
+            module_reports_dir = Path(args.module_reports) if args.module_reports else None
+            create_pyvis_graph(graph, output_path, title=args.title, module_reports_dir=module_reports_dir)
         elif args.type == "static":
             create_static_graph(
                 graph, 
@@ -265,6 +269,8 @@ Examples:
     scan_parser.add_argument("--description", help="Description for this snapshot")
     scan_parser.add_argument("--visualize", action="store_true",
                            help="Generate HTML visualization")
+    scan_parser.add_argument("--module-reports", 
+                           help="Directory containing module-specific HTML reports for cross-module linking")
     scan_parser.set_defaults(func=cmd_scan)
     
     # Compare command
@@ -288,6 +294,8 @@ Examples:
                            default="spring", help="Layout for static visualization")
     viz_parser.add_argument("--width", type=int, default=12, help="Width for static visualization")
     viz_parser.add_argument("--height", type=int, default=8, help="Height for static visualization")
+    viz_parser.add_argument("--module-reports", 
+                           help="Directory containing module-specific HTML reports for cross-module linking")
     viz_parser.set_defaults(func=cmd_visualize)
     
     # Info command

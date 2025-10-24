@@ -8,7 +8,8 @@ def create_pyvis_graph(graph: nx.DiGraph,
                       output_path: Path,
                       title: str = "Function Call Graph",
                       height: str = "750px",
-                      width: str = "100%") -> None:
+                      width: str = "100%",
+                      module_reports_dir: Optional[Path] = None) -> None:
     """Create an interactive HTML visualization using pyvis.
     
     Args:
@@ -17,6 +18,7 @@ def create_pyvis_graph(graph: nx.DiGraph,
         title: Graph title
         height: Graph height
         width: Graph width
+        module_reports_dir: Directory containing module-specific HTML reports
     """
     try:
         import pyvis
@@ -39,7 +41,7 @@ def create_pyvis_graph(graph: nx.DiGraph,
     }}
     ''')
     
-    # Add nodes with styling
+    # Add nodes with styling and click handlers
     for node, attrs in graph.nodes(data=True):
         # Determine node color based on properties
         color = "#97c2fc"  # Default blue
@@ -67,6 +69,7 @@ def create_pyvis_graph(graph: nx.DiGraph,
             tooltip_parts.append("🔗 CROSS-MODULE FUNCTION")
             tooltip_parts.append(f"Target Module: {attrs.get('target_module', 'Unknown')}")
             tooltip_parts.append(f"Called From: {attrs.get('source_module', 'Unknown')}")
+            tooltip_parts.append("💡 Click to open module report")
         
         tooltip_parts.append(f"In-degree: {graph.in_degree(node)}")
         tooltip_parts.append(f"Out-degree: {graph.out_degree(node)}")
@@ -77,15 +80,34 @@ def create_pyvis_graph(graph: nx.DiGraph,
         border_width = 3 if attrs.get("cross_module") else 1
         border_color = "#ff0000" if attrs.get("cross_module") else "#666666"
         
-        net.add_node(
-            node,
-            label=node.split(".")[-1],  # Show only function name
-            title=tooltip,
-            color=color,
-            border=border_width,
-            borderColor=border_color,
-            font={"size": 12, "color": "#333333"}
-        )
+        # Prepare node options
+        node_options = {
+            "label": node.split(".")[-1],  # Show only function name
+            "title": tooltip,
+            "color": color,
+            "borderWidth": border_width,
+            "borderColor": border_color,
+            "font": {"size": 12, "color": "#333333"}
+        }
+        
+        # Add click handler for cross-module functions
+        if attrs.get("cross_module") and module_reports_dir:
+            target_module = attrs.get('target_module', '').replace('.py', '')
+            if target_module:
+                # Look for module report file
+                module_report_path = module_reports_dir / f"{target_module}.html"
+                if module_report_path.exists():
+                    # Add JavaScript click handler
+                    node_options["click_handler"] = f"window.open('{module_report_path}', '_blank')"
+                else:
+                    # Try alternative naming patterns
+                    for pattern in [f"{target_module}_graph.html", f"{target_module}_analysis.html"]:
+                        alt_path = module_reports_dir / pattern
+                        if alt_path.exists():
+                            node_options["click_handler"] = f"window.open('{alt_path}', '_blank')"
+                            break
+        
+        net.add_node(node, **node_options)
     
     # Add edges with styling
     for source, target, attrs in graph.edges(data=True):
@@ -99,6 +121,10 @@ def create_pyvis_graph(graph: nx.DiGraph,
     
     # Save to HTML
     net.save_graph(str(output_path))
+    
+    # Add custom JavaScript for click handlers if cross-module nodes exist
+    if any(attrs.get("cross_module") for _, attrs in graph.nodes(data=True)) and module_reports_dir:
+        _add_click_handlers_to_html(output_path, graph, module_reports_dir)
 
 
 def create_static_graph(graph: nx.DiGraph, 
@@ -311,6 +337,85 @@ def create_drift_visualization(old_graph: nx.DiGraph,
         )
     
     net.save_graph(str(output_path))
+
+
+def _add_click_handlers_to_html(html_path: Path, graph: nx.DiGraph, module_reports_dir: Path) -> None:
+    """Add custom JavaScript click handlers for cross-module nodes.
+    
+    Args:
+        html_path: Path to the HTML file to modify
+        graph: NetworkX graph containing cross-module nodes
+        module_reports_dir: Directory containing module reports
+    """
+    try:
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # Create mapping of target modules to their report files
+        module_mapping = {}
+        for node, attrs in graph.nodes(data=True):
+            if attrs.get("cross_module"):
+                target_module = attrs.get('target_module', '').replace('.py', '')
+                if target_module:
+                    # Look for module report file
+                    module_report_path = module_reports_dir / f"{target_module}.html"
+                    if module_report_path.exists():
+                        module_mapping[target_module] = str(module_report_path)
+                    else:
+                        # Try alternative naming patterns
+                        for pattern in [f"{target_module}_graph.html", f"{target_module}_analysis.html"]:
+                            alt_path = module_reports_dir / pattern
+                            if alt_path.exists():
+                                module_mapping[target_module] = str(alt_path)
+                                break
+        
+        if module_mapping:
+            # Create JavaScript for click handlers
+            js_code = f"""
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {json.dumps(module_mapping)};
+
+function addClickHandlers() {{
+    const nodes = network.body.data.nodes;
+    nodes.forEach(node => {{
+        if (node.title && node.title.includes('🔗 CROSS-MODULE FUNCTION')) {{
+            const targetModule = node.title.match(/Target Module: (\\w+)/);
+            if (targetModule && moduleMapping[targetModule[1]]) {{
+                network.on("click", function(params) {{
+                    if (params.nodes.length > 0) {{
+                        const clickedNodeId = params.nodes[0];
+                        const clickedNode = nodes.find(n => n.id === clickedNodeId);
+                        if (clickedNode && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {{
+                            const module = clickedNode.title.match(/Target Module: (\\w+)/);
+                            if (module && moduleMapping[module[1]]) {{
+                                window.open(moduleMapping[module[1]], '_blank');
+                            }}
+                        }}
+                    }}
+                }});
+            }}
+        }}
+    }});
+}}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 1000);
+</script>
+"""
+            
+            # Insert the JavaScript before the closing </body> tag
+            if '</body>' in html_content:
+                html_content = html_content.replace('</body>', js_code + '</body>')
+            else:
+                html_content += js_code
+            
+            # Write back to file
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+    
+    except Exception as e:
+        print(f"Warning: Could not add click handlers to {html_path}: {e}")
 
 
 def export_graph_data(graph: nx.DiGraph, 
