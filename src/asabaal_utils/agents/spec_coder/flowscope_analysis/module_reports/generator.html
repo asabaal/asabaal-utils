@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html>
+    <head><title>generator Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "generator.generate_from_spec", "label": "generate_from_spec", "shape": "dot", "title": "Function: generator.generate_from_spec\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 172\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: generator\nCalled From: 02_code_generator\n\ud83d\udca1 Click to open module report\nIn-degree: 0\nOut-degree: 10"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.__init__", "label": "__init__", "shape": "dot", "title": "Function: generator.__init__\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 66\nIn-degree: 0\nOut-degree: 1"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._load_config", "label": "_load_config", "shape": "dot", "title": "Function: generator._load_config\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 125\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._sanitize_filename", "label": "_sanitize_filename", "shape": "dot", "title": "Function: generator._sanitize_filename\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 92\nIn-degree: 3\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_source_code", "label": "_generate_source_code", "shape": "dot", "title": "Function: generator._generate_source_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 306\nIn-degree: 1\nOut-degree: 6"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_documentation", "label": "_generate_documentation", "shape": "dot", "title": "Function: generator._generate_documentation\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 368\nIn-degree: 1\nOut-degree: 5"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_tests", "label": "_generate_tests", "shape": "dot", "title": "Function: generator._generate_tests\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 398\nIn-degree: 1\nOut-degree: 3"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_ci_config", "label": "_generate_ci_config", "shape": "dot", "title": "Function: generator._generate_ci_config\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 668\nIn-degree: 1\nOut-degree: 1"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_validation_script", "label": "_generate_validation_script", "shape": "dot", "title": "Function: generator._generate_validation_script\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 710\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "shape": "dot", "title": "Function: generator._generate_requirements_file\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 737\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "shape": "dot", "title": "Function: generator._strip_markdown_code_blocks\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 493\nIn-degree: 3\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "shape": "dot", "title": "Function: generator._clean_documentation_markdown\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 591\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_unit_test", "label": "_generate_unit_test", "shape": "dot", "title": "Function: generator._generate_unit_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 755\nIn-degree: 1\nOut-degree: 4"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_integration_test", "label": "_generate_integration_test", "shape": "dot", "title": "Function: generator._generate_integration_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 815\nIn-degree: 1\nOut-degree: 4"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "shape": "dot", "title": "Function: generator._generate_github_workflow\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 689\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._validate_python_code", "label": "_validate_python_code", "shape": "dot", "title": "Function: generator._validate_python_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 989\nIn-degree: 3\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "shape": "dot", "title": "Function: generator._generate_fallback_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 1041\nIn-degree: 3\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_unit_test_with_retry", "label": "_generate_unit_test_with_retry", "shape": "dot", "title": "Function: generator._generate_unit_test_with_retry\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 881\nIn-degree: 0\nOut-degree: 5"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._clean_generated_code", "label": "_clean_generated_code", "shape": "dot", "title": "Function: generator._clean_generated_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 921\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.parse_file", "label": "parse_file", "shape": "dot", "title": "Function: spec_parser.parse_file\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.validate_spec", "label": "validate_spec", "shape": "dot", "title": "Function: spec_parser.validate_spec\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.test_connection", "label": "test_connection", "shape": "dot", "title": "Function: ollama_client.test_connection\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "config.get", "label": "get", "shape": "dot", "title": "Function: config.get\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "shape": "dot", "title": "Function: spec_parser.format_requirements_for_prompt\nIn-degree: 2\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.format_interfaces_for_prompt", "label": "format_interfaces_for_prompt", "shape": "dot", "title": "Function: spec_parser.format_interfaces_for_prompt\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "source_code_prompt.format", "label": "format", "shape": "dot", "title": "Function: source_code_prompt.format\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.generate_code", "label": "generate_code", "shape": "dot", "title": "Function: ollama_client.generate_code\nIn-degree: 3\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "documentation_prompt.format", "label": "format", "shape": "dot", "title": "Function: documentation_prompt.format\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.generate", "label": "generate", "shape": "dot", "title": "Function: ollama_client.generate\nIn-degree: 2\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.generate_tests", "label": "generate_tests", "shape": "dot", "title": "Function: ollama_client.generate_tests\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 spec_parser.parse_file", "to": "spec_parser.parse_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 spec_parser.validate_spec", "to": "spec_parser.validate_spec"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 generator._generate_source_code", "to": "generator._generate_source_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 generator._generate_documentation", "to": "generator._generate_documentation"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 generator._generate_tests", "to": "generator._generate_tests"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 generator._generate_ci_config", "to": "generator._generate_ci_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 generator._generate_validation_script", "to": "generator._generate_validation_script"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 generator._generate_requirements_file", "to": "generator._generate_requirements_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 ollama_client.test_connection", "to": "ollama_client.test_connection"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.generate_from_spec", "title": "generator.generate_from_spec \u2192 config.get", "to": "config.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.__init__", "title": "generator.__init__ \u2192 generator._load_config", "to": "generator._load_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_source_code", "title": "generator._generate_source_code \u2192 spec_parser.format_requirements_for_prompt", "to": "spec_parser.format_requirements_for_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_source_code", "title": "generator._generate_source_code \u2192 spec_parser.format_interfaces_for_prompt", "to": "spec_parser.format_interfaces_for_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_source_code", "title": "generator._generate_source_code \u2192 source_code_prompt.format", "to": "source_code_prompt.format"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_source_code", "title": "generator._generate_source_code \u2192 ollama_client.generate_code", "to": "ollama_client.generate_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_source_code", "title": "generator._generate_source_code \u2192 generator._strip_markdown_code_blocks", "to": "generator._strip_markdown_code_blocks"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_source_code", "title": "generator._generate_source_code \u2192 generator._sanitize_filename", "to": "generator._sanitize_filename"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_documentation", "title": "generator._generate_documentation \u2192 spec_parser.format_requirements_for_prompt", "to": "spec_parser.format_requirements_for_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_documentation", "title": "generator._generate_documentation \u2192 documentation_prompt.format", "to": "documentation_prompt.format"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_documentation", "title": "generator._generate_documentation \u2192 ollama_client.generate", "to": "ollama_client.generate"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_documentation", "title": "generator._generate_documentation \u2192 generator._sanitize_filename", "to": "generator._sanitize_filename"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_documentation", "title": "generator._generate_documentation \u2192 generator._clean_documentation_markdown", "to": "generator._clean_documentation_markdown"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_tests", "title": "generator._generate_tests \u2192 generator._sanitize_filename", "to": "generator._sanitize_filename"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_tests", "title": "generator._generate_tests \u2192 generator._generate_unit_test", "to": "generator._generate_unit_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_tests", "title": "generator._generate_tests \u2192 generator._generate_integration_test", "to": "generator._generate_integration_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_ci_config", "title": "generator._generate_ci_config \u2192 generator._generate_github_workflow", "to": "generator._generate_github_workflow"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test", "title": "generator._generate_unit_test \u2192 ollama_client.generate_code", "to": "ollama_client.generate_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test", "title": "generator._generate_unit_test \u2192 generator._strip_markdown_code_blocks", "to": "generator._strip_markdown_code_blocks"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test", "title": "generator._generate_unit_test \u2192 generator._validate_python_code", "to": "generator._validate_python_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test", "title": "generator._generate_unit_test \u2192 generator._generate_fallback_test", "to": "generator._generate_fallback_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_integration_test", "title": "generator._generate_integration_test \u2192 ollama_client.generate_code", "to": "ollama_client.generate_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_integration_test", "title": "generator._generate_integration_test \u2192 generator._strip_markdown_code_blocks", "to": "generator._strip_markdown_code_blocks"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_integration_test", "title": "generator._generate_integration_test \u2192 generator._validate_python_code", "to": "generator._validate_python_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_integration_test", "title": "generator._generate_integration_test \u2192 generator._generate_fallback_test", "to": "generator._generate_fallback_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry \u2192 generator._generate_fallback_test", "to": "generator._generate_fallback_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry \u2192 generator._clean_generated_code", "to": "generator._clean_generated_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry \u2192 generator._validate_python_code", "to": "generator._validate_python_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry \u2192 ollama_client.generate_tests", "to": "ollama_client.generate_tests"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry \u2192 ollama_client.generate", "to": "ollama_client.generate"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"test_req_001": "test_req_001.html", "example_runner": "example_runner.html", "test_ollama_client_integration": "test_ollama_client_integration.html", "sync_notebooks_bidirectional": "sync_notebooks_bidirectional.html", "error_handlers": "error_handlers.html", "test_generate_pulse": "test_generate_pulse.html", "run_complex_integration_test": "run_complex_integration_test.html", "align_behaviors": "align_behaviors.html", "conftest": "conftest.html", "enforce_signature": "enforce_signature.html", "run_comparison_analysis": "run_comparison_analysis.html", "deployment_checklist": "deployment_checklist.html", "orchestrator": "orchestrator.html", "test_apply_envelope": "test_apply_envelope.html", "test_compare_behaviors": "test_compare_behaviors.html", "test_organizer": "test_organizer.html", "aligner": "aligner.html", "analyze_tests": "analyze_tests.html", "test_generator": "test_generator.html", "client": "client.html", "assertions": "assertions.html", "generator": "generator.html", "run_integration_test": "run_integration_test.html", "test_build_logic_catalog": "test_build_logic_catalog.html", "test_plan_patches": "test_plan_patches.html", "test_cli": "test_cli.html", "organizer": "organizer.html", "parse_tests": "parse_tests.html", "catalog_path": "catalog_path.html", "spec_parser": "spec_parser.html", "heal": "heal.html", "02_code_generator": "02_code_generator.html", "test_ollama_client": "test_ollama_client.html", "run_integration_tests": "run_integration_tests.html", "analyze_all_runs": "analyze_all_runs.html", "components": "components.html", "test_spec_parser": "test_spec_parser.html", "test_tester": "test_tester.html", "08_integration": "08_integration.html", "generated_dir": "generated_dir.html", "event_queue": "event_queue.html", "healer": "healer.html", "test_orchestrator": "test_orchestrator.html", "templates": "templates.html", "test_healer_integration": "test_healer_integration.html", "test_tester_integration": "test_tester_integration.html", "config": "config.html", "pipeline_notebook": "pipeline_notebook.html", "stage1_spec_to_scaffold": "stage1_spec_to_scaffold.html", "compare_behaviors": "compare_behaviors.html", "12_behavior_analysis": "12_behavior_analysis.html", "test_analyze_tests": "test_analyze_tests.html", "test_enforce_signature": "test_enforce_signature.html", "aggregate_behaviors": "aggregate_behaviors.html", "test_classify_failures": "test_classify_failures.html", "test_generate_prompts": "test_generate_prompts.html", "test_align_behaviors": "test_align_behaviors.html", "alerts": "alerts.html", "tester": "tester.html", "test_end_to_end_pipeline": "test_end_to_end_pipeline.html", "generate_prompts": "generate_prompts.html", "error_log": "error_log.html", "test_parse_tests": "test_parse_tests.html", "catalog": "catalog.html", "test_templates": "test_templates.html", "category_mapping": "category_mapping.html", "summarize_tests": "summarize_tests.html", "documentation_prompt": "documentation_prompt.html", "classify_failures": "classify_failures.html", "cli": "cli.html", "sample_test": "sample_test.html", "05_cli_interface": "05_cli_interface.html", "test_export_audio": "test_export_audio.html", "test_generator_integration": "test_generator_integration.html", "enforcer": "enforcer.html", "plan_patches": "plan_patches.html", "test_orchestrator_integration": "test_orchestrator_integration.html", "test_healer": "test_healer.html", "test_basic_function": "test_basic_function.html", "ollama_client": "ollama_client.html", "stage5_healer": "stage5_healer.html", "test_aggregate_behaviors": "test_aggregate_behaviors.html", "test_templates_integration": "test_templates_integration.html", "04_organizer": "04_organizer.html", "base_dir": "base_dir.html", "test_organizer_integration": "test_organizer_integration.html", "01_spec_parser": "01_spec_parser.html", "build_logic_catalog": "build_logic_catalog.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"generator.generate_from_spec": {"nodes": [{"id": "generator._generate_documentation", "label": "_generate_documentation", "title": "generator._generate_documentation\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 368", "color": "#97c2fc"}, {"id": "spec_parser.format_interfaces_for_prompt", "label": "format_interfaces_for_prompt", "title": "spec_parser.format_interfaces_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "ollama_client.generate", "label": "generate", "title": "ollama_client.generate\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "documentation_prompt.format", "label": "format", "title": "documentation_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ffd700"}, {"id": "config.get", "label": "get", "title": "config.get\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator.generate_from_spec", "label": "generate_from_spec", "title": "generator.generate_from_spec\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 172", "color": "#ff6b6b"}, {"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ffd700"}, {"id": "generator._generate_unit_test", "label": "_generate_unit_test", "title": "generator._generate_unit_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 755", "color": "#97c2fc"}, {"id": "spec_parser.validate_spec", "label": "validate_spec", "title": "spec_parser.validate_spec\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ffd700"}, {"id": "spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "title": "spec_parser.format_requirements_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_source_code", "label": "_generate_source_code", "title": "generator._generate_source_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 306", "color": "#97c2fc"}, {"id": "generator._generate_tests", "label": "_generate_tests", "title": "generator._generate_tests\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 398", "color": "#97c2fc"}, {"id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "title": "generator._clean_documentation_markdown\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 591", "color": "#ffd700"}, {"id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "title": "generator._generate_github_workflow\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 689", "color": "#ffd700"}, {"id": "generator._generate_validation_script", "label": "_generate_validation_script", "title": "generator._generate_validation_script\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 710", "color": "#ffd700"}, {"id": "source_code_prompt.format", "label": "format", "title": "source_code_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "title": "generator._generate_requirements_file\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 737", "color": "#ffd700"}, {"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ffd700"}, {"id": "generator._generate_integration_test", "label": "_generate_integration_test", "title": "generator._generate_integration_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 815", "color": "#97c2fc"}, {"id": "spec_parser.parse_file", "label": "parse_file", "title": "spec_parser.parse_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "ollama_client.test_connection", "label": "test_connection", "title": "ollama_client.test_connection\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_ci_config", "label": "_generate_ci_config", "title": "generator._generate_ci_config\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 668", "color": "#97c2fc"}, {"id": "ollama_client.generate_code", "label": "generate_code", "title": "ollama_client.generate_code\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "generator._generate_unit_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_source_code", "to": "generator._sanitize_filename"}, {"from": "generator._generate_integration_test", "to": "ollama_client.generate_code"}, {"from": "generator._generate_source_code", "to": "spec_parser.format_requirements_for_prompt"}, {"from": "generator._generate_tests", "to": "generator._generate_unit_test"}, {"from": "generator._generate_integration_test", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_tests", "to": "generator._generate_integration_test"}, {"from": "generator._generate_unit_test", "to": "ollama_client.generate_code"}, {"from": "generator._generate_documentation", "to": "generator._clean_documentation_markdown"}, {"from": "generator._generate_source_code", "to": "source_code_prompt.format"}, {"from": "generator._generate_documentation", "to": "ollama_client.generate"}, {"from": "generator._generate_source_code", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator.generate_from_spec", "to": "spec_parser.parse_file"}, {"from": "generator.generate_from_spec", "to": "spec_parser.validate_spec"}, {"from": "generator._generate_unit_test", "to": "generator._generate_fallback_test"}, {"from": "generator.generate_from_spec", "to": "config.get"}, {"from": "generator.generate_from_spec", "to": "generator._generate_requirements_file"}, {"from": "generator.generate_from_spec", "to": "ollama_client.test_connection"}, {"from": "generator._generate_ci_config", "to": "generator._generate_github_workflow"}, {"from": "generator._generate_source_code", "to": "ollama_client.generate_code"}, {"from": "generator.generate_from_spec", "to": "generator._generate_tests"}, {"from": "generator._generate_source_code", "to": "spec_parser.format_interfaces_for_prompt"}, {"from": "generator.generate_from_spec", "to": "generator._generate_validation_script"}, {"from": "generator._generate_integration_test", "to": "generator._validate_python_code"}, {"from": "generator._generate_tests", "to": "generator._sanitize_filename"}, {"from": "generator._generate_documentation", "to": "documentation_prompt.format"}, {"from": "generator._generate_integration_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator.generate_from_spec", "to": "generator._generate_ci_config"}, {"from": "generator._generate_documentation", "to": "generator._sanitize_filename"}, {"from": "generator.generate_from_spec", "to": "generator._generate_source_code"}, {"from": "generator.generate_from_spec", "to": "generator._generate_documentation"}, {"from": "generator._generate_unit_test", "to": "generator._validate_python_code"}, {"from": "generator._generate_documentation", "to": "spec_parser.format_requirements_for_prompt"}]}, "generator.__init__": {"nodes": [{"id": "generator.__init__", "label": "__init__", "title": "generator.__init__\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 66", "color": "#ff6b6b"}, {"id": "generator._load_config", "label": "_load_config", "title": "generator._load_config\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 125", "color": "#ffd700"}], "edges": [{"from": "generator.__init__", "to": "generator._load_config"}]}, "generator._load_config": {"nodes": [{"id": "generator._load_config", "label": "_load_config", "title": "generator._load_config\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 125", "color": "#ff6b6b"}], "edges": []}, "generator._sanitize_filename": {"nodes": [{"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ff6b6b"}], "edges": []}, "generator._generate_source_code": {"nodes": [{"id": "spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "title": "spec_parser.format_requirements_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "spec_parser.format_interfaces_for_prompt", "label": "format_interfaces_for_prompt", "title": "spec_parser.format_interfaces_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_source_code", "label": "_generate_source_code", "title": "generator._generate_source_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 306", "color": "#ff6b6b"}, {"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ffd700"}, {"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ffd700"}, {"id": "ollama_client.generate_code", "label": "generate_code", "title": "ollama_client.generate_code\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "source_code_prompt.format", "label": "format", "title": "source_code_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "generator._generate_source_code", "to": "generator._sanitize_filename"}, {"from": "generator._generate_source_code", "to": "ollama_client.generate_code"}, {"from": "generator._generate_source_code", "to": "source_code_prompt.format"}, {"from": "generator._generate_source_code", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_source_code", "to": "spec_parser.format_requirements_for_prompt"}, {"from": "generator._generate_source_code", "to": "spec_parser.format_interfaces_for_prompt"}]}, "generator._generate_documentation": {"nodes": [{"id": "generator._generate_documentation", "label": "_generate_documentation", "title": "generator._generate_documentation\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 368", "color": "#ff6b6b"}, {"id": "spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "title": "spec_parser.format_requirements_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "ollama_client.generate", "label": "generate", "title": "ollama_client.generate\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "documentation_prompt.format", "label": "format", "title": "documentation_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "title": "generator._clean_documentation_markdown\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 591", "color": "#ffd700"}, {"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ffd700"}], "edges": [{"from": "generator._generate_documentation", "to": "generator._clean_documentation_markdown"}, {"from": "generator._generate_documentation", "to": "ollama_client.generate"}, {"from": "generator._generate_documentation", "to": "documentation_prompt.format"}, {"from": "generator._generate_documentation", "to": "generator._sanitize_filename"}, {"from": "generator._generate_documentation", "to": "spec_parser.format_requirements_for_prompt"}]}, "generator._generate_tests": {"nodes": [{"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ffd700"}, {"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ffd700"}, {"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ffd700"}, {"id": "generator._generate_tests", "label": "_generate_tests", "title": "generator._generate_tests\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 398", "color": "#ff6b6b"}, {"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ffd700"}, {"id": "generator._generate_integration_test", "label": "_generate_integration_test", "title": "generator._generate_integration_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 815", "color": "#97c2fc"}, {"id": "generator._generate_unit_test", "label": "_generate_unit_test", "title": "generator._generate_unit_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 755", "color": "#97c2fc"}, {"id": "ollama_client.generate_code", "label": "generate_code", "title": "ollama_client.generate_code\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "generator._generate_unit_test", "to": "ollama_client.generate_code"}, {"from": "generator._generate_unit_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_integration_test", "to": "generator._validate_python_code"}, {"from": "generator._generate_integration_test", "to": "ollama_client.generate_code"}, {"from": "generator._generate_tests", "to": "generator._sanitize_filename"}, {"from": "generator._generate_integration_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_tests", "to": "generator._generate_unit_test"}, {"from": "generator._generate_unit_test", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_integration_test", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_tests", "to": "generator._generate_integration_test"}, {"from": "generator._generate_unit_test", "to": "generator._validate_python_code"}]}, "generator._generate_ci_config": {"nodes": [{"id": "generator._generate_ci_config", "label": "_generate_ci_config", "title": "generator._generate_ci_config\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 668", "color": "#ff6b6b"}, {"id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "title": "generator._generate_github_workflow\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 689", "color": "#ffd700"}], "edges": [{"from": "generator._generate_ci_config", "to": "generator._generate_github_workflow"}]}, "generator._generate_validation_script": {"nodes": [{"id": "generator._generate_validation_script", "label": "_generate_validation_script", "title": "generator._generate_validation_script\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 710", "color": "#ff6b6b"}], "edges": []}, "generator._generate_requirements_file": {"nodes": [{"id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "title": "generator._generate_requirements_file\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 737", "color": "#ff6b6b"}], "edges": []}, "generator._strip_markdown_code_blocks": {"nodes": [{"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ff6b6b"}], "edges": []}, "generator._clean_documentation_markdown": {"nodes": [{"id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "title": "generator._clean_documentation_markdown\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 591", "color": "#ff6b6b"}], "edges": []}, "generator._generate_unit_test": {"nodes": [{"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ffd700"}, {"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ffd700"}, {"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ffd700"}, {"id": "generator._generate_unit_test", "label": "_generate_unit_test", "title": "generator._generate_unit_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 755", "color": "#ff6b6b"}, {"id": "ollama_client.generate_code", "label": "generate_code", "title": "ollama_client.generate_code\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "generator._generate_unit_test", "to": "ollama_client.generate_code"}, {"from": "generator._generate_unit_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_unit_test", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_unit_test", "to": "generator._validate_python_code"}]}, "generator._generate_integration_test": {"nodes": [{"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ffd700"}, {"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ffd700"}, {"id": "generator._generate_integration_test", "label": "_generate_integration_test", "title": "generator._generate_integration_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 815", "color": "#ff6b6b"}, {"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ffd700"}, {"id": "ollama_client.generate_code", "label": "generate_code", "title": "ollama_client.generate_code\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "generator._generate_integration_test", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_integration_test", "to": "generator._validate_python_code"}, {"from": "generator._generate_integration_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_integration_test", "to": "ollama_client.generate_code"}]}, "generator._generate_github_workflow": {"nodes": [{"id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "title": "generator._generate_github_workflow\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 689", "color": "#ff6b6b"}], "edges": []}, "generator._validate_python_code": {"nodes": [{"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ff6b6b"}], "edges": []}, "generator._generate_fallback_test": {"nodes": [{"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ff6b6b"}], "edges": []}, "generator._generate_unit_test_with_retry": {"nodes": [{"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ffd700"}, {"id": "ollama_client.generate_tests", "label": "generate_tests", "title": "ollama_client.generate_tests\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_unit_test_with_retry", "label": "_generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 881", "color": "#ff6b6b"}, {"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ffd700"}, {"id": "ollama_client.generate", "label": "generate", "title": "ollama_client.generate\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._clean_generated_code", "label": "_clean_generated_code", "title": "generator._clean_generated_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 921", "color": "#ffd700"}], "edges": [{"from": "generator._generate_unit_test_with_retry", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_unit_test_with_retry", "to": "ollama_client.generate"}, {"from": "generator._generate_unit_test_with_retry", "to": "generator._clean_generated_code"}, {"from": "generator._generate_unit_test_with_retry", "to": "generator._validate_python_code"}, {"from": "generator._generate_unit_test_with_retry", "to": "ollama_client.generate_tests"}]}, "generator._clean_generated_code": {"nodes": [{"id": "generator._clean_generated_code", "label": "_clean_generated_code", "title": "generator._clean_generated_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 921", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - generator
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:66
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_clean_documentation_markdown" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._clean_documentation_markdown', '_clean_documentation_markdown')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_clean_documentation_markdown</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:591
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_clean_generated_code" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._clean_generated_code', '_clean_generated_code')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_clean_generated_code</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:921
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_ci_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_ci_config', '_generate_ci_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_ci_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:668
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_documentation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_documentation', '_generate_documentation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_documentation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑5</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:368
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_fallback_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_fallback_test', '_generate_fallback_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_fallback_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓3</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:1041
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_github_workflow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_github_workflow', '_generate_github_workflow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_github_workflow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:689
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_integration_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_integration_test', '_generate_integration_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_integration_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑4</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:815
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_requirements_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_requirements_file', '_generate_requirements_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_requirements_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:737
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_source_code" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_source_code', '_generate_source_code')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_source_code</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑6</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:306
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_tests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_tests', '_generate_tests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_tests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑3</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:398
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_unit_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_unit_test', '_generate_unit_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_unit_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑4</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:755
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_unit_test_with_retry" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_unit_test_with_retry', '_generate_unit_test_with_retry')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_unit_test_with_retry</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑5</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:881
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_validation_script" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_validation_script', '_generate_validation_script')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_validation_script</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:710
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_load_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._load_config', '_load_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_load_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:125
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_sanitize_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._sanitize_filename', '_sanitize_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_sanitize_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓3</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:92
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_strip_markdown_code_blocks" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._strip_markdown_code_blocks', '_strip_markdown_code_blocks')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_strip_markdown_code_blocks</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓3</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:493
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_validate_python_code" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._validate_python_code', '_validate_python_code')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_validate_python_code</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓3</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:989
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_from_spec" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator.generate_from_spec', 'generate_from_spec')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_from_spec</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑10</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:172
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

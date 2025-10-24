@@ -16,7 +16,8 @@ from .visualize import (
     create_module_view,
     create_drift_visualization,
     create_summary_report,
-    export_graph_data
+    export_graph_data,
+    create_module_reports_with_explorer
 )
 
 
@@ -242,6 +243,61 @@ def cmd_report(args) -> None:
         sys.exit(1)
 
 
+def cmd_analyze(args) -> None:
+    """Analyze a directory and create comprehensive reports with Function Explorer."""
+    path = Path(args.path)
+    
+    if not path.exists():
+        print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
+        sys.exit(1)
+    
+    print(f"Analyzing '{path}'...")
+    
+    try:
+        # Scan the directory
+        exclude_patterns = set(args.exclude) if args.exclude else None
+        graph = scan_directory(path, exclude_patterns)
+        
+        print(f"Found {graph.number_of_nodes()} functions and {graph.number_of_edges()} calls")
+        
+        # Create output directory
+        output_dir = Path(args.output)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create main visualization
+        main_viz_path = output_dir / "flowscope_visualization.html"
+        module_reports_dir = output_dir / "module_reports"
+        create_pyvis_graph(
+            graph, 
+            main_viz_path, 
+            title="FlowScope Analysis - Function Call Graph",
+            module_reports_dir=module_reports_dir
+        )
+        print(f"✓ Created main visualization: {main_viz_path}")
+        
+        # Create module reports with Function Explorer
+        if args.modules:
+            create_module_reports_with_explorer(graph, output_dir, include_function_explorer=True)
+        
+        # Create summary report
+        summary_path = output_dir / "flowscope_report.md"
+        create_summary_report(graph, summary_path)
+        print(f"✓ Created summary report: {summary_path}")
+        
+        # Create module view if requested
+        if args.module_view:
+            module_view_path = output_dir / "module_view.html"
+            create_module_view(graph, module_view_path)
+            print(f"✓ Created module view: {module_view_path}")
+        
+        print(f"\nAnalysis complete! Reports saved to: {output_dir}")
+        print(f"Open {main_viz_path} to start exploring.")
+        
+    except Exception as e:
+        print(f"Error during analysis: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -249,6 +305,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  flowscope analyze src/ --output analysis/ --modules
   flowscope scan src/ --output project.json
   flowscope scan main.py --output main.json --visualize
   flowscope compare old.json new.json --output diff.txt --visualize drift.html
@@ -319,6 +376,19 @@ Examples:
     report_parser.add_argument("--output", "-o", default="flow_report.txt",
                              help="Output file path (default: flow_report.txt)")
     report_parser.set_defaults(func=cmd_report)
+    
+    # Analyze command - comprehensive analysis with Function Explorer
+    analyze_parser = subparsers.add_parser("analyze", help="Analyze directory with Function Explorer")
+    analyze_parser.add_argument("path", help="Path to analyze")
+    analyze_parser.add_argument("--output", "-o", default="flowscope_analysis",
+                              help="Output directory (default: flowscope_analysis)")
+    analyze_parser.add_argument("--exclude", nargs="*",
+                               help="Patterns to exclude from scanning")
+    analyze_parser.add_argument("--modules", action="store_true", default=True,
+                               help="Create module-specific reports with Function Explorer")
+    analyze_parser.add_argument("--module-view", action="store_true",
+                               help="Create module-level relationship view")
+    analyze_parser.set_defaults(func=cmd_analyze)
     
     # Parse arguments
     args = parser.parse_args()

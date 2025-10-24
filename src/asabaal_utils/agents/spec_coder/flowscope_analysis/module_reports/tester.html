@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+    <head><title>tester Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "tester.main", "label": "main", "shape": "dot", "title": "Function: tester.main\nFile: src/asabaal_utils/agents/spec_coder/tester.py\nLine: 301\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "tester.__init__", "label": "__init__", "shape": "dot", "title": "Function: tester.__init__\nFile: src/asabaal_utils/agents/spec_coder/tester.py\nLine: 49\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "tester.analyze_single_file", "label": "analyze_single_file", "shape": "dot", "title": "Function: tester.analyze_single_file\nFile: src/asabaal_utils/agents/spec_coder/tester.py\nLine: 78\nIn-degree: 1\nOut-degree: 1"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "tester.analyze_directory", "label": "analyze_directory", "shape": "dot", "title": "Function: tester.analyze_directory\nFile: src/asabaal_utils/agents/spec_coder/tester.py\nLine: 130\nIn-degree: 1\nOut-degree: 1"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "tester.generate_report", "label": "generate_report", "shape": "dot", "title": "Function: tester.generate_report\nFile: src/asabaal_utils/agents/spec_coder/tester.py\nLine: 218\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "tester.run_tests", "label": "run_tests", "shape": "dot", "title": "Function: tester.run_tests\nFile: src/asabaal_utils/agents/spec_coder/tester.py\nLine: 263\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: tester\nCalled From: cli\n\ud83d\udca1 Click to open module report\nIn-degree: 0\nOut-degree: 2"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "summarizer.summarize_test_file", "label": "summarize_test_file", "shape": "dot", "title": "Function: summarizer.summarize_test_file\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "tester.analyze_single_file", "title": "tester.analyze_single_file \u2192 summarizer.summarize_test_file", "to": "summarizer.summarize_test_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "tester.analyze_directory", "title": "tester.analyze_directory \u2192 tester.analyze_single_file", "to": "tester.analyze_single_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "tester.run_tests", "title": "tester.run_tests \u2192 tester.analyze_directory", "to": "tester.analyze_directory"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "tester.run_tests", "title": "tester.run_tests \u2192 tester.generate_report", "to": "tester.generate_report"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"test_req_001": "test_req_001.html", "example_runner": "example_runner.html", "test_ollama_client_integration": "test_ollama_client_integration.html", "sync_notebooks_bidirectional": "sync_notebooks_bidirectional.html", "error_handlers": "error_handlers.html", "planner": "planner.html", "test_generate_pulse": "test_generate_pulse.html", "run_complex_integration_test": "run_complex_integration_test.html", "scalability_strategies": "scalability_strategies.html", "align_behaviors": "align_behaviors.html", "conftest": "conftest.html", "middleware": "middleware.html", "enforce_signature": "enforce_signature.html", "run_comparison_analysis": "run_comparison_analysis.html", "deployment_checklist": "deployment_checklist.html", "metrics": "metrics.html", "reports_dir": "reports_dir.html", "orchestrator": "orchestrator.html", "test_apply_envelope": "test_apply_envelope.html", "test_compare_behaviors": "test_compare_behaviors.html", "test_organizer": "test_organizer.html", "aligner": "aligner.html", "analyze_tests": "analyze_tests.html", "test_generator": "test_generator.html", "client": "client.html", "assertions": "assertions.html", "generator": "generator.html", "run_integration_test": "run_integration_test.html", "test_build_logic_catalog": "test_build_logic_catalog.html", "test_plan_patches": "test_plan_patches.html", "test_cli": "test_cli.html", "organizer": "organizer.html", "parse_tests": "parse_tests.html", "catalog_path": "catalog_path.html", "spec_parser": "spec_parser.html", "session": "session.html", "ollama": "ollama.html", "optimization_log": "optimization_log.html", "heal": "heal.html", "02_code_generator": "02_code_generator.html", "test_ollama_client": "test_ollama_client.html", "run_integration_tests": "run_integration_tests.html", "test_env_dir": "test_env_dir.html", "security_recommendations": "security_recommendations.html", "analyze_all_runs": "analyze_all_runs.html", "components": "components.html", "test_spec_parser": "test_spec_parser.html", "test_tester": "test_tester.html", "08_integration": "08_integration.html", "summarizer": "summarizer.html", "generated_dir": "generated_dir.html", "log_entries": "log_entries.html", "event_queue": "event_queue.html", "test_prompt": "test_prompt.html", "healer": "healer.html", "test_orchestrator": "test_orchestrator.html", "templates": "templates.html", "test_healer_integration": "test_healer_integration.html", "test_tester_integration": "test_tester_integration.html", "config": "config.html", "pipeline_notebook": "pipeline_notebook.html", "stage1_spec_to_scaffold": "stage1_spec_to_scaffold.html", "compare_behaviors": "compare_behaviors.html", "12_behavior_analysis": "12_behavior_analysis.html", "test_analyze_tests": "test_analyze_tests.html", "test_enforce_signature": "test_enforce_signature.html", "aggregate_behaviors": "aggregate_behaviors.html", "test_classify_failures": "test_classify_failures.html", "test_generate_prompts": "test_generate_prompts.html", "test_align_behaviors": "test_align_behaviors.html", "alerts": "alerts.html", "tester": "tester.html", "test_end_to_end_pipeline": "test_end_to_end_pipeline.html", "generate_prompts": "generate_prompts.html", "pipeline_stages": "pipeline_stages.html", "error_log": "error_log.html", "test_parse_tests": "test_parse_tests.html", "catalog": "catalog.html", "test_templates": "test_templates.html", "category_mapping": "category_mapping.html", "summarize_tests": "summarize_tests.html", "spec_file_path": "spec_file_path.html", "integration_log": "integration_log.html", "documentation_prompt": "documentation_prompt.html", "classify_failures": "classify_failures.html", "cli": "cli.html", "sample_test": "sample_test.html", "05_cli_interface": "05_cli_interface.html", "test_export_audio": "test_export_audio.html", "test_generator_integration": "test_generator_integration.html", "enforcer": "enforcer.html", "strategies": "strategies.html", "plan_patches": "plan_patches.html", "test_orchestrator_integration": "test_orchestrator_integration.html", "test_healer": "test_healer.html", "test_basic_function": "test_basic_function.html", "ollama_client": "ollama_client.html", "src_dir": "src_dir.html", "stage5_healer": "stage5_healer.html", "test_aggregate_behaviors": "test_aggregate_behaviors.html", "test_templates_integration": "test_templates_integration.html", "04_organizer": "04_organizer.html", "base_dir": "base_dir.html", "test_organizer_integration": "test_organizer_integration.html", "01_spec_parser": "01_spec_parser.html", "build_logic_catalog": "build_logic_catalog.html", "source_code_prompt": "source_code_prompt.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"tester.main": {"nodes": [{"id": "tester.main", "label": "main", "title": "tester.main\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 301", "color": "#ff6b6b"}], "edges": []}, "tester.__init__": {"nodes": [{"id": "tester.__init__", "label": "__init__", "title": "tester.__init__\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 49", "color": "#ff6b6b"}], "edges": []}, "tester.analyze_single_file": {"nodes": [{"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "tester.analyze_single_file", "label": "analyze_single_file", "title": "tester.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 78", "color": "#ff6b6b"}], "edges": [{"from": "tester.analyze_single_file", "to": "summarizer.summarize_test_file"}]}, "tester.analyze_directory": {"nodes": [{"id": "tester.analyze_directory", "label": "analyze_directory", "title": "tester.analyze_directory\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 130", "color": "#ff6b6b"}, {"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "tester.analyze_single_file", "label": "analyze_single_file", "title": "tester.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 78", "color": "#97c2fc"}], "edges": [{"from": "tester.analyze_single_file", "to": "summarizer.summarize_test_file"}, {"from": "tester.analyze_directory", "to": "tester.analyze_single_file"}]}, "tester.generate_report": {"nodes": [{"id": "tester.generate_report", "label": "generate_report", "title": "tester.generate_report\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 218", "color": "#ff6b6b"}], "edges": []}, "tester.run_tests": {"nodes": [{"id": "tester.generate_report", "label": "generate_report", "title": "tester.generate_report\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 218", "color": "#ffd700"}, {"id": "tester.run_tests", "label": "run_tests", "title": "tester.run_tests\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 263", "color": "#ff6b6b"}, {"id": "tester.analyze_directory", "label": "analyze_directory", "title": "tester.analyze_directory\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 130", "color": "#97c2fc"}, {"id": "summarizer.summarize_test_file", "label": "summarize_test_file", "title": "summarizer.summarize_test_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "tester.analyze_single_file", "label": "analyze_single_file", "title": "tester.analyze_single_file\\nFile: src/asabaal_utils/agents/spec_coder/tester.py\\nLine: 78", "color": "#97c2fc"}], "edges": [{"from": "tester.run_tests", "to": "tester.generate_report"}, {"from": "tester.run_tests", "to": "tester.analyze_directory"}, {"from": "tester.analyze_single_file", "to": "summarizer.summarize_test_file"}, {"from": "tester.analyze_directory", "to": "tester.analyze_single_file"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - tester
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('tester.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tester.py:49
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('tester.analyze_directory', 'analyze_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tester.py:130
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_single_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('tester.analyze_single_file', 'analyze_single_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_single_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tester.py:78
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('tester.generate_report', 'generate_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tester.py:218
+                </div>
+            </div>
+
+            <div class="function-item" data-name="main" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('tester.main', 'main')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>main</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tester.py:301
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_tests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('tester.run_tests', 'run_tests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_tests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑2</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tester.py:263
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

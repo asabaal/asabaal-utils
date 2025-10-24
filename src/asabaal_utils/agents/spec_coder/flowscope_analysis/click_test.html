@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Click Test</title>
+    <script>
+        // Test if click handlers work at all
+        function testClick() {
+            alert("Click test works!");
+            console.log("Click test triggered");
+        }
+        
+        // Test if window.open works
+        function testWindowOpen() {
+            console.log("Testing window.open...");
+            window.open("https://example.com", "_blank");
+        }
+    </script>
+</head>
+<body>
+    <h1>Click Test Page</h1>
+    <button onclick="testClick()">Test Click</button>
+    <button onclick="testWindowOpen()">Test Window Open</button>
+    
+    <h2>Current FlowScope Issues:</h2>
+    <ul>
+        <li>Are cross-module nodes actually being clicked?</li>
+        <li>Is the network object properly initialized?</li>
+        <li>Are there JavaScript errors preventing execution?</li>
+        <li>Is the timing correct for network initialization?</li>
+    </ul>
+</body>
+</html>

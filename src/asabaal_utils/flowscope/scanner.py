@@ -109,48 +109,53 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
         except (SyntaxError, UnicodeDecodeError):
             continue
 
-        current_func = None
         current_module = file.stem
         imported_modules = module_imports.get(current_module, set())
         
+        # First pass: find all function definitions in this file
+        function_nodes = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                func_name = f"{current_module}.{node.name}"
-                graph.add_node(func_name, file=str(file), line=node.lineno)
-                current_func = func_name
-                
-            elif isinstance(node, ast.AsyncFunctionDef):
-                func_name = f"{current_module}.{node.name}"
-                graph.add_node(func_name, file=str(file), line=node.lineno, async_func=True)
-                current_func = func_name
-                
-            elif isinstance(node, ast.Call) and current_func:
-                called_name = _extract_called_name(node, imported_modules)
-                if called_name and not _is_external_function(called_name, local_modules):
-                    # Check if this is a cross-module call
-                    if "." in called_name:
-                        target_module = called_name.split(".")[0]
-                        if target_module != current_module and target_module in local_modules:
-                            # This is a cross-module call within the codebase
-                            if called_name not in graph.nodes():
-                                graph.add_node(
-                                    called_name, 
-                                    cross_module=True,
-                                    target_module=target_module,
-                                    source_module=current_module
-                                )
-                            else:
-                                # Update existing node with cross-module info
-                                graph.nodes[called_name]['cross_module'] = True
-                                graph.nodes[called_name]['target_module'] = target_module
-                                graph.nodes[called_name]['source_module'] = current_module
-                    
-                    graph.add_edge(current_func, called_name)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                function_nodes.append(node)
+        
+        # Process each function separately to avoid scope confusion
+        for func_node in function_nodes:
+            if isinstance(func_node, ast.FunctionDef):
+                func_name = f"{current_module}.{func_node.name}"
+                graph.add_node(func_name, file=str(file), line=func_node.lineno)
+            else:  # AsyncFunctionDef
+                func_name = f"{current_module}.{func_node.name}"
+                graph.add_node(func_name, file=str(file), line=func_node.lineno, async_func=True)
+            
+            # Look for calls only within this function
+            for node in ast.walk(func_node):
+                if isinstance(node, ast.Call):
+                    called_name = _extract_called_name(node, imported_modules, current_module)
+                    if called_name and not _is_external_function(called_name, local_modules):
+                        # Check if this is a cross-module call
+                        if "." in called_name:
+                            target_module = called_name.split(".")[0]
+                            if target_module != current_module and target_module in local_modules:
+                                # This is a cross-module call within the codebase
+                                if called_name not in graph.nodes():
+                                    graph.add_node(
+                                        called_name, 
+                                        cross_module=True,
+                                        target_module=target_module,
+                                        source_module=current_module
+                                    )
+                                else:
+                                    # Update existing node with cross-module info
+                                    graph.nodes[called_name]['cross_module'] = True
+                                    graph.nodes[called_name]['target_module'] = target_module
+                                    graph.nodes[called_name]['source_module'] = current_module
+                        
+                        graph.add_edge(func_name, called_name, line=node.lineno)
     
     return graph
 
 
-def _extract_called_name(call_node: ast.Call, imported_modules: Set[str]) -> Optional[str]:
+def _extract_called_name(call_node: ast.Call, imported_modules: Set[str], current_module: str) -> Optional[str]:
     """Extract name of called function from an AST Call node.
     
     Only captures module-level function calls that are explicitly imported.
@@ -184,15 +189,31 @@ def _extract_called_name(call_node: ast.Call, imported_modules: Set[str]) -> Opt
             parts.append(node.id)
             full_name = ".".join(reversed(parts))
             
-            # Only capture module.function calls where module is imported
-            # and it's exactly 2 parts (module.function)
-            if len(parts) == 2:
+            # Capture self.method() and self._method() calls (internal methods) FIRST
+            # Only capture direct self.method() calls, not self.attribute.method()
+            if len(parts) == 2 and parts[-1] == 'self':
+                method_name = parts[0]
+                # Return with current module prefix
+                full_method_name = f"{current_module}.{method_name}"
+                return full_method_name
+            
+            # Capture self.attribute.method() calls as cross-module calls
+            elif len(parts) >= 3 and parts[-1] == 'self':
+                # This is like self.spec_parser.parse_file
+                # Treat as cross-module call to attribute.method
+                method_name = parts[0]
+                attribute_name = parts[1]
+                cross_module_call = f"{attribute_name}.{method_name}"
+                return cross_module_call
+            
+            # Capture module.function calls where module is imported
+            elif len(parts) == 2:
                 module_name, func_name = parts[1], parts[0]
                 # Only capture if module is explicitly imported
                 if module_name in imported_modules:
                     return full_name
             
-            # Exclude method calls and longer chains
+            # Exclude other method calls and longer chains
             return None
     
     return None
@@ -234,38 +255,44 @@ def scan_file(file_path: Path) -> nx.DiGraph:
     # For single file, assume only this module is local
     local_modules = {current_module}
     
+    # First pass: find all function definitions
+    function_nodes = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef):
-            func_name = f"{current_module}.{node.name}"
-            graph.add_node(func_name, file=str(file_path), line=node.lineno)
-            current_func = func_name
-            
-        elif isinstance(node, ast.AsyncFunctionDef):
-            func_name = f"{current_module}.{node.name}"
-            graph.add_node(func_name, file=str(file_path), line=node.lineno, async_func=True)
-            current_func = func_name
-            
-        elif isinstance(node, ast.Call) and current_func:
-            called_name = _extract_called_name(node, imported_modules)
-            if called_name and not _is_external_function(called_name, local_modules):
-                # Check if this is a cross-module call
-                if "." in called_name:
-                    target_module = called_name.split(".")[0]
-                    if target_module != current_module and target_module in imported_modules:
-                        # This is a cross-module call
-                        if called_name not in graph.nodes():
-                            graph.add_node(
-                                called_name, 
-                                cross_module=True,
-                                target_module=target_module,
-                                source_module=current_module
-                            )
-                        else:
-                            # Update existing node with cross-module info
-                            graph.nodes[called_name]['cross_module'] = True
-                            graph.nodes[called_name]['target_module'] = target_module
-                            graph.nodes[called_name]['source_module'] = current_module
-                
-                graph.add_edge(current_func, called_name)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            function_nodes.append(node)
+    
+    # Process each function separately to avoid scope confusion
+    for func_node in function_nodes:
+        if isinstance(func_node, ast.FunctionDef):
+            func_name = f"{current_module}.{func_node.name}"
+            graph.add_node(func_name, file=str(file_path), line=func_node.lineno)
+        else:  # AsyncFunctionDef
+            func_name = f"{current_module}.{func_node.name}"
+            graph.add_node(func_name, file=str(file_path), line=func_node.lineno, async_func=True)
+        
+        # Look for calls only within this function
+        for node in ast.walk(func_node):
+            if isinstance(node, ast.Call):
+                called_name = _extract_called_name(node, imported_modules, current_module)
+                if called_name and not _is_external_function(called_name, local_modules):
+                    # Check if this is a cross-module call
+                    if "." in called_name:
+                        target_module = called_name.split(".")[0]
+                        if target_module != current_module and target_module in imported_modules:
+                            # This is a cross-module call
+                            if called_name not in graph.nodes():
+                                graph.add_node(
+                                    called_name, 
+                                    cross_module=True,
+                                    target_module=target_module,
+                                    source_module=current_module
+                                )
+                            else:
+                                # Update existing node with cross-module info
+                                graph.nodes[called_name]['cross_module'] = True
+                                graph.nodes[called_name]['target_module'] = target_module
+                                graph.nodes[called_name]['source_module'] = current_module
+                    
+                    graph.add_edge(func_name, called_name, line=node.lineno)
     
     return graph
