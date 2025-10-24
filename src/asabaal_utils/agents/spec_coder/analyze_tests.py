@@ -11,13 +11,16 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-from parse_tests import parse_test_file
-from summarize_tests import TestSummarizer
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from asabaal_utils.agents.spec_coder.parse_tests import parse_test_file
+from asabaal_utils.agents.spec_coder.summarize_tests import TestSummarizer
 
 logger = logging.getLogger(__name__)
 
 
-class TestAnalyzer:
+class AnalysisEngine:
     """Main orchestrator for test analysis."""
     
     def __init__(self, model_name: str = "qwen3-coder:latest", spec_file: Optional[Path] = None, source_file: Optional[Path] = None):
@@ -168,7 +171,7 @@ def main():
     if possible_source.exists():
         source_file = possible_source
     
-    analyzer = TestAnalyzer(spec_file=spec_file, source_file=source_file)
+    analyzer = AnalysisEngine(spec_file=spec_file, source_file=source_file)
     
     if spec_file:
         print(f"Using spec context: {spec_file}")

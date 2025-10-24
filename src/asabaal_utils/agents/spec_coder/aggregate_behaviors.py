@@ -78,8 +78,15 @@ def extract_behaviors_from_report(report: Dict[str, Any]) -> List[Dict[str, Any]
 
 def extract_function_name_from_test(test_name: str) -> str:
     """Extract function name from test name."""
+    # Handle edge case of just "test"
+    if test_name == 'test' or not test_name:
+        return ''
+    
+    # Handle case where test_ is at the end (add_function_test)
+    if test_name.endswith('_test'):
+        name_part = test_name[:-5]  # Remove '_test'
     # Remove test_ prefix and convert to function name
-    if test_name.startswith('test_'):
+    elif test_name.startswith('test_'):
         name_part = test_name[5:]  # Remove 'test_'
     else:
         name_part = test_name
@@ -182,13 +189,14 @@ def merge_behaviors(behaviors_list: List[List[Dict[str, Any]]]) -> List[Dict[str
     for func_name, func_behaviors in function_groups.items():
         merged = {
             'function_name': func_name,
+            'test_name': func_behaviors[0].get('test_name', ''),  # Keep first test name for compatibility
             'file_paths': list(set(b.get('file_path') for b in func_behaviors if b.get('file_path'))),
             'test_names': [b.get('test_name') for b in func_behaviors],
             'sources': list(set(b.get('source') for b in func_behaviors)),
             'behaviors': [b.get('implied_behavior', '') for b in func_behaviors if b.get('implied_behavior')],
             'validation_rules': [],
             'parameters': [],
-            'alignment_scores': [b.get('alignment_score', 0) for b in func_behaviors if b.get('alignment_score') > 0],
+            'alignment_scores': [b.get('alignment_score', 0) for b in func_behaviors if b.get('alignment_score') is not None and b.get('alignment_score') > 0],
             'average_alignment_score': 0
         }
         
@@ -235,9 +243,13 @@ def save_aggregated_behaviors(behaviors: List[Dict[str, Any]], output_file: Path
 
 def main():
     """Main aggregation process."""
-    reports_dir = Path("reports")
-    output_dir = Path("logic_catalog")
-    output_dir.mkdir(exist_ok=True)
+    import os
+    
+    # Use BASE_DIR environment variable if set, otherwise use current directory
+    base_dir = Path(os.environ.get('BASE_DIR', Path.cwd()))
+    reports_dir = Path(os.environ.get('REPORTS_DIR', base_dir / "reports"))
+    output_dir = Path(os.environ.get('OUTPUT_DIR', base_dir / "logic_catalog"))
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     print("=== Aggregating Behaviors from Alignment Reports ===")
     

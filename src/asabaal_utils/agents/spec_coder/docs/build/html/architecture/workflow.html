@@ -1,0 +1,969 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow Documentation &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Component Documentation" href="components.html" />
+    <link rel="prev" title="System Design" href="design.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="design.html">System Design</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Workflow Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overall-system-workflow">Overall System Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-pipeline-flow">High-Level Pipeline Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-1-specification-to-test-scaffold">Stage 1: Specification to Test Scaffold</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detailed-workflow">Detailed Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling-flow">Error Handling Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-2-test-scaffold-to-requirements">Stage 2: Test Scaffold to Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ai-powered-generation-flow">AI-Powered Generation Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-assurance-flow">Quality Assurance Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-3-requirements-to-alignment">Stage 3: Requirements to Alignment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#behavior-analysis-flow">Behavior Analysis Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gap-analysis-flow">Gap Analysis Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-4-alignment-to-code-generation">Stage 4: Alignment to Code Generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-generation-flow">Code Generation Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#architecture-design-flow">Architecture Design Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-5-healer-self-healing">Stage 5: Healer (Self-Healing)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#healing-process-flow">Healing Process Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#escalation-flow">Escalation Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-workflows">Error Handling Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#global-error-handling">Global Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-specific-error-handling">Stage-Specific Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-optimization-workflows">Performance Optimization Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-processing-flow">Parallel Processing Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caching-workflow">Caching Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-workflows">Integration Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ci-cd-integration-flow">CI/CD Integration Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api-integration-flow">API Integration Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-and-observability-flow">Monitoring and Observability Flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#health-check-workflow">Health Check Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging-workflow">Logging Workflow</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Workflow Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/architecture/workflow.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="workflow-documentation">
+<h1>Workflow Documentation<a class="headerlink" href="#workflow-documentation" title="Link to this heading"></a></h1>
+<p>This document provides detailed workflow diagrams and process flows for the spec-coder system, illustrating how data moves through the pipeline and how components interact.</p>
+<section id="overall-system-workflow">
+<h2>Overall System Workflow<a class="headerlink" href="#overall-system-workflow" title="Link to this heading"></a></h2>
+<section id="high-level-pipeline-flow">
+<h3>High-Level Pipeline Flow<a class="headerlink" href="#high-level-pipeline-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   User Input    │    │  Configuration  │    │  AI Models      │
+│                 │    │                 │    │                 │
+│ • Spec Files    │    │ • Model Settings│    │ • Llama3        │
+│ • CLI Args      │───▶│ • Pipeline      │───▶│ • CodeLlama     │
+│ • Config Files  │    │   Options       │    │ • Qwen3-Coder   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+        │                       │                       │
+        └───────────────────────┼───────────────────────┘
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Integration Orchestrator                    │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐     │
+│  │   Pipeline  │  │   Error     │  │    State            │     │
+│  │  Manager    │  │  Handler    │  │   Management        │     │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Pipeline Stages                            │
+│                                                                 │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────┐ │
+│  │ Stage 1 │──▶│ Stage 2 │──▶│ Stage 3 │──▶│ Stage 4 │──▶│Stage5│ │
+│  │Spec→Test│   │Test→Req │   │Req→Align│   │Align→Code│ │Heal │ │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘   └─────┘ │
+│       │             │             │             │           │   │
+│       ▼             ▼             ▼             ▼           ▼   │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────┐ │
+│  │ Test    │   │ Logical │   │ Behavior│   │ Software│   │Fixed│ │
+│  │Scaffold │   │Requirements│ │Alignment│   │  Code   │   │Code │ │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘   └─────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Output Generation                          │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐     │
+│  │   Source    │  │    Tests    │  │    Documentation    │     │
+│  │    Code     │  │             │  │                     │     │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘     │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐     │
+│  │   Reports   │  │   Metrics   │  │    Quality Score    │     │
+│  │             │  │             │  │                     │     │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-1-specification-to-test-scaffold">
+<h2>Stage 1: Specification to Test Scaffold<a class="headerlink" href="#stage-1-specification-to-test-scaffold" title="Link to this heading"></a></h2>
+<section id="detailed-workflow">
+<h3>Detailed Workflow<a class="headerlink" href="#detailed-workflow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Specification  │
+│                 │
+│ • OpenSpec/YAML │
+│ • Functions     │
+│ • Classes       │
+│ • Behaviors     │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│   SpecParser    │
+│                 │
+│ • Validate      │
+│ • Parse         │
+│ • Extract       │
+│ • Normalize     │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Parsed Spec    │
+│                 │
+│ • Structured    │
+│ • Validated     │
+│ • Enriched      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│ Template Engine │
+│                 │
+│ • Select        │
+│ • Populate      │
+│ • Generate      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Test Scaffold  │
+│                 │
+│ • Test Classes  │
+│ • Method Stubs  │
+│ • Assertions    │
+│ • Fixtures      │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="error-handling-flow">
+<h3>Error Handling Flow<a class="headerlink" href="#error-handling-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Parse Error    │
+│                 │
+│ • Invalid YAML  │
+│ • Missing Fields│
+│ • Type Mismatch │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Error Recovery │
+│                 │
+│ • Auto-fix      │
+│ • Fallback      │
+│ • User Prompt   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│   Retry Logic   │
+│                 │
+│ • Max Attempts  │
+│ • Backoff       │
+│ • Escalation    │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-2-test-scaffold-to-requirements">
+<h2>Stage 2: Test Scaffold to Requirements<a class="headerlink" href="#stage-2-test-scaffold-to-requirements" title="Link to this heading"></a></h2>
+<section id="ai-powered-generation-flow">
+<h3>AI-Powered Generation Flow<a class="headerlink" href="#ai-powered-generation-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Test Scaffold  │
+│                 │
+│ • Test Classes  │
+│ • Method Names  │
+│ • Descriptions  │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  AI Model       │
+│                 │
+│ • Llama3        │
+│ • CodeLlama     │
+│ • Qwen3-Coder   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Prompt         │
+│  Engineering    │
+│                 │
+│ • Context       │
+│ • Examples      │
+│ • Constraints   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Generated      │
+│  Tests          │
+│                 │
+│ • Complete      │
+│ • Validated     │
+│ • Cleaned       │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="quality-assurance-flow">
+<h3>Quality Assurance Flow<a class="headerlink" href="#quality-assurance-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Generated      │
+│  Tests          │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Validation     │
+│                 │
+│ • Syntax Check  │
+│ • Import Check  │
+│ • Structure     │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Issues?        │
+│                 │
+│ • Yes → Heal    │
+│ • No → Continue │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Clean Tests    │
+│                 │
+│ • Remove Noise  │
+│ • Fix Format    │
+│ • Optimize      │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-3-requirements-to-alignment">
+<h2>Stage 3: Requirements to Alignment<a class="headerlink" href="#stage-3-requirements-to-alignment" title="Link to this heading"></a></h2>
+<section id="behavior-analysis-flow">
+<h3>Behavior Analysis Flow<a class="headerlink" href="#behavior-analysis-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Generated      │
+│  Tests          │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Test Execution  │
+│                 │
+│ • Run Tests     │
+│ • Collect       │
+│ • Measure       │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Behavior       │
+│  Extraction     │
+│                 │
+│ • Analyze       │
+│ • Categorize    │
+│ • Document      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Requirement    │
+│  Mapping        │
+│                 │
+│ • Compare       │
+│ • Align         │
+│ • Score         │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="gap-analysis-flow">
+<h3>Gap Analysis Flow<a class="headerlink" href="#gap-analysis-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Spec           │
+│  Requirements   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Test           │
+│  Behaviors      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Comparison     │
+│                 │
+│ • Missing       │
+│ • Extra         │
+│ • Mismatched    │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Gap Report     │
+│                 │
+│ • Coverage      │
+│ • Issues        │
+│ • Recommendations│
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-4-alignment-to-code-generation">
+<h2>Stage 4: Alignment to Code Generation<a class="headerlink" href="#stage-4-alignment-to-code-generation" title="Link to this heading"></a></h2>
+<section id="code-generation-flow">
+<h3>Code Generation Flow<a class="headerlink" href="#code-generation-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Aligned        │
+│  Requirements   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  AI Code        │
+│  Generator      │
+│                 │
+│ • Model Select  │
+│ • Prompt Build  │
+│ • Generate      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Raw Code       │
+│                 │
+│ • Functions     │
+│ • Classes       │
+│ • Modules       │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Code           │
+│  Processing     │
+│                 │
+│ • Format        │
+│ • Validate      │
+│ • Document      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Generated      │
+│  Software       │
+│                 │
+│ • Production    │
+│ • Ready         │
+│ • Tested        │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="architecture-design-flow">
+<h3>Architecture Design Flow<a class="headerlink" href="#architecture-design-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Requirements   │
+│  Analysis       │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Design         │
+│  Patterns       │
+│                 │
+│ • SOLID         │
+│ • DRY           │
+│ • KISS          │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Module         │
+│  Organization   │
+│                 │
+│ • Packages      │
+│ • Dependencies  │
+│ • Interfaces    │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Implementation │
+│                 │
+│ • Code Style    │
+│ • Best Practices│
+│ • Standards     │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-5-healer-self-healing">
+<h2>Stage 5: Healer (Self-Healing)<a class="headerlink" href="#stage-5-healer-self-healing" title="Link to this heading"></a></h2>
+<section id="healing-process-flow">
+<h3>Healing Process Flow<a class="headerlink" href="#healing-process-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Generated      │
+│  Code + Tests   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Test Execution  │
+│                 │
+│ • Run All Tests │
+│ • Collect       │
+│ • Analyze       │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Issues?        │
+│                 │
+│ • No → Done     │
+│ • Yes → Heal    │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Issue          │
+│  Analysis       │
+│                 │
+│ • Categorize    │
+│ • Prioritize    │
+│ • Diagnose      │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  AI Healing     │
+│                 │
+│ • Understand    │
+│ • Plan Fix      │
+│ • Apply Fix     │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Validation     │
+│                 │
+│ • Re-test       │
+│ • Verify        │
+│ • Confirm       │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="escalation-flow">
+<h3>Escalation Flow<a class="headerlink" href="#escalation-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Healing        │
+│  Failed?        │
+│                 │
+│ • No → Success  │
+│ • Yes → Check   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Max Attempts?  │
+│                 │
+│ • No → Retry    │
+│ • Yes → Escalate│
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Escalation     │
+│                 │
+│ • Different     │
+│   Model         │
+│ • Simpler       │
+│   Approach      │
+│ • Human Help    │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling-workflows">
+<h2>Error Handling Workflows<a class="headerlink" href="#error-handling-workflows" title="Link to this heading"></a></h2>
+<section id="global-error-handling">
+<h3>Global Error Handling<a class="headerlink" href="#global-error-handling" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Error          │
+│  Detection      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Error          │
+│  Classification │
+│                 │
+│ • Syntax        │
+│ • Logic         │
+│ • Runtime       │
+│ • AI Model      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Recovery       │
+│  Strategy       │
+│                 │
+│ • Auto-fix      │
+│ • Retry         │
+│ • Fallback      │
+│ • Skip          │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Result         │
+│                 │
+│ • Success       │
+│ • Partial       │
+│ • Failed        │
+│ • Escalated     │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="stage-specific-error-handling">
+<h3>Stage-Specific Error Handling<a class="headerlink" href="#stage-specific-error-handling" title="Link to this heading"></a></h3>
+<p><strong>Stage 1 Errors</strong>
+.. code-block:: text</p>
+<blockquote>
+<div><p>Parse Error → Validate → Fix → Retry → Report</p>
+</div></blockquote>
+<p><strong>Stage 2 Errors</strong>
+.. code-block:: text</p>
+<blockquote>
+<div><p>AI Error → Switch Model → Retry → Simplify Prompt → Report</p>
+</div></blockquote>
+<p><strong>Stage 3 Errors</strong>
+.. code-block:: text</p>
+<blockquote>
+<div><p>Test Error → Debug → Fix → Re-run → Report</p>
+</div></blockquote>
+<p><strong>Stage 4 Errors</strong>
+.. code-block:: text</p>
+<blockquote>
+<div><p>Code Error → Regenerate → Different Approach → Report</p>
+</div></blockquote>
+<p><strong>Stage 5 Errors</strong>
+.. code-block:: text</p>
+<blockquote>
+<div><p>Healing Error → Escalate → Human Intervention → Report</p>
+</div></blockquote>
+</section>
+</section>
+<section id="performance-optimization-workflows">
+<h2>Performance Optimization Workflows<a class="headerlink" href="#performance-optimization-workflows" title="Link to this heading"></a></h2>
+<section id="parallel-processing-flow">
+<h3>Parallel Processing Flow<a class="headerlink" href="#parallel-processing-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Pipeline       │
+│  Analysis       │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Dependency     │
+│  Graph          │
+│                 │
+│ • Independent   │
+│ • Sequential    │
+│ • Conditional   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Parallel       │
+│  Execution      │
+│                 │
+│ • Thread Pool   │
+│ • Async Tasks   │
+│ • Distributed   │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Result         │
+│  Aggregation    │
+│                 │
+│ • Collect       │
+│ • Merge         │
+ │ • Validate     │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="caching-workflow">
+<h3>Caching Workflow<a class="headerlink" href="#caching-workflow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Request        │
+│  Analysis       │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Cache          │
+│  Lookup         │
+│                 │
+│ • Hit → Return  │
+│ • Miss → Compute│
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Compute        │
+│  Result         │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Cache          │
+│  Store          │
+│                 │
+│ • TTL           │
+│ • Size Limit    │
+│ • Eviction      │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-workflows">
+<h2>Integration Workflows<a class="headerlink" href="#integration-workflows" title="Link to this heading"></a></h2>
+<section id="ci-cd-integration-flow">
+<h3>CI/CD Integration Flow<a class="headerlink" href="#ci-cd-integration-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Code Commit    │
+│  / Spec Change  │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  CI Pipeline    │
+│  Trigger        │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  spec-coder     │
+│  Execution      │
+│                 │
+│ • Generate      │
+│ • Test          │
+│ • Validate      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Quality Gates   │
+│                 │
+│ • Pass → Deploy │
+│ • Fail → Report │
+ └─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="api-integration-flow">
+<h3>API Integration Flow<a class="headerlink" href="#api-integration-flow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  API Request    │
+│                 │
+│ • Spec File     │
+│ • Options       │
+│ • Callback      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Request        │
+│  Validation     │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Async          │
+│  Processing     │
+│                 │
+│ • Queue         │
+│ • Worker        │
+│ • Progress      │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Response       │
+│                 │
+│ • Results       │
+│ • Status        │
+│ • Artifacts     │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<section id="monitoring-and-observability-flow">
+<h2>Monitoring and Observability Flow<a class="headerlink" href="#monitoring-and-observability-flow" title="Link to this heading"></a></h2>
+<section id="health-check-workflow">
+<h3>Health Check Workflow<a class="headerlink" href="#health-check-workflow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Health         │
+│  Monitor        │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Component      │
+│  Checks         │
+│                 │
+│ • AI Models     │
+│ • File System   │
+│ • Dependencies  │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Metrics        │
+│  Collection     │
+│                 │
+│ • Performance   │
+│ • Errors        │
+│ • Usage         │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Alerting       │
+│                 │
+│ • Thresholds    │
+│ • Notifications │
+│ • Escalation    │
+└─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="logging-workflow">
+<h3>Logging Workflow<a class="headerlink" href="#logging-workflow" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Event          │
+│  Generation     │
+ └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Log            │
+│  Formatting     │
+│                 │
+│ • Structured    │
+│ • Context       │
+│ • Correlation   │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Log            │
+│  Routing        │
+│                 │
+│ • File          │
+│ • Console       │
+│ • Remote        │
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  Log            │
+│  Analysis       │
+│                 │
+│ • Search        │
+│ • Dashboard     │
+│ • Alerts        │
+└─────────────────┘
+</pre></div>
+</div>
+<p>These workflows provide a comprehensive view of how the spec-coder system operates, from initial specification input to final software delivery, including all the intermediate processes, error handling, and optimization strategies.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="design.html" class="btn btn-neutral float-left" title="System Design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="components.html" class="btn btn-neutral float-right" title="Component Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

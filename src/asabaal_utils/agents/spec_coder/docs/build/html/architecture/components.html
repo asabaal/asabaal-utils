@@ -1,0 +1,790 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component Documentation &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing to spec-coder" href="../development/contributing.html" />
+    <link rel="prev" title="Workflow Documentation" href="workflow.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Component Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core-components">Core Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#integrationorchestrator">IntegrationOrchestrator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specparser">SpecParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#codegenerator">CodeGenerator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#behaviorcomparator">BehaviorComparator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tester">Tester</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#healer">Healer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-stages">Pipeline Stages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stage-1-specification-to-test-scaffold">Stage 1: Specification to Test Scaffold</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-2-test-scaffold-to-requirements">Stage 2: Test Scaffold to Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-3-requirements-to-alignment">Stage 3: Requirements to Alignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-4-alignment-to-code-generation">Stage 4: Alignment to Code Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-5-healer-self-healing">Stage 5: Healer (Self-Healing)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#supporting-components">Supporting Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ollamaclient">OllamaClient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#templateengine">TemplateEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filemanager">FileManager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configurationmanager">ConfigurationManager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loggingsystem">LoggingSystem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#component-interactions">Component Interactions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-flow-patterns">Data Flow Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#communication-patterns">Communication Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-points">Integration Points</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Component Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/architecture/components.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="component-documentation">
+<h1>Component Documentation<a class="headerlink" href="#component-documentation" title="Link to this heading"></a></h1>
+<p>This document provides detailed information about each component in the spec-coder system, including their responsibilities, interfaces, and interactions.</p>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h2>
+<section id="integrationorchestrator">
+<h3>IntegrationOrchestrator<a class="headerlink" href="#integrationorchestrator" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Central coordinator that manages the entire pipeline workflow and ensures proper execution of all stages.</p>
+<p><strong>Responsibilities</strong>:
+- Initialize and configure pipeline stages
+- Manage execution flow and state
+- Handle errors and recovery
+- Coordinate between components
+- Provide unified interface for external systems</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">IntegrationOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize orchestrator with configuration.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PipelineResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute complete pipeline from specification to code.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">PipelineContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StageResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute a single pipeline stage.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pipeline_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PipelineStatus</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get current pipeline status and progress.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cancel_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cancel currently running pipeline.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Configuration Options</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;llama3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;base_url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">300</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;pipeline&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;max_retries&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s2">&quot;parallel_stages&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;continue_on_error&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;stages&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;stage1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s2">&quot;stage2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s2">&quot;stage3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s2">&quot;stage4&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s2">&quot;stage5&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Usage Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;my_app_spec.yml&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_code&quot;</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="si">}</span><span class="s2"> functions&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Quality score: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">quality_score</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="specparser">
+<h3>SpecParser<a class="headerlink" href="#specparser" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Parse and validate specification files in OpenSpec and YAML formats.</p>
+<p><strong>Responsibilities</strong>:
+- Read and parse specification files
+- Validate specification structure and content
+- Extract requirements, functions, and behaviors
+- Normalize and enrich specification data
+- Handle different specification formats</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SpecParser</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Specification</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse specification from file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;yaml&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Specification</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse specification from string.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">Specification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate specification structure and content.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">Specification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Specification</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize specification to standard format.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Supported Formats</strong>:
+- YAML specifications
+- OpenSpec format
+- JSON specifications
+- Custom format extensions</p>
+<p><strong>Specification Schema</strong>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;My</span><span class="nv"> </span><span class="s">Application&quot;</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Application</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span>
+
+<span class="nt">functions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;function_name&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Function</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;param_name&quot;</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;param_type&quot;</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Parameter</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="w">    </span><span class="nt">return_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;return_type&quot;</span>
+<span class="w">    </span><span class="nt">behaviors</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Behavior</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="w">    </span><span class="nt">examples</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Example</span><span class="nv"> </span><span class="s">usage&quot;</span>
+
+<span class="nt">classes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;class_name&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Class</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="w">    </span><span class="nt">methods</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;method_name&quot;</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Method</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="w">        </span><span class="nt">parameters</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">return_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type&quot;</span>
+
+<span class="nt">behaviors</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;BEHAVIOR_ID&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Behavior</span><span class="nv"> </span><span class="s">description&quot;</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;functional|non_functional&quot;</span>
+<span class="w">    </span><span class="nt">priority</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;high|medium|low&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="codegenerator">
+<h3>CodeGenerator<a class="headerlink" href="#codegenerator" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Generate software code from specifications using AI models.</p>
+<p><strong>Responsibilities</strong>:
+- Generate code from aligned requirements
+- Apply appropriate design patterns and best practices
+- Ensure code quality and maintainability
+- Handle different programming languages and frameworks
+- Optimize generated code for performance</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">CodeGenerator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;llama3&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize code generator with AI model.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Requirement</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">GenerationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate code from requirements.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_spec</span><span class="p">:</span> <span class="n">FunctionSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratedFunction</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a single function.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_spec</span><span class="p">:</span> <span class="n">ClassSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratedClass</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a single class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_spec</span><span class="p">:</span> <span class="n">ModuleSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratedModule</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a complete module.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Generation Strategies</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">strategies</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;llama2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="mi">1024</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="mi">4096</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;balanced&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;llama3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="mi">2048</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Output Formats</strong>:
+- Python modules and packages
+- Configuration files
+- Documentation files
+- Test files
+- Build scripts</p>
+</section>
+<section id="behaviorcomparator">
+<h3>BehaviorComparator<a class="headerlink" href="#behaviorcomparator" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Compare and analyze behaviors between specifications and implementations.</p>
+<p><strong>Responsibilities</strong>:
+- Extract behaviors from specifications and tests
+- Perform semantic comparison and alignment
+- Identify gaps and mismatches
+- Generate alignment reports
+- Provide improvement recommendations</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BehaviorComparator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compare_behaviors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_behaviors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Behavior</span><span class="p">],</span>
+                        <span class="n">test_behaviors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Behavior</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ComparisonResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare specification and test behaviors.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_spec_behaviors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">Specification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Behavior</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract behaviors from specification.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_test_behaviors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Behavior</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract behaviors from test files.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_alignment_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comparison</span><span class="p">:</span> <span class="n">ComparisonResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlignmentReport</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate detailed alignment report.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Analysis Types</strong>:
+- Functional behavior comparison
+- Non-functional requirement analysis
+- Performance behavior assessment
+- Security behavior verification
+- Usability behavior evaluation</p>
+<p><strong>Scoring Metrics</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scoring</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;coverage&quot;</span><span class="p">:</span> <span class="s2">&quot;Percentage of spec behaviors covered&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;alignment&quot;</span><span class="p">:</span> <span class="s2">&quot;Semantic similarity between behaviors&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;completeness&quot;</span><span class="p">:</span> <span class="s2">&quot;How well tests cover requirements&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="s2">&quot;Overall test and code quality&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gaps&quot;</span><span class="p">:</span> <span class="s2">&quot;Number and severity of missing behaviors&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="tester">
+<h3>Tester<a class="headerlink" href="#tester" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Execute tests and validate generated code functionality.</p>
+<p><strong>Responsibilities</strong>:
+- Run test suites on generated code
+- Collect test results and metrics
+- Identify failing tests and issues
+- Generate test reports
+- Validate code functionality</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Tester</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_tests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TestResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run tests and collect results.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_single_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleTestResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a single test file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_test_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TestResult</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TestReport</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate comprehensive test report.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">TestResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoverageReport</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate test coverage.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Test Frameworks Supported</strong>:
+- pytest
+- unittest
+- doctest
+- Custom test frameworks</p>
+<p><strong>Test Types</strong>:
+- Unit tests
+- Integration tests
+- Performance tests
+- Security tests
+- Usability tests</p>
+</section>
+<section id="healer">
+<h3>Healer<a class="headerlink" href="#healer" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Automatically detect and fix issues in generated code.</p>
+<p><strong>Responsibilities</strong>:
+- Identify code issues and test failures
+- Analyze root causes of problems
+- Apply automatic fixes and patches
+- Validate fix effectiveness
+- Escalate when necessary</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Healer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">heal_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test_results</span><span class="p">:</span> <span class="n">TestResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HealingResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Heal code issues based on test failures.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">diagnose_issue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">TestError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Diagnosis</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Diagnose the root cause of an issue.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_fix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagnosis</span><span class="p">:</span> <span class="n">Diagnosis</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FixResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply automatic fix for diagnosed issue.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_fix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fix_result</span><span class="p">:</span> <span class="n">FixResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that fix resolves the issue.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Healing Strategies</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">healing_strategies</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;syntax_errors&quot;</span><span class="p">:</span> <span class="s2">&quot;auto_fix_syntax&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;import_errors&quot;</span><span class="p">:</span> <span class="s2">&quot;add_missing_imports&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type_errors&quot;</span><span class="p">:</span> <span class="s2">&quot;fix_type_annotations&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logic_errors&quot;</span><span class="p">:</span> <span class="s2">&quot;regenerate_function&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;test_failures&quot;</span><span class="p">:</span> <span class="s2">&quot;adjust_implementation&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Escalation Criteria</strong>:
+- Maximum healing attempts reached
+- Unknown error types
+- Complex architectural issues
+- Security vulnerabilities
+- Performance degradation</p>
+</section>
+</section>
+<section id="pipeline-stages">
+<h2>Pipeline Stages<a class="headerlink" href="#pipeline-stages" title="Link to this heading"></a></h2>
+<section id="stage-1-specification-to-test-scaffold">
+<h3>Stage 1: Specification to Test Scaffold<a class="headerlink" href="#stage-1-specification-to-test-scaffold" title="Link to this heading"></a></h3>
+<p><strong>Component</strong>: SpecToTestScaffold</p>
+<p><strong>Purpose</strong>: Parse specifications and generate comprehensive test scaffolds.</p>
+<p><strong>Input</strong>: OpenSpec/YAML specification files</p>
+<p><strong>Output</strong>: Complete test suite structure</p>
+<p><strong>Process</strong>:
+1. Parse and validate specification
+2. Extract requirements and behaviors
+3. Generate test class structure
+4. Create test method signatures
+5. Set up test fixtures and utilities</p>
+<p><strong>Key Configuration</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stage1_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;output_format&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;test_framework&quot;</span><span class="p">:</span> <span class="s2">&quot;pytest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;include_fixtures&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;generate_docs&quot;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="stage-2-test-scaffold-to-requirements">
+<h3>Stage 2: Test Scaffold to Requirements<a class="headerlink" href="#stage-2-test-scaffold-to-requirements" title="Link to this heading"></a></h3>
+<p><strong>Component</strong>: TestToRequirements</p>
+<p><strong>Purpose</strong>: Generate complete test implementations from scaffolds.</p>
+<p><strong>Input</strong>: Test scaffolds from Stage 1</p>
+<p><strong>Output</strong>: Comprehensive test implementations</p>
+<p><strong>Process</strong>:
+1. Analyze test scaffolds
+2. Generate test logic using AI
+3. Create positive and negative test cases
+4. Add edge cases and error handling
+5. Clean and validate generated tests</p>
+<p><strong>Key Configuration</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stage2_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;generate_edge_cases&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;include_performance_tests&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;test_density&quot;</span><span class="p">:</span> <span class="s2">&quot;comprehensive&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="stage-3-requirements-to-alignment">
+<h3>Stage 3: Requirements to Alignment<a class="headerlink" href="#stage-3-requirements-to-alignment" title="Link to this heading"></a></h3>
+<p><strong>Component</strong>: RequirementsToAlignment</p>
+<p><strong>Purpose</strong>: Execute tests and perform behavioral alignment analysis.</p>
+<p><strong>Input</strong>: Generated tests from Stage 2</p>
+<p><strong>Output</strong>: Alignment analysis and gap identification</p>
+<p><strong>Process</strong>:
+1. Execute generated test suite
+2. Collect test results and metrics
+3. Extract test behaviors
+4. Compare with specification requirements
+5. Generate alignment reports</p>
+<p><strong>Key Configuration</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stage3_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;test_framework&quot;</span><span class="p">:</span> <span class="s2">&quot;pytest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;parallel_execution&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;timeout_per_test&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="s2">&quot;analysis_depth&quot;</span><span class="p">:</span> <span class="s2">&quot;comprehensive&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="stage-4-alignment-to-code-generation">
+<h3>Stage 4: Alignment to Code Generation<a class="headerlink" href="#stage-4-alignment-to-code-generation" title="Link to this heading"></a></h3>
+<p><strong>Component</strong>: AlignmentToCode</p>
+<p><strong>Purpose</strong>: Generate production-ready code based on aligned requirements.</p>
+<p><strong>Input</strong>: Alignment results from Stage 3</p>
+<p><strong>Output</strong>: Complete software implementation</p>
+<p><strong>Process</strong>:
+1. Analyze alignment results
+2. Generate code using AI models
+3. Apply design patterns and best practices
+4. Create documentation and examples
+5. Validate code quality</p>
+<p><strong>Key Configuration</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stage4_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;code_style&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;include_docs&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;quality_checks&quot;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="stage-5-healer-self-healing">
+<h3>Stage 5: Healer (Self-Healing)<a class="headerlink" href="#stage-5-healer-self-healing" title="Link to this heading"></a></h3>
+<p><strong>Component</strong>: CodeHealer</p>
+<p><strong>Purpose</strong>: Automatically detect and fix issues in generated code.</p>
+<p><strong>Input</strong>: Generated code from Stage 4 and test results</p>
+<p><strong>Output</strong>: Healed, production-ready code</p>
+<p><strong>Process</strong>:
+1. Run comprehensive test suite
+2. Identify failing tests and issues
+3. Diagnose root causes
+4. Apply automatic fixes
+5. Validate and re-test</p>
+<p><strong>Key Configuration</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stage5_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;auto_heal&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;max_heal_attempts&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">&quot;heal_timeout&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="s2">&quot;escalation_enabled&quot;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="supporting-components">
+<h2>Supporting Components<a class="headerlink" href="#supporting-components" title="Link to this heading"></a></h2>
+<section id="ollamaclient">
+<h3>OllamaClient<a class="headerlink" href="#ollamaclient" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Interface to Ollama API for AI model interactions.</p>
+<p><strong>Responsibilities</strong>:
+- Manage connections to Ollama server
+- Handle model requests and responses
+- Implement retry logic and error handling
+- Optimize request performance
+- Monitor model availability</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OllamaClient</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Ollama client.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate text using specified model.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List available models.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pull_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pull model from repository.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">health_check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if Ollama server is healthy.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="templateengine">
+<h3>TemplateEngine<a class="headerlink" href="#templateengine" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Manage and render templates for code generation.</p>
+<p><strong>Responsibilities</strong>:
+- Load and parse template files
+- Render templates with context data
+- Support multiple template formats
+- Cache compiled templates
+- Validate template syntax</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TemplateEngine</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;templates&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize template engine.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">render_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render template with context.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Template</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load template from file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">:</span> <span class="n">Template</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate template syntax.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Template Types</strong>:
+- Test templates
+- Code templates
+- Documentation templates
+- Configuration templates</p>
+</section>
+<section id="filemanager">
+<h3>FileManager<a class="headerlink" href="#filemanager" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Handle file system operations and organization.</p>
+<p><strong>Responsibilities</strong>:
+- Create and manage directory structures
+- Read and write files safely
+- Handle file permissions and security
+- Organize generated artifacts
+- Clean up temporary files</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FileManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_directory_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create organized directory structure.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write file with optional backup.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read file content safely.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">organize_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="s2">&quot;&quot;&quot;Organize generated artifacts into proper structure.&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="configurationmanager">
+<h3>ConfigurationManager<a class="headerlink" href="#configurationmanager" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Manage system configuration from multiple sources.</p>
+<p><strong>Responsibilities</strong>:
+- Load configuration from files, environment, and CLI
+- Validate configuration settings
+- Provide configuration to components
+- Handle configuration updates
+- Support configuration profiles</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load configuration from multiple sources.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate configuration settings.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_component_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get configuration for specific component.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updates</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="s2">&quot;&quot;&quot;Update configuration with new values.&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="loggingsystem">
+<h3>LoggingSystem<a class="headerlink" href="#loggingsystem" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Provide comprehensive logging and monitoring.</p>
+<p><strong>Responsibilities</strong>:
+- Log system events and errors
+- Provide structured logging
+- Support multiple log destinations
+- Enable log analysis and searching
+- Monitor system performance</p>
+<p><strong>Key Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LoggingSystem</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log event with context.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_pipeline_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log pipeline stage execution.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log error with full context.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LogEntry</span><span class="p">]:</span>
+        <span class="s2">&quot;&quot;&quot;Retrieve logs with optional filters.&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="component-interactions">
+<h2>Component Interactions<a class="headerlink" href="#component-interactions" title="Link to this heading"></a></h2>
+<section id="data-flow-patterns">
+<h3>Data Flow Patterns<a class="headerlink" href="#data-flow-patterns" title="Link to this heading"></a></h3>
+<p><strong>Pipeline Data Flow</strong>:
+1. <strong>Specification</strong> → SpecParser → ParsedSpec
+2. <strong>ParsedSpec</strong> → Stage1 → TestScaffold
+3. <strong>TestScaffold</strong> → Stage2 → GeneratedTests
+4. <strong>GeneratedTests</strong> → Stage3 → AlignmentResult
+5. <strong>AlignmentResult</strong> → Stage4 → GeneratedCode
+6. <strong>GeneratedCode</strong> → Stage5 → HealedCode</p>
+<p><strong>Configuration Flow</strong>:
+1. ConfigurationManager → All Components
+2. Environment Variables → ConfigurationManager
+3. CLI Arguments → ConfigurationManager
+4. Config Files → ConfigurationManager</p>
+<p><strong>Error Handling Flow</strong>:
+1. Component Error → ErrorHandler
+2. ErrorHandler → LoggingSystem
+3. ErrorHandler → RecoveryStrategy
+4. RecoveryStrategy → Component Retry</p>
+</section>
+<section id="communication-patterns">
+<h3>Communication Patterns<a class="headerlink" href="#communication-patterns" title="Link to this heading"></a></h3>
+<p><strong>Synchronous Communication</strong>:
+- Direct method calls between components
+- Immediate response required
+- Used for critical operations</p>
+<p><strong>Asynchronous Communication</strong>:
+- AI model requests
+- Long-running operations
+- Event-driven notifications</p>
+<p><strong>Event-Driven Communication</strong>:
+- Pipeline stage completion events
+- Error notifications
+- Progress updates</p>
+<p><strong>Streaming Communication</strong>:
+- Large file operations
+- Real-time progress updates
+- Log streaming</p>
+</section>
+<section id="integration-points">
+<h3>Integration Points<a class="headerlink" href="#integration-points" title="Link to this heading"></a></h3>
+<p><strong>External System Integration</strong>:
+- Ollama API for AI models
+- File system for I/O operations
+- Test frameworks for validation
+- Build systems for deployment</p>
+<p><strong>Plugin Integration</strong>:
+- Custom pipeline stages
+- Additional AI models
+- Specialized processors
+- Output formatters</p>
+<p><strong>API Integration</strong>:
+- REST API for external access
+- GraphQL API for flexible queries
+- WebSocket API for real-time updates
+- CLI API for command-line access</p>
+<p>This component architecture provides a robust, scalable, and maintainable foundation for the spec-coder system, enabling it to generate high-quality software from specifications efficiently and reliably.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="workflow.html" class="btn btn-neutral float-left" title="Workflow Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../development/contributing.html" class="btn btn-neutral float-right" title="Contributing to spec-coder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

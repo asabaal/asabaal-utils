@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>asabaal_utils.agents.spec_coder.healer.plan_patches &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/generator.html">CodeGenerator API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">asabaal_utils.agents.spec_coder.healer.plan_patches</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for asabaal_utils.agents.spec_coder.healer.plan_patches</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plan Patches - Map failure classifications to repair strategies</span>
+
+<span class="sd">This module creates repair recipes based on failure classifications.</span>
+<span class="sd">It provides structured prompts and strategies for the OLAMA repair process.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RepairStrategy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Defines a repair strategy for a specific failure type.&quot;&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">prompt_template</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">confidence_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">requires_signature_fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">allowed_changes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span>
+
+<div class="viewcode-block" id="PatchPlanner">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.PatchPlanner">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PatchPlanner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Maps failure classifications to repair strategies.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="PatchPlanner.__init__">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.PatchPlanner.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">healer_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">healer_dir</span> <span class="o">=</span> <span class="n">healer_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">artifacts_dir</span> <span class="o">=</span> <span class="n">healer_dir</span> <span class="o">/</span> <span class="s2">&quot;artifacts&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strategies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_strategies</span><span class="p">()</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_strategies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RepairStrategy</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize repair strategies for each failure type.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;signature_mismatch&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;signature_mismatch&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Function signature doesn&#39;t match expected canonical form&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signature_mismatch_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                <span class="n">requires_signature_fix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">5</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;throws_on_smoke&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;throws_on_smoke&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Function crashes on basic smoke test&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_throws_on_smoke_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">15</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;logic_mismatch&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;logic_mismatch&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Function logic doesn&#39;t match expected behavior&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_logic_mismatch_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">20</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;import_error&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;import_error&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Missing or incorrect imports&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_import_error_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">3</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;syntax_error&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;syntax_error&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Python syntax errors&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_syntax_error_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;type_error&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;type_error&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Type-related runtime errors&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_error_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">12</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;attribute_error&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;attribute_error&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Missing or incorrect attributes/method calls&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_attribute_error_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">15</span>
+            <span class="p">),</span>
+            
+            <span class="s2">&quot;value_error&quot;</span><span class="p">:</span> <span class="n">RepairStrategy</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value_error&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid values or edge cases&quot;</span><span class="p">,</span>
+                <span class="n">prompt_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_error_prompt</span><span class="p">(),</span>
+                <span class="n">max_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">confidence_threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                <span class="n">allowed_changes</span><span class="o">=</span><span class="mi">15</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_signature_mismatch_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for signature mismatch repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing a Python function signature mismatch.</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">EXPECTED SIGNATURE:</span>
+<span class="s2">```python</span>
+<span class="si">{expected_signature}</span>
+<span class="s2">```</span>
+
+<span class="s2">ERROR DETAILS:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Change ONLY the function signature to match the expected form</span>
+<span class="s2">2. Keep all parameter names the same if possible</span>
+<span class="s2">3. Preserve the function body logic</span>
+<span class="s2">4. Add type hints if missing in expected signature</span>
+<span class="s2">5. Do not change the function implementation</span>
+
+<span class="s2">Return ONLY the complete fixed function with the correct signature.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_throws_on_smoke_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for smoke test failure repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing a Python function that crashes on basic smoke test.</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">SMOKE TEST ERROR:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">EXPECTED BEHAVIOR:</span>
+<span class="s2">- Function must work with no arguments (smoke test) using default parameters</span>
+<span class="s2">- Should not raise exceptions when called with defaults</span>
+<span class="s2">- Should return a reasonable default value when called with defaults</span>
+<span class="s2">- Should preserve core functionality when called with proper arguments</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Ensure all parameters have sensible defaults</span>
+<span class="s2">2. Add guards to prevent crashes when using defaults (e.g., empty lists, zero values)</span>
+<span class="s2">3. Return a reasonable default value (empty list, empty dict, None, etc.) when called with defaults</span>
+<span class="s2">4. Preserve the core logic for when proper arguments are provided</span>
+<span class="s2">5. Handle edge cases gracefully without raising exceptions</span>
+
+<span class="s2">Return ONLY the complete fixed function.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_logic_mismatch_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for logic mismatch repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing a Python function with incorrect logic.</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">TEST FAILURE DETAILS:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">EXPECTED BEHAVIOR:</span>
+<span class="si">{expected_behavior}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Analyze the test failure to understand expected behavior</span>
+<span class="s2">2. Fix the logic to match the expected behavior</span>
+<span class="s2">3. Preserve the function&#39;s overall purpose and structure</span>
+<span class="s2">4. Ensure the fix handles the failing test case</span>
+<span class="s2">5. Keep changes focused on the logic issue</span>
+
+<span class="s2">Return ONLY the complete fixed function.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_import_error_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for import error repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing import errors in a Python function.</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">IMPORT ERROR:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Fix missing or incorrect imports</span>
+<span class="s2">2. Use standard library imports when possible</span>
+<span class="s2">3. Remove unused imports</span>
+<span class="s2">4. Fix import paths if needed</span>
+<span class="s2">5. Do not change the function logic</span>
+
+<span class="s2">Return ONLY the complete fixed function with correct imports.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_syntax_error_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for syntax error repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing Python syntax errors.</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">SYNTAX ERROR:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Fix the syntax error</span>
+<span class="s2">2. Ensure proper indentation</span>
+<span class="s2">3. Fix any missing colons, brackets, etc.</span>
+<span class="s2">4. Preserve the logic and intent</span>
+<span class="s2">5. Ensure the code is valid Python</span>
+
+<span class="s2">Return ONLY the complete fixed function.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_type_error_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for type error repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing type-related runtime errors.</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">TYPE ERROR:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Fix the type error (wrong operations, method calls, etc.)</span>
+<span class="s2">2. Add proper type checking/conversion if needed</span>
+<span class="s2">3. Handle different input types appropriately</span>
+<span class="s2">4. Preserve the core logic</span>
+<span class="s2">5. Ensure type safety</span>
+
+<span class="s2">Return ONLY the complete fixed function.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_attribute_error_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for attribute error repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing attribute errors (missing methods/attributes).</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">ATTRIBUTE ERROR:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Fix the missing or incorrect attribute/method call</span>
+<span class="s2">2. Use correct method names and parameters</span>
+<span class="s2">3. Handle cases where attributes might not exist</span>
+<span class="s2">4. Use appropriate alternatives if needed</span>
+<span class="s2">5. Preserve the intended functionality</span>
+
+<span class="s2">Return ONLY the complete fixed function.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_value_error_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate prompt for value error repairs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;You are fixing value errors (invalid values, edge cases).</span>
+
+<span class="s2">CURRENT FUNCTION:</span>
+<span class="s2">```python</span>
+<span class="si">{function_code}</span>
+<span class="s2">```</span>
+
+<span class="s2">VALUE ERROR:</span>
+<span class="si">{error_details}</span>
+
+<span class="s2">REPAIR INSTRUCTIONS:</span>
+<span class="s2">1. Fix the invalid value or edge case handling</span>
+<span class="s2">2. Add proper input validation</span>
+<span class="s2">3. Handle boundary conditions correctly</span>
+<span class="s2">4. Provide appropriate defaults or error handling</span>
+<span class="s2">5. Preserve the core logic</span>
+
+<span class="s2">Return ONLY the complete fixed function.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="PatchPlanner.create_repair_plan">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.PatchPlanner.create_repair_plan">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_repair_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">failure_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                          <span class="n">function_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error_details</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">expected_signature</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">expected_behavior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a repair plan for a specific function failure.&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">failure_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategies</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown failure type: </span><span class="si">{</span><span class="n">failure_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">strategy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategies</span><span class="p">[</span><span class="n">failure_type</span><span class="p">]</span>
+        
+        <span class="c1"># Build the prompt</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">function_code</span><span class="o">=</span><span class="n">function_code</span><span class="p">,</span>
+            <span class="n">error_details</span><span class="o">=</span><span class="n">error_details</span><span class="p">,</span>
+            <span class="n">expected_signature</span><span class="o">=</span><span class="n">expected_signature</span> <span class="ow">or</span> <span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+            <span class="n">expected_behavior</span><span class="o">=</span><span class="n">expected_behavior</span> <span class="ow">or</span> <span class="s2">&quot;N/A&quot;</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Create repair plan</span>
+        <span class="n">repair_plan</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="n">function_name</span><span class="p">,</span>
+            <span class="s2">&quot;failure_type&quot;</span><span class="p">:</span> <span class="n">failure_type</span><span class="p">,</span>
+            <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
+            <span class="s2">&quot;max_attempts&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">max_attempts</span><span class="p">,</span>
+            <span class="s2">&quot;confidence_threshold&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">confidence_threshold</span><span class="p">,</span>
+            <span class="s2">&quot;requires_signature_fix&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">requires_signature_fix</span><span class="p">,</span>
+            <span class="s2">&quot;allowed_changes&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">allowed_changes</span><span class="p">,</span>
+            <span class="s2">&quot;expected_signature&quot;</span><span class="p">:</span> <span class="n">expected_signature</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;pending&quot;</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">repair_plan</span></div>
+
+    
+<div class="viewcode-block" id="PatchPlanner.save_repair_plans">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.PatchPlanner.save_repair_plans">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_repair_plans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plans</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">output_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save repair plans to a YAML file.&quot;&quot;&quot;</span>
+        <span class="n">plans_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;repair_plans&quot;</span><span class="p">:</span> <span class="n">plans</span><span class="p">,</span>
+            <span class="s2">&quot;total_plans&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">plans</span><span class="p">),</span>
+            <span class="s2">&quot;strategies_used&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">plan</span><span class="p">[</span><span class="s2">&quot;failure_type&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">plan</span> <span class="ow">in</span> <span class="n">plans</span><span class="p">))</span>
+        <span class="p">}</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">plans_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="PatchPlanner.load_repair_plans">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.PatchPlanner.load_repair_plans">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_repair_plans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load repair plans from a YAML file.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;repair_plans&quot;</span><span class="p">,</span> <span class="p">[])</span></div>
+
+    
+<div class="viewcode-block" id="PatchPlanner.get_strategy_summary">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.PatchPlanner.get_strategy_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_strategy_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get summary of available repair strategies.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="s2">&quot;max_attempts&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">max_attempts</span><span class="p">,</span>
+                <span class="s2">&quot;confidence_threshold&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">confidence_threshold</span><span class="p">,</span>
+                <span class="s2">&quot;requires_signature_fix&quot;</span><span class="p">:</span> <span class="n">strategy</span><span class="o">.</span><span class="n">requires_signature_fix</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategies</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span></div>
+</div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main function for testing the patch planner.&quot;&quot;&quot;</span>
+    <span class="n">healer_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">planner</span> <span class="o">=</span> <span class="n">PatchPlanner</span><span class="p">(</span><span class="n">healer_dir</span><span class="p">)</span>
+    
+    <span class="c1"># Test creating a repair plan</span>
+    <span class="n">test_function</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;def add_numbers(a, b):</span>
+<span class="s1">    return a + b&#39;&#39;&#39;</span>
+    
+    <span class="n">test_error</span> <span class="o">=</span> <span class="s2">&quot;TypeError: unsupported operand type(s) for +: &#39;str&#39; and &#39;int&#39;&quot;</span>
+    
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">planner</span><span class="o">.</span><span class="n">create_repair_plan</span><span class="p">(</span>
+        <span class="n">function_name</span><span class="o">=</span><span class="s2">&quot;add_numbers&quot;</span><span class="p">,</span>
+        <span class="n">failure_type</span><span class="o">=</span><span class="s2">&quot;type_error&quot;</span><span class="p">,</span>
+        <span class="n">function_code</span><span class="o">=</span><span class="n">test_function</span><span class="p">,</span>
+        <span class="n">error_details</span><span class="o">=</span><span class="n">test_error</span>
+    <span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Created repair plan:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Show strategy summary</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available strategies:&quot;</span><span class="p">)</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">planner</span><span class="o">.</span><span class="n">get_strategy_summary</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=30646c52"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation Guide" href="installation.html" />
+    <link rel="prev" title="Spec-Coder Agent Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#method-1-install-from-pypi">Method 1: Install from PyPI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-2-install-from-source">Method 2: Install from Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-3-development-installation">Method 3: Development Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-individual-stages">Running Individual Stages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-workflows">Common Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-1-test-generation-only">Workflow 1: Test Generation Only</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-2-full-pipeline-with-custom-configuration">Workflow 2: Full Pipeline with Custom Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-3-iterative-development">Workflow 3: Iterative Development</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<p>This guide will help you get up and running with the Spec-Coder Agent quickly.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Before you begin, ensure you have the following installed:</p>
+<ul class="simple">
+<li><p>Python 3.8 or higher</p></li>
+<li><p>pip (Python package manager)</p></li>
+<li><p>Git (for cloning repositories)</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<section id="method-1-install-from-pypi">
+<h3>Method 1: Install from PyPI<a class="headerlink" href="#method-1-install-from-pypi" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>asabaal-utils<span class="o">[</span>spec-coder<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="method-2-install-from-source">
+<h3>Method 2: Install from Source<a class="headerlink" href="#method-2-install-from-source" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/your-org/asabaal-utils.git
+<span class="nb">cd</span><span class="w"> </span>asabaal-utils
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>spec-coder<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="method-3-development-installation">
+<h3>Method 3: Development Installation<a class="headerlink" href="#method-3-development-installation" title="Link to this heading"></a></h3>
+<p>For developers who want to contribute:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/your-org/asabaal-utils.git
+<span class="nb">cd</span><span class="w"> </span>asabaal-utils
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>spec-coder,dev<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Create a specification file</strong> (<code class="docutils literal notranslate"><span class="pre">example_spec.yml</span></code>):</p></li>
+</ol>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Example</span><span class="nv"> </span><span class="s">Project&quot;</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A</span><span class="nv"> </span><span class="s">simple</span><span class="nv"> </span><span class="s">example</span><span class="nv"> </span><span class="s">project&quot;</span>
+<span class="nt">functions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;multiply_by_2&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Multiplies</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">number</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">2&quot;</span>
+<span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;n&quot;</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;int&quot;</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;The</span><span class="nv"> </span><span class="s">number</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">multiply&quot;</span>
+<span class="w">    </span><span class="nt">return_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;int&quot;</span>
+<span class="w">    </span><span class="nt">behaviors</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Returns</span><span class="nv"> </span><span class="s">n</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">2&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Handles</span><span class="nv"> </span><span class="s">positive</span><span class="nv"> </span><span class="s">numbers&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Handles</span><span class="nv"> </span><span class="s">negative</span><span class="nv"> </span><span class="s">numbers&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Handles</span><span class="nv"> </span><span class="s">zero&quot;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Run the complete pipeline</strong>:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>run<span class="w"> </span>--spec<span class="w"> </span>example_spec.yml<span class="w"> </span>--output<span class="w"> </span>./results
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><strong>Check the results</strong>:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-la<span class="w"> </span>results/
+<span class="c1"># Results will contain:</span>
+<span class="c1"># - scaffolds/ (generated tests and code)</span>
+<span class="c1"># - reports/ (analysis and alignment reports)</span>
+<span class="c1"># - stage4_generation/ (final implementation)</span>
+</pre></div>
+</div>
+</section>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<section id="running-individual-stages">
+<h3>Running Individual Stages<a class="headerlink" href="#running-individual-stages" title="Link to this heading"></a></h3>
+<p>You can run individual stages of the pipeline:</p>
+<p><strong>Stage 1: Generate Tests</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>generate<span class="w"> </span>--spec<span class="w"> </span>example_spec.yml<span class="w"> </span>--output<span class="w"> </span>./tests
+</pre></div>
+</div>
+<p><strong>Stage 2: Analyze Tests</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>analyze<span class="w"> </span>--input<span class="w"> </span>./tests<span class="w"> </span>--output<span class="w"> </span>./analysis
+</pre></div>
+</div>
+<p><strong>Stage 3: Align Behaviors</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>align<span class="w"> </span>--spec<span class="w"> </span>example_spec.yml<span class="w"> </span>--analysis<span class="w"> </span>./analysis<span class="w"> </span>--output<span class="w"> </span>./alignment
+</pre></div>
+</div>
+<p><strong>Stage 4: Generate Final Code</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>finalize<span class="w"> </span>--alignment<span class="w"> </span>./alignment<span class="w"> </span>--output<span class="w"> </span>./final_code
+</pre></div>
+</div>
+</section>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>The Spec-Coder Agent can be configured through:</p>
+<ol class="arabic simple">
+<li><p><strong>Command-line arguments</strong> (see <span class="xref std std-doc">user_guide/configuration</span>)</p></li>
+<li><p><strong>Configuration files</strong> (<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>)</p></li>
+<li><p><strong>Environment variables</strong></p></li>
+</ol>
+<p>Example configuration file (<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ollama</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;llama2&quot;</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://localhost:11434&quot;</span>
+
+<span class="nt">pipeline</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stages</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generate</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">analyze</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">align</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">finalize</span>
+
+<span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;structured&quot;</span>
+<span class="w">  </span><span class="nt">include_tests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">include_docs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</section>
+<section id="common-workflows">
+<h2>Common Workflows<a class="headerlink" href="#common-workflows" title="Link to this heading"></a></h2>
+<section id="workflow-1-test-generation-only">
+<h3>Workflow 1: Test Generation Only<a class="headerlink" href="#workflow-1-test-generation-only" title="Link to this heading"></a></h3>
+<p>If you only need to generate tests from an existing specification:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>generate<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--spec<span class="w"> </span>your_spec.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output<span class="w"> </span>./tests<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--format<span class="w"> </span>pytest
+</pre></div>
+</div>
+</section>
+<section id="workflow-2-full-pipeline-with-custom-configuration">
+<h3>Workflow 2: Full Pipeline with Custom Configuration<a class="headerlink" href="#workflow-2-full-pipeline-with-custom-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>spec-coder<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--spec<span class="w"> </span>your_spec.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--config<span class="w"> </span>custom_config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output<span class="w"> </span>./results<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model<span class="w"> </span>llama3<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--verbose
+</pre></div>
+</div>
+</section>
+<section id="workflow-3-iterative-development">
+<h3>Workflow 3: Iterative Development<a class="headerlink" href="#workflow-3-iterative-development" title="Link to this heading"></a></h3>
+<p>For iterative development with feedback:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate initial tests</span>
+spec-coder<span class="w"> </span>generate<span class="w"> </span>--spec<span class="w"> </span>spec.yml<span class="w"> </span>--output<span class="w"> </span>./v1
+
+<span class="c1"># Review and modify tests if needed</span>
+
+<span class="c1"># Continue with analysis</span>
+spec-coder<span class="w"> </span>analyze<span class="w"> </span>--input<span class="w"> </span>./v1<span class="w"> </span>--output<span class="w"> </span>./analysis
+
+<span class="c1"># Complete the pipeline</span>
+spec-coder<span class="w"> </span>run<span class="w"> </span>--spec<span class="w"> </span>spec.yml<span class="w"> </span>--from-stage<span class="w"> </span>analyze<span class="w"> </span>--output<span class="w"> </span>./final
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'asabaal_utils'</span></code></p>
+<p><strong>Solution</strong>: Ensure you’ve installed the package in development mode or your Python path is set correctly.</p>
+<p><strong>Issue</strong>: <code class="docutils literal notranslate"><span class="pre">Connection</span> <span class="pre">refused</span> <span class="pre">to</span> <span class="pre">Ollama</span> <span class="pre">server</span></code></p>
+<p><strong>Solution</strong>: Make sure Ollama is running and accessible at the configured URL.</p>
+<p><strong>Issue</strong>: <code class="docutils literal notranslate"><span class="pre">IndentationError</span> <span class="pre">in</span> <span class="pre">generated</span> <span class="pre">test</span> <span class="pre">files</span></code></p>
+<p><strong>Solution</strong>: This should be automatically handled now. If it persists, check the specification format and try regenerating.</p>
+</section>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Documentation</strong>: Full documentation at <a class="reference internal" href="index.html"><span class="doc">Spec-Coder Agent Documentation</span></a></p></li>
+<li><p><strong>Issues</strong>: Report bugs on <a class="reference external" href="https://github.com/your-org/asabaal-utils/issues">GitHub Issues</a></p></li>
+<li><p><strong>Discussions</strong>: Join our <a class="reference external" href="https://github.com/your-org/asabaal-utils/discussions">GitHub Discussions</a></p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Read the <span class="xref std std-doc">user_guide/overview</span> for a detailed understanding of the system</p></li>
+<li><p>Check the <span class="xref std std-doc">user_guide/pipeline</span> for in-depth pipeline documentation</p></li>
+<li><p>Explore the <a class="reference internal" href="api/modules.html"><span class="doc">API Reference</span></a> for detailed API reference</p></li>
+<li><p>Review the <a class="reference internal" href="testing/overview.html"><span class="doc">Testing Strategy Overview</span></a> for testing information</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Spec-Coder Agent Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

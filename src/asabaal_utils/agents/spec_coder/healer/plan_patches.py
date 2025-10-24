@@ -113,6 +113,8 @@ class PatchPlanner:
         """Generate prompt for signature mismatch repairs."""
         return """You are fixing a Python function signature mismatch.
 
+FUNCTION NAME: {function_name}
+
 CURRENT FUNCTION:
 ```python
 {function_code}
@@ -138,6 +140,8 @@ Return ONLY the complete fixed function with the correct signature."""
     def _throws_on_smoke_prompt(self) -> str:
         """Generate prompt for smoke test failure repairs."""
         return """You are fixing a Python function that crashes on basic smoke test.
+
+FUNCTION NAME: {function_name}
 
 CURRENT FUNCTION:
 ```python
@@ -304,6 +308,7 @@ Return ONLY the complete fixed function."""
         
         # Build the prompt
         prompt = strategy.prompt_template.format(
+            function_name=function_name,
             function_code=function_code,
             error_details=error_details,
             expected_signature=expected_signature or "N/A",

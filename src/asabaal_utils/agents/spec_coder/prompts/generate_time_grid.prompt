@@ -5,9 +5,9 @@ Generate a Python function `generate_time_grid` that implements the following sp
 
 ## Function Signature
 ```python
-def generate_time_grid(list: Any, such: Any) -> Any:
+def generate_time_grid(exactly: Any) -> Any:
     """
-    The function must produce a non-empty list of floating-point timestamps representing evenly spaced beats for a given tempo and duration.
+    The function must create a time grid with exactly 4 elements, where the first element is zero.
     """
     # Implementation here
 ```
@@ -16,28 +16,20 @@ def generate_time_grid(list: Any, such: Any) -> Any:
 creation
 
 ## Behavioral Requirements
-- The function must produce a non-empty list of floating-point timestamps representing evenly spaced beats for a given tempo and duration.
-- The function must produce a non-empty list of floating-point timestamps representing evenly spaced beats for a given tempo and duration.
-- The function must produce a list of floating-point timestamps representing evenly spaced beats over a specified duration at a given tempo.
-- The function should handle edge cases involving low tempo values by raising an exception to prevent invalid time grid generation.
-- The function should handle edge cases involving tempo values, ensuring it raises exceptions for invalid inputs such as negative or zero tempo values.
+- The function must create a time grid with exactly 4 elements, where the first element is zero.
+- The function must create a time grid with exactly 4 elements, where the first element is zero.
 
 ## Parameters
-- `list` (Any): Parameter list
-- `such` (Any): Parameter such
+- `exactly` (Any): Parameter exactly
 
 ## Return Type
 The function must return a value of type `Any`.
 
 ## Validation Rules
-- The function should handle edge cases involving tempo values, ensuring it raises exceptions for invalid inputs such as negative or zero tempo values
-- The function should handle edge cases involving low tempo values by raising an exception to prevent invalid time grid generation
-- The function must produce a list of floating-point timestamps representing evenly spaced beats over a specified duration at a given tempo
-- The function must produce a non-empty list of floating-point timestamps representing evenly spaced beats for a given tempo and duration
+- The function must create a time grid with exactly 4 elements, where the first element is zero
 
 ## Error Conditions
-- The function should handle edge cases involving tempo values, ensuring it raises exceptions for invalid inputs such as negative or zero tempo values
-- The function should handle edge cases involving low tempo values by raising an exception to prevent invalid time grid generation
+- No specific error conditions defined
 
 ## Implementation Guidelines
 
@@ -49,9 +41,9 @@ The function must return a value of type `Any`.
 
 ## Test Coverage Context
 This function has the following test coverage:
-- Test files: test_timegrid.py, test_accents.py, test_midi_export.py
-- Test names: test_generate_time_grid_happy_path, test_generate_time_grid_happy_path, test_generate_time_grid_happy_path, test_generate_time_grid_edge_cases, test_generate_time_grid_edge_cases
-- Average alignment score: 0.90
+- Test files: test_summaries.json
+- Test names: test_generate_time_grid, test_generate_time_grid
+- Average alignment score: 0.00
 
 ## Additional Notes
 - Focus on implementing the core functionality as specified

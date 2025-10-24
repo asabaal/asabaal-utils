@@ -132,6 +132,8 @@ class TestTemplatesIntegration:
         # Generate the prompt
         prompt = templates.source_code_prompt.format(
             spec_id=sample_openspec["spec_id"],
+            title=sample_openspec["title"],
+            version="1.0.0",
             interfaces="\n".join(interfaces),
             requirements="\n".join(requirements)
         )
@@ -330,6 +332,8 @@ class TestTemplatesIntegration:
         
         source_prompt = templates.source_code_prompt.format(
             spec_id=sample_openspec["spec_id"],
+            title=sample_openspec["title"],
+            version="1.0.0",
             interfaces="\n".join(interfaces),
             requirements="\n".join(requirements)
         )

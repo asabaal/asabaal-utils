@@ -185,7 +185,7 @@ interfaces:
         # Verify generation succeeded
         assert result.success, f"Generation failed: {result.errors}"
         assert len(result.files_generated) > 0
-        assert execution_time < 60  # Should complete within 60 seconds
+        assert execution_time < 180  # Should complete within 3 minutes (AI models can be slow)
         
         # Verify source code was generated
         source_files = [f for f in result.files_generated if f.endswith('.py')]
@@ -244,7 +244,7 @@ interfaces:
         # Verify generation succeeded
         assert result.success, f"Generation failed: {result.errors}"
         assert len(result.files_generated) > 0
-        assert execution_time < 120  # Complex spec may take longer
+        assert execution_time < 300  # Complex spec may take up to 5 minutes (AI models can be slow)
         
         # Verify source code was generated
         source_files = [f for f in result.files_generated if f.endswith('.py')]

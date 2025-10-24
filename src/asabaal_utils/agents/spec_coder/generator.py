@@ -35,10 +35,52 @@ class GenerationResult:
 
 
 class CodeGenerator:
-    """Main generator class that orchestrates the code generation process."""
+    """
+    Main generator class that orchestrates AI-powered code generation from OpenSpec specifications.
+    
+    This class serves as the primary interface for converting OpenSpec YAML specifications
+    into complete, working code implementations. It coordinates multiple AI models and
+    generation strategies to produce source code, tests, documentation, and configuration
+    files based on specification requirements.
+    
+    The generator supports:
+    - Source code generation from function specifications
+    - Automated test generation with coverage analysis
+    - Documentation generation
+    - CI/CD configuration generation
+    - Code validation and cleanup
+    
+    Attributes:
+        config: Configuration dictionary for model settings and generation options
+        spec_parser: SpecParser instance for processing OpenSpec files
+        ollama_client: OllamaClient instance for AI model interactions
+        templates: PromptTemplates instance for generation prompts
+    
+    Example:
+        >>> generator = CodeGenerator()
+        >>> result = generator.generate_from_spec(Path("api_spec.yaml"))
+        >>> if result.success:
+        ...     print(f"Generated {len(result.files_generated)} files")
+    """
     
     def __init__(self, config_path: Optional[Path] = None):
-        """Initialize the generator with configuration."""
+        """
+        Initialize the CodeGenerator with configuration.
+        
+        Args:
+            config_path: Optional path to configuration file. If None, uses default
+                        configuration settings for model parameters and generation options.
+        
+        Raises:
+            FileNotFoundError: If config_path is specified but file doesn't exist
+            ValueError: If configuration file contains invalid settings
+        
+        Example:
+            >>> # Use default configuration
+            >>> generator = CodeGenerator()
+            >>> # Use custom configuration
+            >>> generator = CodeGenerator(Path("config.json"))
+        """
         self.config = self._load_config(config_path)
         self.spec_parser = SpecParser()
         self.ollama_client = OllamaClient(GenerationConfig(**self.config['model']))
@@ -48,12 +90,77 @@ class CodeGenerator:
         logging.basicConfig(level=logging.INFO)
     
     def _sanitize_filename(self, name: str) -> str:
-        """Convert spec_id to consistent filename format."""
+        """
+        Convert a name to a consistent, filesystem-safe filename format.
+        
+        This private method ensures that generated filenames are consistent across
+        different platforms and filesystems by replacing problematic characters
+        with safe alternatives. It handles spaces, hyphens, and other characters
+        that might cause issues in different operating systems.
+        
+        Args:
+            name: Original name string that may contain spaces, hyphens, or other
+                  filesystem-unsafe characters.
+        
+        Returns:
+            Sanitized filename string using only underscores as separators.
+            All spaces and hyphens are replaced with underscores for consistency.
+        
+        Note:
+            This method is conservative in its approach - it only replaces the most
+            common problematic characters to preserve readability while ensuring
+            filesystem compatibility.
+        
+        Example:
+            >>> generator._sanitize_filename("my-api-spec")
+            'my_api_spec'
+            >>> generator._sanitize_filename("test file name")
+            'test_file_name'
+            >>> generator._sanitize_filename("complex_name-v2.0")
+            'complex_name_v2.0'
+        """
         # Always use underscores for consistency
         return name.replace('-', '_').replace(' ', '_')
     
     def _load_config(self, config_path: Optional[Path]) -> Dict[str, Any]:
-        """Load configuration from YAML file."""
+        """
+        Load generator configuration from a YAML file with fallback to default.
+        
+        This private method handles configuration loading for the code generator,
+        supporting both custom configuration files and a default configuration.
+        It loads model settings, generation parameters, and other options that
+        control the code generation process.
+        
+        Args:
+            config_path: Optional path to custom configuration YAML file. If None,
+                        uses the default configuration file in the config directory.
+        
+        Returns:
+            Dictionary containing configuration settings with the following structure:
+            {
+                'model': {
+                    'model': str - Model name,
+                    'base_url': str - Ollama server URL,
+                    'temperature': float - Generation temperature,
+                    'max_tokens': int - Maximum tokens to generate
+                },
+                'generation': {
+                    'overwrite': bool - Whether to overwrite existing files,
+                    'retry_attempts': int - Number of retry attempts for failed generations
+                }
+            }
+        
+        Raises:
+            FileNotFoundError: If neither custom nor default config file exists
+            yaml.YAMLError: If configuration file contains invalid YAML
+        
+        Example:
+            >>> # Use default configuration
+            >>> config = generator._load_config(None)
+            >>> # Use custom configuration
+            >>> config = generator._load_config(Path("my_config.yaml"))
+            >>> print(f"Model: {config['model']['model']}")
+        """
         import yaml
         
         if config_path is None:
@@ -63,6 +170,49 @@ class CodeGenerator:
             return yaml.safe_load(f)
     
     def generate_from_spec(self, spec_path: Path, output_dir: Optional[Path] = None) -> GenerationResult:
+        """
+        Generate complete code implementation from an OpenSpec specification file.
+        
+        This is the main entry point for code generation. It processes an OpenSpec
+        YAML file and generates a complete project structure including source code,
+        tests, documentation, and configuration files. The generation process uses
+        AI models to create implementations that match the specification requirements.
+        
+        Args:
+            spec_path: Path to the OpenSpec YAML specification file containing
+                      requirements, function interfaces, validation criteria, and metadata.
+            output_dir: Directory where generated code will be written. If None,
+                       creates a 'generated_functions' directory in the current location.
+        
+        Returns:
+            GenerationResult object containing:
+            - success: Boolean indicating if generation completed successfully
+            - files_generated: List of paths to generated files
+            - errors: List of error messages encountered during generation
+            - warnings: List of warnings about potential issues
+            - execution_time: Time taken for generation in seconds
+        
+        Raises:
+            FileNotFoundError: If spec_path does not exist
+            ValueError: If spec_path contains invalid OpenSpec format
+            OSError: If output_dir cannot be created or written to
+            RuntimeError: If AI model generation fails
+        
+        Example:
+            >>> generator = CodeGenerator()
+            >>> result = generator.generate_from_spec(
+            ...     Path("calculator_spec.yaml"),
+            ...     Path("generated_calculator")
+            ... )
+            >>> if result.success:
+            ...     print(f"Generated {len(result.files_generated)} files")
+            ...     for file_path in result.files_generated:
+            ...         print(f"  - {file_path}")
+            >>> else:
+            ...     print("Generation failed:")
+            ...     for error in result.errors:
+            ...         print(f"  - {error}")
+        """
         """Generate complete implementation from an OpenSpec specification."""
         import time
         start_time = time.time()
@@ -154,6 +304,32 @@ class CodeGenerator:
         )
     
     def _generate_source_code(self, spec: OpenSpec, output_dir: Path) -> Optional[str]:
+        """
+        Generate source code implementations for all requirements in the specification.
+        
+        This method uses AI models to generate complete, working implementations
+        for each function specified in the OpenSpec file. It considers function
+        signatures, requirements descriptions, and validation criteria to create
+        appropriate implementations.
+        
+        Args:
+            spec: Parsed OpenSpec object containing requirements and interfaces.
+            output_dir: Directory where source code files will be written.
+        
+        Returns:
+            Path to the main generated source file, or None if generation failed.
+        
+        Raises:
+            RuntimeError: If AI model fails to generate valid code
+            OSError: If source code files cannot be written
+        
+        Example:
+            >>> generator = CodeGenerator()
+            >>> spec = generator.spec_parser.parse_file(Path("spec.yaml"))
+            >>> source_file = generator._generate_source_code(spec, Path("output"))
+            >>> if source_file:
+            ...     print(f"Generated source: {source_file}")
+        """
         """Generate the main source code file."""
         try:
             # Prepare the prompt
@@ -171,13 +347,16 @@ class CodeGenerator:
             logger.info("Generating source code...")
             generated_code = self.ollama_client.generate_code(prompt)
             
+            # Clean up markdown formatting from generated code
+            cleaned_code = self._strip_markdown_code_blocks(generated_code)
+            
             # Write to file
             filename = self._sanitize_filename(spec.spec_id)
             output_file = output_dir / "scaffolds" / "src" / f"{filename}.py"
             output_file.parent.mkdir(parents=True, exist_ok=True)
             
             with open(output_file, 'w') as f:
-                f.write(generated_code)
+                f.write(cleaned_code)
             
             logger.info(f"Source code written to: {output_file}")
             return str(output_file)
@@ -203,8 +382,11 @@ class CodeGenerator:
             output_file = output_dir / "scaffolds" / "docs" / f"{filename}.md"
             output_file.parent.mkdir(parents=True, exist_ok=True)
             
+            # Clean up markdown formatting issues
+            cleaned_doc = self._clean_documentation_markdown(generated_doc)
+            
             with open(output_file, 'w') as f:
-                f.write(generated_doc)
+                f.write(cleaned_doc)
             
             logger.info(f"Documentation written to: {output_file}")
             return str(output_file)
@@ -214,6 +396,32 @@ class CodeGenerator:
             return None
     
     def _generate_tests(self, spec: OpenSpec, output_dir: Path) -> List[str]:
+        """
+        Generate comprehensive test suites for all requirements in the specification.
+        
+        This method creates both unit tests and integration tests for each requirement
+        in the specification. It uses AI to generate tests that cover normal operation,
+        edge cases, error conditions, and validation criteria specified in the OpenSpec.
+        
+        Args:
+            spec: Parsed OpenSpec object containing requirements and validation criteria.
+            output_dir: Directory where test files will be written.
+        
+        Returns:
+            List of paths to generated test files. Empty list if generation failed.
+        
+        Raises:
+            RuntimeError: If AI model fails to generate valid tests
+            OSError: If test files cannot be written
+        
+        Example:
+            >>> generator = CodeGenerator()
+            >>> spec = generator.spec_parser.parse_file(Path("spec.yaml"))
+            >>> test_files = generator._generate_tests(spec, Path("output"))
+            >>> print(f"Generated {len(test_files)} test files")
+            >>> for test_file in test_files:
+            ...     print(f"  - {test_file}")
+        """
         """Generate test files for each requirement."""
         test_files = []
         
@@ -229,21 +437,51 @@ class CodeGenerator:
                     source_code = f.read()
             
             for requirement in spec.requirements:
+                # Generate tests for all requirements, even if no validation is specified
                 if not requirement.validation:
-                    continue
-                for validation in requirement.validation:
-                    if validation.type == 'unit':
-                        test_file = self._generate_unit_test(
-                            requirement, source_code, output_dir
-                        )
-                        if test_file:
-                            test_files.append(test_file)
-                    elif validation.type == 'integration':
-                        test_file = self._generate_integration_test(
-                            requirement, source_code, output_dir
-                        )
-                        if test_file:
-                            test_files.append(test_file)
+                    # No validation specified - generate a basic functional test
+                    logger.info(f"No validation specified for {requirement.id}, generating basic functional test")
+                    test_file = self._generate_unit_test(
+                        requirement, source_code, output_dir
+                    )
+                    if test_file:
+                        test_files.append(test_file)
+                else:
+                    # Validation specified - generate tests based on validation type
+                    for validation in requirement.validation:
+                        if validation.type == 'unit':
+                            test_file = self._generate_unit_test(
+                                requirement, source_code, output_dir
+                            )
+                            if test_file:
+                                test_files.append(test_file)
+                        elif validation.type == 'integration':
+                            test_file = self._generate_integration_test(
+                                requirement, source_code, output_dir
+                            )
+                            if test_file:
+                                test_files.append(test_file)
+                        elif validation.type == 'functional':
+                            # Functional validation - generate both unit and integration tests
+                            unit_test = self._generate_unit_test(
+                                requirement, source_code, output_dir
+                            )
+                            if unit_test:
+                                test_files.append(unit_test)
+                            
+                            integration_test = self._generate_integration_test(
+                                requirement, source_code, output_dir
+                            )
+                            if integration_test:
+                                test_files.append(integration_test)
+                        else:
+                            # Unknown validation type - generate a basic unit test
+                            logger.warning(f"Unknown validation type '{validation.type}' for {requirement.id}, generating basic unit test")
+                            test_file = self._generate_unit_test(
+                                requirement, source_code, output_dir
+                            )
+                            if test_file:
+                                test_files.append(test_file)
             
             logger.info(f"Generated {len(test_files)} test files")
             
@@ -253,6 +491,40 @@ class CodeGenerator:
         return test_files
     
     def _strip_markdown_code_blocks(self, content: str) -> str:
+        """
+        Remove markdown code block markers from AI-generated content.
+        
+        This private method processes AI-generated text to remove markdown code block
+        delimiters (```python, ```, etc.) that are commonly included in model responses
+        but would cause syntax errors if left in the generated code files.
+        
+        Args:
+            content: Raw text content from AI model that may contain markdown code
+                    block markers and other formatting artifacts.
+        
+        Returns:
+            Clean code string with markdown markers removed, suitable for writing
+            directly to Python files. The method preserves the actual code content
+            while removing only the formatting markers.
+        
+        Note:
+            This method handles various markdown code block formats:
+            - ```python
+            - ```
+            - Language-specific markers (```javascript, etc.)
+            - Multiple code blocks in the same content
+        
+        Example:
+            >>> content = '''
+            ... ```python
+            ... def hello_world():
+            ...     print("Hello, World!")
+            ... ```
+            ... '''
+            >>> clean_code = generator._strip_markdown_code_blocks(content)
+            >>> assert '```python' not in clean_code
+            >>> assert 'def hello_world():' in clean_code
+        """
         """Strip markdown code block formatting and other non-Python content from generated content."""
         import re
         
@@ -283,7 +555,9 @@ class CodeGenerator:
                 not stripped or
                 stripped.lower().startswith('here is') or
                 stripped.lower().startswith('this is') or
-                stripped.lower().startswith('the following')):
+                stripped.lower().startswith('the following') or
+                'do not add extra parameters' in stripped.lower() or
+                'do not modify existing ones' in stripped.lower()):
                 continue
             
             # Skip lines that are clearly instructions
@@ -314,45 +588,82 @@ class CodeGenerator:
         
         return content
     
-    def _generate_unit_test(self, requirement: Requirement, source_code: str, output_dir: Path) -> Optional[str]:
-        """Generate a unit test for a specific requirement."""
-        try:
-            validation_file = requirement.validation[0].file if requirement.validation else "unknown"
-            prompt = self.templates.test_prompt.format(
-                req_id=requirement.id,
-                req_title=requirement.title,
-                req_description=requirement.description,
-                validation=f"unit test in {validation_file}"
-            )
+    def _clean_documentation_markdown(self, content: str) -> str:
+        """
+        Clean up markdown formatting issues in AI-generated documentation.
+        
+        This method fixes common issues with AI-generated markdown:
+        1. Removes extra plain text lines between code blocks
+        2. Fixes incorrect code block language markers for output
+        3. Removes redundant empty lines
+        4. Cleans up AI-generated artifacts
+        
+        Args:
+            content: Raw markdown content from AI model
             
-            generated_test = self.ollama_client.generate_tests(source_code, requirement.description)
+        Returns:
+            Cleaned markdown content with proper formatting
+        """
+        import re
+        
+        lines = content.split('\n')
+        cleaned_lines = []
+        i = 0
+        
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
             
-            # Strip markdown code blocks if present
-            generated_test = self._strip_markdown_code_blocks(generated_test)
+            # Skip AI-generated artifacts and notes
+            if (stripped.startswith('Note:') or 
+                stripped.startswith('TODO:') or
+                stripped.startswith('Replace') or
+                'actual name of your module' in stripped.lower() or
+                stripped.startswith('# Note:') or
+                stripped.startswith('# TODO:') or
+                'Return only the markdown documentation' in stripped or
+                'without explanations' in stripped):
+                i += 1
+                continue
             
-            # Extract filename from validation or create one
-            if requirement.validation:
-                # Get just the filename, not the full path
-                test_filename = Path(requirement.validation[0].file).name
-            else:
-                test_filename = f"test_{requirement.id.lower()}.py"
-            output_file = output_dir / "scaffolds" / "tests" / test_filename
-            output_file.parent.mkdir(parents=True, exist_ok=True)
+            # Fix code block language for output blocks
+            if stripped.startswith('```python') and i > 0:
+                # Look at previous lines to determine if this is output
+                prev_lines = [lines[j].strip() for j in range(max(0, i-3), i) if lines[j].strip()]
+                if any('print(' in prev_line or 'output:' in prev_line.lower() or 'result:' in prev_line.lower() 
+                      for prev_line in prev_lines):
+                    # This looks like output, change to plain code block
+                    cleaned_lines.append('```')
+                    i += 1
+                    continue
             
-            with open(output_file, 'w') as f:
-                f.write(generated_test)
+            # Remove extra empty lines between code blocks
+            if stripped == '' and i > 0 and i < len(lines) - 1:
+                next_line = lines[i + 1].strip()
+                prev_line = lines[i - 1].strip()
+                
+                # If we're between two code blocks or after a code block, keep only one empty line
+                if (prev_line.startswith('```') and next_line.startswith('```')) or \
+                   (prev_line.startswith('```') and next_line == ''):
+                    # Skip this empty line
+                    i += 1
+                    continue
             
-            logger.debug(f"Unit test written to: {output_file}")
-            return str(output_file)
+            # Remove consecutive empty lines
+            if stripped == '' and cleaned_lines and cleaned_lines[-1].strip() == '':
+                i += 1
+                continue
             
-        except Exception as e:
-            logger.error(f"Failed to generate unit test for {requirement.id}: {e}")
-            return None
+            cleaned_lines.append(line)
+            i += 1
+        
+        # Remove trailing empty lines
+        while cleaned_lines and not cleaned_lines[-1].strip():
+            cleaned_lines.pop()
+        
+        return '\n'.join(cleaned_lines)
     
-    def _generate_integration_test(self, requirement: Requirement, source_code: str, output_dir: Path) -> Optional[str]:
-        """Generate an integration test for a specific requirement."""
-        # Similar to unit test but with integration focus
-        return self._generate_unit_test(requirement, source_code, output_dir)
+
     
     def _generate_ci_config(self, spec: OpenSpec, output_dir: Path) -> List[str]:
         """Generate CI/CD configuration files."""
@@ -441,6 +752,132 @@ ruff>=0.1.0
             logger.error(f"Failed to generate requirements file: {e}")
             return None
     
+    def _generate_unit_test(self, requirement: Requirement, source_code: str, output_dir: Path) -> Optional[str]:
+        """
+        Generate a unit test for a specific requirement.
+        
+        Args:
+            requirement: The requirement to generate tests for
+            source_code: The generated source code (for context)
+            output_dir: Directory to write the test file
+            
+        Returns:
+            Path to the generated test file, or None if generation failed
+        """
+        try:
+            # Prepare the prompt for unit test generation
+            # Create a simple prompt for this specific requirement
+            prompt = f"""
+Generate comprehensive pytest tests for the following requirement:
+
+Requirement ID: {requirement.id}
+Title: {requirement.title}
+Description: {requirement.description}
+
+Generate tests that verify:
+- Correct functionality
+- Edge cases
+- Error conditions
+- Type safety
+
+Return only the test code without explanations.
+"""
+            
+            # Generate test code
+            logger.info(f"Generating unit test for requirement: {requirement.id}")
+            test_code = self.ollama_client.generate_code(prompt)
+            
+            # Clean up markdown formatting
+            test_code = self._strip_markdown_code_blocks(test_code)
+            
+            # Validate the generated test code
+            if not self._validate_python_code(test_code):
+                logger.warning(f"Generated unit test for {requirement.id} failed syntax validation, using fallback")
+                test_code = self._generate_fallback_test(requirement)
+            
+            # Write test file
+            test_dir = output_dir / "tests"
+            test_dir.mkdir(exist_ok=True)
+            
+            test_filename = f"test_{requirement.id.lower().replace('-', '_')}.py"
+            test_file = test_dir / test_filename
+            
+            with open(test_file, 'w') as f:
+                f.write(test_code)
+            
+            logger.info(f"Generated unit test: {test_file}")
+            return str(test_file)
+            
+        except Exception as e:
+            logger.error(f"Failed to generate unit test for {requirement.id}: {e}")
+            return None
+    
+    def _generate_integration_test(self, requirement: Requirement, source_code: str, output_dir: Path) -> Optional[str]:
+        """
+        Generate an integration test for a specific requirement.
+        
+        Args:
+            requirement: The requirement to generate tests for
+            source_code: The generated source code (for context)
+            output_dir: Directory to write the test file
+            
+        Returns:
+            Path to the generated test file, or None if generation failed
+        """
+        try:
+            # Prepare the prompt for integration test generation
+            prompt = f"""
+Generate comprehensive pytest integration tests for the following requirement:
+
+Requirement ID: {requirement.id}
+Title: {requirement.title}
+Description: {requirement.description}
+
+IMPORTANT: This is an INTEGRATION test. The test should:
+1. Test multiple components working together
+2. Verify end-to-end functionality
+3. Use realistic data and scenarios
+4. Test the complete workflow described in the requirement
+
+Generate tests that verify:
+- Correct functionality
+- Edge cases
+- Error conditions
+- Type safety
+- Integration between components
+
+Return only the test code without explanations.
+"""
+            
+            # Generate test code
+            logger.info(f"Generating integration test for requirement: {requirement.id}")
+            test_code = self.ollama_client.generate_code(prompt)
+            
+            # Clean up markdown formatting
+            test_code = self._strip_markdown_code_blocks(test_code)
+            
+            # Validate the generated test code
+            if not self._validate_python_code(test_code):
+                logger.warning(f"Generated integration test for {requirement.id} failed syntax validation, using fallback")
+                test_code = self._generate_fallback_test(requirement)
+            
+            # Write test file
+            test_dir = output_dir / "tests"
+            test_dir.mkdir(exist_ok=True)
+            
+            test_filename = f"test_{requirement.id.lower().replace('-', '_')}_integration.py"
+            test_file = test_dir / test_filename
+            
+            with open(test_file, 'w') as f:
+                f.write(test_code)
+            
+            logger.info(f"Generated integration test: {test_file}")
+            return str(test_file)
+            
+        except Exception as e:
+            logger.error(f"Failed to generate integration test for {requirement.id}: {e}")
+            return None
+    
     def _generate_unit_test_with_retry(self, requirement: Requirement, source_code: str, max_retries: int = 3) -> str:
         """Generate a unit test with retry logic when AI generation fails."""
         for attempt in range(max_retries):
@@ -482,6 +919,40 @@ Generate complete, syntactically valid pytest code. Return ONLY the Python code 
         return self._generate_fallback_test(requirement)
     
     def _clean_generated_code(self, generated_code: str) -> str:
+        """
+        Clean and validate AI-generated code to ensure it's executable and well-formatted.
+        
+        This private method processes raw AI-generated code to fix common issues,
+        remove problematic content, and ensure the code is syntactically correct.
+        It handles various artifacts that AI models might introduce during generation.
+        
+        Args:
+            generated_code: Raw code string from AI model that may contain formatting
+                           issues, instructional text, or other problematic elements.
+        
+        Returns:
+            Cleaned code string that is syntactically valid and ready for execution.
+            The method removes problematic elements while preserving functional code.
+        
+        Note:
+            The cleaning process includes:
+            - Removing instructional comments and notes
+            - Fixing indentation issues
+            - Removing template placeholders
+            - Ensuring proper function structure
+            - Validating Python syntax
+        
+        Example:
+            >>> raw_code = '''
+            ... # TODO: Implement this function
+            ... def example():
+            ...     # Replace with your implementation
+            ...     pass
+            ... '''
+            >>> clean_code = generator._clean_generated_code(raw_code)
+            >>> assert 'TODO:' not in clean_code
+            >>> assert 'def example():' in clean_code
+        """
         """Clean generated code by removing markdown formatting and fixing truncation."""
         if not generated_code:
             return ""
@@ -516,6 +987,32 @@ Generate complete, syntactically valid pytest code. Return ONLY the Python code 
         return cleaned_code
     
     def _validate_python_code(self, code: str) -> bool:
+        """
+        Validate that generated Python code is syntactically correct.
+        
+        This private method performs syntax validation on generated code to ensure
+        it can be executed without Python syntax errors. It uses the built-in
+        compile() function to check syntax without actually executing the code.
+        
+        Args:
+            code: Python code string to validate for syntax correctness.
+        
+        Returns:
+            True if the code is syntactically valid Python, False otherwise.
+        
+        Note:
+            This method only checks syntax, not runtime errors or logical issues.
+            It's a fast way to catch obvious generation problems before writing
+            code to files.
+        
+        Example:
+            >>> valid_code = "def hello():\n    print('Hello')"
+            >>> invalid_code = "def hello()\n    print('Hello')"  # Missing colon
+            >>> generator._validate_python_code(valid_code)
+            True
+            >>> generator._validate_python_code(invalid_code)
+            False
+        """
         """Validate that the generated code is syntactically valid Python."""
         if not code.strip():
             return False
@@ -526,6 +1023,20 @@ Generate complete, syntactically valid pytest code. Return ONLY the Python code 
             return True
         except SyntaxError:
             return False
+    
+            
+            test_filename = f"test_{requirement.id.lower().replace('-', '_')}_integration.py"
+            test_file = test_dir / test_filename
+            
+            with open(test_file, 'w') as f:
+                f.write(test_code)
+            
+            logger.info(f"Generated integration test: {test_file}")
+            return str(test_file)
+            
+        except Exception as e:
+            logger.error(f"Failed to generate integration test for {requirement.id}: {e}")
+            return None
     
     def _generate_fallback_test(self, requirement: Requirement) -> str:
         """Generate a basic fallback test when AI generation fails."""

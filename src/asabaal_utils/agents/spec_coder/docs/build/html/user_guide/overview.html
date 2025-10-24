@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Overview &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pipeline Stages" href="pipeline.html" />
+    <link rel="prev" title="Installation Guide" href="../installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">System Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-spec-coder">What is spec-coder?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-features">Key Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ai-powered-generation">AI-Powered Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#comprehensive-pipeline">Comprehensive Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-assurance">Quality Assurance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-modules">Core Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#supporting-components">Supporting Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#use-cases">Use Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#software-development-teams">Software Development Teams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#product-teams">Product Teams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Quality Assurance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#devops-automation">DevOps &amp; Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">System Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user_guide/overview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="system-overview">
+<h1>System Overview<a class="headerlink" href="#system-overview" title="Link to this heading"></a></h1>
+<p>The spec-coder agent is a comprehensive AI-powered system for automated test generation and validation from specifications. It provides a complete pipeline from specification parsing to test execution and behavioral analysis.</p>
+<section id="what-is-spec-coder">
+<h2>What is spec-coder?<a class="headerlink" href="#what-is-spec-coder" title="Link to this heading"></a></h2>
+<p>spec-coder is an advanced AI-powered software development system that leverages Large Language Models (LLMs) to:</p>
+<ul class="simple">
+<li><p><strong>Parse Specifications</strong>: Read and understand OpenSpec and YAML specification files</p></li>
+<li><p><strong>Generate Test Scaffolds</strong>: Create comprehensive test suites to understand requirements</p></li>
+<li><p><strong>Extract Requirements</strong>: Derive logical requirements from test behaviors</p></li>
+<li><p><strong>Generate Software</strong>: Write complete, production-ready code from specifications</p></li>
+<li><p><strong>Self-Heal Code</strong>: Automatically detect and fix issues in generated code</p></li>
+<li><p><strong>Align Behaviors</strong>: Ensure generated code matches specified requirements</p></li>
+<li><p><strong>Validate Output</strong>: Run comprehensive testing before delivery</p></li>
+</ul>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<section id="ai-powered-generation">
+<h3>AI-Powered Generation<a class="headerlink" href="#ai-powered-generation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Uses state-of-the-art LLMs (Llama3, CodeLlama, Qwen3) for intelligent test generation</p></li>
+<li><p>Supports multiple AI models through Ollama integration</p></li>
+<li><p>Context-aware generation based on specification requirements</p></li>
+</ul>
+</section>
+<section id="comprehensive-pipeline">
+<h3>Comprehensive Pipeline<a class="headerlink" href="#comprehensive-pipeline" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Stage 1</strong>: Specification parsing and scaffold generation</p></li>
+<li><p><strong>Stage 2</strong>: Test generation from specifications</p></li>
+<li><p><strong>Stage 3</strong>: Test execution and validation</p></li>
+<li><p><strong>Stage 4</strong>: Behavioral analysis and alignment</p></li>
+</ul>
+</section>
+<section id="quality-assurance">
+<h3>Quality Assurance<a class="headerlink" href="#quality-assurance" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Automated test execution and validation</p></li>
+<li><p>Behavioral comparison between tests and specifications</p></li>
+<li><p>Gap analysis and coverage reporting</p></li>
+<li><p>Code healing and automatic fixes</p></li>
+</ul>
+</section>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The spec-coder system consists of several key components:</p>
+<section id="core-modules">
+<h3>Core Modules<a class="headerlink" href="#core-modules" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>SpecParser</strong>: Parses OpenSpec and YAML specification files</p></li>
+<li><p><strong>CodeGenerator</strong>: Generates pytest test files from specifications</p></li>
+<li><p><strong>Tester</strong>: Executes tests and validates functionality</p></li>
+<li><p><strong>BehavioralAligner</strong>: Aligns test behaviors with specification requirements</p></li>
+<li><p><strong>BehaviorComparator</strong>: Compares test and specification behaviors</p></li>
+<li><p><strong>Healer</strong>: Automatically fixes issues in generated code</p></li>
+<li><p><strong>IntegrationOrchestrator</strong>: Manages the complete pipeline workflow</p></li>
+</ul>
+</section>
+<section id="supporting-components">
+<h3>Supporting Components<a class="headerlink" href="#supporting-components" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>OllamaClient</strong>: Interface to AI models for code generation</p></li>
+<li><p><strong>CLI</strong>: Command-line interface for easy usage</p></li>
+<li><p><strong>Templates</strong>: Reusable templates for code generation</p></li>
+</ul>
+</section>
+</section>
+<section id="use-cases">
+<h2>Use Cases<a class="headerlink" href="#use-cases" title="Link to this heading"></a></h2>
+<section id="software-development-teams">
+<h3>Software Development Teams<a class="headerlink" href="#software-development-teams" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Rapid application development from specifications</p></li>
+<li><p>Automated feature implementation</p></li>
+<li><p>Specification-driven development</p></li>
+<li><p>Code generation for complex systems</p></li>
+</ul>
+</section>
+<section id="product-teams">
+<h3>Product Teams<a class="headerlink" href="#product-teams" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Quick prototyping from requirements</p></li>
+<li><p>Automated MVP generation</p></li>
+<li><p>Feature validation through testing</p></li>
+<li><p>Rapid iteration and development</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>Quality Assurance<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Automated code generation with built-in quality</p></li>
+<li><p>Self-healing code that fixes its own issues</p></li>
+<li><p>Comprehensive test coverage</p></li>
+<li><p>Requirement validation and compliance</p></li>
+</ul>
+</section>
+<section id="devops-automation">
+<h3>DevOps &amp; Automation<a class="headerlink" href="#devops-automation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>CI/CD pipeline integration</p></li>
+<li><p>Automated deployment from specs</p></li>
+<li><p>Infrastructure as code generation</p></li>
+<li><p>Automated testing and healing</p></li>
+</ul>
+</section>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>To start using spec-coder:</p>
+<ol class="arabic simple">
+<li><p><strong>Install Dependencies</strong>: See <a class="reference internal" href="../installation.html"><span class="doc">Installation Guide</span></a></p></li>
+<li><p><strong>Create Specification</strong>: Write your OpenSpec or YAML specification</p></li>
+<li><p><strong>Run Pipeline</strong>: Use the CLI or orchestrator to generate tests</p></li>
+<li><p><strong>Review Results</strong>: Analyze generated tests and coverage reports</p></li>
+</ol>
+<p>For detailed instructions, see <a class="reference internal" href="../getting_started.html"><span class="doc">Getting Started</span></a>.</p>
+</section>
+<section id="example-workflow">
+<h2>Example Workflow<a class="headerlink" href="#example-workflow" title="Link to this heading"></a></h2>
+<p>Here’s a typical workflow with spec-coder:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="c1"># Create orchestrator instance</span>
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+
+<span class="c1"># Run complete pipeline</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;my_application_spec.yml&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_code&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Check results</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="si">}</span><span class="s2"> functions&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Code quality: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">quality_score</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All tests passing: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">all_tests_passed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipeline failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This single command:</p>
+<ol class="arabic simple">
+<li><p>Parses your specification</p></li>
+<li><p>Generates comprehensive test scaffolds</p></li>
+<li><p>Extracts requirements from tests</p></li>
+<li><p>Aligns behaviors and identifies gaps</p></li>
+<li><p>Generates the complete software application</p></li>
+<li><p>Runs tests and self-heals any issues</p></li>
+<li><p>Delivers production-ready code</p></li>
+</ol>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../getting_started.html"><span class="doc">Getting Started</span></a> - Quick start guide</p></li>
+<li><p><a class="reference internal" href="pipeline.html"><span class="doc">Pipeline Stages</span></a> - Detailed pipeline documentation</p></li>
+<li><p><a class="reference internal" href="configuration.html"><span class="doc">Configuration Guide</span></a> - Configuration options</p></li>
+<li><p><a class="reference internal" href="../api/modules.html"><span class="doc">API Reference</span></a> - API reference</p></li>
+<li><p><a class="reference internal" href="../testing/overview.html"><span class="doc">Testing Strategy Overview</span></a> - Testing strategy</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../installation.html" class="btn btn-neutral float-left" title="Installation Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipeline.html" class="btn btn-neutral float-right" title="Pipeline Stages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

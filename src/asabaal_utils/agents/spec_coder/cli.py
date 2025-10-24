@@ -16,15 +16,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 try:
     # Try relative imports first (when installed as package)
     from .generator import CodeGenerator
-    from .tester import TestAnalyzer  
-    from .healer import Healer
+    from .tester import AnalysisEngine  
+    from .healer.heal import Healer
     from .organizer import CodeOrganizer
     from .orchestrator import IntegrationOrchestrator
 except ImportError:
     # Fall back to absolute imports (when running directly)
     from generator import CodeGenerator
-    from tester import TestAnalyzer  
-    from healer import Healer
+    from tester import AnalysisEngine  
+    from healer.heal import Healer
     from organizer import CodeOrganizer
     from orchestrator import IntegrationOrchestrator
 
@@ -82,7 +82,7 @@ def cmd_test(args):
     setup_logging(args.verbose)
     
     try:
-        tester = TestAnalyzer()
+        tester = AnalysisEngine()
         print("🧪 Running automated tests...")
         success = tester.run_tests()
         

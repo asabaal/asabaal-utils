@@ -248,8 +248,15 @@ def save_catalog(catalog: Dict[str, Any], output_file: Path):
 
 def main():
     """Main catalog building process."""
-    aggregated_file = Path("logic_catalog/aggregated_behaviors.json")
-    output_file = Path("logic_catalog/functional_catalog.yaml")
+    import os
+    
+    # Use BASE_DIR environment variable if set, otherwise use current directory
+    base_dir = Path(os.environ.get('BASE_DIR', Path.cwd()))
+    logic_catalog_dir = Path(os.environ.get('OUTPUT_DIR', base_dir / "logic_catalog"))
+    logic_catalog_dir.mkdir(parents=True, exist_ok=True)
+    
+    aggregated_file = logic_catalog_dir / "aggregated_behaviors.json"
+    output_file = logic_catalog_dir / "functional_catalog.yaml"
     
     print("=== Building Functional Logic Catalog ===")
     

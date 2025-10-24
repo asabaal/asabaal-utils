@@ -1,0 +1,815 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage Examples &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api/modules.html" />
+    <link rel="prev" title="Configuration Guide" href="configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#software-generation-from-specification">Software Generation from Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-model-configuration">Custom Model Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#individual-component-usage">Individual Component Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-codegenerator-directly">Using CodeGenerator Directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#behavior-analysis-only">Behavior Analysis Only</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-examples">Advanced Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-pipeline-configuration">Custom Pipeline Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#batch-processing">Batch Processing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#real-world-scenarios">Real-World Scenarios</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#web-api-testing">Web API Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-processing-pipeline">Data Processing Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-examples">Error Handling Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#robust-error-handling">Robust Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#partial-success-handling">Partial Success Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-examples">Integration Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ci-cd-integration">CI/CD Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#github-actions-example">GitHub Actions Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-optimization">Performance Optimization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#caching-results">Caching Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-processing">Parallel Processing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user_guide/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage-examples">
+<h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h1>
+<p>This section provides practical examples of using the spec-coder agent for various scenarios and use cases.</p>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<section id="software-generation-from-specification">
+<h3>Software Generation from Specification<a class="headerlink" href="#software-generation-from-specification" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="c1"># Basic usage with default configuration</span>
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;calculator_spec.yml&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_code&quot;</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="si">}</span><span class="s2"> functions&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Code quality: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">quality_score</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All tests passing: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">all_tests_passed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-model-configuration">
+<h3>Custom Model Configuration<a class="headerlink" href="#custom-model-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="c1"># Use a specific AI model for code generation</span>
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;api_spec.yml&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_api&quot;</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;api_spec.yml&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./api_tests&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="individual-component-usage">
+<h2>Individual Component Usage<a class="headerlink" href="#individual-component-usage" title="Link to this heading"></a></h2>
+<section id="using-codegenerator-directly">
+<h3>Using CodeGenerator Directly<a class="headerlink" href="#using-codegenerator-directly" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span><span class="p">,</span> <span class="n">SpecParser</span>
+
+<span class="c1"># Parse specification</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span>
+<span class="n">spec_data</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;my_feature_spec.yml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Generate software code</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama3&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span>
+    <span class="n">spec_data</span><span class="o">=</span><span class="n">spec_data</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_feature&quot;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">)</span><span class="si">}</span><span class="s2"> code files&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Functions created: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Classes created: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">classes_created</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tests generated: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">tests_generated</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="behavior-analysis-only">
+<h3>Behavior Analysis Only<a class="headerlink" href="#behavior-analysis-only" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">BehaviorComparator</span><span class="p">,</span> <span class="n">SpecParser</span>
+
+<span class="c1"># Load specification and existing tests</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;feature_spec.yml&quot;</span><span class="p">)</span>
+
+<span class="n">comparator</span> <span class="o">=</span> <span class="n">BehaviorComparator</span><span class="p">()</span>
+
+<span class="c1"># Analyze existing test behaviors</span>
+<span class="n">test_behaviors</span> <span class="o">=</span> <span class="n">comparator</span><span class="o">.</span><span class="n">load_test_behaviors</span><span class="p">(</span>
+    <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;test_analysis.json&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Compare with specification</span>
+<span class="n">comparison_result</span> <span class="o">=</span> <span class="n">comparator</span><span class="o">.</span><span class="n">compare_all_requirements</span><span class="p">(</span>
+    <span class="n">spec</span><span class="p">,</span> <span class="n">test_behaviors</span>
+<span class="p">)</span>
+
+<span class="c1"># Generate report</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">comparator</span><span class="o">.</span><span class="n">generate_summary_report</span><span class="p">(</span><span class="n">comparison_result</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average alignment: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;average_alignment_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Critical gaps: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;requirements_with_critical_issues&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-examples">
+<h2>Advanced Examples<a class="headerlink" href="#advanced-examples" title="Link to this heading"></a></h2>
+<section id="custom-pipeline-configuration">
+<h3>Custom Pipeline Configuration<a class="headerlink" href="#custom-pipeline-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="c1"># Advanced configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generation_config&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="mi">4096</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;pipeline&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;max_retries&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s2">&quot;parallel_stages&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;continue_on_error&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;stages&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;stage2&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;generate_edge_cases&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;include_performance_tests&quot;</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;stage4&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;analysis_depth&quot;</span><span class="p">:</span> <span class="s2">&quot;comprehensive&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+ <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+     <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;complex_feature_spec.yml&quot;</span><span class="p">,</span>
+     <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./comprehensive_code&quot;</span>
+ <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="batch-processing">
+<h3>Batch Processing<a class="headerlink" href="#batch-processing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Process multiple specifications</span>
+<span class="n">spec_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;specs/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yml&quot;</span><span class="p">))</span>
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">spec_file</span> <span class="ow">in</span> <span class="n">spec_files</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="n">spec_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+
+     <span class="n">output_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;./generated_code/</span><span class="si">{</span><span class="n">spec_file</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">&quot;</span>
+     <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+         <span class="n">spec_file</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">spec_file</span><span class="p">),</span>
+         <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span>
+     <span class="p">)</span>
+
+     <span class="n">results</span><span class="p">[</span><span class="n">spec_file</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+
+     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ Generated </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="si">}</span><span class="s2"> functions&quot;</span><span class="p">)</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ Code quality: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">quality_score</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+     <span class="k">else</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✗ Failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Summary</span>
+<span class="n">successful</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">success</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Processed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spec_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> specs, </span><span class="si">{</span><span class="n">successful</span><span class="si">}</span><span class="s2"> successful&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="real-world-scenarios">
+<h2>Real-World Scenarios<a class="headerlink" href="#real-world-scenarios" title="Link to this heading"></a></h2>
+<section id="web-api-testing">
+<h3>Web API Testing<a class="headerlink" href="#web-api-testing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="c1"># API specification example</span>
+<span class="n">api_spec</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">project_name: &quot;User Management API&quot;</span>
+<span class="s2">functions:</span>
+<span class="s2">  - name: &quot;create_user&quot;</span>
+<span class="s2">    description: &quot;Create a new user account&quot;</span>
+<span class="s2">    parameters:</span>
+<span class="s2">      - name: &quot;email&quot;</span>
+<span class="s2">        type: &quot;string&quot;</span>
+<span class="s2">        validation: &quot;email format&quot;</span>
+<span class="s2">      - name: &quot;password&quot;</span>
+<span class="s2">        type: &quot;string&quot;</span>
+<span class="s2">        validation: &quot;min 8 characters&quot;</span>
+<span class="s2">    return_type: &quot;User object&quot;</span>
+<span class="s2">    behaviors:</span>
+<span class="s2">      - &quot;Validates email format&quot;</span>
+<span class="s2">      - &quot;Hashes password&quot;</span>
+<span class="s2">      - &quot;Returns user ID&quot;</span>
+<span class="s2">      - &quot;Handles duplicate emails&quot;</span>
+
+<span class="s2">  - name: &quot;authenticate_user&quot;</span>
+<span class="s2">    description: &quot;Authenticate user credentials&quot;</span>
+<span class="s2">    parameters:</span>
+<span class="s2">      - name: &quot;email&quot;</span>
+<span class="s2">        type: &quot;string&quot;</span>
+<span class="s2">      - name: &quot;password&quot;</span>
+<span class="s2">        type: &quot;string&quot;</span>
+<span class="s2">    return_type: &quot;Auth token&quot;</span>
+<span class="s2">    behaviors:</span>
+<span class="s2">      - &quot;Validates credentials&quot;</span>
+<span class="s2">      - &quot;Returns JWT token&quot;</span>
+<span class="s2">      - &quot;Handles invalid credentials&quot;</span>
+<span class="s2">      - &quot;Handles account lockout&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1"># Save spec to file</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;user_api_spec.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">api_spec</span><span class="p">)</span>
+
+ <span class="c1"># Generate comprehensive API implementation</span>
+ <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span>
+     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+     <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+         <span class="s2">&quot;stages&quot;</span><span class="p">:</span> <span class="p">{</span>
+             <span class="s2">&quot;stage2&quot;</span><span class="p">:</span> <span class="p">{</span>
+                 <span class="s2">&quot;include_integration_tests&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="s2">&quot;include_security_tests&quot;</span><span class="p">:</span> <span class="kc">True</span>
+             <span class="p">},</span>
+             <span class="s2">&quot;stage4&quot;</span><span class="p">:</span> <span class="p">{</span>
+                 <span class="s2">&quot;code_style&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;include_error_handling&quot;</span><span class="p">:</span> <span class="kc">True</span>
+             <span class="p">},</span>
+             <span class="s2">&quot;stage5&quot;</span><span class="p">:</span> <span class="p">{</span>
+                 <span class="s2">&quot;auto_heal&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="s2">&quot;max_heal_attempts&quot;</span><span class="p">:</span> <span class="mi">3</span>
+             <span class="p">}</span>
+         <span class="p">}</span>
+     <span class="p">}</span>
+ <span class="p">)</span>
+
+ <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+     <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;user_api_spec.yml&quot;</span><span class="p">,</span>
+     <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_api&quot;</span>
+ <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="data-processing-pipeline">
+<h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="c1"># Data processing specification</span>
+<span class="n">data_spec</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">project_name: &quot;Data Processing Pipeline&quot;</span>
+<span class="s2">functions:</span>
+<span class="s2">  - name: &quot;process_csv_file&quot;</span>
+<span class="s2">    description: &quot;Process CSV data file&quot;</span>
+<span class="s2">    parameters:</span>
+<span class="s2">      - name: &quot;file_path&quot;</span>
+<span class="s2">        type: &quot;string&quot;</span>
+<span class="s2">      - name: &quot;operations&quot;</span>
+<span class="s2">        type: &quot;list of operations&quot;</span>
+<span class="s2">    return_type: &quot;Processed data&quot;</span>
+<span class="s2">    behaviors:</span>
+<span class="s2">      - &quot;Validates file format&quot;</span>
+<span class="s2">      - &quot;Handles missing data&quot;</span>
+<span class="s2">      - &quot;Applies transformations&quot;</span>
+<span class="s2">      - &quot;Handles large files&quot;</span>
+<span class="s2">      - &quot;Logs processing steps&quot;</span>
+
+<span class="s2">  - name: &quot;validate_data_quality&quot;</span>
+<span class="s2">    description: &quot;Validate processed data quality&quot;</span>
+<span class="s2">    parameters:</span>
+<span class="s2">      - name: &quot;data&quot;</span>
+<span class="s2">        type: &quot;DataFrame&quot;</span>
+<span class="s2">      - name: &quot;quality_rules&quot;</span>
+<span class="s2">        type: &quot;validation rules&quot;</span>
+<span class="s2">    return_type: &quot;Quality report&quot;</span>
+<span class="s2">    behaviors:</span>
+<span class="s2">      - &quot;Checks data completeness&quot;</span>
+<span class="s2">      - &quot;Validates data types&quot;</span>
+<span class="s2">      - &quot;Detects outliers&quot;</span>
+<span class="s2">      - &quot;Generates quality metrics&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama3&quot;</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;stages&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;stage2&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;include_performance_tests&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;include_edge_case_tests&quot;</span><span class="p">:</span> <span class="kc">True</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+ <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+     <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;data_pipeline_spec.yml&quot;</span><span class="p">,</span>
+     <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_data_pipeline&quot;</span>
+ <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling-examples">
+<h2>Error Handling Examples<a class="headerlink" href="#error-handling-examples" title="Link to this heading"></a></h2>
+<section id="robust-error-handling">
+<h3>Robust Error Handling<a class="headerlink" href="#robust-error-handling" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">safe_pipeline_execution</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute pipeline with robust error handling.&quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span>
+                <span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">continue_on_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">fallback_models</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;llama2&quot;</span><span class="p">,</span> <span class="s2">&quot;llama3&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+                <span class="n">spec_file</span><span class="o">=</span><span class="n">spec_file</span><span class="p">,</span>
+                <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully processed </span><span class="si">{</span><span class="n">spec_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to process </span><span class="si">{</span><span class="n">spec_file</span><span class="si">}</span><span class="s2"> after </span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2"> attempts&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="c1"># Usage</span>
+<span class="k">try</span><span class="p">:</span>
+     <span class="n">result</span> <span class="o">=</span> <span class="n">safe_pipeline_execution</span><span class="p">(</span>
+         <span class="s2">&quot;complex_spec.yml&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;./generated_robust_code&quot;</span>
+     <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipeline failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Implement fallback logic</span>
+</pre></div>
+</div>
+</section>
+<section id="partial-success-handling">
+<h3>Partial Success Handling<a class="headerlink" href="#partial-success-handling" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span><span class="n">continue_on_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+ <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+     <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;problematic_spec.yml&quot;</span><span class="p">,</span>
+     <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./partial_generated_code&quot;</span>
+ <span class="p">)</span>
+
+<span class="c1"># Handle partial success</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Complete success!&quot;</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">result</span><span class="o">.</span><span class="n">partial_success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Partial success: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">successful_stages</span><span class="si">}</span><span class="s2">/4 stages completed&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check which stages succeeded</span>
+    <span class="k">for</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">stage_result</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stage_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">stage_result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✗ </span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">stage_result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Complete failure: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-examples">
+<h2>Integration Examples<a class="headerlink" href="#integration-examples" title="Link to this heading"></a></h2>
+<section id="ci-cd-integration">
+<h3>CI/CD Integration<a class="headerlink" href="#ci-cd-integration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ci_test_generation.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+     <span class="n">spec_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SPEC_FILE&quot;</span><span class="p">)</span>
+     <span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;OUTPUT_DIR&quot;</span><span class="p">,</span> <span class="s2">&quot;./generated_code&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">spec_file</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: SPEC_FILE environment variable required&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MODEL&quot;</span><span class="p">,</span> <span class="s2">&quot;llama3&quot;</span><span class="p">),</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TIMEOUT&quot;</span><span class="p">,</span> <span class="s2">&quot;300&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+        <span class="n">spec_file</span><span class="o">=</span><span class="n">spec_file</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span>
+    <span class="p">)</span>
+
+     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Generated </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="si">}</span><span class="s2"> functions&quot;</span><span class="p">)</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Code quality: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">quality_score</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ All tests passing: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">all_tests_passed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+     <span class="k">else</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✗ Failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="github-actions-example">
+<h3>GitHub Actions Example<a class="headerlink" href="#github-actions-example" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1"># .github/workflows/generate-code.yml</span>
+<span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Generate Code from Specifications</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;specs/**/*.yml&#39;</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;specs/**/*.yml&#39;</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">generate-tests</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+<span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v4</span>
+<span class="w">      </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.11&#39;</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">pip install spec-coder</span>
+<span class="w">        </span><span class="no">pip install ollama</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Start Ollama</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">ollama serve &amp;</span>
+<span class="w">        </span><span class="no">sleep 10</span>
+<span class="w">        </span><span class="no">ollama pull llama3</span>
+
+<span class="w">    </span><span class="w w-Error"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Generate code</span>
+<span class="w">       </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">         </span><span class="nt">SPEC_FILE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">specs/api/user_management.yml</span>
+<span class="w">         </span><span class="nt">OUTPUT_DIR</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generated_code</span>
+<span class="w">         </span><span class="nt">MODEL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">llama3</span>
+<span class="w">       </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python ci_code_generation.py</span>
+
+<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run generated tests</span>
+<span class="w">       </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">         </span><span class="no">pip install pytest</span>
+<span class="w">         </span><span class="no">pytest generated_code/tests/ -v</span>
+
+<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload generated code</span>
+<span class="w">       </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v3</span>
+<span class="w">       </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generated-code</span>
+<span class="w">         </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generated_code/</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-optimization">
+<h2>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h2>
+<section id="caching-results">
+<h3>Caching Results<a class="headerlink" href="#caching-results" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CachedOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="s2">&quot;./cache&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_cache_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate cache key based on spec content and config.&quot;&quot;&quot;</span>
+        <span class="n">spec_content</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">spec_file</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">spec_content</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_pipeline_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run pipeline with caching.&quot;&quot;&quot;</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_key</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">config</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="n">cache_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="s2">.json&quot;</span>
+
+        <span class="c1"># Check cache</span>
+        <span class="k">if</span> <span class="n">cache_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading from cache: </span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">cached_result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">cache_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">cached_result</span>
+
+        <span class="c1"># Run pipeline</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+            <span class="n">spec_file</span><span class="o">=</span><span class="n">spec_file</span><span class="p">,</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span>
+        <span class="p">)</span>
+
+         <span class="c1"># Cache result</span>
+         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+             <span class="n">cache_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span>
+                 <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="s1">&#39;functions_created&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">functions_created</span><span class="p">,</span>
+                 <span class="s1">&#39;quality_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">quality_score</span><span class="p">,</span>
+                 <span class="s1">&#39;all_tests_passed&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">all_tests_passed</span><span class="p">,</span>
+                 <span class="s1">&#39;execution_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">execution_time</span>
+             <span class="p">}))</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+ <span class="c1"># Usage</span>
+ <span class="n">cached_orchestrator</span> <span class="o">=</span> <span class="n">CachedOrchestrator</span><span class="p">()</span>
+ <span class="n">result</span> <span class="o">=</span> <span class="n">cached_orchestrator</span><span class="o">.</span><span class="n">run_pipeline_cached</span><span class="p">(</span>
+     <span class="s2">&quot;api_spec.yml&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;./cached_generated_code&quot;</span>
+ <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="parallel-processing">
+<h3>Parallel Processing<a class="headerlink" href="#parallel-processing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span><span class="p">,</span> <span class="n">as_completed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">process_specification</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_base_dir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process a single specification.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">output_base_dir</span> <span class="o">/</span> <span class="n">spec_file</span><span class="o">.</span><span class="n">stem</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+            <span class="n">spec_file</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">spec_file</span><span class="p">),</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="p">)</span>
+
+         <span class="k">return</span> <span class="p">{</span>
+             <span class="s1">&#39;spec_file&#39;</span><span class="p">:</span> <span class="n">spec_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+             <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">,</span>
+             <span class="s1">&#39;functions_created&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;functions_created&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="s1">&#39;quality_score&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;quality_score&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+         <span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;spec_file&#39;</span><span class="p">:</span> <span class="n">spec_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">batch_process_specifications</span><span class="p">(</span><span class="n">spec_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process multiple specifications in parallel.&quot;&quot;&quot;</span>
+    <span class="n">spec_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">spec_dir</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yml&quot;</span><span class="p">))</span>
+    <span class="n">output_base_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">output_base_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="c1"># Submit all jobs</span>
+        <span class="n">future_to_spec</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">process_specification</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">,</span> <span class="n">output_base_dir</span><span class="p">):</span> <span class="n">spec_file</span>
+            <span class="k">for</span> <span class="n">spec_file</span> <span class="ow">in</span> <span class="n">spec_files</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Collect results</span>
+        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">as_completed</span><span class="p">(</span><span class="n">future_to_spec</span><span class="p">):</span>
+            <span class="n">spec_file</span> <span class="o">=</span> <span class="n">future_to_spec</span><span class="p">[</span><span class="n">future</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+                <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;✓&quot;</span> <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;✗&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;spec_file&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✗ </span><span class="si">{</span><span class="n">spec_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+
+ <span class="c1"># Usage</span>
+ <span class="n">results</span> <span class="o">=</span> <span class="n">batch_process_specifications</span><span class="p">(</span>
+     <span class="s2">&quot;./specs&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;./parallel_generated_code&quot;</span><span class="p">,</span>
+     <span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span>
+ <span class="p">)</span>
+
+<span class="n">successful</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Processed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> specs, </span><span class="si">{</span><span class="n">successful</span><span class="si">}</span><span class="s2"> successful&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../getting_started.html"><span class="doc">Getting Started</span></a> - Basic setup and quick start</p></li>
+<li><p><a class="reference internal" href="configuration.html"><span class="doc">Configuration Guide</span></a> - Detailed configuration options</p></li>
+<li><p><a class="reference internal" href="../api/modules.html"><span class="doc">API Reference</span></a> - Complete API reference</p></li>
+<li><p><a class="reference internal" href="../testing/overview.html"><span class="doc">Testing Strategy Overview</span></a> - Testing strategies and best practices</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/modules.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

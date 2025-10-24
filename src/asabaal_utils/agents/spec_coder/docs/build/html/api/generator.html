@@ -1,0 +1,444 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeGenerator API &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IntegrationOrchestrator API" href="orchestrator.html" />
+    <link rel="prev" title="API Reference" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CodeGenerator API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core-methods">Core Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generate-tests">generate_tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strip-markdown-code-blocks">_strip_markdown_code_blocks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asabaal_utils.agents.spec_coder.generator.CodeGenerator._strip_markdown_code_blocks"><code class="docutils literal notranslate"><span class="pre">CodeGenerator._strip_markdown_code_blocks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generationresult-class">GenerationResult Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-usage">Advanced Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tips">Performance Tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API Reference</a></li>
+      <li class="breadcrumb-item active">CodeGenerator API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/generator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="codegenerator-api">
+<h1>CodeGenerator API<a class="headerlink" href="#codegenerator-api" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">CodeGenerator</span></code> class is responsible for generating comprehensive test suites from specifications.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asabaal_utils.agents.spec_coder.generator.</span></span><span class="sig-name descname"><span class="pre">CodeGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/generator.html#CodeGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Main generator class that orchestrates the code generation process.</p>
+<p>Initialize the generator with configuration.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/generator.html#CodeGenerator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Initialize the generator with configuration.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">generate_from_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/generator.html#CodeGenerator.generate_from_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Generate complete implementation from an OpenSpec specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="modules.html#asabaal_utils.agents.spec_coder.generator.GenerationResult" title="asabaal_utils.agents.spec_coder.generator.GenerationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenerationResult</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="core-methods">
+<h2>Core Methods<a class="headerlink" href="#core-methods" title="Link to this heading"></a></h2>
+<section id="generate-tests">
+<h3>generate_tests<a class="headerlink" href="#generate-tests" title="Link to this heading"></a></h3>
+<p>Generates pytest test files from a specification. This is the main entry point for test generation.</p>
+<p><strong>Parameters:</strong>
+- <code class="docutils literal notranslate"><span class="pre">spec_data</span></code> (dict): The specification data containing function definitions
+- <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> (Path): Directory where test files will be saved
+- <code class="docutils literal notranslate"><span class="pre">model</span></code> (str, optional): AI model to use for generation</p>
+<p><strong>Returns:</strong>
+- <code class="docutils literal notranslate"><span class="pre">GenerationResult</span></code>: Object containing generation results and metadata</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span>
+
+<span class="c1"># Parse specification</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span>
+<span class="n">spec_data</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;my_spec.yml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Generate tests</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span><span class="n">spec_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./tests&quot;</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="si">}</span><span class="s2"> test files&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generation failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="strip-markdown-code-blocks">
+<h3>_strip_markdown_code_blocks<a class="headerlink" href="#strip-markdown-code-blocks" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.generator.CodeGenerator._strip_markdown_code_blocks">
+<span class="sig-prename descclassname"><span class="pre">CodeGenerator.</span></span><span class="sig-name descname"><span class="pre">_strip_markdown_code_blocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/generator.html#CodeGenerator._strip_markdown_code_blocks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.generator.CodeGenerator._strip_markdown_code_blocks" title="Link to this definition"></a></dt>
+<dd><p>Strip markdown code block formatting and other non-Python content from generated content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Cleans AI-generated content by removing instructional text and fixing indentation issues. This method is crucial for handling the IndentationError that was previously encountered in Stage 2.</p>
+<p><strong>Parameters:</strong>
+- <code class="docutils literal notranslate"><span class="pre">content</span></code> (str): Raw content from AI generation</p>
+<p><strong>Returns:</strong>
+- <code class="docutils literal notranslate"><span class="pre">str</span></code>: Cleaned Python code</p>
+<p><strong>Features:</strong>
+- Removes instructional text like “pytest test code only”
+- Fixes indentation issues
+- Preserves valid Python code structure
+- Handles various AI response formats</p>
+</section>
+</section>
+<section id="generationresult-class">
+<h2>GenerationResult Class<a class="headerlink" href="#generationresult-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asabaal_utils.agents.spec_coder.generator.</span></span><span class="sig-name descname"><span class="pre">GenerationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_generated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warnings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/generator.html#GenerationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Result of a generation operation.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">success</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">files_generated</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">errors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">warnings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">execution_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></em></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_generated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warnings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_time</span></span></em><span class="sig-paren">)</span></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>The CodeGenerator can be configured through:</p>
+<ol class="arabic simple">
+<li><p><strong>Constructor parameters</strong>:
+- <code class="docutils literal notranslate"><span class="pre">model</span></code>: AI model to use
+- <code class="docutils literal notranslate"><span class="pre">base_url</span></code>: Ollama server URL
+- <code class="docutils literal notranslate"><span class="pre">timeout</span></code>: Request timeout</p></li>
+<li><p><strong>Environment variables</strong>:
+- <code class="docutils literal notranslate"><span class="pre">SPEC_CODER_MODEL</span></code>: Default AI model
+- <code class="docutils literal notranslate"><span class="pre">SPEC_CODER_OLLAMA_URL</span></code>: Ollama server URL</p></li>
+</ol>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<p>The CodeGenerator handles various error scenarios:</p>
+<ul class="simple">
+<li><p><strong>Network errors</strong>: Automatic retry with exponential backoff</p></li>
+<li><p><strong>Model errors</strong>: Fallback to alternative models</p></li>
+<li><p><strong>Content errors</strong>: Cleaning and validation of generated content</p></li>
+<li><p><strong>File system errors</strong>: Proper error reporting and recovery</p></li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama3&quot;</span><span class="p">)</span>
+
+<span class="n">spec_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;project_name&quot;</span><span class="p">:</span> <span class="s2">&quot;My Project&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;functions&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Adds two numbers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;return_type&quot;</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;behaviors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Returns a + b&quot;</span><span class="p">,</span> <span class="s2">&quot;Handles positive numbers&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span><span class="n">spec_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./tests&quot;</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">test_file</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created: </span><span class="si">{</span><span class="n">test_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="advanced-usage">
+<h3>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span>
+
+<span class="c1"># Custom configuration</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span>
+<span class="p">)</span>
+
+<span class="c1"># Generate with custom prompt template</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span>
+    <span class="n">spec_data</span><span class="p">,</span>
+    <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./tests&quot;</span><span class="p">),</span>
+    <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;custom_test_template&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Handle results</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Success: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">execution_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">retry_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retried </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">retry_count</span><span class="si">}</span><span class="s2"> times&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Specification Quality</strong>: Ensure your specifications are detailed and accurate</p></li>
+<li><p><strong>Error Handling</strong>: Always check <code class="docutils literal notranslate"><span class="pre">result.success</span></code> before using generated files</p></li>
+<li><p><strong>File Management</strong>: Use unique output directories for different specifications</p></li>
+<li><p><strong>Model Selection</strong>: Choose appropriate models for your use case:
+- <code class="docutils literal notranslate"><span class="pre">llama3</span></code>: General purpose
+- <code class="docutils literal notranslate"><span class="pre">codellama</span></code>: Code-specific tasks
+- <code class="docutils literal notranslate"><span class="pre">llama2</span></code>: Lightweight option</p></li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: Generated tests have syntax errors</p>
+<p><strong>Solution</strong>: The <code class="docutils literal notranslate"><span class="pre">_strip_markdown_code_blocks</span></code> method should handle this automatically. If issues persist:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Manually clean content</span>
+<span class="n">cleaned</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">_strip_markdown_code_blocks</span><span class="p">(</span><span class="n">raw_content</span><span class="p">)</span>
+
+<span class="c1"># Validate Python syntax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Content is valid Python&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Syntax error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Issue</strong>: Generation is very slow</p>
+<p><strong>Solution</strong>:
+- Use a faster model (llama2 instead of llama3)
+- Reduce specification complexity
+- Check network connectivity to Ollama server</p>
+<p><strong>Issue</strong>: Out of memory errors</p>
+<p><strong>Solution</strong>:
+- Use smaller models
+- Process functions individually
+- Increase system RAM or use cloud-based solutions</p>
+</section>
+</section>
+<section id="performance-tips">
+<h2>Performance Tips<a class="headerlink" href="#performance-tips" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Model Selection</strong>: Use <code class="docutils literal notranslate"><span class="pre">llama2</span></code> for faster generation, <code class="docutils literal notranslate"><span class="pre">llama3</span></code> for better quality</p></li>
+<li><p><strong>Batch Processing</strong>: Generate multiple functions in a single request when possible</p></li>
+<li><p><strong>Caching</strong>: Cache results for repeated specifications</p></li>
+<li><p><strong>Parallel Processing</strong>: Use multiple generator instances for large projects</p></li>
+</ol>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="orchestrator.html"><span class="doc">IntegrationOrchestrator API</span></a> - Pipeline orchestration</p></li>
+<li><p><a class="reference internal" href="tester.html"><span class="doc">Tester API</span></a> - Test execution and validation</p></li>
+<li><p><a class="reference internal" href="spec_parser.html"><span class="doc">SpecParser API</span></a> - Specification parsing</p></li>
+<li><p><a class="reference internal" href="ollama_client.html"><span class="doc">OllamaClient API</span></a> - AI model interface</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="orchestrator.html" class="btn btn-neutral float-right" title="IntegrationOrchestrator API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

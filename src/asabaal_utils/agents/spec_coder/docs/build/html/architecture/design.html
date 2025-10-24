@@ -1,0 +1,605 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Design &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Workflow Documentation" href="workflow.html" />
+    <link rel="prev" title="Testing Strategy Overview" href="../testing/overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">System Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#design-principles">Design Principles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-values">Core Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#architectural-patterns">Architectural Patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#system-architecture">System Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-architecture">High-Level Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interactions">Component Interactions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#core-components">Core Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#integrationorchestrator">IntegrationOrchestrator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-stages">Pipeline Stages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ai-model-integration">AI Model Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-management">Configuration Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-models">Data Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pipelinecontext">PipelineContext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stageresult">StageResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specification-models">Specification Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quality-assurance">Quality Assurance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#built-in-quality-checks">Built-in Quality Checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#self-healing-mechanisms">Self-Healing Mechanisms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalability">Scalability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optimization-strategies">Optimization Strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-considerations">Security Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input-validation">Input Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output-security">Output Security</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#extensibility">Extensibility</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api-extensions">API Extensions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">System Design</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/architecture/design.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="system-design">
+<h1>System Design<a class="headerlink" href="#system-design" title="Link to this heading"></a></h1>
+<p>The spec-coder agent is designed as a modular, extensible system for automated software generation from specifications. This document outlines the core design principles, architectural patterns, and system components.</p>
+<section id="design-principles">
+<h2>Design Principles<a class="headerlink" href="#design-principles" title="Link to this heading"></a></h2>
+<section id="core-values">
+<h3>Core Values<a class="headerlink" href="#core-values" title="Link to this heading"></a></h3>
+<p><strong>AI-First Architecture</strong>
+- Leverages Large Language Models (LLMs) as the primary engine for code generation
+- Uses multiple specialized AI models for different tasks
+- Implements intelligent fallback and error recovery mechanisms</p>
+<p><strong>Pipeline-Driven Processing</strong>
+- Modular pipeline stages that can be executed independently
+- Each stage has well-defined inputs and outputs
+- Supports parallel processing where possible</p>
+<p><strong>Quality by Design</strong>
+- Built-in testing and validation at every stage
+- Self-healing capabilities to automatically fix issues
+- Comprehensive error handling and recovery</p>
+<p><strong>Extensibility and Modularity</strong>
+- Plugin-based architecture for easy extension
+- Clear separation of concerns
+- Configurable components and behaviors</p>
+</section>
+<section id="architectural-patterns">
+<h3>Architectural Patterns<a class="headerlink" href="#architectural-patterns" title="Link to this heading"></a></h3>
+<p><strong>Pipeline Pattern</strong>
+The system uses a pipeline pattern where data flows through a series of processing stages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Specification → Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 5 → Generated Software
+</pre></div>
+</div>
+<p>Each stage:
+- Has a single responsibility
+- Can be configured independently
+- Produces well-defined output for the next stage
+- Includes error handling and validation</p>
+<p><strong>Strategy Pattern</strong>
+Different AI models and generation strategies can be selected at runtime:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Different strategies for different needs</span>
+<span class="n">strategies</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="s2">&quot;llama2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="s2">&quot;codellama&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;balance&quot;</span><span class="p">:</span> <span class="s2">&quot;llama3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;advanced&quot;</span><span class="p">:</span> <span class="s2">&quot;qwen3-coder&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Observer Pattern</strong>
+Components can observe and react to pipeline events:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PipelineObserver</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_stage_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_stage_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Factory Pattern</strong>
+Components are created through factories to ensure proper configuration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ComponentFactory</span><span class="p">:</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_generator</span><span class="p">(</span><span class="n">model_type</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;codellama&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CodeLlamaGenerator</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;llama3&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Llama3Generator</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="c1"># ... other models</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="system-architecture">
+<h2>System Architecture<a class="headerlink" href="#system-architecture" title="Link to this heading"></a></h2>
+<section id="high-level-architecture">
+<h3>High-Level Architecture<a class="headerlink" href="#high-level-architecture" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────────────────────────┐
+│                    spec-coder System                        │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │    CLI      │  │   Config    │  │    Logging          │  │
+│  │  Interface  │  │  Manager    │  │    System           │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│                Integration Orchestrator                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Pipeline  │  │   Error     │  │    State            │  │
+│  │  Manager    │  │  Handler    │  │   Management        │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│                      Pipeline Stages                        │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌───────┐ │
+│  │ Stage 1 │ │ Stage 2 │ │ Stage 3 │ │ Stage 4 │ │Stage 5│ │
+│  │Spec→Test│ │Test→Req │ │Req→Align│ │Align→Code│ │Healer │ │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └───────┘ │
+├─────────────────────────────────────────────────────────────┤
+│                    Core Components                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │  SpecParser │  │CodeGenerator│  │   BehaviorAnalyzer  │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │    Tester   │  │   Healer    │  │  TemplateEngine     │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│                   External Services                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Ollama    │  │  File System│  │    Test Framework   │  │
+│  │    API      │  │   Manager   │  │     (pytest)        │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="component-interactions">
+<h3>Component Interactions<a class="headerlink" href="#component-interactions" title="Link to this heading"></a></h3>
+<p><strong>Data Flow</strong>
+1. <strong>Input Processing</strong>: Specifications are parsed and validated
+2. <strong>Pipeline Execution</strong>: Data flows through the 5 stages
+3. <strong>Quality Assurance</strong>: Testing and healing ensure quality
+4. <strong>Output Generation</strong>: Production-ready code is delivered</p>
+<p><strong>Control Flow</strong>
+1. <strong>Orchestration</strong>: IntegrationOrchestrator manages the pipeline
+2. <strong>Error Handling</strong>: Errors are caught and handled gracefully
+3. <strong>State Management</strong>: Pipeline state is tracked and persisted
+4. <strong>Configuration</strong>: Components are configured based on user settings</p>
+<p><strong>Communication Patterns</strong>
+- <strong>Synchronous</strong>: Direct method calls between components
+- <strong>Asynchronous</strong>: Long-running AI operations use async patterns
+- <strong>Event-Driven</strong>: Components can subscribe to pipeline events
+- <strong>Streaming</strong>: Large outputs are streamed to avoid memory issues</p>
+</section>
+</section>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h2>
+<section id="integrationorchestrator">
+<h3>IntegrationOrchestrator<a class="headerlink" href="#integrationorchestrator" title="Link to this heading"></a></h3>
+<p>The central coordinator that manages the entire pipeline:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">IntegrationOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_stages</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_manager</span> <span class="o">=</span> <span class="n">StateManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_handler</span> <span class="o">=</span> <span class="n">ErrorHandler</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute the complete pipeline.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Initialize pipeline context</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_context</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+
+            <span class="c1"># Execute stages</span>
+            <span class="k">for</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">stage</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stages</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_run_stage</span><span class="p">(</span><span class="n">stage_name</span><span class="p">):</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">stage</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+                    <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_context</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+            <span class="c1"># Generate final result</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_result</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pipeline-stages">
+<h3>Pipeline Stages<a class="headerlink" href="#pipeline-stages" title="Link to this heading"></a></h3>
+<p>Each stage implements a common interface:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PipelineStage</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">PipelineContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StageResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute the stage and return results.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">PipelineContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate input context.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StageResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle stage-specific errors.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">StageResult</span><span class="p">(</span><span class="n">success</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="ai-model-integration">
+<h3>AI Model Integration<a class="headerlink" href="#ai-model-integration" title="Link to this heading"></a></h3>
+<p>Abstract interface for AI models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">AIModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate text from prompt.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate generated response.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-management">
+<h3>Configuration Management<a class="headerlink" href="#configuration-management" title="Link to this heading"></a></h3>
+<p>Hierarchical configuration system:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">EnvironmentConfigSource</span><span class="p">(),</span>
+            <span class="n">FileConfigSource</span><span class="p">(),</span>
+            <span class="n">CommandLineConfigSource</span><span class="p">()</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge configuration from all sources.&quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">load</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">config</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="data-models">
+<h2>Data Models<a class="headerlink" href="#data-models" title="Link to this heading"></a></h2>
+<section id="pipelinecontext">
+<h3>PipelineContext<a class="headerlink" href="#pipelinecontext" title="Link to this heading"></a></h3>
+<p>Context object that flows through the pipeline:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PipelineContext</span><span class="p">:</span>
+    <span class="n">spec_file</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">stage_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">StageResult</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_stage_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StageResult</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stage_name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_stage_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">StageResult</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stage_results</span><span class="p">[</span><span class="n">stage_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+<section id="stageresult">
+<h3>StageResult<a class="headerlink" href="#stageresult" title="Link to this heading"></a></h3>
+<p>Result object for each stage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StageResult</span><span class="p">:</span>
+    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">files_created</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">warnings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="specification-models">
+<h3>Specification Models<a class="headerlink" href="#specification-models" title="Link to this heading"></a></h3>
+<p>Models for parsed specifications:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Specification</span><span class="p">:</span>
+    <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">functions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">FunctionSpec</span><span class="p">]</span>
+    <span class="n">classes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ClassSpec</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">behaviors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BehaviorSpec</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">requirements</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RequirementSpec</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FunctionSpec</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ParameterSpec</span><span class="p">]</span>
+    <span class="n">return_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">behaviors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">examples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="quality-assurance">
+<h2>Quality Assurance<a class="headerlink" href="#quality-assurance" title="Link to this heading"></a></h2>
+<section id="built-in-quality-checks">
+<h3>Built-in Quality Checks<a class="headerlink" href="#built-in-quality-checks" title="Link to this heading"></a></h3>
+<p><strong>Code Quality</strong>
+- Syntax validation
+- Style checking (black, flake8)
+- Type checking (mypy)
+- Security scanning</p>
+<p><strong>Functional Quality</strong>
+- Test execution and validation
+- Coverage analysis
+- Performance benchmarking
+- Integration testing</p>
+<p><strong>Architectural Quality</strong>
+- Design pattern compliance
+- Modularity assessment
+- Dependency analysis
+- Documentation completeness</p>
+</section>
+<section id="self-healing-mechanisms">
+<h3>Self-Healing Mechanisms<a class="headerlink" href="#self-healing-mechanisms" title="Link to this heading"></a></h3>
+<p><strong>Automatic Fixes</strong>
+- Syntax error correction
+- Import statement fixes
+- Type annotation improvements
+- Test failure resolution</p>
+<p><strong>Escalation Logic</strong>
+- Retry with different models
+- Fallback to simpler approaches
+- Human intervention requests
+- Partial result delivery</p>
+</section>
+</section>
+<section id="performance-considerations">
+<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h2>
+<section id="scalability">
+<h3>Scalability<a class="headerlink" href="#scalability" title="Link to this heading"></a></h3>
+<p><strong>Horizontal Scaling</strong>
+- Parallel stage execution
+- Distributed processing support
+- Load balancing for AI requests
+- Resource pooling</p>
+<p><strong>Vertical Scaling</strong>
+- Memory optimization
+- CPU utilization tuning
+- AI model selection based on resources
+- Caching and memoization</p>
+</section>
+<section id="optimization-strategies">
+<h3>Optimization Strategies<a class="headerlink" href="#optimization-strategies" title="Link to this heading"></a></h3>
+<p><strong>AI Model Optimization</strong>
+- Model selection based on task complexity
+- Prompt engineering for better results
+- Response caching
+- Batch processing</p>
+<p><strong>Pipeline Optimization</strong>
+- Stage parallelization
+- Incremental processing
+- Result caching
+- Smart retry logic</p>
+<p><strong>Resource Management</strong>
+- Memory usage monitoring
+- CPU utilization optimization
+- Disk space management
+- Network bandwidth optimization</p>
+</section>
+</section>
+<section id="security-considerations">
+<h2>Security Considerations<a class="headerlink" href="#security-considerations" title="Link to this heading"></a></h2>
+<section id="input-validation">
+<h3>Input Validation<a class="headerlink" href="#input-validation" title="Link to this heading"></a></h3>
+<p><strong>Specification Validation</strong>
+- Schema validation
+- Content sanitization
+- Size limits
+- Format verification</p>
+<p><strong>AI Input Sanitization</strong>
+- Prompt injection prevention
+- Content filtering
+- Length limits
+- Character encoding validation</p>
+</section>
+<section id="output-security">
+<h3>Output Security<a class="headerlink" href="#output-security" title="Link to this heading"></a></h3>
+<p><strong>Generated Code Security</strong>
+- Security vulnerability scanning
+- Malicious code detection
+- Dependency security checks
+- Access control validation</p>
+<p><strong>Data Protection</strong>
+- Sensitive data redaction
+- Temporary file cleanup
+- Secure file permissions
+- Audit logging</p>
+</section>
+</section>
+<section id="extensibility">
+<h2>Extensibility<a class="headerlink" href="#extensibility" title="Link to this heading"></a></h2>
+<section id="plugin-architecture">
+<h3>Plugin Architecture<a class="headerlink" href="#plugin-architecture" title="Link to this heading"></a></h3>
+<p><strong>Stage Plugins</strong>
+- Custom pipeline stages
+- Third-party integrations
+- Specialized processing
+- Domain-specific logic</p>
+<p><strong>Model Plugins</strong>
+- Custom AI models
+- External API integrations
+- Specialized generators
+- Fine-tuned models</p>
+<p><strong>Output Plugins</strong>
+- Custom formatters
+- Different output formats
+- Integration tools
+- Deployment systems</p>
+</section>
+<section id="api-extensions">
+<h3>API Extensions<a class="headerlink" href="#api-extensions" title="Link to this heading"></a></h3>
+<p><strong>REST API</strong>
+- HTTP endpoints for pipeline control
+- Webhook support
+- Authentication and authorization
+- Rate limiting</p>
+<p><strong>GraphQL API</strong>
+- Flexible querying
+- Real-time updates
+- Subscription support
+- Schema introspection</p>
+<p><strong>CLI Extensions</strong>
+- Custom commands
+- Plugin management
+- Configuration utilities
+- Debugging tools</p>
+<p>This design provides a solid foundation for the spec-coder system, ensuring it’s robust, scalable, and maintainable while delivering high-quality generated software.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../testing/overview.html" class="btn btn-neutral float-left" title="Testing Strategy Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="workflow.html" class="btn btn-neutral float-right" title="Workflow Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,672 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>asabaal_utils.agents.spec_coder.generator &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/generator.html">CodeGenerator API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">asabaal_utils.agents.spec_coder.generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for asabaal_utils.agents.spec_coder.generator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">OpenSpec-to-Code Generator</span>
+
+<span class="sd">Main orchestrator for converting OpenSpec specifications into complete</span>
+<span class="sd">code implementations using AI models.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span><span class="p">,</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">Requirement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.ollama_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">OllamaClient</span><span class="p">,</span> <span class="n">GenerationConfig</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">PromptTemplates</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span><span class="p">,</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">Requirement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ollama_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">OllamaClient</span><span class="p">,</span> <span class="n">GenerationConfig</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">PromptTemplates</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GenerationResult">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.generator.GenerationResult">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GenerationResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Result of a generation operation.&quot;&quot;&quot;</span>
+    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">files_generated</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">warnings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">execution_time</span><span class="p">:</span> <span class="nb">float</span></div>
+
+
+
+<div class="viewcode-block" id="CodeGenerator">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.generator.CodeGenerator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CodeGenerator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main generator class that orchestrates the code generation process.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="CodeGenerator.__init__">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.generator.CodeGenerator.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the generator with configuration.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_config</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span> <span class="o">=</span> <span class="n">OllamaClient</span><span class="p">(</span><span class="n">GenerationConfig</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">templates</span> <span class="o">=</span> <span class="n">PromptTemplates</span><span class="p">()</span>
+        
+        <span class="c1"># Setup logging</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sanitize_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert spec_id to consistent filename format.&quot;&quot;&quot;</span>
+        <span class="c1"># Always use underscores for consistency</span>
+        <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load configuration from YAML file.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+        
+        <span class="k">if</span> <span class="n">config_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;config&quot;</span> <span class="o">/</span> <span class="s2">&quot;config.yaml&quot;</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="CodeGenerator.generate_from_spec">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.generator.CodeGenerator.generate_from_spec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_from_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GenerationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate complete implementation from an OpenSpec specification.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1"># Setup paths - use the provided output_dir, or fall back to current directory</span>
+        <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;output&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">warnings</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Clean output directory to prevent mixing old/new formats</span>
+        <span class="k">if</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">output_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;generation&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;overwrite&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Output directory exists and is not empty. Use overwrite=True to clean it.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">GenerationResult</span><span class="p">(</span>
+                    <span class="n">success</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">files_generated</span><span class="o">=</span><span class="p">[],</span>
+                    <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Output directory exists and overwrite=False&quot;</span><span class="p">],</span>
+                    <span class="n">warnings</span><span class="o">=</span><span class="n">warnings</span><span class="p">,</span>
+                    <span class="n">execution_time</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        
+        <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">files_generated</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Parse the specification</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsing specification: </span><span class="si">{</span><span class="n">spec_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="n">spec_path</span><span class="p">)</span>
+            
+            <span class="c1"># Validate the specification</span>
+            <span class="n">validation_issues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span><span class="o">.</span><span class="n">validate_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">validation_issues</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Spec validation issue: </span><span class="si">{</span><span class="n">issue</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">validation_issues</span><span class="p">)</span>
+            
+            <span class="c1"># Test Ollama connection</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span><span class="o">.</span><span class="n">test_connection</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to connect to Ollama. Please ensure Ollama is running and the model is available.&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Generate files</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting code generation...&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># 1. Generate main source code</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_source_code</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source_file</span><span class="p">:</span>
+                <span class="n">files_generated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source_file</span><span class="p">)</span>
+            
+            <span class="c1"># 2. Generate documentation</span>
+            <span class="n">doc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_documentation</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">doc_file</span><span class="p">:</span>
+                <span class="n">files_generated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc_file</span><span class="p">)</span>
+            
+            <span class="c1"># 3. Generate tests for each requirement</span>
+            <span class="n">test_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_tests</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+            <span class="n">files_generated</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">test_files</span><span class="p">)</span>
+            
+            <span class="c1"># 4. Generate CI/CD configuration</span>
+            <span class="n">ci_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_ci_config</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+            <span class="n">files_generated</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ci_files</span><span class="p">)</span>
+            
+            <span class="c1"># 5. Generate validation script</span>
+            <span class="n">validation_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_validation_script</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">validation_file</span><span class="p">:</span>
+                <span class="n">files_generated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">validation_file</span><span class="p">)</span>
+            
+            <span class="c1"># 6. Generate requirements file</span>
+            <span class="n">requirements_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_requirements_file</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">requirements_file</span><span class="p">:</span>
+                <span class="n">files_generated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">requirements_file</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generation complete. Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">files_generated</span><span class="p">)</span><span class="si">}</span><span class="s2"> files.&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        
+        <span class="n">execution_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="k">return</span> <span class="n">GenerationResult</span><span class="p">(</span>
+            <span class="n">success</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">files_generated</span><span class="o">=</span><span class="n">files_generated</span><span class="p">,</span>
+            <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">,</span>
+            <span class="n">warnings</span><span class="o">=</span><span class="n">warnings</span><span class="p">,</span>
+            <span class="n">execution_time</span><span class="o">=</span><span class="n">execution_time</span>
+        <span class="p">)</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_source_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate the main source code file.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Prepare the prompt</span>
+            <span class="n">requirements_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span><span class="o">.</span><span class="n">format_requirements_for_prompt</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="n">interfaces_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span><span class="o">.</span><span class="n">format_interfaces_for_prompt</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">source_code_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">spec_id</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">spec_id</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                <span class="n">requirements</span><span class="o">=</span><span class="n">requirements_text</span><span class="p">,</span>
+                <span class="n">interfaces</span><span class="o">=</span><span class="n">interfaces_text</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Generate code</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating source code...&quot;</span><span class="p">)</span>
+            <span class="n">generated_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+            
+            <span class="c1"># Write to file</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_filename</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">spec_id</span><span class="p">)</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scaffolds&quot;</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">.py&quot;</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">generated_code</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Source code written to: </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate source code: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_documentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate documentation file.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">requirements_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span><span class="o">.</span><span class="n">format_requirements_for_prompt</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">documentation_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">spec_id</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">spec_id</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">requirements</span><span class="o">=</span><span class="n">requirements_text</span>
+            <span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating documentation...&quot;</span><span class="p">)</span>
+            <span class="n">generated_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+            
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_filename</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">spec_id</span><span class="p">)</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scaffolds&quot;</span> <span class="o">/</span> <span class="s2">&quot;docs&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">.md&quot;</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">generated_doc</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Documentation written to: </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate documentation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_tests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate test files for each requirement.&quot;&quot;&quot;</span>
+        <span class="n">test_files</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># First generate the source code to have it available for test generation</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_filename</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">spec_id</span><span class="p">)</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scaffolds&quot;</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">.py&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">source_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Source code file not found, generating tests without code context&quot;</span><span class="p">)</span>
+                <span class="n">source_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">source_code</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            
+            <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">requirements</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">validation</span> <span class="ow">in</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">validation</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;unit&#39;</span><span class="p">:</span>
+                        <span class="n">test_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_unit_test</span><span class="p">(</span>
+                            <span class="n">requirement</span><span class="p">,</span> <span class="n">source_code</span><span class="p">,</span> <span class="n">output_dir</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="n">test_file</span><span class="p">:</span>
+                            <span class="n">test_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">validation</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;integration&#39;</span><span class="p">:</span>
+                        <span class="n">test_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_integration_test</span><span class="p">(</span>
+                            <span class="n">requirement</span><span class="p">,</span> <span class="n">source_code</span><span class="p">,</span> <span class="n">output_dir</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="n">test_file</span><span class="p">:</span>
+                            <span class="n">test_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">test_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> test files&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate tests: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">test_files</span>
+    
+<div class="viewcode-block" id="CodeGenerator._strip_markdown_code_blocks">
+<a class="viewcode-back" href="../../../../api/generator.html#asabaal_utils.agents.spec_coder.generator.CodeGenerator._strip_markdown_code_blocks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_strip_markdown_code_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Strip markdown code block formatting and other non-Python content from generated content.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+        
+        <span class="c1"># Remove ```python and ``` markers</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```python\s*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```\s*$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```\s*$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        
+        <span class="c1"># Remove common AI-generated comments and notes</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">in_python_code</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            
+            <span class="c1"># Skip lines that look like AI instructions or notes</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Note:&#39;</span><span class="p">)</span> <span class="ow">or</span> 
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TODO:&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Replace&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;your_module&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="s1">&#39;actual name of your module&#39;</span> <span class="ow">in</span> <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;# Note:&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;# TODO:&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;pytest test code only&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;The test code must be complete&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Generate comprehensive pytest tests&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="ow">not</span> <span class="n">stripped</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;here is&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;this is&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;the following&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Skip lines that are clearly instructions</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">keyword</span> <span class="ow">in</span> <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s1">&#39;generate tests&#39;</span><span class="p">,</span> <span class="s1">&#39;test code&#39;</span><span class="p">,</span> <span class="s1">&#39;pytest file&#39;</span><span class="p">,</span> <span class="s1">&#39;executable&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;complete and executable&#39;</span><span class="p">,</span> <span class="s1">&#39;single pytest file&#39;</span><span class="p">,</span> <span class="s1">&#39;instruction&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;requirement:&#39;</span><span class="p">,</span> <span class="s1">&#39;code to test:&#39;</span><span class="p">,</span> <span class="s1">&#39;verify:&#39;</span>
+            <span class="p">]):</span>
+                <span class="k">continue</span>
+            
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        
+        <span class="c1"># Remove any remaining empty lines at the beginning or end</span>
+        <span class="k">while</span> <span class="n">cleaned_lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cleaned_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">cleaned_lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cleaned_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        
+        <span class="c1"># Fix indentation issues by removing leading spaces only from the first few lines</span>
+        <span class="c1"># that might have been incorrectly indented by AI generation</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span>  <span class="c1"># Not properly indented</span>
+                <span class="c1"># Remove leading spaces from lines that should start at column 0</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;def &#39;</span><span class="p">,</span> <span class="s1">&#39;class &#39;</span><span class="p">,</span> <span class="s1">&#39;import &#39;</span><span class="p">,</span> <span class="s1">&#39;from &#39;</span><span class="p">,</span> <span class="s1">&#39;@&#39;</span><span class="p">)):</span>
+                    <span class="n">cleaned_lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+        
+        <span class="n">content</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">content</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_unit_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">,</span> <span class="n">source_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a unit test for a specific requirement.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">validation_file</span> <span class="o">=</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">file</span> <span class="k">if</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span> <span class="k">else</span> <span class="s2">&quot;unknown&quot;</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">test_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">req_id</span><span class="o">=</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">req_title</span><span class="o">=</span><span class="n">requirement</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">req_description</span><span class="o">=</span><span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">validation</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;unit test in </span><span class="si">{</span><span class="n">validation_file</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            
+            <span class="n">generated_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span><span class="n">source_code</span><span class="p">,</span> <span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+            
+            <span class="c1"># Strip markdown code blocks if present</span>
+            <span class="n">generated_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_markdown_code_blocks</span><span class="p">(</span><span class="n">generated_test</span><span class="p">)</span>
+            
+            <span class="c1"># Extract filename from validation or create one</span>
+            <span class="k">if</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+                <span class="c1"># Get just the filename, not the full path</span>
+                <span class="n">test_filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">test_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;test_</span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">.py&quot;</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scaffolds&quot;</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="n">test_filename</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">generated_test</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unit test written to: </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate unit test for </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_integration_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">,</span> <span class="n">source_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate an integration test for a specific requirement.&quot;&quot;&quot;</span>
+        <span class="c1"># Similar to unit test but with integration focus</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_unit_test</span><span class="p">(</span><span class="n">requirement</span><span class="p">,</span> <span class="n">source_code</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_ci_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate CI/CD configuration files.&quot;&quot;&quot;</span>
+        <span class="n">ci_files</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Generate GitHub Actions workflow</span>
+            <span class="n">workflow_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_github_workflow</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="n">workflow_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;.github&quot;</span> <span class="o">/</span> <span class="s2">&quot;workflows&quot;</span> <span class="o">/</span> <span class="s2">&quot;ci.yml&quot;</span>
+            <span class="n">workflow_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">workflow_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">workflow_content</span><span class="p">)</span>
+            
+            <span class="n">ci_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">workflow_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CI workflow written to: </span><span class="si">{</span><span class="n">workflow_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate CI config: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">ci_files</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_github_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">OpenSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate GitHub Actions workflow content.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;name: CI</span>
+<span class="s2">on:</span>
+<span class="s2">  push:</span>
+<span class="s2">  pull_request:</span>
+<span class="s2">jobs:</span>
+<span class="s2">  validate:</span>
+<span class="s2">    runs-on: ubuntu-latest</span>
+<span class="s2">    steps:</span>
+<span class="s2">      - uses: actions/checkout@v4</span>
+<span class="s2">      - uses: actions/setup-python@v5</span>
+<span class="s2">        with:</span>
+<span class="s2">          python-version: &#39;3.11&#39;</span>
+<span class="s2">      - name: Install deps</span>
+<span class="s2">        run: |</span>
+<span class="s2">          pip install pytest ruff || true</span>
+<span class="s2">      - name: Run validation</span>
+<span class="s2">        run: bash scripts/validate.sh</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_validation_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate validation script.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">script_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;#!/usr/bin/env bash</span>
+<span class="s2">set -euo pipefail</span>
+<span class="s2">echo &quot;▶ Running validation...&quot;</span>
+<span class="s2">ruff check . || true</span>
+<span class="s2">pytest -q</span>
+<span class="s2">echo &quot;✅ Validation complete.&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+            
+            <span class="n">script_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scripts&quot;</span> <span class="o">/</span> <span class="s2">&quot;validate.sh&quot;</span>
+            <span class="n">script_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">script_content</span><span class="p">)</span>
+            
+            <span class="c1"># Make executable</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">script_file</span><span class="p">,</span> <span class="mo">0o755</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation script written to: </span><span class="si">{</span><span class="n">script_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">script_file</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate validation script: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_requirements_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate requirements.txt file.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">requirements_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;pytest&gt;=7.4.0</span>
+<span class="s2">ruff&gt;=0.1.0</span>
+<span class="s2">&quot;&quot;&quot;</span>
+            
+            <span class="n">requirements_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;requirements.txt&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">requirements_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">requirements_content</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Requirements file written to: </span><span class="si">{</span><span class="n">requirements_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">requirements_file</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to generate requirements file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_unit_test_with_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">,</span> <span class="n">source_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a unit test with retry logic when AI generation fails.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># First attempt - normal generation</span>
+                    <span class="n">generated_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span><span class="n">source_code</span><span class="p">,</span> <span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Retry attempts - with feedback about previous failure</span>
+                    <span class="n">retry_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Generate pytest tests for the following requirement. </span>
+<span class="s2">Your previous attempt had syntax errors or was incomplete. Please ensure the code is valid, complete Python.</span>
+
+<span class="s2">Requirement: </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="si">}</span>
+
+<span class="s2">Code to test:</span>
+<span class="s2">```python</span>
+<span class="si">{</span><span class="n">source_code</span><span class="si">}</span>
+<span class="s2">```</span>
+
+<span class="s2">Generate complete, syntactically valid pytest code. Return ONLY the Python code without explanations.&quot;&quot;&quot;</span>
+                    <span class="n">generated_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ollama_client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">retry_prompt</span><span class="p">,</span> 
+                        <span class="s2">&quot;You are an expert Python test developer. Generate complete, valid pytest code.&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Strip markdown code blocks if present</span>
+                <span class="n">cleaned_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_generated_code</span><span class="p">(</span><span class="n">generated_test</span><span class="p">)</span>
+                
+                <span class="c1"># Validate that the generated code is syntactically valid</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_python_code</span><span class="p">(</span><span class="n">cleaned_test</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully generated valid test for </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> on attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">cleaned_test</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed for </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> - invalid Python syntax&quot;</span><span class="p">)</span>
+                    
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed for </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> with error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># All retries failed - use fallback</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All </span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2"> attempts failed for </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, using fallback test&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_fallback_test</span><span class="p">(</span><span class="n">requirement</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_generated_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generated_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean generated code by removing markdown formatting and fixing truncation.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">generated_code</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        
+        <span class="c1"># Remove markdown code blocks</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">generated_code</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="c1"># Skip markdown code block markers</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;```python&#39;</span><span class="p">,</span> <span class="s1">&#39;```&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        
+        <span class="n">cleaned_code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">)</span>
+        
+        <span class="c1"># Fix common truncation issues</span>
+        <span class="k">if</span> <span class="n">cleaned_code</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="c1"># Check if the last line is incomplete (common truncation pattern)</span>
+            <span class="n">last_line</span> <span class="o">=</span> <span class="n">cleaned_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">cleaned_lines</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            
+            <span class="c1"># If the last line looks like it was cut off mid-function, remove it</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">last_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;def &#39;</span><span class="p">)</span> <span class="ow">and</span> 
+                <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">last_line</span> <span class="ow">and</span> <span class="s1">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">last_line</span><span class="p">):</span>
+                <span class="n">cleaned_lines</span> <span class="o">=</span> <span class="n">cleaned_lines</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">cleaned_code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">)</span>
+            
+            <span class="c1"># Ensure the file ends properly</span>
+            <span class="k">if</span> <span class="n">cleaned_code</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cleaned_code</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+                <span class="n">cleaned_code</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        
+        <span class="k">return</span> <span class="n">cleaned_code</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_python_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that the generated code is syntactically valid Python.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_fallback_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a basic fallback test when AI generation fails.&quot;&quot;&quot;</span>
+        <span class="n">test_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;test_</span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="n">fallback_test</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;import pytest</span>
+
+<span class="s1">def </span><span class="si">{</span><span class="n">test_name</span><span class="si">}</span><span class="s1">():</span>
+<span class="s1">    &quot;&quot;&quot;Fallback test for requirement: </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">    # TODO: Implement proper test for: </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="si">}</span>
+<span class="s1">    # This is a placeholder generated due to AI generation failure</span>
+<span class="s1">    # FAIL the test to indicate that proper implementation is needed</span>
+<span class="s1">    pytest.fail(f&quot;AI generation failed for requirement </span><span class="se">{{</span><span class="s1">requirement.id</span><span class="se">}}</span><span class="s1">. Manual test implementation required for: </span><span class="se">{{</span><span class="s1">requirement.description</span><span class="se">}}</span><span class="s1">&quot;)</span>
+<span class="s1">&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">fallback_test</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -209,11 +209,15 @@ def generate_prompts_index(catalog: Dict[str, Any], prompts_dir: Path):
 
 def main():
     """Main prompt generation process."""
+    import os
+    
     print(f"DEBUG: Current working directory: {Path.cwd()}")
     print(f"DEBUG: Current directory contents: {list(Path.cwd().iterdir())}")
     
-    catalog_file = Path("logic_catalog/functional_catalog.yaml")
-    prompts_dir = Path("prompts")
+    # Use BASE_DIR environment variable if set, otherwise use current directory
+    base_dir = Path(os.environ.get('BASE_DIR', Path.cwd()))
+    catalog_file = base_dir / "logic_catalog" / "functional_catalog.yaml"
+    prompts_dir = base_dir / "prompts"
     
     print(f"DEBUG: Looking for catalog at: {catalog_file.absolute()}")
     print(f"DEBUG: Catalog exists: {catalog_file.exists()}")

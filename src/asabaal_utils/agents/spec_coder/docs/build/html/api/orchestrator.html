@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IntegrationOrchestrator API &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tester API" href="tester.html" />
+    <link rel="prev" title="CodeGenerator API" href="generator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IntegrationOrchestrator API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core-methods">Core Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run-pipeline">run_pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-methods">Stage Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stage1-spec-to-scaffolds">_stage1_spec_to_scaffolds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage2-scaffold-to-requirements">_stage2_scaffold_to_requirements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._stage2_scaffold_to_requirements"><code class="docutils literal notranslate"><span class="pre">IntegrationOrchestrator._stage2_scaffold_to_requirements()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#stage3-requirements-to-alignment">_stage3_requirements_to_alignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._stage3_requirements_to_alignment"><code class="docutils literal notranslate"><span class="pre">IntegrationOrchestrator._stage3_requirements_to_alignment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#stage4-alignment-to-generation">_stage4_alignment_to_generation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#utility-methods">Utility Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run">run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.run"><code class="docutils literal notranslate"><span class="pre">IntegrationOrchestrator.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#clean-test-file-content">_clean_test_file_content</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._clean_test_file_content"><code class="docutils literal notranslate"><span class="pre">IntegrationOrchestrator._clean_test_file_content()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-configuration">Example Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-configuration">Custom Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API Reference</a></li>
+      <li class="breadcrumb-item active">IntegrationOrchestrator API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/orchestrator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="integrationorchestrator-api">
+<h1>IntegrationOrchestrator API<a class="headerlink" href="#integrationorchestrator-api" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">IntegrationOrchestrator</span></code> class manages the complete pipeline workflow, coordinating all stages of the spec-coder process.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asabaal_utils.agents.spec_coder.orchestrator.</span></span><span class="sig-name descname"><span class="pre">IntegrationOrchestrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Main integration orchestrator.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_reports_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.get_reports_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the appropriate reports directory based on output_dir.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">load_spec_file_path_from_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.load_spec_file_path_from_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Load spec file path from pipeline metadata if available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Run a command and return the result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompletedProcess</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">run_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.run_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Run the integration pipeline in the specified mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">run_full_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.run_full_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Run the complete multi-stage pipeline from spec to code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="core-methods">
+<h2>Core Methods<a class="headerlink" href="#core-methods" title="Link to this heading"></a></h2>
+<section id="run-pipeline">
+<h3>run_pipeline<a class="headerlink" href="#run-pipeline" title="Link to this heading"></a></h3>
+<p>Executes the complete 4-stage pipeline from specification to final code generation.</p>
+<p><strong>Parameters:</strong>
+- <code class="docutils literal notranslate"><span class="pre">spec_file</span></code> (Path): Path to the specification file
+- <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> (Path): Directory for all outputs
+- <code class="docutils literal notranslate"><span class="pre">config</span></code> (dict, optional): Configuration overrides</p>
+<p><strong>Returns:</strong>
+- <code class="docutils literal notranslate"><span class="pre">bool</span></code>: True if pipeline completed successfully</p>
+</section>
+</section>
+<section id="stage-methods">
+<h2>Stage Methods<a class="headerlink" href="#stage-methods" title="Link to this heading"></a></h2>
+<p>The orchestrator provides methods for each pipeline stage:</p>
+<section id="stage1-spec-to-scaffolds">
+<h3>_stage1_spec_to_scaffolds<a class="headerlink" href="#stage1-spec-to-scaffolds" title="Link to this heading"></a></h3>
+</section>
+<section id="stage2-scaffold-to-requirements">
+<h3>_stage2_scaffold_to_requirements<a class="headerlink" href="#stage2-scaffold-to-requirements" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._stage2_scaffold_to_requirements">
+<span class="sig-prename descclassname"><span class="pre">IntegrationOrchestrator.</span></span><span class="sig-name descname"><span class="pre">_stage2_scaffold_to_requirements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator._stage2_scaffold_to_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._stage2_scaffold_to_requirements" title="Link to this definition"></a></dt>
+<dd><p>Stage 2: Extract logical requirements from test scaffold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="stage3-requirements-to-alignment">
+<h3>_stage3_requirements_to_alignment<a class="headerlink" href="#stage3-requirements-to-alignment" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._stage3_requirements_to_alignment">
+<span class="sig-prename descclassname"><span class="pre">IntegrationOrchestrator.</span></span><span class="sig-name descname"><span class="pre">_stage3_requirements_to_alignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator._stage3_requirements_to_alignment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._stage3_requirements_to_alignment" title="Link to this definition"></a></dt>
+<dd><p>Stage 3: Perform behavioral alignment checking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="stage4-alignment-to-generation">
+<h3>_stage4_alignment_to_generation<a class="headerlink" href="#stage4-alignment-to-generation" title="Link to this heading"></a></h3>
+</section>
+</section>
+<section id="utility-methods">
+<h2>Utility Methods<a class="headerlink" href="#utility-methods" title="Link to this heading"></a></h2>
+<section id="run">
+<h3>run<a class="headerlink" href="#run" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.run">
+<span class="sig-prename descclassname"><span class="pre">IntegrationOrchestrator.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.run" title="Link to this definition"></a></dt>
+<dd><p>Run a command and return the result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompletedProcess</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="clean-test-file-content">
+<h3>_clean_test_file_content<a class="headerlink" href="#clean-test-file-content" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._clean_test_file_content">
+<span class="sig-prename descclassname"><span class="pre">IntegrationOrchestrator.</span></span><span class="sig-name descname"><span class="pre">_clean_test_file_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/orchestrator.html#IntegrationOrchestrator._clean_test_file_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator._clean_test_file_content" title="Link to this definition"></a></dt>
+<dd><p>Clean test file content to handle instructional text that causes IndentationError.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>This method handles the critical task of cleaning AI-generated test content to prevent IndentationError issues in Stage 2.</p>
+</section>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>The orchestrator can be configured through:</p>
+<ol class="arabic simple">
+<li><p><strong>Constructor parameters</strong>: Base directory, configuration file</p></li>
+<li><p><strong>Configuration file</strong>: YAML configuration with stage settings</p></li>
+<li><p><strong>Environment variables</strong>: Override specific settings</p></li>
+</ol>
+<section id="example-configuration">
+<h3>Example Configuration<a class="headerlink" href="#example-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">pipeline</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stages</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spec_to_scaffolds</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scaffold_to_requirements</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">requirements_to_alignment</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alignment_to_generation</span>
+
+<span class="w">  </span><span class="nt">retry_attempts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">timeout_seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+
+<span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">preserve_intermediate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">create_reports</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<p>The orchestrator implements robust error handling:</p>
+<ul class="simple">
+<li><p><strong>Stage-level isolation</strong>: Errors in one stage don’t prevent others</p></li>
+<li><p><strong>Retry mechanisms</strong>: Automatic retry with exponential backoff</p></li>
+<li><p><strong>Graceful degradation</strong>: Partial results are preserved</p></li>
+<li><p><strong>Detailed logging</strong>: Comprehensive error reporting</p></li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.orchestrator</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+
+<span class="n">success</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;my_spec.yml&quot;</span><span class="p">),</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./results&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pipeline completed successfully&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pipeline failed - check logs&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-configuration">
+<h3>Custom Configuration<a class="headerlink" href="#custom-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span>
+    <span class="n">base_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./workspace&quot;</span><span class="p">),</span>
+    <span class="n">config_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;custom_config.yaml&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Run individual stages</span>
+<span class="k">if</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">_stage1_spec_to_scaffolds</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stage 1 completed&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">_stage2_scaffold_to_requirements</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stage 2 completed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="generator.html"><span class="doc">CodeGenerator API</span></a> - Test generation functionality</p></li>
+<li><p><a class="reference internal" href="tester.html"><span class="doc">Tester API</span></a> - Test execution and validation</p></li>
+<li><p><a class="reference internal" href="spec_parser.html"><span class="doc">SpecParser API</span></a> - Specification parsing</p></li>
+<li><p><span class="xref std std-doc">user_guide/pipeline</span> - Pipeline workflow documentation</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="generator.html" class="btn btn-neutral float-left" title="CodeGenerator API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tester.html" class="btn btn-neutral float-right" title="Tester API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

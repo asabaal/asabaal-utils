@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>asabaal_utils.agents.spec_coder.healer.classify_failures &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/generator.html">CodeGenerator API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">asabaal_utils.agents.spec_coder.healer.classify_failures</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for asabaal_utils.agents.spec_coder.healer.classify_failures</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Failure Classifier - Extracts and labels failures from test reports</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<div class="viewcode-block" id="FailureClassifier">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.FailureClassifier">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FailureClassifier</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Classifies test failures into specific categories for targeted repair.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="FailureClassifier.__init__">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.FailureClassifier.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reports_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reports&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reports_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">reports_dir</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="FailureClassifier.load_test_results">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.FailureClassifier.load_test_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_test_results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the latest test results.&quot;&quot;&quot;</span>
+        <span class="c1"># First try the latest file</span>
+        <span class="n">test_results_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reports_dir</span> <span class="o">/</span> <span class="s2">&quot;latest_test_results.json&quot;</span>
+        
+        <span class="k">if</span> <span class="n">test_results_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">test_results_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="c1"># If not found, look for the most recent test_results_*.json file</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+        <span class="n">test_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reports_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;test_results_*.json&quot;</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">test_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No test results found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reports_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Get the most recent file</span>
+        <span class="n">latest_file</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">test_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">latest_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="FailureClassifier.classify_failure">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.FailureClassifier.classify_failure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">classify_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stderr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Classify a specific function&#39;s test failure.&quot;&quot;&quot;</span>
+        <span class="c1"># Combine stdout and stderr for analysis</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stdout</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="c1"># NameError during import/collection - missing imports like &#39;Any&#39;</span>
+        <span class="k">if</span> <span class="s2">&quot;NameError&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;not defined&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;collecting&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;import_error&quot;</span>
+        
+        <span class="c1"># Signature mismatch detection - missing required arguments</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;missing&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;required positional&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="p">(</span><span class="s2">&quot;takes&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;positional argument&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="p">(</span><span class="s2">&quot;unexpected keyword argument&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;signature_mismatch&quot;</span>
+        
+        <span class="c1"># Smoke test failures - look for basic_execution test failures with any exception</span>
+        <span class="n">basic_execution_pattern</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;test_</span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">_basic_execution&quot;</span>
+        <span class="k">if</span> <span class="n">basic_execution_pattern</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;FAILED&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="c1"># Check if it&#39;s a signature issue (missing arguments)</span>
+            <span class="k">if</span> <span class="s2">&quot;missing&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;required positional&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;signature_mismatch&quot;</span>
+            <span class="c1"># Otherwise, it&#39;s a smoke test failure (function throws with defaults)</span>
+            <span class="k">return</span> <span class="s2">&quot;throws_on_smoke&quot;</span>
+        
+        <span class="c1"># Import errors</span>
+        <span class="k">if</span> <span class="s2">&quot;ImportError&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">or</span> <span class="s2">&quot;ModuleNotFoundError&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;import_error&quot;</span>
+        
+        <span class="c1"># Syntax errors</span>
+        <span class="k">if</span> <span class="s2">&quot;SyntaxError&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">or</span> <span class="s2">&quot;IndentationError&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;syntax_error&quot;</span>
+        
+        <span class="c1"># NameError during execution (undefined variables)</span>
+        <span class="k">if</span> <span class="s2">&quot;NameError&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;not defined&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;logic_mismatch&quot;</span>
+        
+        <span class="c1"># ValueError during execution</span>
+        <span class="k">if</span> <span class="s2">&quot;ValueError&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;throws_on_smoke&quot;</span>
+        
+        <span class="c1"># Type errors (that aren&#39;t signature issues)</span>
+        <span class="k">if</span> <span class="s2">&quot;TypeError&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">and</span> <span class="s2">&quot;missing&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;type_error&quot;</span>
+        
+        <span class="c1"># Default to logic mismatch for assertion failures and other issues</span>
+        <span class="k">if</span> <span class="s2">&quot;AssertionError&quot;</span> <span class="ow">in</span> <span class="n">output</span> <span class="ow">or</span> <span class="s2">&quot;assert&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;logic_mismatch&quot;</span>
+        
+        <span class="c1"># If no specific pattern detected, classify as logic_mismatch</span>
+        <span class="k">return</span> <span class="s2">&quot;logic_mismatch&quot;</span></div>
+
+    
+<div class="viewcode-block" id="FailureClassifier.classify_all_failures">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.FailureClassifier.classify_all_failures">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">classify_all_failures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Classify all failed functions from the test results.&quot;&quot;&quot;</span>
+        <span class="n">test_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_test_results</span><span class="p">()</span>
+        <span class="n">classified_failures</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">test_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="n">classification</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classify_failure</span><span class="p">(</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stderr&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                
+                <span class="n">classified_failures</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function_name&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;classification&quot;</span><span class="p">:</span> <span class="n">classification</span><span class="p">,</span>
+                    <span class="s2">&quot;returncode&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;returncode&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;stdout&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;stderr&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stderr&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;test_dir&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;test_dir&quot;</span><span class="p">)</span>
+                <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">classified_failures</span></div>
+
+    
+<div class="viewcode-block" id="FailureClassifier.save_classification_report">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.FailureClassifier.save_classification_report">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_classification_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">failures</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the classification report.&quot;&quot;&quot;</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;$date&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$numberLong&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))}}),</span>
+                <span class="s2">&quot;total_failures&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;failures&quot;</span><span class="p">:</span> <span class="n">failures</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Create artifacts directory</span>
+        <span class="n">artifacts_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;healer/artifacts&quot;</span><span class="p">)</span>
+        <span class="n">artifacts_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Save with timestamp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">report_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;classification_report_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="c1"># Also save as latest</span>
+        <span class="n">latest_path</span> <span class="o">=</span> <span class="n">artifacts_dir</span> <span class="o">/</span> <span class="s2">&quot;latest_classification_report.json&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">latest_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">report_path</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main classification process.&quot;&quot;&quot;</span>
+    <span class="n">classifier</span> <span class="o">=</span> <span class="n">FailureClassifier</span><span class="p">()</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">failures</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">classify_all_failures</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">failures</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ No failures to classify!&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Classifying </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span><span class="si">}</span><span class="s2"> failures...&quot;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">failure</span> <span class="ow">in</span> <span class="n">failures</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">failure</span><span class="p">[</span><span class="s1">&#39;function_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">failure</span><span class="p">[</span><span class="s1">&#39;classification&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">report_path</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">save_classification_report</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📄 Classification report saved: </span><span class="si">{</span><span class="n">report_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Classification failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

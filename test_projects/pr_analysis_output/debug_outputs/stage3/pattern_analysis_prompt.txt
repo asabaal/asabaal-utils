@@ -4,8 +4,38 @@ Here is the pattern analysis data:
 
 ```json
 {
-  "file_categories": [],
-  "sample_files_by_category": {}
+  "file_categories": [
+    "UNCATEGORIZED"
+  ],
+  "sample_files_by_category": {
+    "UNCATEGORIZED": [
+      {
+        "path": "data_pipeline/good/processors/data_transformer.py",
+        "change_type": "A",
+        "content_preview": "from typing import Iterator, Dict, List, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass TransformResult:\n    processed_count: int\n    errors: List[str]\n    processing_time: float\n\nclass DataTransformer:\n    def __init__(self, batch_size: int = 1000):\n        self.batch_size = batch_size\n   "
+      },
+      {
+        "path": "data_pipeline/bad/helpers/data_processor.py",
+        "change_type": "A",
+        "content_preview": "# DUPLICATE LOGIC WITH MEMORY ISSUES - BAD CODE\n\ndef handle_dataset(dataset):\n    \"\"\"Handle dataset processing - DUPLICATE OF data_helper.py\"\"\"\n    output = []\n    \n    # Same memory issue as process_all_data\n    print(f\"Processing dataset with {len(dataset)} items...\")\n    \n    for data_point in da"
+      },
+      {
+        "path": "data_pipeline/bad/utils/data_helper.py",
+        "change_type": "A",
+        "content_preview": "# MEMORY INEFFICIENT DATA PROCESSING - BAD CODE\n\ndef process_all_data(data_list):\n    \"\"\"Process all data at once - MEMORY INTENSIVE ANTI-PATTERN\"\"\"\n    results = []\n    \n    # Load entire dataset into memory at once\n    print(f\"Loading {len(data_list)} items into memory...\")\n    \n    for item in da"
+      },
+      {
+        "path": "auth_service/good/auth/auth_service.py",
+        "change_type": "A",
+        "content_preview": "import bcrypt\nimport jwt\nfrom datetime import datetime, timedelta\nfrom typing import Optional, Dict, Any\nfrom dataclasses import dataclass\n\n@dataclass\nclass User:\n    id: int\n    username: str\n    email: str\n    password_hash: str\n    is_active: bool = True\n    created_at: Optional[datetime] = None\n"
+      },
+      {
+        "path": "auth_service/bad/security/user_auth.py",
+        "change_type": "A",
+        "content_preview": "# CRITICAL SECURITY VULNERABILITIES - BAD CODE\n\nclass SimpleDatabase:\n    def __init__(self):\n        self.users = {}\n        \n    def get_user(self, username):\n        return self.users.get(username)\n\ndb = SimpleDatabase()\n\ndef authenticate_user(username, password):\n    \"\"\"PLAIN TEXT PASSWORD COMPA"
+      }
+    ]
+  }
 }
 ```
 

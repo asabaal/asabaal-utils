@@ -1,0 +1,333 @@
+metadata:
+  catalog_version: 1.0.0
+  generated_at: '2025-10-14'
+  total_functions: 8
+  categories:
+    creation:
+    - generate_time_grid
+    - generate_time_grid_zero_duration
+    - generate_time_grid_negative_tempo
+    utility:
+    - apply_accent_pattern
+    - apply_accent_pattern_pattern
+    export:
+    - export_as_midi
+    - export_as_midi_outfile
+    - export_as_midi_accents
+  source_metadata:
+    total_functions: 8
+    total_behaviors: 17
+    functions_with_specified_tests: 0
+    functions_with_additional_tests: 8
+functions:
+  generate_time_grid:
+    name: generate_time_grid
+    original_name: generate_time_grid
+    category: creation
+    description: The function should produce a non-empty list of time grid timestamps
+      when given valid tempo, duration, and time grid parameters.
+    behaviors:
+    - The function should produce a non-empty list of time grid timestamps when given
+      valid tempo, duration, and time grid parameters.
+    - The function should handle extreme tempo values gracefully, potentially raising
+      exceptions or returning expected results within valid ranges.
+    - The function should produce a non-empty list of floating-point numbers representing
+      time grid points based on the provided tempo and duration.
+    - The function must handle tempo and duration parameters correctly without raising
+      unexpected exceptions.
+    parameters:
+    - name: list
+      type: Any
+      default: null
+      description: Parameter list
+    return_type: Any
+    validation_rules:
+    - The function must handle tempo and duration parameters correctly without raising
+      unexpected exceptions
+    - The function should produce a non-empty list of floating-point numbers representing
+      time grid points based on the provided tempo and duration
+    - The function should handle extreme tempo values gracefully, potentially raising
+      exceptions or returning expected results within valid ranges
+    - The function should produce a non-empty list of time grid timestamps when given
+      valid tempo, duration, and time grid parameters
+    error_conditions: []
+    test_coverage:
+      test_names:
+      - test_generate_time_grid_happy_path
+      - test_generate_time_grid_edge_cases
+      - test_generate_time_grid_happy_path
+      - test_generate_time_grid_type_safety
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 4
+      total_validation_rules: 4
+      has_specified_tests: false
+      has_additional_tests: true
+  apply_accent_pattern:
+    name: apply_accent_pattern
+    original_name: apply_accent_pattern
+    category: utility
+    description: The function must process a time grid and accent pattern to produce
+      a structured output where each timestamp is a float and each accent value is
+      an integer.
+    behaviors:
+    - The function must process a time grid and accent pattern to produce a structured
+      output where each timestamp is a float and each accent value is an integer.
+    - The function should handle edge cases involving single-element patterns and
+      multiple time points, ensuring proper exception handling when pattern matching
+      fails.
+    - The function should process a time grid and accent pattern to produce a list
+      of tuples representing accent information, ensuring the output matches the input
+      length and maintains tuple structure.
+    parameters:
+    - name: list
+      type: Any
+      default: null
+      description: Parameter list
+    return_type: Any
+    validation_rules:
+    - The function should handle edge cases involving single-element patterns and
+      multiple time points, ensuring proper exception handling when pattern matching
+      fails
+    - The function must process a time grid and accent pattern to produce a structured
+      output where each timestamp is a float and each accent value is an integer
+    - The function should process a time grid and accent pattern to produce a list
+      of tuples representing accent information, ensuring the output matches the input
+      length and maintains tuple structure
+    error_conditions: []
+    test_coverage:
+      test_names:
+      - test_apply_accent_pattern_happy_path
+      - test_apply_accent_pattern_edge_cases
+      - test_apply_accent_pattern_happy_path
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 3
+      total_validation_rules: 3
+      has_specified_tests: false
+      has_additional_tests: true
+  export_as_midi:
+    name: export_as_midi
+    original_name: export_as_midi
+    category: export
+    description: The function must process time grid and accent data to generate a
+      valid MIDI file and return True upon successful completion.
+    behaviors:
+    - The function must process time grid and accent data to generate a valid MIDI
+      file and return True upon successful completion.
+    - The function should handle edge cases involving time grid and accent parameters,
+      ensuring proper validation and exception handling for boundary conditions.
+    - The function must process time grid and accent data to generate a MIDI file
+      and return True upon successful completion.
+    parameters: []
+    return_type: bytes
+    validation_rules:
+    - The function must process time grid and accent data to generate a MIDI file
+      and return True upon successful completion
+    - The function should handle edge cases involving time grid and accent parameters,
+      ensuring proper validation and exception handling for boundary conditions
+    - The function must process time grid and accent data to generate a valid MIDI
+      file and return True upon successful completion
+    error_conditions: []
+    test_coverage:
+      test_names:
+      - test_export_as_midi_happy_path
+      - test_export_as_midi_edge_cases
+      - test_export_as_midi_happy_path
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 3
+      total_validation_rules: 3
+      has_specified_tests: false
+      has_additional_tests: true
+  export_as_midi_outfile:
+    name: export_as_midi_outfile
+    original_name: export_as_midi_outfile
+    category: export
+    description: The function should raise an exception when attempting to export
+      MIDI data with a None outfile parameter, ensuring proper error handling for
+      invalid output destinations.
+    behaviors:
+    - The function should raise an exception when attempting to export MIDI data with
+      a None outfile parameter, ensuring proper error handling for invalid output
+      destinations.
+    - The function should raise an exception when provided with an invalid file type
+      for output, specifically rejecting integer values for the outfile parameter.
+    - The function should handle invalid output file paths gracefully, likely by raising
+      an exception or returning an error code when the specified file cannot be written
+      to.
+    parameters:
+    - name: a
+      type: Any
+      default: null
+      description: Parameter a
+    - name: an
+      type: Any
+      default: null
+      description: Parameter an
+    return_type: bytes
+    validation_rules:
+    - The function should raise an exception when provided with an invalid file type
+      for output, specifically rejecting integer values for the outfile parameter
+    - The function should handle invalid output file paths gracefully, likely by raising
+      an exception or returning an error code when the specified file cannot be written
+      to
+    - The function should raise an exception when attempting to export MIDI data with
+      a None outfile parameter, ensuring proper error handling for invalid output
+      destinations
+    error_conditions:
+    - The function should raise an exception when provided with an invalid file type
+      for output, specifically rejecting integer values for the outfile parameter
+    - The function should handle invalid output file paths gracefully, likely by raising
+      an exception or returning an error code when the specified file cannot be written
+      to
+    - The function should raise an exception when attempting to export MIDI data with
+      a None outfile parameter, ensuring proper error handling for invalid output
+      destinations
+    test_coverage:
+      test_names:
+      - test_export_as_midi_invalid_outfile
+      - test_export_as_midi_invalid_outfile_type
+      - test_export_as_midi_invalid_outfile
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 3
+      total_validation_rules: 3
+      has_specified_tests: false
+      has_additional_tests: true
+  generate_time_grid_zero_duration:
+    name: generate_time_grid_zero_duration
+    original_name: generate_time_grid_zero_duration
+    category: creation
+    description: The function should handle zero duration inputs gracefully, likely
+      by raising an exception or returning an empty result.
+    behaviors:
+    - The function should handle zero duration inputs gracefully, likely by raising
+      an exception or returning an empty result.
+    parameters: []
+    return_type: Any
+    validation_rules:
+    - The function should handle zero duration inputs gracefully, likely by raising
+      an exception or returning an empty result
+    error_conditions: []
+    test_coverage:
+      test_names:
+      - test_generate_time_grid_zero_duration
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 1
+      total_validation_rules: 1
+      has_specified_tests: false
+      has_additional_tests: true
+  generate_time_grid_negative_tempo:
+    name: generate_time_grid_negative_tempo
+    original_name: generate_time_grid_negative_tempo
+    category: creation
+    description: The function should handle negative tempo values by raising an exception,
+      ensuring tempo is always positive.
+    behaviors:
+    - The function should handle negative tempo values by raising an exception, ensuring
+      tempo is always positive.
+    parameters: []
+    return_type: Any
+    validation_rules:
+    - The function should handle negative tempo values by raising an exception, ensuring
+      tempo is always positive
+    error_conditions: []
+    test_coverage:
+      test_names:
+      - test_generate_time_grid_negative_tempo
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 1
+      total_validation_rules: 1
+      has_specified_tests: false
+      has_additional_tests: true
+  apply_accent_pattern_pattern:
+    name: apply_accent_pattern_pattern
+    original_name: apply_accent_pattern_pattern
+    category: utility
+    description: The function should raise an exception when given an invalid pattern,
+      specifically when the pattern contains elements that cannot be processed correctly.
+    behaviors:
+    - The function should raise an exception when given an invalid pattern, specifically
+      when the pattern contains elements that cannot be processed correctly.
+    parameters: []
+    return_type: Any
+    validation_rules:
+    - The function should raise an exception when given an invalid pattern, specifically
+      when the pattern contains elements that cannot be processed correctly
+    error_conditions:
+    - The function should raise an exception when given an invalid pattern, specifically
+      when the pattern contains elements that cannot be processed correctly
+    test_coverage:
+      test_names:
+      - test_apply_accent_pattern_invalid_pattern
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 1
+      total_validation_rules: 1
+      has_specified_tests: false
+      has_additional_tests: true
+  export_as_midi_accents:
+    name: export_as_midi_accents
+    original_name: export_as_midi_accents
+    category: export
+    description: The function should process time grid generation with accent markers,
+      handling invalid accent specifications gracefully by raising an exception.
+    behaviors:
+    - The function should process time grid generation with accent markers, handling
+      invalid accent specifications gracefully by raising an exception.
+    parameters:
+    - name: accent
+      type: Any
+      default: null
+      description: Parameter accent
+    return_type: Any
+    validation_rules:
+    - The function should process time grid generation with accent markers, handling
+      invalid accent specifications gracefully by raising an exception
+    error_conditions:
+    - The function should process time grid generation with accent markers, handling
+      invalid accent specifications gracefully by raising an exception
+    test_coverage:
+      test_names:
+      - test_export_as_midi_invalid_accents
+      file_paths:
+      - test_summaries.json
+      sources:
+      - additional
+      average_alignment_score: 0
+    metadata:
+      total_behaviors: 1
+      total_validation_rules: 1
+      has_specified_tests: false
+      has_additional_tests: true

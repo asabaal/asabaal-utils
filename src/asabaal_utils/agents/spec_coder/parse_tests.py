@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class TestInfo:
+class ParsedTestInfo:
     """Represents extracted information about a single test."""
     name: str
     target_function: Optional[str]
@@ -21,12 +21,12 @@ class TestInfo:
     assertions: List[str]
 
 
-class TestVisitor(ast.NodeVisitor):
+class ASTVisitor(ast.NodeVisitor):
     """AST visitor to extract test information."""
     
     def __init__(self):
-        self.tests: List[TestInfo] = []
-        self.current_test: Optional[TestInfo] = None
+        self.tests: List[ParsedTestInfo] = []
+        self.current_test: Optional[ParsedTestInfo] = None
         self.imports: Dict[str, str] = {}  # alias -> module
         self.from_imports: Dict[str, List[str]] = {}  # module -> [names]
         self.variables: Dict[str, Any] = {}  # variable name -> value (for current test)
@@ -52,7 +52,7 @@ class TestVisitor(ast.NodeVisitor):
         """Visit test functions."""
         if node.name.startswith("test_"):
             self.variables = {}  # Reset variables for each test
-            self.current_test = TestInfo(
+            self.current_test = ParsedTestInfo(
                 name=node.name,
                 target_function=None,
                 inputs={},
@@ -209,7 +209,7 @@ def parse_test_file(file_path: Path) -> Dict[str, Any]:
             "tests": []
         }
     
-    visitor = TestVisitor()
+    visitor = ASTVisitor()
     visitor.visit(tree)
     
     return {

@@ -1,8 +1,8 @@
 You are a senior software architect analyzing code patterns and consistency across this PR.
 
 ## PR Context
-- Analyzing: 259 files
-- Categories: 9 different types
+- Analyzing: 10 files
+- Categories: 1 different types
 
 ## Analysis Focus
 Look for patterns and consistency issues:
@@ -23,191 +23,281 @@ Look for patterns and consistency issues:
    - Inconsistent error handling approaches
 
 ## Sample File Analysis
-## .env.example
-- Category: CONFIGURATION (MEDIUM)
-- Change: D (+0/-26)
-- Size: 974 bytes, 26 lines
-- Content sample:
-```
-# Environment Configuration for Asabaal Ventures Website
-# Copy this file to .env and fill in your actual values
-# Get Supabase values from your project dashboard -> Settings -> API
-
-# Supabase Configuration (required for contact forms)
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-anon-key-here
-
-# Optional: Service role key for admin operations (keep this secret!)
-# Only needed if you plan to add admin functionality later
-
-... [truncated]
-```
-
-## .gitignore
+## data_pipeline/good/processors/data_transformer.py
 - Category: UNCATEGORIZED (MEDIUM)
-- Change: D (+0/-40)
-- Size: 710 bytes, 41 lines
+- Change: A (+40/-0)
+- Size: 3153 bytes, 92 lines
 - Content sample:
 ```
-**/.claude/settings.local.json
-*.pdf
+from typing import Iterator, Dict, List, Any
+from dataclasses import dataclass
 
-# Environment variables
-.env
-.env.local
-.env.production
+@dataclass
+class TransformResult:
+    processed_count: int
+    errors: List[str]
+    processing_time: float
 
-# Local Supabase configuration (keep your keys private!)
-config/supabase-keys.js
-
-# Content Management
-# Note: You can choose to track or ignore blog content
-# Option 1: Track everything (recommended for backup)
-# content/
-
-# Option 2: Ignore drafts only (track published content)
-content/blog/drafts/
-
-# Option 3: Ignore all content (if you prefer external storage)
-# content/blog/
-
-# Migration script ou
+class DataTransformer:
+    def __init__(self, batch_size: int = 1000):
+        self.batch_size = batch_size
+        
+    def transform_large_dataset(self, data: Iterator[Dict]) -> Iterator[Dict]:
+        """Memory-efficient data transformation using batches"""
+        total_processed = 0
+        
+        for b
 ... [truncated]
 ```
 
-## AGENTIC_SYSTEM_TECHNICAL_WALKTHROUGH.md
-- Category: DOCUMENTATION (MEDIUM)
-- Change: D (+0/-345)
-- Size: 16437 bytes, 345 lines
+## data_pipeline/bad/helpers/data_processor.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+50/-0)
+- Size: 2431 bytes, 73 lines
 - Content sample:
 ```
-# Agentic PR Analysis System - Technical Walkthrough
+# DUPLICATE LOGIC WITH MEMORY ISSUES - BAD CODE
 
-*Visual guide to how the agent-calling-agents architecture works*
+def handle_dataset(dataset):
+    """Handle dataset processing - DUPLICATE OF data_helper.py"""
+    output = []
+    
+    # Same memory issue as process_all_data
+    print(f"Processing dataset with {len(dataset)} items...")
+    
+    for data_point in dataset:
+        # Same expensive transformation - duplicate code
+        transformed = expensive_transformation(data_point)
+        output.append(transformed)
+        
+    return output
 
----
-
-## System Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    PR ANALYZER ORCHESTRATOR                     │
-│                        (pr_analyzer.py)                         │
-└─────────────────────┬───────────────────────────────────────────┘
-                      │
-                      ▼
-┌────────────────
+def expensive_
 ... [truncated]
 ```
 
-## DEPLOYMENT.md
-- Category: DOCUMENTATION (MEDIUM)
-- Change: D (+0/-233)
-- Size: 7252 bytes, 233 lines
+## data_pipeline/bad/utils/data_helper.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+50/-0)
+- Size: 2307 bytes, 72 lines
 - Content sample:
 ```
-# 🚀 Deployment Guide
+# MEMORY INEFFICIENT DATA PROCESSING - BAD CODE
 
-Your website is ready to deploy! This guide covers deployment to multiple platforms with full backend functionality.
-
-## ✅ What's Already Ready
-- ✅ Blog system (static files, no database needed)
-- ✅ All website pages and styling
-- ✅ Contact forms and email subscription forms
-- ✅ Responsive design and professional layout
-
-## 🔧 Step 1: Setup Supabase Backend (5 minutes)
-
-### 1.1 Create Supabase Project
-1. Go to [supabase.com](https://supabase.com) → Sign up/Login
-2. Click **"
+def process_all_data(data_list):
+    """Process all data at once - MEMORY INTENSIVE ANTI-PATTERN"""
+    results = []
+    
+    # Load entire dataset into memory at once
+    print(f"Loading {len(data_list)} items into memory...")
+    
+    for item in data_list:
+        # Process each item without batching - memory intensive
+        processed = expensive_transformation(item)
+        results.append(processed)
+        
+        # No memory cleanup - wil
 ... [truncated]
 ```
 
-## SUPABASE_SETUP.md
-- Category: DOCUMENTATION (MEDIUM)
-- Change: D (+0/-232)
-- Size: 6368 bytes, 232 lines
+## auth_service/good/auth/auth_service.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+40/-0)
+- Size: 3609 bytes, 106 lines
 - Content sample:
 ```
-# Supabase Backend Setup Guide
+import bcrypt
+import jwt
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from dataclasses import dataclass
 
-This guide will help you set up the backend infrastructure for the Asabaal Ventures website using Supabase.
+@dataclass
+class User:
+    id: int
+    username: str
+    email: str
+    password_hash: str
+    is_active: bool = True
+    created_at: Optional[datetime] = None
 
-## 🚀 Quick Start
+@dataclass
+class AuthToken:
+    token: str
+    expires_at: datetime
+    user_id: int
 
-### Step 1: Create Supabase Project
-
-1. Go to [supabase.com](https://supabase.com)
-2. Sign up/Login with your account
-3. Click "New Project"
-4. Choose your organization
-5. Fill in project details:
-   - **Name**: `asabaal-ventures-backend`
-   - **Database Password**: Generate a secure password (save this!)
-   - **Region**: Choose closest to
+class AuthService:
+    def __init__(self, secret_key: str, token_expiry_hours: int = 24):
+        self.secret_key
 ... [truncated]
 ```
 
-## TECHNICAL_SPECIFICATION.md
-- Category: DOCUMENTATION (MEDIUM)
-- Change: D (+0/-309)
-- Size: 9752 bytes, 309 lines
+## auth_service/bad/security/user_auth.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+50/-0)
+- Size: 1917 bytes, 64 lines
 - Content sample:
 ```
-# Asabaal Ventures Multimedia Ecosystem - Technical Specification
+# CRITICAL SECURITY VULNERABILITIES - BAD CODE
 
-## 🎯 Project Overview
+class SimpleDatabase:
+    def __init__(self):
+        self.users = {}
+        
+    def get_user(self, username):
+        return self.users.get(username)
 
-**Goal**: Build a revolutionary multimedia ecosystem combining Discord community management, tiered content access, live events, gaming integration, and music experience platform.
+db = SimpleDatabase()
 
-**Timeline**: 
-- Soft Launch: Winter 2024/2025 (with 4th demo EP)
-- Full Launch: July 2026 (with debut professional album)
-
-## 🏗️ System Architecture
-
-### Core Components
-
-#### 1. Website Platform (Content Hub)
-- **Current**: Sta
+def authenticate_user(username, password):
+    """PLAIN TEXT PASSWORD COMPARISON - CRITICAL SECURITY FLAW"""
+    user = db.get_user(username)
+    
+    # CRITICAL: Comparing plain text passwords
+    if user and user.password == password:  # NEVER DO THIS!
+        return gener
 ... [truncated]
 ```
 
-## assets/images/blog/20250512-cover-image.jpg
-- Category: BLOG_CONTENT (MEDIUM)
-- Change: D (+0/-0)
-- Size: 203669 bytes, 0 lines
+## auth_service/bad/auth/login_handler.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+50/-0)
+- Size: 2841 bytes, 91 lines
 - Content sample:
 ```
-[File too large]
+# DUPLICATE AUTHENTICATION LOGIC WITH SAME SECURITY ISSUES - BAD CODE
+
+class UserDatabase:
+    def __init__(self):
+        self.accounts = {}
+        
+    def find_user(self, user):
+        return self.accounts.get(user)
+
+user_db = UserDatabase()
+
+def login_user(user, passw):
+    """Handle user login - DUPLICATE LOGIC WITH SAME SECURITY FLAWS"""
+    account = user_db.find_user(user)
+    
+    # SAME CRITICAL SECURITY ISSUE: Plain text password comparison
+    if account and account.password == pas
+... [truncated]
 ```
 
-## assets/images/blog/asabaal-ventures.jpg
-- Category: BLOG_CONTENT (MEDIUM)
-- Change: D (+0/-0)
-- Size: 288052 bytes, 0 lines
+## ecommerce_api/good/services/product_service.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+40/-0)
+- Size: 3489 bytes, 103 lines
 - Content sample:
 ```
-[File too large]
+from typing import List, Dict, Optional
+from ..models.product import Product
+
+class MockDatabase:
+    """Mock database for testing"""
+    def __init__(self):
+        self.products = []
+        
+    def query(self, model_class):
+        return MockQuery(self.products, model_class)
+        
+    def add(self, obj):
+        self.products.append(obj)
+        
+    def commit(self):
+        pass
+        
+    def refresh(self, obj):
+        pass
+
+class MockQuery:
+    def __init__(self, data, model_class
+... [truncated]
 ```
 
-## assets/images/blog/by-my-hand.jpg
-- Category: BLOG_CONTENT (MEDIUM)
-- Change: D (+0/-0)
-- Size: 336708 bytes, 0 lines
+## ecommerce_api/good/models/product.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+40/-0)
+- Size: 473 bytes, 19 lines
 - Content sample:
 ```
-[File too large]
+from dataclasses import dataclass
+from typing import Optional
+from datetime import datetime
+
+@dataclass
+class Product:
+    id: int
+    name: str
+    description: str
+    price: float
+    category: str
+    is_active: bool = True
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
+    def __post_init__(self):
+        if self.created_at is None:
+            self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
 ```
 
-## assets/images/blog/charting-a-course.jpg
-- Category: BLOG_CONTENT (MEDIUM)
-- Change: D (+0/-0)
-- Size: 349764 bytes, 0 lines
+## ecommerce_api/bad/services/product_search.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+50/-0)
+- Size: 1073 bytes, 35 lines
 - Content sample:
 ```
-[File too large]
+# SQL INJECTION VULNERABILITY - BAD CODE
+import sqlite3
+
+class Database:
+    def __init__(self, db_path):
+        self.conn = sqlite3.connect(db_path)
+        
+    def query(self, sql):
+        """Execute raw SQL query"""
+        cursor = self.conn.cursor()
+        cursor.execute(sql)
+        return cursor
+
+db = Database("products.db")
+
+def search_products(query, filters):
+    """Search products - VULNERABLE TO SQL INJECTION"""
+    products = db.query("SELECT * FROM products WHERE active = 1")
+ 
+... [truncated]
+```
+
+## ecommerce_api/bad/services/product_finder.py
+- Category: UNCATEGORIZED (MEDIUM)
+- Change: A (+50/-0)
+- Size: 1256 bytes, 40 lines
+- Content sample:
+```
+# DUPLICATE CODE WITH SQL INJECTION - BAD CODE
+import sqlite3
+
+class ProductDB:
+    def __init__(self, path):
+        self.connection = sqlite3.connect(path)
+        
+    def execute(self, sql):
+        cursor = self.connection.cursor()
+        cursor.execute(sql)
+        return cursor
+
+product_db = ProductDB("ecommerce.db")
+
+def find_products(search_term, options):
+    """Find products - DUPLICATE LOGIC WITH SAME SQL INJECTION"""
+    sql = "SELECT * FROM products WHERE active = 1"
+    
+    if s
+... [truncated]
 ```
 
 

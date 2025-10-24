@@ -1,0 +1,887 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debugging Guide &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="Contributing to spec-coder" href="contributing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Debugging Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#common-issues-and-solutions">Common Issues and Solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation-and-setup-issues">Installation and Setup Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-execution-issues">Pipeline Execution Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-generation-issues">Code Generation Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-execution-issues">Test Execution Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging-tools-and-techniques">Debugging Tools and Techniques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#logging-and-monitoring">Logging and Monitoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interactive-debugging">Interactive Debugging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-debugging">Performance Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-analysis">Error Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-error-types">Common Error Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-diagnosis-workflow">Error Diagnosis Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging-checklist">Debugging Checklist</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pre-execution-checklist">Pre-Execution Checklist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-checklist">Runtime Checklist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post-execution-checklist">Post-Execution Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-debugging">Advanced Debugging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-debug-hooks">Custom Debug Hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remote-debugging">Remote Debugging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automated-testing">Automated Testing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Debugging Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/development/debugging.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="debugging-guide">
+<h1>Debugging Guide<a class="headerlink" href="#debugging-guide" title="Link to this heading"></a></h1>
+<p>This guide provides comprehensive debugging strategies and tools for troubleshooting issues in the spec-coder system.</p>
+<section id="common-issues-and-solutions">
+<h2>Common Issues and Solutions<a class="headerlink" href="#common-issues-and-solutions" title="Link to this heading"></a></h2>
+<section id="installation-and-setup-issues">
+<h3>Installation and Setup Issues<a class="headerlink" href="#installation-and-setup-issues" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: Ollama Connection Failed
+.. code-block:: text</p>
+<blockquote>
+<div><p>Error: Failed to connect to Ollama server at <a class="reference external" href="http://localhost:11434">http://localhost:11434</a></p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Check Ollama Service</strong>:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check if Ollama is running</span>
+ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ollama
+
+<span class="c1"># Start Ollama service</span>
+ollama<span class="w"> </span>serve
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Verify Port Availability</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p># Check if port 11434 is available
+netstat -tlnp | grep 11434</p>
+<p># Kill any process using the port
+sudo fuser -k 11434/tcp</p>
+</div></blockquote>
+</li>
+<li><p><strong>Check Firewall Settings</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p># Allow port 11434 through firewall
+sudo ufw allow 11434</p>
+</div></blockquote>
+</li>
+</ol>
+<p><strong>Issue</strong>: Model Not Found
+.. code-block:: text</p>
+<blockquote>
+<div><p>Error: Model ‘llama3’ not found</p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Pull Required Models</strong>:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ollama<span class="w"> </span>pull<span class="w"> </span>llama3
+ollama<span class="w"> </span>pull<span class="w"> </span>codellama
+ollama<span class="w"> </span>pull<span class="w"> </span>qwen3-coder
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>List Available Models</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>ollama list</p>
+</div></blockquote>
+</li>
+<li><p><strong>Update Model Configuration</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl class="simple">
+<dt>“model”: {</dt><dd><p>“name”: “llama2”,  # Use available model
+“base_url”: “<a class="reference external" href="http://localhost:11434">http://localhost:11434</a>”</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="pipeline-execution-issues">
+<h3>Pipeline Execution Issues<a class="headerlink" href="#pipeline-execution-issues" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: Pipeline Stuck at Stage 2
+.. code-block:: text</p>
+<blockquote>
+<div><p>Pipeline running… (stuck for long time)</p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Check AI Model Response</strong>:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test model directly</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">OllamaClient</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">OllamaClient</span><span class="p">()</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="s2">&quot;llama3&quot;</span><span class="p">,</span> <span class="s2">&quot;Hello, world!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Increase Timeout</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl class="simple">
+<dt>“model”: {</dt><dd><p>“timeout”: 600  # Increase to 10 minutes</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+<li><p><strong>Use Faster Model</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl>
+<dt>“stages”: {</dt><dd><dl class="simple">
+<dt>“stage2”: {</dt><dd><p>“model”: “llama2”  # Faster but less capable</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+</ol>
+<p><strong>Issue</strong>: Memory Usage Too High
+.. code-block:: text</p>
+<blockquote>
+<div><p>MemoryError: Unable to allocate memory</p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Reduce Batch Size</strong>:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;pipeline&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="mi">1</span>  <span class="c1"># Process one item at a time</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Enable Streaming</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl class="simple">
+<dt>“model”: {</dt><dd><p>“stream”: True</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+<li><p><strong>Clear Cache</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Clear AI model cache
+ollama rm llama3
+ollama pull llama3</p>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="code-generation-issues">
+<h3>Code Generation Issues<a class="headerlink" href="#code-generation-issues" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: Generated Code Has Syntax Errors
+.. code-block:: text</p>
+<blockquote>
+<div><p>SyntaxError: invalid syntax</p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Enable Auto-Healing</strong>:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;stages&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;stage5&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;auto_heal&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;max_heal_attempts&quot;</span><span class="p">:</span> <span class="mi">5</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Check Model Temperature</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl>
+<dt>“model”: {</dt><dd><dl class="simple">
+<dt>“generation_config”: {</dt><dd><p>“temperature”: 0.3  # Lower for more deterministic output</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+<li><p><strong>Validate Input Specification</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>from spec_coder import SpecParser
+parser = SpecParser()
+spec = parser.parse_file(“spec.yml”)
+validation = parser.validate_spec(spec)
+print(validation.errors)</p>
+</div></blockquote>
+</li>
+</ol>
+<p><strong>Issue</strong>: Generated Code Doesn’t Match Requirements
+.. code-block:: text</p>
+<blockquote>
+<div><p>Generated function doesn’t implement required behavior</p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Improve Specification</strong>:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">functions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;calculate_total&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Calculate</span><span class="nv"> </span><span class="s">total</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">tax&quot;</span>
+<span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;amount&quot;</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;float&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tax_rate&quot;</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;float&quot;</span>
+<span class="w">    </span><span class="nt">behaviors</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Multiplies</span><span class="nv"> </span><span class="s">amount</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">(1</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">tax_rate)&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Returns</span><span class="nv"> </span><span class="s">float</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">decimal</span><span class="nv"> </span><span class="s">places&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Handles</span><span class="nv"> </span><span class="s">negative</span><span class="nv"> </span><span class="s">amounts&quot;</span>
+<span class="w">    </span><span class="nt">examples</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;calculate_total(100,</span><span class="nv"> </span><span class="s">0.1)</span><span class="nv"> </span><span class="s">returns</span><span class="nv"> </span><span class="s">110.00&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Adjust Generation Parameters</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl>
+<dt>“stages”: {</dt><dd><dl>
+<dt>“stage4”: {</dt><dd><p>“model”: “codellama”,
+“generation_config”: {</p>
+<blockquote>
+<div><p>“temperature”: 0.5,
+“max_tokens”: 4096</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+<li><p><strong>Enable Detailed Analysis</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl>
+<dt>“stages”: {</dt><dd><dl class="simple">
+<dt>“stage3”: {</dt><dd><p>“analysis_depth”: “comprehensive”</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="test-execution-issues">
+<h3>Test Execution Issues<a class="headerlink" href="#test-execution-issues" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: Tests Fail on Generated Code
+.. code-block:: text</p>
+<blockquote>
+<div><p>AssertionError: Expected 5 but got 3</p>
+</div></blockquote>
+<p><strong>Solutions</strong>:
+1. <strong>Check Test Logic</strong>:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Review generated test</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;generated_tests/test_function.py&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+     <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Enable Healing</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>config = {</dt><dd><dl>
+<dt>“stages”: {</dt><dd><dl class="simple">
+<dt>“stage5”: {</dt><dd><p>“auto_heal”: True,
+“heal_strategy”: “test_driven”</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+<li><p><strong>Manual Intervention</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Fix code manually and re-run tests
+result = orchestrator.run_stage(“stage5”, context)</p>
+</div></blockquote>
+</li>
+</ol>
+</section>
+</section>
+<section id="debugging-tools-and-techniques">
+<h2>Debugging Tools and Techniques<a class="headerlink" href="#debugging-tools-and-techniques" title="Link to this heading"></a></h2>
+<section id="logging-and-monitoring">
+<h3>Logging and Monitoring<a class="headerlink" href="#logging-and-monitoring" title="Link to this heading"></a></h3>
+<p><strong>Enable Debug Logging</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>import logging</p>
+<p># Enable debug logging
+logging.basicConfig(</p>
+<blockquote>
+<div><p>level=logging.DEBUG,
+format=’%(asctime)s - %(name)s - %(levelname)s - %(message)s’</p>
+</div></blockquote>
+<p>)</p>
+<p># Or use configuration
+config = {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“logging”: {</dt><dd><p>“level”: “DEBUG”,
+“file”: “debug.log”</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p><strong>Monitor Pipeline Progress</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>from spec_coder import IntegrationOrchestrator</p>
+<p>orchestrator = IntegrationOrchestrator()</p>
+<p># Add progress callback
+def progress_callback(stage, status, progress):</p>
+<blockquote>
+<div><p>print(f”Stage {stage}: {status} ({progress:.1f}%)”)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>result = orchestrator.run_pipeline(</dt><dd><p>spec_file=”spec.yml”,
+output_dir=”./output”,
+progress_callback=progress_callback</p>
+</dd>
+</dl>
+<p>)</p>
+</div></blockquote>
+<p><strong>Analyze Pipeline Metrics</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Get detailed pipeline metrics
+result = orchestrator.run_pipeline(“spec.yml”, “./output”)</p>
+<dl class="simple">
+<dt>for stage_name, stage_result in result.stage_results.items():</dt><dd><p>print(f”{stage_name}:”)
+print(f”  Success: {stage_result.success}”)
+print(f”  Duration: {stage_result.duration:.2f}s”)
+print(f”  Memory: {stage_result.memory_usage:.1f}MB”)
+print(f”  Errors: {len(stage_result.errors)}”)</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+<section id="interactive-debugging">
+<h3>Interactive Debugging<a class="headerlink" href="#interactive-debugging" title="Link to this heading"></a></h3>
+<p><strong>Debug Individual Stages</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>from spec_coder import IntegrationOrchestrator</p>
+<p>orchestrator = IntegrationOrchestrator()</p>
+<p># Run stages one by one
+context = orchestrator.create_context(“spec.yml”, “./output”)</p>
+<p># Stage 1
+stage1_result = orchestrator.run_stage(“stage1”, context)
+print(f”Stage 1: {stage1_result.success}”)</p>
+<p># Stage 2
+if stage1_result.success:</p>
+<blockquote>
+<div><p>context = orchestrator.update_context(context, stage1_result)
+stage2_result = orchestrator.run_stage(“stage2”, context)
+print(f”Stage 2: {stage2_result.success}”)</p>
+</div></blockquote>
+</div></blockquote>
+<p><strong>Inspect Intermediate Results</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Check parsed specification
+from spec_coder import SpecParser
+parser = SpecParser()
+spec = parser.parse_file(“spec.yml”)
+print(f”Functions: {len(spec.functions)}”)
+print(f”Behaviors: {len(spec.behaviors)}”)</p>
+<p># Check generated tests
+from spec_coder import CodeGenerator
+generator = CodeGenerator()
+test_result = generator.generate_tests(spec)
+print(f”Test files: {test_result.files_created}”)</p>
+</div></blockquote>
+<p><strong>Test AI Model Responses</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>from spec_coder import OllamaClient</p>
+<p>client = OllamaClient()</p>
+<p># Test simple prompt
+response = client.generate(“llama3”, “Write a Python function that adds two numbers.”)
+print(response)</p>
+<p># Test with specification
+spec_prompt = “””
+Generate a Python function based on this specification:
+- Name: calculate_area
+- Parameters: width (float), height (float)
+- Returns: float (area)
+- Behavior: multiplies width by height
+“””
+response = client.generate(“codellama”, spec_prompt)
+print(response)</p>
+</div></blockquote>
+</section>
+<section id="performance-debugging">
+<h3>Performance Debugging<a class="headerlink" href="#performance-debugging" title="Link to this heading"></a></h3>
+<p><strong>Profile Pipeline Performance</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>import cProfile
+import pstats</p>
+<p># Profile pipeline execution
+profiler = cProfile.Profile()
+profiler.enable()</p>
+<p>result = orchestrator.run_pipeline(“spec.yml”, “./output”)</p>
+<p>profiler.disable()
+stats = pstats.Stats(profiler)
+stats.sort_stats(‘cumulative’)
+stats.print_stats(10)  # Top 10 functions</p>
+</div></blockquote>
+<p><strong>Memory Usage Analysis</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>import tracemalloc</p>
+<p># Start memory tracing
+tracemalloc.start()</p>
+<p>result = orchestrator.run_pipeline(“spec.yml”, “./output”)</p>
+<p># Get memory statistics
+current, peak = tracemalloc.get_traced_memory()
+print(f”Current memory usage: {current / 1024 / 1024:.1f} MB”)
+print(f”Peak memory usage: {peak / 1024 / 1024:.1f} MB”)</p>
+<p>tracemalloc.stop()</p>
+</div></blockquote>
+<p><strong>AI Model Performance</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p>import time</p>
+<p>from spec_coder import OllamaClient</p>
+<p>client = OllamaClient()</p>
+<p># Test model response times
+models = [“llama2”, “llama3”, “codellama”]
+prompt = “Write a simple Python function.”</p>
+<dl>
+<dt>for model in models:</dt><dd><p>start_time = time.time()
+response = client.generate(model, prompt)
+end_time = time.time()</p>
+<p>print(f”{model}: {end_time - start_time:.2f}s ({len(response)} chars)”)</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+</section>
+<section id="error-analysis">
+<h2>Error Analysis<a class="headerlink" href="#error-analysis" title="Link to this heading"></a></h2>
+<section id="common-error-types">
+<h3>Common Error Types<a class="headerlink" href="#common-error-types" title="Link to this heading"></a></h3>
+<p><strong>Specification Errors</strong>:
+- Invalid YAML syntax
+- Missing required fields
+- Type mismatches
+- Circular dependencies</p>
+<p><strong>AI Model Errors</strong>:
+- Model not available
+- Timeout exceeded
+- Invalid response format
+- Content policy violations</p>
+<p><strong>Pipeline Errors</strong>:
+- Stage dependency failures
+- Resource exhaustion
+- File system issues
+- Network connectivity problems</p>
+<p><strong>Code Generation Errors</strong>:
+- Syntax errors
+- Logic errors
+- Import errors
+- Type errors</p>
+</section>
+<section id="error-diagnosis-workflow">
+<h3>Error Diagnosis Workflow<a class="headerlink" href="#error-diagnosis-workflow" title="Link to this heading"></a></h3>
+<p><strong>1. Identify Error Location</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Check which stage failed
+result = orchestrator.run_pipeline(“spec.yml”, “./output”)</p>
+<dl class="simple">
+<dt>for stage_name, stage_result in result.stage_results.items():</dt><dd><dl class="simple">
+<dt>if not stage_result.success:</dt><dd><p>print(f”Failed stage: {stage_name}”)
+print(f”Error: {stage_result.error}”)
+print(f”Traceback: {stage_result.traceback}”)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>2. Analyze Error Context</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Get detailed error information
+failed_stage = result.get_failed_stage()</p>
+<p>print(f”Stage: {failed_stage.name}”)
+print(f”Input: {failed_stage.input_data}”)
+print(f”Configuration: {failed_stage.config}”)
+print(f”Environment: {failed_stage.environment}”)</p>
+</div></blockquote>
+<p><strong>3. Reproduce Error</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Create minimal reproduction case
+minimal_spec = “””
+project_name: “Test”
+functions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>name: “test_func”
+description: “Test function”
+parameters: []
+return_type: “str”</p></li>
+</ul>
+</div></blockquote>
+<p>“””</p>
+<p># Save minimal spec
+with open(“minimal_spec.yml”, “w”) as f:</p>
+<blockquote>
+<div><p>f.write(minimal_spec)</p>
+</div></blockquote>
+<p># Test with minimal spec
+result = orchestrator.run_pipeline(“minimal_spec.yml”, “./minimal_output”)</p>
+</div></blockquote>
+<p><strong>4. Test Fix</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><p># Apply potential fix
+config_fix = {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“model”: {</dt><dd><p>“timeout”: 600,
+“temperature”: 0.3</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+<p>orchestrator = IntegrationOrchestrator(config=config_fix)
+result = orchestrator.run_pipeline(“spec.yml”, “./fixed_output”)</p>
+</div></blockquote>
+</section>
+</section>
+<section id="debugging-checklist">
+<h2>Debugging Checklist<a class="headerlink" href="#debugging-checklist" title="Link to this heading"></a></h2>
+<section id="pre-execution-checklist">
+<h3>Pre-Execution Checklist<a class="headerlink" href="#pre-execution-checklist" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>[ ] Ollama service is running</p></li>
+<li><p>[ ] Required models are pulled</p></li>
+<li><p>[ ] Specification file is valid</p></li>
+<li><p>[ ] Output directory exists and is writable</p></li>
+<li><p>[ ] Configuration is properly set</p></li>
+<li><p>[ ] Dependencies are installed</p></li>
+<li><p>[ ] Sufficient memory and disk space</p></li>
+</ul>
+</section>
+<section id="runtime-checklist">
+<h3>Runtime Checklist<a class="headerlink" href="#runtime-checklist" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>[ ] Monitor memory usage</p></li>
+<li><p>[ ] Check network connectivity</p></li>
+<li><p>[ ] Watch for timeout errors</p></li>
+<li><p>[ ] Verify AI model responses</p></li>
+<li><p>[ ] Log all errors and warnings</p></li>
+<li><p>[ ] Track pipeline progress</p></li>
+</ul>
+</section>
+<section id="post-execution-checklist">
+<h3>Post-Execution Checklist<a class="headerlink" href="#post-execution-checklist" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>[ ] Review generated code quality</p></li>
+<li><p>[ ] Run all tests successfully</p></li>
+<li><p>[ ] Check documentation completeness</p></li>
+<li><p>[ ] Verify performance metrics</p></li>
+<li><p>[ ] Analyze error logs</p></li>
+<li><p>[ ] Validate output structure</p></li>
+</ul>
+</section>
+</section>
+<section id="advanced-debugging">
+<h2>Advanced Debugging<a class="headerlink" href="#advanced-debugging" title="Link to this heading"></a></h2>
+<section id="custom-debug-hooks">
+<h3>Custom Debug Hooks<a class="headerlink" href="#custom-debug-hooks" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DebugOrchestrator</span><span class="p">(</span><span class="n">IntegrationOrchestrator</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="c1"># Log stage start</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] Starting </span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] Context: </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Run stage</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run_stage</span><span class="p">(</span><span class="n">stage_name</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="c1"># Log stage result</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] </span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2"> result: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Store debug data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug_data</span><span class="p">[</span><span class="n">stage_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">context</span><span class="p">,</span>
+            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+<section id="remote-debugging">
+<h3>Remote Debugging<a class="headerlink" href="#remote-debugging" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable remote debugging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">debugpy</span>
+
+<span class="n">debugpy</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">5678</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Waiting for debugger attach...&quot;</span><span class="p">)</span>
+<span class="n">debugpy</span><span class="o">.</span><span class="n">wait_for_client</span><span class="p">()</span>
+
+<span class="c1"># Run pipeline with debugger</span>
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span><span class="s2">&quot;spec.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;./output&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="automated-testing">
+<h3>Automated Testing<a class="headerlink" href="#automated-testing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestSpecCoderDebugging</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_pipeline_with_debug_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test pipeline with known good specification.&quot;&quot;&quot;</span>
+        <span class="n">spec_file</span> <span class="o">=</span> <span class="s2">&quot;tests/fixtures/debug_spec.yml&quot;</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;/tmp/debug_output&quot;</span>
+
+        <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">functions_created</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">all_tests_passed</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_error_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test error handling with invalid specification.&quot;&quot;&quot;</span>
+        <span class="n">spec_file</span> <span class="o">=</span> <span class="s2">&quot;tests/fixtures/invalid_spec.yml&quot;</span>
+
+        <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="s2">&quot;/tmp/error_output&quot;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span>
+        <span class="k">assert</span> <span class="s2">&quot;ValidationError&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">error</span>
+</pre></div>
+</div>
+<p>This debugging guide provides comprehensive strategies for identifying, diagnosing, and resolving issues in the spec-coder system. Use these tools and techniques to maintain system reliability and performance.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing to spec-coder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

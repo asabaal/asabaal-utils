@@ -1,0 +1,27 @@
+description: A simple example that demonstrates the spec-coder pipeline by implementing
+  a function that multiplies integers by 2.
+interfaces:
+- methods:
+  - description: Multiplies the input integer by 2 and returns the result. This is
+      the ONLY function in this module.
+    name: basic_function
+    parameters:
+    - description: The integer to multiply by 2
+      name: x
+      type: int
+    returns:
+      description: The input integer multiplied by 2
+      type: int
+  name: SimpleInterface
+requirements:
+- description: Implement a function that takes an integer and returns the same integer
+    multiplied by 2. This is the ONLY function that should be implemented.
+  id: req-001
+  title: Basic Multiply Function
+  validation:
+  - file: test_basic_function.py
+    target: test_basic_function
+    type: unit
+spec_id: example-001
+title: 'Example: Multiply by 2 Function'
+version: 1.0.0

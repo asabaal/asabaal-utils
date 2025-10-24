@@ -1,16 +1,14 @@
 {
-  "merge_readiness_score": 15,
+  "merge_readiness_score": 25,
   "status": "NOT_READY",
-  "blocking_issues": 4,
-  "warning_issues": 3,
-  "recommendation": "PR should be split into smaller, focused changes. Multiple critical security and quality issues need to be addressed before merging.",
+  "blocking_issues": 5,
+  "warning_issues": 8,
+  "recommendation": "This PR introduces a large volume of new code with significant quality and security issues. It includes multiple instances of bad code patterns such as memory inefficiency, duplicate logic, SQL injection vulnerabilities, and critical security flaws. The PR should not be merged in its current state and requires substantial refactoring, code review, and security assessment before consideration.",
   "key_concerns": [
-    "Multiple known security vulnerabilities including SQL injection risks in product_search.py and product_finder.py",
-    "Significant code duplication with shared issues (auth handlers, data processors)",
-    "Memory inefficient implementations flagged in data processing modules",
-    "Files explicitly marked as 'BAD CODE' being introduced to codebase",
-    "Mixed good/bad implementation patterns suggesting experimental/learning code",
-    "Large PR scope (460 lines) combining multiple concerns makes review difficult",
-    "Authentication and security changes mixed with data processing and business logic"
+    "Multiple files contain critical security vulnerabilities including SQL injection and weak authentication logic",
+    "Large number of new files with poor code quality and anti-patterns like memory-intensive data processing",
+    "Duplicate code across modules leading to maintenance and consistency issues",
+    "Lack of proper categorization and organization of code changes",
+    "No evidence of testing or validation for the new code introduced"
   ]
 }

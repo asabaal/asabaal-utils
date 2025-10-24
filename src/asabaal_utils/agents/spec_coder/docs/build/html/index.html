@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spec-Coder Agent Documentation &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=30646c52"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Spec-Coder Agent Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="spec-coder-agent-documentation">
+<h1>Spec-Coder Agent Documentation<a class="headerlink" href="#spec-coder-agent-documentation" title="Link to this heading"></a></h1>
+<p>Welcome to the comprehensive documentation for the Spec-Coder Agent, an AI-powered system for automated software development from specifications.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-methods">Installation Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#ollama-setup">Ollama Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/overview.html">System Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#what-is-spec-coder">What is spec-coder?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#key-features">Key Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#architecture">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#use-cases">Use Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/overview.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/pipeline.html">Pipeline Stages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#stage-1-specification-to-test-scaffold">Stage 1: Specification to Test Scaffold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#stage-2-test-scaffold-to-requirements">Stage 2: Test Scaffold to Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#stage-3-requirements-to-alignment">Stage 3: Requirements to Alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#stage-4-alignment-to-code-generation">Stage 4: Alignment to Code Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#stage-5-healer-self-healing">Stage 5: Healer (Self-Healing)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#pipeline-orchestration">Pipeline Orchestration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#error-handling-and-recovery">Error Handling and Recovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#configuration-options">Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pipeline.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/configuration.html">Configuration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#configuration-methods">Configuration Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#environment-variables">Environment Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#configuration-files">Configuration Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#constructor-configuration">Constructor Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#model-configuration">Model Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#pipeline-configuration">Pipeline Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#output-configuration">Output Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#performance-configuration">Performance Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#logging-configuration">Logging Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#advanced-configuration">Advanced Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#configuration-validation">Configuration Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#example-complete-configuration">Example: Complete Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/configuration.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/examples.html">Usage Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#individual-component-usage">Individual Component Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#advanced-examples">Advanced Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#real-world-scenarios">Real-World Scenarios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#error-handling-examples">Error Handling Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#integration-examples">Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#performance-optimization">Performance Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/examples.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tester.html">Tester API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/healer.html">Healer API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spec_parser.html">SpecParser API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/align_behaviors.html">BehavioralAligner API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/compare_behaviors.html">BehaviorComparator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ollama_client.html">OllamaClient API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/modules.html#core-modules">Core Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/modules.html#supporting-modules">Supporting Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/modules.html#utility-modules">Utility Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/modules.html#module-index">Module Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/generator.html">CodeGenerator API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#core-methods">Core Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#generationresult-class">GenerationResult Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#performance-tips">Performance Tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generator.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/orchestrator.html">IntegrationOrchestrator API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#core-methods">Core Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#stage-methods">Stage Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#utility-methods">Utility Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/orchestrator.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/tester.html">Tester API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/tester.html#core-methods">Core Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tester.html#testresult-class">TestResult Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tester.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tester.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tester.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/healer.html">Healer API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/healer.html#core-methods">Core Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/healer.html#healresult-class">HealResult Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/healer.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/healer.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/overview.html">Testing Strategy Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#testing-philosophy">Testing Philosophy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#test-organization">Test Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#testing-tools-and-frameworks">Testing Tools and Frameworks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#test-data-management">Test Data Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#continuous-integration">Continuous Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#test-coverage">Test Coverage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#running-tests">Running Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#test-markers">Test Markers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/overview.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture/design.html">System Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#design-principles">Design Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#system-architecture">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#core-components">Core Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#data-models">Data Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#quality-assurance">Quality Assurance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/design.html#extensibility">Extensibility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/workflow.html">Workflow Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#overall-system-workflow">Overall System Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#stage-1-specification-to-test-scaffold">Stage 1: Specification to Test Scaffold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#stage-2-test-scaffold-to-requirements">Stage 2: Test Scaffold to Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#stage-3-requirements-to-alignment">Stage 3: Requirements to Alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#stage-4-alignment-to-code-generation">Stage 4: Alignment to Code Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#stage-5-healer-self-healing">Stage 5: Healer (Self-Healing)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#error-handling-workflows">Error Handling Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#performance-optimization-workflows">Performance Optimization Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#integration-workflows">Integration Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/workflow.html#monitoring-and-observability-flow">Monitoring and Observability Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/components.html">Component Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture/components.html#core-components">Core Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/components.html#pipeline-stages">Pipeline Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/components.html#supporting-components">Supporting Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/components.html#component-interactions">Component Interactions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/contributing.html">Contributing to spec-coder</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#code-style-and-standards">Code Style and Standards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#project-structure">Project Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#contribution-guidelines">Contribution Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#release-process">Release Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#community-guidelines">Community Guidelines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development/debugging.html">Debugging Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/debugging.html#common-issues-and-solutions">Common Issues and Solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/debugging.html#debugging-tools-and-techniques">Debugging Tools and Techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/debugging.html#error-analysis">Error Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/debugging.html#debugging-checklist">Debugging Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/debugging.html#advanced-debugging">Advanced Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development/changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#unreleased">[Unreleased]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#id1">[1.2.0] - 2024-01-15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#id2">[1.1.0] - 2023-12-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#id3">[1.0.0] - 2023-10-15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#id4">[0.9.0] - 2023-09-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#id5">[0.8.0] - 2023-08-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#version-history-summary">Version History Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#upcoming-releases">Upcoming Releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/changelog.html#release-process">Release Process</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Spec-Coder Agent is a sophisticated AI-powered system that automatically writes software from specifications. It transforms OpenSpec/YAML specifications into production-ready code through a multi-stage pipeline that includes test generation, requirement extraction, behavioral alignment, code generation, and self-healing.</p>
+<section id="key-features">
+<h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Automated Software Development</strong>: Write complete software applications from specifications</p></li>
+<li><p><strong>Test-First Approach</strong>: Generate tests first to understand requirements thoroughly</p></li>
+<li><p><strong>Behavioral Alignment</strong>: Ensure generated code matches specified behaviors through AI analysis</p></li>
+<li><p><strong>Self-Healing</strong>: Automatically detect and fix code issues before human intervention</p></li>
+<li><p><strong>Pipeline Orchestration</strong>: Multi-stage processing with robust error handling and recovery</p></li>
+<li><p><strong>Extensible Architecture</strong>: Modular design for easy customization and integration</p></li>
+</ul>
+</section>
+<section id="quick-start">
+<h3>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install the agent</span>
+pip<span class="w"> </span>install<span class="w"> </span>asabaal-utils<span class="o">[</span>spec-coder<span class="o">]</span>
+
+<span class="c1"># Run a complete pipeline</span>
+spec-coder<span class="w"> </span>run<span class="w"> </span>--spec<span class="w"> </span>your_spec.yml<span class="w"> </span>--output<span class="w"> </span>./results
+
+<span class="c1"># Generate tests only</span>
+spec-coder<span class="w"> </span>generate<span class="w"> </span>--spec<span class="w"> </span>your_spec.yml<span class="w"> </span>--output<span class="w"> </span>./tests
+</pre></div>
+</div>
+</section>
+<section id="pipeline-stages">
+<h3>Pipeline Stages<a class="headerlink" href="#pipeline-stages" title="Link to this heading"></a></h3>
+<p>The Spec-Coder Agent operates through a comprehensive multi-stage pipeline:</p>
+<ol class="arabic simple">
+<li><p><strong>Stage 1</strong>: Specification to Test Scaffold
+- Generates comprehensive test suites from specifications
+- Creates test scaffolds to understand requirements thoroughly</p></li>
+<li><p><strong>Stage 2</strong>: Test Scaffold to Requirements
+- Extracts logical requirements from generated test scaffolds
+- Analyzes test behaviors to derive implementation requirements</p></li>
+<li><p><strong>Stage 3</strong>: Requirements to Alignment
+- Performs behavioral alignment between requirements and test behaviors
+- Identifies gaps and ensures comprehensive coverage</p></li>
+<li><p><strong>Stage 4</strong>: Alignment to Code Generation
+- Generates the actual software code based on aligned requirements
+- Creates production-ready implementation</p></li>
+<li><p><strong>Stage 5</strong>: Self-Healing
+- Executes tests on generated code
+- Automatically detects and fixes failures using AI
+- Escalates to non-local AI or human only if healing fails</p></li>
+</ol>
+<p>Each stage is designed to be independently executable while maintaining seamless integration with the overall pipeline.</p>
+</section>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

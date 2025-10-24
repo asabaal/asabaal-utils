@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>asabaal_utils.agents.spec_coder.healer.enforce_signature &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/generator.html">CodeGenerator API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">asabaal_utils.agents.spec_coder.healer.enforce_signature</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for asabaal_utils.agents.spec_coder.healer.enforce_signature</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Signature Enforcer - Ensures functions match canonical signatures</span>
+<span class="sd">Simplified version using string manipulation instead of AST</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<div class="viewcode-block" id="SignatureEnforcer">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SignatureEnforcer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enforces canonical signatures on generated functions.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="SignatureEnforcer.__init__">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">healer_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">catalog_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;logic_catalog/functional_catalog.yaml&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">healer_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">healer_dir</span><span class="p">)</span>
+        <span class="c1"># Resolve catalog path relative to healer directory parent (generator directory)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">catalog_path</span><span class="p">)</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="n">catalog_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">healer_dir</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">catalog_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">catalog_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">catalog_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="SignatureEnforcer.load_catalog">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.load_catalog">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the functional logic catalog.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Catalog not found: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SignatureEnforcer.get_canonical_signature">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.get_canonical_signature">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_canonical_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the canonical signature for a function from the catalog.&quot;&quot;&quot;</span>
+        <span class="n">functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;functions&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">function_info</span> <span class="o">=</span> <span class="n">functions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="p">{})</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">function_info</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="c1"># Build signature from catalog info</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">function_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">param_strs</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">param_name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">)</span>
+            <span class="n">param_type</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">param_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">param_type</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">param_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">param_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">signature</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_strs</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="n">signature</span></div>
+
+    
+<div class="viewcode-block" id="SignatureEnforcer.parse_signature">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.parse_signature">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse a signature string into name and parameters.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">signature</span><span class="p">,</span> <span class="p">[]</span>
+        
+        <span class="n">name_part</span> <span class="o">=</span> <span class="n">signature</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">params_part</span> <span class="o">=</span> <span class="n">signature</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">params_part</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param_str</span> <span class="ow">in</span> <span class="n">params_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+                <span class="n">param_str</span> <span class="o">=</span> <span class="n">param_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_str</span><span class="p">:</span>
+                    <span class="n">param_name</span> <span class="o">=</span> <span class="n">param_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">param_type</span><span class="p">:</span>
+                        <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="n">default</span> <span class="o">=</span> <span class="n">param_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
+                        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param_type</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="n">default</span>
+                    <span class="p">})</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">param_str</span><span class="p">,</span>
+                        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">None</span>
+                    <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">name_part</span><span class="p">,</span> <span class="n">params</span></div>
+
+    
+<div class="viewcode-block" id="SignatureEnforcer.enforce_signature">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.enforce_signature">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">enforce_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_src</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rewrite a Python function to match its canonical signature using string manipulation.&quot;&quot;&quot;</span>
+        <span class="c1"># Get canonical signature</span>
+        <span class="n">canonical_sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_canonical_signature</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">canonical_sig</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  No canonical signature found for </span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">py_src</span>
+        
+        <span class="c1"># Parse the canonical signature to add smoke-safe defaults</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_signature</span><span class="p">(</span><span class="n">canonical_sig</span><span class="p">)</span>
+        
+        <span class="c1"># Add smoke-safe defaults to all parameters</span>
+        <span class="n">param_strs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">param_name</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">param_type</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+            
+            <span class="c1"># Add smoke-safe defaults based on type</span>
+            <span class="k">if</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+            <span class="k">elif</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;0.0&#39;</span>
+            <span class="k">elif</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;&quot;&quot;&#39;</span>
+            <span class="k">elif</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s1">&#39;list&#39;</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;[]&#39;</span>
+            <span class="k">elif</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+            
+            <span class="n">param_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">param_type</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Build new signature with defaults</span>
+        <span class="n">new_sig</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_strs</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+        
+        <span class="c1"># Split into lines</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">py_src</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Find the function definition line</span>
+        <span class="n">func_line_idx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;def </span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s1">(&#39;</span><span class="p">):</span>
+                <span class="n">func_line_idx</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="k">break</span>
+        
+        <span class="k">if</span> <span class="n">func_line_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Function </span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2"> not found in source&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">py_src</span>
+        
+        <span class="c1"># Get the indentation of the original function</span>
+        <span class="n">original_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">func_line_idx</span><span class="p">]</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+        
+        <span class="c1"># Replace the signature line</span>
+        <span class="n">new_signature</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;def </span><span class="si">{</span><span class="n">new_sig</span><span class="si">}</span><span class="s1">:&#39;</span>
+        <span class="n">lines</span><span class="p">[</span><span class="n">func_line_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_signature</span>
+        
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SignatureEnforcer.add_smoke_safe_defaults">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.add_smoke_safe_defaults">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_smoke_safe_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_src</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add smoke-safe defaults to function parameters.&quot;&quot;&quot;</span>
+        <span class="c1"># This is handled by the signature enforcement</span>
+        <span class="k">return</span> <span class="n">py_src</span></div>
+
+    
+<div class="viewcode-block" id="SignatureEnforcer.add_impl_wrapper">
+<a class="viewcode-back" href="../../../../../api/modules.html#asabaal_utils.agents.spec_coder.healer.SignatureEnforcer.add_impl_wrapper">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_impl_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_src</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a private _impl() wrapper for strict validation.&quot;&quot;&quot;</span>
+        <span class="c1"># For now, skip the complex wrapper implementation</span>
+        <span class="k">return</span> <span class="n">py_src</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test signature enforcement on a sample function.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+    <span class="n">enforcer</span> <span class="o">=</span> <span class="n">SignatureEnforcer</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+    
+    <span class="c1"># Test with a sample function</span>
+    <span class="n">sample_code</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;def export_as_midi(such, lists, are, invalid):</span>
+<span class="s1">    &quot;&quot;&quot;Test function.&quot;&quot;&quot;</span>
+<span class="s1">    pass</span>
+<span class="s1">&#39;&#39;&#39;</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original code:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sample_code</span><span class="p">)</span>
+    
+    <span class="n">enforced_code</span> <span class="o">=</span> <span class="n">enforcer</span><span class="o">.</span><span class="n">enforce_signature</span><span class="p">(</span><span class="n">sample_code</span><span class="p">,</span> <span class="s2">&quot;export_as_midi&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enforced code:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">enforced_code</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

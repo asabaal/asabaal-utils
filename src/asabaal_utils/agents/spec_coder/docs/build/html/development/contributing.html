@@ -1,0 +1,624 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing to spec-coder &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Debugging Guide" href="debugging.html" />
+    <link rel="prev" title="Component Documentation" href="../architecture/components.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to spec-coder</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-workflow">Development Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-style-and-standards">Code Style and Standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-code-style">Python Code Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-standards">Testing Standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#documentation-standards">Documentation Standards</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#directory-layout">Directory Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-organization">Component Organization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contribution-guidelines">Contribution Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pull-request-process">Pull Request Process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#release-process">Release Process</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-management">Version Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changelog-maintenance">Changelog Maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#release-checklist">Release Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#community-guidelines">Community Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-of-conduct">Code of Conduct</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#communication-channels">Communication Channels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recognition-and-appreciation">Recognition and Appreciation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing to spec-coder</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/development/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing-to-spec-coder">
+<h1>Contributing to spec-coder<a class="headerlink" href="#contributing-to-spec-coder" title="Link to this heading"></a></h1>
+<p>This guide provides information for developers who want to contribute to the spec-coder project. We welcome contributions of all types, including bug fixes, new features, documentation improvements, and test enhancements.</p>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="development-environment-setup">
+<h3>Development Environment Setup<a class="headerlink" href="#development-environment-setup" title="Link to this heading"></a></h3>
+<p><strong>Prerequisites</strong>:
+- Python 3.8 or higher
+- Git
+- Ollama (for AI model testing)
+- Docker (optional, for containerized development)</p>
+<p><strong>Setup Steps</strong>:</p>
+<ol class="arabic">
+<li><p><strong>Fork and Clone</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>git clone <a class="reference external" href="https://github.com/your-username/spec-coder.git">https://github.com/your-username/spec-coder.git</a>
+cd spec-coder</p>
+</div></blockquote>
+</li>
+<li><p><strong>Create Virtual Environment</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>python -m venv venv
+source venv/bin/activate  # On Windows: venvScriptsactivate</p>
+</div></blockquote>
+</li>
+<li><p><strong>Install Dependencies</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>pip install -e “.[dev]”
+pip install -r requirements-dev.txt</p>
+</div></blockquote>
+</li>
+<li><p><strong>Install Pre-commit Hooks</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>pre-commit install</p>
+</div></blockquote>
+</li>
+<li><p><strong>Setup Ollama</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p># Install Ollama
+curl -fsSL <a class="reference external" href="https://ollama.ai/install.sh">https://ollama.ai/install.sh</a> | sh</p>
+<p># Start Ollama service
+ollama serve</p>
+<p># Pull required models
+ollama pull llama3
+ollama pull codellama</p>
+</div></blockquote>
+</li>
+<li><p><strong>Run Tests</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>pytest tests/ -v</p>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="development-workflow">
+<h3>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>1. Create a Feature Branch</strong>:</dt><dd><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/your-feature-name
+</pre></div>
+</div>
+</dd>
+<dt><strong>2. Make Changes</strong>:</dt><dd><ul class="simple">
+<li><p>Write code following the style guidelines</p></li>
+<li><p>Add tests for new functionality</p></li>
+<li><p>Update documentation as needed</p></li>
+</ul>
+</dd>
+<dt><strong>3. Run Quality Checks</strong>:</dt><dd><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run linting</span>
+flake8<span class="w"> </span>src/
+black<span class="w"> </span>src/
+isort<span class="w"> </span>src/
+
+<span class="c1"># Run type checking</span>
+mypy<span class="w"> </span>src/
+
+<span class="c1"># Run tests</span>
+pytest<span class="w"> </span>tests/<span class="w"> </span>--cov<span class="o">=</span>src/
+
+<span class="c1"># Run security checks</span>
+bandit<span class="w"> </span>-r<span class="w"> </span>src/
+</pre></div>
+</div>
+</dd>
+<dt><strong>4. Commit Changes</strong>:</dt><dd><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add your feature description&quot;</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>5. Push and Create Pull Request</strong>:</dt><dd><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/your-feature-name
+<span class="c1"># Create PR on GitHub</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</section>
+</section>
+<section id="code-style-and-standards">
+<h2>Code Style and Standards<a class="headerlink" href="#code-style-and-standards" title="Link to this heading"></a></h2>
+<section id="python-code-style">
+<h3>Python Code Style<a class="headerlink" href="#python-code-style" title="Link to this heading"></a></h3>
+<p>We follow the following Python style guidelines:</p>
+<p><strong>Formatting</strong>:
+- Use <cite>black</cite> for code formatting
+- Use <cite>isort</cite> for import sorting
+- Maximum line length: 88 characters</p>
+<p><strong>Linting</strong>:
+- Use <cite>flake8</cite> for linting
+- Follow PEP 8 guidelines
+- Use type hints where appropriate</p>
+<p><strong>Documentation</strong>:
+- Use docstrings for all public functions and classes
+- Follow Google or NumPy docstring style
+- Include type hints in function signatures</p>
+<p><strong>Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_code</span><span class="p">(</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">Specification</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;llama3&quot;</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GenerationResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate code from specification.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spec: The specification to generate code from</span>
+<span class="sd">        model: The AI model to use for generation</span>
+<span class="sd">        config: Optional configuration parameters</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        GenerationResult containing the generated code and metadata</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        GenerationError: If code generation fails</span>
+<span class="sd">        ValidationError: If specification is invalid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-standards">
+<h3>Testing Standards<a class="headerlink" href="#testing-standards" title="Link to this heading"></a></h3>
+<p><strong>Test Structure</strong>:
+- Use <cite>pytest</cite> for testing
+- Place tests in <cite>tests/</cite> directory
+- Mirror source directory structure in tests</p>
+<p><strong>Test Coverage</strong>:
+- Aim for &gt;80% code coverage
+- Test all public functions and classes
+- Include edge cases and error conditions</p>
+<p><strong>Test Naming</strong>:
+- Use descriptive test names
+- Follow pattern: <cite>test_&lt;function&gt;_&lt;scenario&gt;</cite></p>
+<p><strong>Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span><span class="p">,</span> <span class="n">Specification</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestCodeGenerator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_generate_code_success</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test successful code generation.&quot;&quot;&quot;</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">Specification</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">functions</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">()</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_generate_code_invalid_spec_raises_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test that invalid specification raises error.&quot;&quot;&quot;</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Invalid spec</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="n">ValidationError</span><span class="p">):</span>
+            <span class="n">generator</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="documentation-standards">
+<h3>Documentation Standards<a class="headerlink" href="#documentation-standards" title="Link to this heading"></a></h3>
+<p><strong>Documentation Types</strong>:
+- <strong>API Documentation</strong>: Docstrings and type hints
+- <strong>User Documentation</strong>: Guides and tutorials
+- <strong>Developer Documentation</strong>: Architecture and contributing
+- <strong>Examples</strong>: Code examples and use cases</p>
+<p><strong>Documentation Style</strong>:
+- Use clear, concise language
+- Include code examples
+- Provide step-by-step instructions
+- Use consistent formatting</p>
+<p><strong>Review Process</strong>:
+- All documentation changes require review
+- Documentation should be updated with code changes
+- Include documentation in pull request reviews</p>
+</section>
+</section>
+<section id="project-structure">
+<h2>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h2>
+<section id="directory-layout">
+<h3>Directory Layout<a class="headerlink" href="#directory-layout" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>spec-coder/
+├── src/
+│   └── spec_coder/
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── orchestrator.py
+│       ├── generator.py
+│       ├── tester.py
+│       ├── healer/
+│       │   ├── __init__.py
+│       │   └── heal.py
+│       └── utils/
+│           ├── __init__.py
+│           ├── config.py
+│           └── logging.py
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── fixtures/
+├── docs/
+│   ├── source/
+│   │   ├── user_guide/
+│   │   ├── architecture/
+│   │   ├── development/
+│   │   └── api/
+│   └── build/
+├── examples/
+├── scripts/
+├── requirements.txt
+├── requirements-dev.txt
+├── setup.py
+├── pyproject.toml
+├── README.md
+└── CONTRIBUTING.md
+</pre></div>
+</div>
+</section>
+<section id="component-organization">
+<h3>Component Organization<a class="headerlink" href="#component-organization" title="Link to this heading"></a></h3>
+<p><strong>Core Components</strong>:
+- <cite>orchestrator.py</cite>: Main pipeline coordination
+- <cite>generator.py</cite>: Code generation logic
+- <cite>tester.py</cite>: Test execution and validation
+- <cite>healer/</cite>: Self-healing functionality</p>
+<p><strong>Utilities</strong>:
+- <cite>utils/config.py</cite>: Configuration management
+- <cite>utils/logging.py</cite>: Logging system
+- <cite>utils/validation.py</cite>: Input validation</p>
+<p><strong>External Interfaces</strong>:
+- <cite>cli.py</cite>: Command-line interface
+- <cite>api/</cite>: REST API (if applicable)
+- <cite>templates/</cite>: Code generation templates</p>
+</section>
+</section>
+<section id="contribution-guidelines">
+<h2>Contribution Guidelines<a class="headerlink" href="#contribution-guidelines" title="Link to this heading"></a></h2>
+<section id="types-of-contributions">
+<h3>Types of Contributions<a class="headerlink" href="#types-of-contributions" title="Link to this heading"></a></h3>
+<p><strong>Bug Fixes</strong>:
+- Report bugs using GitHub Issues
+- Include reproduction steps
+- Add tests that cover the bug
+- Fix the issue with minimal changes</p>
+<p><strong>New Features</strong>:
+- Propose features using GitHub Discussions
+- Create design document for large features
+- Implement with tests and documentation
+- Follow existing patterns and conventions</p>
+<p><strong>Documentation</strong>:
+- Fix typos and grammatical errors
+- Improve clarity and examples
+- Add missing documentation
+- Translate to other languages</p>
+<p><strong>Performance Improvements</strong>:
+- Profile performance bottlenecks
+- Optimize critical paths
+- Add performance tests
+- Document performance changes</p>
+</section>
+<section id="pull-request-process">
+<h3>Pull Request Process<a class="headerlink" href="#pull-request-process" title="Link to this heading"></a></h3>
+<p><strong>Before Submitting</strong>:
+1. Ensure all tests pass
+2. Update documentation
+3. Follow code style guidelines
+4. Add changelog entry
+5. Test with real specifications</p>
+<p><strong>Pull Request Template</strong>:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gu">## Description</span>
+Brief description of changes
+
+<span class="gu">## Type of Change</span>
+<span class="k">- [ ]</span> Bug fix
+<span class="k">- [ ]</span> New feature
+<span class="k">- [ ]</span> Documentation update
+<span class="k">- [ ]</span> Performance improvement
+<span class="k">- [ ]</span> Other
+
+<span class="gu">## Testing</span>
+<span class="k">- [ ]</span> Added tests for new functionality
+<span class="k">- [ ]</span> All tests pass
+<span class="k">- [ ]</span> Manual testing completed
+
+<span class="gu">## Checklist</span>
+<span class="k">- [ ]</span> Code follows style guidelines
+<span class="k">- [ ]</span> Self-review completed
+<span class="k">- [ ]</span> Documentation updated
+<span class="k">- [ ]</span> Changelog updated
+
+<span class="gu">## Issues Fixed</span>
+Closes <span class="ni">#issue_number</span>
+</pre></div>
+</div>
+<p><strong>Review Process</strong>:
+1. Automated checks must pass
+2. At least one maintainer review required
+3. Address all review comments
+4. Maintain clean commit history</p>
+</section>
+</section>
+<section id="release-process">
+<h2>Release Process<a class="headerlink" href="#release-process" title="Link to this heading"></a></h2>
+<section id="version-management">
+<h3>Version Management<a class="headerlink" href="#version-management" title="Link to this heading"></a></h3>
+<p>We use Semantic Versioning (SemVer):
+- <strong>MAJOR</strong>: Breaking changes
+- <strong>MINOR</strong>: New features (backward compatible)
+- <strong>PATCH</strong>: Bug fixes (backward compatible)</p>
+<p><strong>Release Types</strong>:
+- <strong>Stable Releases</strong>: Regular releases with full testing
+- <strong>Release Candidates</strong>: Pre-release testing
+- <strong>Development Releases</strong>: Cutting-edge features</p>
+</section>
+<section id="changelog-maintenance">
+<h3>Changelog Maintenance<a class="headerlink" href="#changelog-maintenance" title="Link to this heading"></a></h3>
+<p><strong>Changelog Format</strong>:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gu">## [1.2.0] - 2024-01-15</span>
+
+<span class="gu">### Added</span>
+<span class="k">-</span><span class="w"> </span>New AI model support for Qwen3-Coder
+<span class="k">-</span><span class="w"> </span>Parallel pipeline execution
+<span class="k">-</span><span class="w"> </span>Enhanced error reporting
+
+<span class="gu">### Changed</span>
+<span class="k">-</span><span class="w"> </span>Improved code generation quality
+<span class="k">-</span><span class="w"> </span>Updated default model to llama3
+<span class="k">-</span><span class="w"> </span>Refactored configuration system
+
+<span class="gu">### Fixed</span>
+<span class="k">-</span><span class="w"> </span>Memory leak in long-running pipelines
+<span class="k">-</span><span class="w"> </span>Import resolution issues
+<span class="k">-</span><span class="w"> </span>Test execution timeout problems
+
+<span class="gu">### Deprecated</span>
+<span class="k">-</span><span class="w"> </span>Old configuration format (will be removed in 2.0)
+
+<span class="gu">### Security</span>
+<span class="k">-</span><span class="w"> </span>Fixed potential prompt injection vulnerability
+</pre></div>
+</div>
+</section>
+<section id="release-checklist">
+<h3>Release Checklist<a class="headerlink" href="#release-checklist" title="Link to this heading"></a></h3>
+<p><strong>Pre-Release</strong>:
+- [ ] All tests passing
+- [ ] Documentation updated
+- [ ] Changelog updated
+- [ ] Version number updated
+- [ ] Security scan completed
+- [ ] Performance tests run</p>
+<p><strong>Release</strong>:
+- [ ] Create release tag
+- [ ] Build and publish packages
+- [ ] Update documentation website
+- [ ] Create GitHub release
+- [ ] Notify community</p>
+<p><strong>Post-Release</strong>:
+- [ ] Monitor for issues
+- [ ] Update project roadmap
+- [ ] Plan next release
+- [ ] Thank contributors</p>
+</section>
+</section>
+<section id="community-guidelines">
+<h2>Community Guidelines<a class="headerlink" href="#community-guidelines" title="Link to this heading"></a></h2>
+<section id="code-of-conduct">
+<h3>Code of Conduct<a class="headerlink" href="#code-of-conduct" title="Link to this heading"></a></h3>
+<p>We are committed to providing a welcoming and inclusive environment for all contributors. Please:</p>
+<ul class="simple">
+<li><p>Be respectful and considerate</p></li>
+<li><p>Use inclusive language</p></li>
+<li><p>Focus on constructive feedback</p></li>
+<li><p>Help others learn and grow</p></li>
+<li><p>Report inappropriate behavior</p></li>
+</ul>
+</section>
+<section id="communication-channels">
+<h3>Communication Channels<a class="headerlink" href="#communication-channels" title="Link to this heading"></a></h3>
+<p><strong>GitHub</strong>:
+- Issues: Bug reports and feature requests
+- Discussions: General questions and ideas
+- Pull Requests: Code contributions</p>
+<p><strong>Community</strong>:
+- Discord/Slack: Real-time discussions
+- Mailing List: Announcements and discussions
+- Blog: Tutorials and case studies</p>
+<p><strong>Support</strong>:
+- Documentation: Primary source of information
+- Issues: Bug reports and help requests
+- Discussions: General questions</p>
+</section>
+<section id="getting-help">
+<h3>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h3>
+<p><strong>For Contributors</strong>:
+- Read this contributing guide
+- Check existing issues and discussions
+- Ask questions in GitHub Discussions
+- Join community channels</p>
+<p><strong>For Users</strong>:
+- Read user documentation
+- Check FAQ and troubleshooting
+- Search existing issues
+- Create new issue if needed</p>
+</section>
+<section id="recognition-and-appreciation">
+<h3>Recognition and Appreciation<a class="headerlink" href="#recognition-and-appreciation" title="Link to this heading"></a></h3>
+<p><strong>Contributor Recognition</strong>:
+- Contributors section in README
+- Release notes attribution
+- Community spotlights
+- Contributor badges</p>
+<p><strong>Ways to Contribute</strong>:
+- Code contributions
+- Documentation improvements
+- Bug reports and feedback
+- Community support
+- Translation and localization</p>
+<p>Thank you for contributing to spec-coder! Your contributions help make this project better for everyone.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../architecture/components.html" class="btn btn-neutral float-left" title="Component Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="debugging.html" class="btn btn-neutral float-right" title="Debugging Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

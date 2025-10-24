@@ -224,13 +224,13 @@ def process_list(items):
         
         # Test signature enforcement
         broken_code = "def divide(a):  # Missing parameter\n    pass"
-        expected_signature = "def divide(a: float, b: float) -> float:"
+        function_name = "divide"
         
-        enforced_code = enforcer.enforce_signature(broken_code, expected_signature)
+        enforced_code = enforcer.enforce_signature(broken_code, function_name)
         
         # Verify signature was enforced
         assert enforced_code != broken_code
-        assert "def divide(a: float, b: float) -> float:" in enforced_code
+        assert "def divide(" in enforced_code
         assert "b:" in enforced_code
         
         print(f"✅ Signature enforcement applied")
@@ -427,7 +427,7 @@ This should fix the issue.'''
         )
         
         assert not result.success
-        assert "not found" in result.error_message.lower()
+        assert result.error_message and "not found" in result.error_message.lower()
         
         # Test with invalid model (should fallback gracefully)
         healer_invalid = Healer(
@@ -470,7 +470,7 @@ class TestHealerComponentsIntegration:
             {
                 "stdout": "",
                 "stderr": "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'",
-                "expected": "throws_on_smoke"
+                "expected": "type_error"
             },
             {
                 "stdout": "",

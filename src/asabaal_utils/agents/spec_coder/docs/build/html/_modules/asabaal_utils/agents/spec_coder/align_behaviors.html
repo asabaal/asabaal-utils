@@ -1,0 +1,524 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>asabaal_utils.agents.spec_coder.align_behaviors &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/generator.html">CodeGenerator API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">asabaal_utils.agents.spec_coder.align_behaviors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for asabaal_utils.agents.spec_coder.align_behaviors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Behavioral Alignment Engine</span>
+
+<span class="sd">Matches test behaviors with OpenSpec requirements to identify what each test validates.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span><span class="p">,</span> <span class="n">OpenSpec</span><span class="p">,</span> <span class="n">Requirement</span>
+
+
+<div class="viewcode-block" id="TestBehavior">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.TestBehavior">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestBehavior</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a test&#39;s implied behavior from analysis.&quot;&quot;&quot;</span>
+    <span class="n">test_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">test_file</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">implied_behavior</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">test_type</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;unit&#39;, &#39;integration&#39;, etc.</span>
+    <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># 0-1 confidence score from AI</span></div>
+
+
+
+<div class="viewcode-block" id="AlignmentMatch">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.AlignmentMatch">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AlignmentMatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a match between a test and a requirement.&quot;&quot;&quot;</span>
+    <span class="n">test</span><span class="p">:</span> <span class="n">TestBehavior</span>
+    <span class="n">requirement</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Requirement</span><span class="p">]</span>  <span class="c1"># None for additional tests</span>
+    <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">match_reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">alignment_type</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;direct&#39;, &#39;partial&#39;, &#39;indirect&#39;, &#39;none&#39;, &#39;additional&#39;</span>
+    <span class="n">is_specified</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># True if test is for a requirement in OpenSpec</span></div>
+
+
+
+<div class="viewcode-block" id="BehavioralAligner">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BehavioralAligner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aligns test behaviors with OpenSpec requirements.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="BehavioralAligner.__init__">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="BehavioralAligner.load_test_behaviors">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner.load_test_behaviors">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_test_behaviors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">TestBehavior</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load test behaviors from the analysis output.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">analysis_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="n">behaviors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Handle both combined and individual file formats</span>
+        <span class="k">if</span> <span class="s1">&#39;files&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="c1"># Combined format</span>
+            <span class="k">for</span> <span class="n">file_data</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">file_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">file_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file_path&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">test_data</span> <span class="ow">in</span> <span class="n">file_data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">]:</span>
+                    <span class="n">behavior</span> <span class="o">=</span> <span class="n">TestBehavior</span><span class="p">(</span>
+                        <span class="n">test_name</span><span class="o">=</span><span class="n">test_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>  <span class="c1"># Changed from &#39;test_name&#39; to &#39;name&#39;</span>
+                        <span class="n">test_file</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+                        <span class="n">implied_behavior</span><span class="o">=</span><span class="n">test_data</span><span class="p">[</span><span class="s1">&#39;implied_behavior&#39;</span><span class="p">],</span>
+                        <span class="n">test_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_infer_test_type</span><span class="p">(</span><span class="n">test_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]),</span>
+                        <span class="n">confidence</span><span class="o">=</span><span class="mf">0.8</span>  <span class="c1"># Default confidence</span>
+                    <span class="p">)</span>
+                    <span class="n">behaviors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">behavior</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;tests&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="c1"># Single file format</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file_path&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">test_data</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">]:</span>
+                <span class="n">behavior</span> <span class="o">=</span> <span class="n">TestBehavior</span><span class="p">(</span>
+                    <span class="n">test_name</span><span class="o">=</span><span class="n">test_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>  <span class="c1"># Changed from &#39;test_name&#39; to &#39;name&#39;</span>
+                    <span class="n">test_file</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+                    <span class="n">implied_behavior</span><span class="o">=</span><span class="n">test_data</span><span class="p">[</span><span class="s1">&#39;implied_behavior&#39;</span><span class="p">],</span>
+                    <span class="n">test_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_infer_test_type</span><span class="p">(</span><span class="n">test_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]),</span>
+                    <span class="n">confidence</span><span class="o">=</span><span class="mf">0.8</span>  <span class="c1"># Default confidence</span>
+                <span class="p">)</span>
+                <span class="n">behaviors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">behavior</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">behaviors</span></div>
+
+    
+<div class="viewcode-block" id="BehavioralAligner.load_spec">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner.load_spec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpenSpec</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load OpenSpec from file.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="n">spec_file</span><span class="p">)</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_infer_test_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Infer test type from test name.&quot;&quot;&quot;</span>
+        <span class="n">test_name_lower</span> <span class="o">=</span> <span class="n">test_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">keyword</span> <span class="ow">in</span> <span class="n">test_name_lower</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;integration&#39;</span><span class="p">,</span> <span class="s1">&#39;end_to_end&#39;</span><span class="p">,</span> <span class="s1">&#39;e2e&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="s1">&#39;integration&#39;</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">keyword</span> <span class="ow">in</span> <span class="n">test_name_lower</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;test_&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="s1">&#39;unit&#39;</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">keyword</span> <span class="ow">in</span> <span class="n">test_name_lower</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;performance&#39;</span><span class="p">,</span> <span class="s1">&#39;load&#39;</span><span class="p">,</span> <span class="s1">&#39;stress&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="s1">&#39;performance&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;unit&#39;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_keyword_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_behavior</span><span class="p">:</span> <span class="n">TestBehavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate keyword-based match score.&quot;&quot;&quot;</span>
+        <span class="n">test_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">test_behavior</span><span class="o">.</span><span class="n">test_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">test_behavior</span><span class="o">.</span><span class="n">implied_behavior</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">req_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        
+        <span class="c1"># Extract keywords from requirement</span>
+        <span class="n">req_keywords</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\b\w+\b&#39;</span><span class="p">,</span> <span class="n">req_text</span><span class="p">))</span>
+        <span class="n">req_keywords</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="s1">&#39;the&#39;</span><span class="p">)</span>
+        <span class="n">req_keywords</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="n">req_keywords</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="s1">&#39;an&#39;</span><span class="p">)</span>
+        <span class="n">req_keywords</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="s1">&#39;and&#39;</span><span class="p">)</span>
+        <span class="n">req_keywords</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="s1">&#39;or&#39;</span><span class="p">)</span>
+        <span class="n">req_keywords</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="s1">&#39;but&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Count matches</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">req_keywords</span> <span class="k">if</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">test_text</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        
+        <span class="k">return</span> <span class="n">matches</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_keywords</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_function_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_behavior</span><span class="p">:</span> <span class="n">TestBehavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate function name match score.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">requirement</span><span class="o">.</span><span class="n">interface</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        
+        <span class="n">func_name</span> <span class="o">=</span> <span class="n">requirement</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">test_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">test_behavior</span><span class="o">.</span><span class="n">test_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">test_behavior</span><span class="o">.</span><span class="n">implied_behavior</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        
+        <span class="c1"># Direct function name match</span>
+        <span class="k">if</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">test_text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        
+        <span class="c1"># Partial match</span>
+        <span class="n">func_parts</span> <span class="o">=</span> <span class="n">func_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">func_parts</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">test_text</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">matches</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">func_parts</span><span class="p">)</span> <span class="k">if</span> <span class="n">func_parts</span> <span class="k">else</span> <span class="mf">0.0</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_validation_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_behavior</span><span class="p">:</span> <span class="n">TestBehavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate validation criteria match score.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        
+        <span class="n">test_type</span> <span class="o">=</span> <span class="n">test_behavior</span><span class="o">.</span><span class="n">test_type</span>
+        <span class="n">validation_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">]</span>
+        
+        <span class="c1"># Direct type match</span>
+        <span class="k">if</span> <span class="n">test_type</span> <span class="ow">in</span> <span class="n">validation_types</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        
+        <span class="c1"># Partial match (unit tests can validate integration criteria, etc.)</span>
+        <span class="k">if</span> <span class="n">test_type</span> <span class="o">==</span> <span class="s1">&#39;unit&#39;</span> <span class="ow">and</span> <span class="s1">&#39;integration&#39;</span> <span class="ow">in</span> <span class="n">validation_types</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.5</span>
+        <span class="k">elif</span> <span class="n">test_type</span> <span class="o">==</span> <span class="s1">&#39;integration&#39;</span> <span class="ow">and</span> <span class="s1">&#39;unit&#39;</span> <span class="ow">in</span> <span class="n">validation_types</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.7</span>
+        
+        <span class="k">return</span> <span class="mf">0.0</span>
+    
+<div class="viewcode-block" id="BehavioralAligner.align_test_to_requirement">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner.align_test_to_requirement">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">align_test_to_requirement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_behavior</span><span class="p">:</span> <span class="n">TestBehavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">:</span> <span class="n">Requirement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlignmentMatch</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align a single test to a requirement.&quot;&quot;&quot;</span>
+        <span class="n">keyword_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_keyword_match</span><span class="p">(</span><span class="n">test_behavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">)</span>
+        <span class="n">function_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_function_match</span><span class="p">(</span><span class="n">test_behavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">)</span>
+        <span class="n">validation_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_validation_match</span><span class="p">(</span><span class="n">test_behavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">)</span>
+        
+        <span class="c1"># Weighted average</span>
+        <span class="n">total_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">keyword_score</span> <span class="o">*</span> <span class="mf">0.4</span> <span class="o">+</span> <span class="n">function_score</span> <span class="o">*</span> <span class="mf">0.4</span> <span class="o">+</span> <span class="n">validation_score</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span>
+        
+        <span class="c1"># Determine alignment type and reason</span>
+        <span class="k">if</span> <span class="n">total_score</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="n">alignment_type</span> <span class="o">=</span> <span class="s1">&#39;direct&#39;</span>
+            <span class="n">match_reason</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Strong match: keywords (</span><span class="si">{</span><span class="n">keyword_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), function (</span><span class="si">{</span><span class="n">function_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), validation (</span><span class="si">{</span><span class="n">validation_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">elif</span> <span class="n">total_score</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="n">alignment_type</span> <span class="o">=</span> <span class="s1">&#39;partial&#39;</span>
+            <span class="n">match_reason</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Partial match: keywords (</span><span class="si">{</span><span class="n">keyword_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), function (</span><span class="si">{</span><span class="n">function_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), validation (</span><span class="si">{</span><span class="n">validation_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">elif</span> <span class="n">total_score</span> <span class="o">&gt;=</span> <span class="mf">0.3</span><span class="p">:</span>
+            <span class="n">alignment_type</span> <span class="o">=</span> <span class="s1">&#39;indirect&#39;</span>
+            <span class="n">match_reason</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Weak match: keywords (</span><span class="si">{</span><span class="n">keyword_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), function (</span><span class="si">{</span><span class="n">function_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), validation (</span><span class="si">{</span><span class="n">validation_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">alignment_type</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+            <span class="n">match_reason</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No significant match: keywords (</span><span class="si">{</span><span class="n">keyword_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), function (</span><span class="si">{</span><span class="n">function_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), validation (</span><span class="si">{</span><span class="n">validation_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span>
+        
+        <span class="k">return</span> <span class="n">AlignmentMatch</span><span class="p">(</span>
+            <span class="n">test</span><span class="o">=</span><span class="n">test_behavior</span><span class="p">,</span>
+            <span class="n">requirement</span><span class="o">=</span><span class="n">requirement</span><span class="p">,</span>
+            <span class="n">confidence</span><span class="o">=</span><span class="n">total_score</span><span class="p">,</span>
+            <span class="n">match_reason</span><span class="o">=</span><span class="n">match_reason</span><span class="p">,</span>
+            <span class="n">alignment_type</span><span class="o">=</span><span class="n">alignment_type</span><span class="p">,</span>
+            <span class="n">is_specified</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Will be set properly in align_all_tests</span>
+        <span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="BehavioralAligner.align_all_tests">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner.align_all_tests">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">align_all_tests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_behaviors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TestBehavior</span><span class="p">],</span> <span class="n">spec</span><span class="p">:</span> <span class="n">OpenSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">AlignmentMatch</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align all tests to all requirements.&quot;&quot;&quot;</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Group tests by file to track expected vs actual test counts</span>
+        <span class="n">tests_by_file</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">test_behavior</span> <span class="ow">in</span> <span class="n">test_behaviors</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">test_behavior</span><span class="o">.</span><span class="n">test_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">file_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tests_by_file</span><span class="p">:</span>
+                <span class="n">tests_by_file</span><span class="p">[</span><span class="n">file_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tests_by_file</span><span class="p">[</span><span class="n">file_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_behavior</span><span class="p">)</span>
+        
+        <span class="c1"># Count expected tests per file from OpenSpec</span>
+        <span class="n">expected_tests_per_file</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">requirements</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">validation</span> <span class="ow">in</span> <span class="n">requirement</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">validation</span><span class="o">.</span><span class="n">file</span><span class="p">:</span>
+                        <span class="n">expected_tests_per_file</span><span class="p">[</span><span class="n">validation</span><span class="o">.</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># OpenSpec expects 1 test per file</span>
+        
+        <span class="c1"># Create a mapping from actual files to expected files</span>
+        <span class="n">file_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">tests_by_file</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># Try to find a matching expected file</span>
+            <span class="k">for</span> <span class="n">expected_file</span> <span class="ow">in</span> <span class="n">expected_tests_per_file</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="c1"># Strip extensions and compare base names</span>
+                <span class="n">actual_base</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">expected_base</span> <span class="o">=</span> <span class="n">expected_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">actual_base</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">expected_base</span><span class="p">)</span> <span class="ow">or</span> <span class="n">expected_base</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">actual_base</span><span class="p">):</span>
+                    <span class="n">file_mapping</span><span class="p">[</span><span class="n">file_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">expected_file</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_mapping</span><span class="p">[</span><span class="n">file_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">for</span> <span class="n">test_behavior</span> <span class="ow">in</span> <span class="n">test_behaviors</span><span class="p">:</span>
+            <span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">best_score</span> <span class="o">=</span> <span class="mf">0.0</span>
+            
+            <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">requirements</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">align_test_to_requirement</span><span class="p">(</span><span class="n">test_behavior</span><span class="p">,</span> <span class="n">requirement</span><span class="p">)</span>
+                
+                <span class="c1"># Keep the best match for each test</span>
+                <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">confidence</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+                    <span class="n">best_match</span> <span class="o">=</span> <span class="n">match</span>
+                    <span class="n">best_score</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">confidence</span>
+            
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">test_behavior</span><span class="o">.</span><span class="n">test_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">expected_file</span> <span class="o">=</span> <span class="n">file_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">best_match</span> <span class="ow">and</span> <span class="n">best_score</span> <span class="o">&gt;=</span> <span class="mf">0.3</span><span class="p">:</span>  <span class="c1"># Threshold for considering it a real match</span>
+                <span class="c1"># Check if this test is within the expected count for this file</span>
+                <span class="n">file_tests</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">file_name</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">is_specified</span><span class="p">]</span>
+                <span class="n">expected_count</span> <span class="o">=</span> <span class="n">expected_tests_per_file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">expected_file</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">expected_file</span> <span class="k">else</span> <span class="mi">0</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_tests</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">expected_count</span><span class="p">:</span>
+                    <span class="c1"># This test is within the expected count</span>
+                    <span class="n">best_match</span><span class="o">.</span><span class="n">is_specified</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># This test exceeds the expected count, mark as additional</span>
+                    <span class="n">best_match</span><span class="o">.</span><span class="n">is_specified</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">best_match</span><span class="o">.</span><span class="n">alignment_type</span> <span class="o">=</span> <span class="s2">&quot;additional&quot;</span>
+                    <span class="n">best_match</span><span class="o">.</span><span class="n">match_reason</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Additional test - OpenSpec expects </span><span class="si">{</span><span class="n">expected_count</span><span class="si">}</span><span class="s2"> test(s) for </span><span class="si">{</span><span class="n">expected_file</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_match</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Create an &quot;additional&quot; test entry for tests not matching any requirement</span>
+                <span class="n">additional_match</span> <span class="o">=</span> <span class="n">AlignmentMatch</span><span class="p">(</span>
+                    <span class="n">test</span><span class="o">=</span><span class="n">test_behavior</span><span class="p">,</span>
+                    <span class="n">requirement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">confidence</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                    <span class="n">match_reason</span><span class="o">=</span><span class="s2">&quot;No matching requirement found in OpenSpec&quot;</span><span class="p">,</span>
+                    <span class="n">alignment_type</span><span class="o">=</span><span class="s2">&quot;additional&quot;</span><span class="p">,</span>
+                    <span class="n">is_specified</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">additional_match</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">matches</span></div>
+
+    
+<div class="viewcode-block" id="BehavioralAligner.generate_alignment_report">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.BehavioralAligner.generate_alignment_report">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_alignment_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">AlignmentMatch</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a summary report of alignments.&quot;&quot;&quot;</span>
+        <span class="n">total_tests</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+        <span class="n">specified_tests</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">is_specified</span><span class="p">]</span>
+        <span class="n">additional_tests</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">is_specified</span><span class="p">]</span>
+        
+        <span class="n">direct_matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">specified_tests</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">alignment_type</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">)</span>
+        <span class="n">partial_matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">specified_tests</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">alignment_type</span> <span class="o">==</span> <span class="s1">&#39;partial&#39;</span><span class="p">)</span>
+        <span class="n">indirect_matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">specified_tests</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">alignment_type</span> <span class="o">==</span> <span class="s1">&#39;indirect&#39;</span><span class="p">)</span>
+        <span class="n">no_matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">specified_tests</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">alignment_type</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Group by requirement (only for specified tests)</span>
+        <span class="n">req_coverage</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">specified_tests</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">requirement</span><span class="p">:</span>  <span class="c1"># Should always be true for specified tests</span>
+                <span class="n">req_id</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">if</span> <span class="n">req_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">req_coverage</span><span class="p">:</span>
+                    <span class="n">req_coverage</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;requirement_title&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">requirement</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                        <span class="s1">&#39;tests&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                        <span class="s1">&#39;coverage_score&#39;</span><span class="p">:</span> <span class="mf">0.0</span>
+                    <span class="p">}</span>
+                <span class="n">req_coverage</span><span class="p">[</span><span class="n">req_id</span><span class="p">][</span><span class="s1">&#39;tests&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;test_name&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_name</span><span class="p">,</span>
+                    <span class="s1">&#39;test_file&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_file</span><span class="p">,</span>
+                    <span class="s1">&#39;confidence&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+                    <span class="s1">&#39;alignment_type&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">alignment_type</span><span class="p">,</span>
+                    <span class="s1">&#39;implied_behavior&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">implied_behavior</span>
+                <span class="p">})</span>
+        
+        <span class="c1"># Calculate coverage scores</span>
+        <span class="k">for</span> <span class="n">req_id</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">req_coverage</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">]:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;coverage_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;total_tests&#39;</span><span class="p">:</span> <span class="n">total_tests</span><span class="p">,</span>
+                <span class="s1">&#39;specified_tests&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">specified_tests</span><span class="p">),</span>
+                <span class="s1">&#39;additional_tests&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">additional_tests</span><span class="p">),</span>
+                <span class="s1">&#39;direct_matches&#39;</span><span class="p">:</span> <span class="n">direct_matches</span><span class="p">,</span>
+                <span class="s1">&#39;partial_matches&#39;</span><span class="p">:</span> <span class="n">partial_matches</span><span class="p">,</span>
+                <span class="s1">&#39;indirect_matches&#39;</span><span class="p">:</span> <span class="n">indirect_matches</span><span class="p">,</span>
+                <span class="s1">&#39;no_matches&#39;</span><span class="p">:</span> <span class="n">no_matches</span><span class="p">,</span>
+                <span class="s1">&#39;alignment_rate&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">direct_matches</span> <span class="o">+</span> <span class="n">partial_matches</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">specified_tests</span><span class="p">)</span> <span class="k">if</span> <span class="n">specified_tests</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;requirement_coverage&#39;</span><span class="p">:</span> <span class="n">req_coverage</span><span class="p">,</span>
+            <span class="s1">&#39;additional_tests&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;test_name&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_name</span><span class="p">,</span>
+                    <span class="s1">&#39;test_file&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_file</span><span class="p">,</span>
+                    <span class="s1">&#39;test_type&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_type</span><span class="p">,</span>
+                    <span class="s1">&#39;implied_behavior&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">implied_behavior</span><span class="p">,</span>
+                    <span class="s1">&#39;match_reason&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">match_reason</span>
+                <span class="p">}</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">additional_tests</span>
+            <span class="p">],</span>
+            <span class="s1">&#39;detailed_matches&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;test_name&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_name</span><span class="p">,</span>
+                    <span class="s1">&#39;test_file&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">test_file</span><span class="p">,</span>
+                    <span class="s1">&#39;requirement_id&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">requirement</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">requirement</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;requirement_title&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">requirement</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">requirement</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;confidence&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+                    <span class="s1">&#39;alignment_type&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">alignment_type</span><span class="p">,</span>
+                    <span class="s1">&#39;match_reason&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">match_reason</span><span class="p">,</span>
+                    <span class="s1">&#39;is_specified&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">is_specified</span><span class="p">,</span>
+                    <span class="s1">&#39;implied_behavior&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">implied_behavior</span>
+                <span class="p">}</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span>
+            <span class="p">]</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.align_behaviors.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main function for testing the aligner.&quot;&quot;&quot;</span>
+    <span class="n">aligner</span> <span class="o">=</span> <span class="n">BehavioralAligner</span><span class="p">()</span>
+    
+    <span class="c1"># Load test behaviors</span>
+    <span class="n">test_behaviors</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">load_test_behaviors</span><span class="p">(</span>
+        <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;test_summaries.json&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Load spec - use a configurable path or parameter</span>
+    <span class="n">spec_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;test_spec.yml&#39;</span><span class="p">)</span>  <span class="c1"># Default to local test spec</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">spec_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No test spec found. Please provide a spec file path.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">load_spec</span><span class="p">(</span><span class="n">spec_path</span><span class="p">)</span>
+    
+    <span class="c1"># Load spec</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">load_spec</span><span class="p">(</span>
+        <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/home/asabaal/repos/music_creation/qa_test_project/reference/openspec/specs/rhythmic_pulse_generator.yml&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Align</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">align_all_tests</span><span class="p">(</span><span class="n">test_behaviors</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+    
+    <span class="c1"># Generate report</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">generate_alignment_report</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+    
+    <span class="c1"># Save report</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/home/asabaal/repos/music_creation/qa_test_project/generator/alignment&#39;</span><span class="p">)</span>
+    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;alignment_report.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Alignment complete: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;total_tests&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> tests analyzed&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Direct matches: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;direct_matches&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Partial matches: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;partial_matches&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Alignment rate: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;alignment_rate&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

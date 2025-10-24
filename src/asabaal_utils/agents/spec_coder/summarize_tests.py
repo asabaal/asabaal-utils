@@ -11,10 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
-try:
-    from .ollama_client import OllamaClient, GenerationConfig
-except ImportError:
-    from ollama_client import OllamaClient, GenerationConfig
+from asabaal_utils.agents.spec_coder.ollama_client import OllamaClient, GenerationConfig
 
 logger = logging.getLogger(__name__)
 

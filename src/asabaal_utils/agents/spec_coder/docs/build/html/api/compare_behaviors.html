@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BehaviorComparator API &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="OllamaClient API" href="ollama_client.html" />
+    <link rel="prev" title="BehavioralAligner API" href="align_behaviors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generator.html">CodeGenerator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tester.html">Tester API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="healer.html">Healer API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec_parser.html">SpecParser API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="align_behaviors.html">BehavioralAligner API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">BehaviorComparator API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-methods">Core Methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compare-behaviors">compare_behaviors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ollama_client.html">OllamaClient API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#core-modules">Core Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#supporting-modules">Supporting Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#utility-modules">Utility Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-index">Module Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API Reference</a></li>
+      <li class="breadcrumb-item active">BehaviorComparator API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/compare_behaviors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="behaviorcomparator-api">
+<h1>BehaviorComparator API<a class="headerlink" href="#behaviorcomparator-api" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">BehaviorComparator</span></code> class compares and analyzes behaviors between specifications and test implementations.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asabaal_utils.agents.spec_coder.compare_behaviors.</span></span><span class="sig-name descname"><span class="pre">BehaviorComparator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qwen3-coder:latest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Compares test behaviors with OpenSpec requirements using LLM analysis.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qwen3-coder:latest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">load_test_behaviors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.load_test_behaviors"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Load test behaviors from the analysis output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TestBehavior</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">compare_spec_and_test_behaviors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_behaviors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_behaviors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.compare_spec_and_test_behaviors"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Compare specification behaviors with test behaviors to identify gaps and alignment issues.</p>
+<p>This is the main entry point for behavior comparison analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec_behaviors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span>) – List of behaviors extracted from specification requirements</p></li>
+<li><p><strong>test_behaviors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TestBehavior</span></code>]</span>) – List of behaviors extracted from test implementations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary containing comparison results including gaps, strengths, and alignment scores</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">compare_behaviors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_behaviors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_behaviors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.compare_behaviors"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Convenience method that delegates to compare_spec_and_test_behaviors.</p>
+<p>This method maintains backward compatibility with the expected API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">analyze_requirement_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requirement</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_behaviors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.analyze_requirement_coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Analyze how well tests cover a specific requirement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">compare_all_requirements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_behaviors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.compare_all_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Compare all requirements in a spec against test behaviors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference internal" href="modules.html#asabaal_utils.agents.spec_coder.compare_behaviors.ComparisonResult" title="asabaal_utils.agents.spec_coder.compare_behaviors.ComparisonResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComparisonResult</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">generate_summary_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.generate_summary_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Generate a summary report of all comparisons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="core-methods">
+<h2>Core Methods<a class="headerlink" href="#core-methods" title="Link to this heading"></a></h2>
+<section id="compare-behaviors">
+<h3>compare_behaviors<a class="headerlink" href="#compare-behaviors" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.compare_behaviors.BehaviorComparator.compare_behaviors">
+<span class="sig-prename descclassname"><span class="pre">BehaviorComparator.</span></span><span class="sig-name descname"><span class="pre">compare_behaviors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_behaviors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_behaviors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/compare_behaviors.html#BehaviorComparator.compare_behaviors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.compare_behaviors.BehaviorComparator.compare_behaviors" title="Link to this definition"></a></dt>
+<dd><p>Convenience method that delegates to compare_spec_and_test_behaviors.</p>
+<p>This method maintains backward compatibility with the expected API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Compares specification behaviors with test behaviors to identify gaps and alignment issues.</p>
+<p><strong>Parameters:</strong>
+- <code class="docutils literal notranslate"><span class="pre">spec_behaviors</span></code> (list): Behaviors from specification
+- <code class="docutils literal notranslate"><span class="pre">test_behaviors</span></code> (list): TestBehavior objects from test analysis</p>
+<p><strong>Returns:</strong>
+- <code class="docutils literal notranslate"><span class="pre">dict</span></code>: Comparison analysis results including gaps, strengths, and coverage metrics</p>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.compare_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BehaviorComparator</span>
+
+<span class="n">comparator</span> <span class="o">=</span> <span class="n">BehaviorComparator</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">comparator</span><span class="o">.</span><span class="n">compare_behaviors</span><span class="p">(</span><span class="n">spec_behaviors</span><span class="p">,</span> <span class="n">test_behaviors</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;alignment_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;coverage_percentage&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gaps found: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;gaps&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">gap</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;gaps&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">gap</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="align_behaviors.html" class="btn btn-neutral float-left" title="BehavioralAligner API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ollama_client.html" class="btn btn-neutral float-right" title="OllamaClient API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

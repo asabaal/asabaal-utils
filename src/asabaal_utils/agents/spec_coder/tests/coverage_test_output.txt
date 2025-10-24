@@ -1,0 +1,967 @@
+
+(basic_audio_env) asabaal@asabaal-Asabaal-Ventures:~/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder$ python -m pytest tests/ --cov=. --cov-report=term-missing --cov-report=html
+=================================== test session starts ===================================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- /home/asabaal/python_env/basic_audio_env/bin/python
+cachedir: .pytest_cache
+rootdir: /home/asabaal/repos/asabaal-utils
+configfile: pytest.ini
+plugins: cov-7.0.0, anyio-4.11.0
+collected 236 items                                                                       
+
+tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_simple_spec FAILED [  0%]
+tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_complex_spec FAILED [  0%]
+tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_quality_metrics PASSED [  1%]
+tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_different_models PASSED [  1%]
+tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_error_handling PASSED [  2%]
+tests/integration/test_generator_integration.py::TestCodeGeneratorIntegrationManual::test_manual_simple_generation PASSED [  2%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_heal_single_function PASSED [  2%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_heal_all_functions PASSED [  3%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_signature_enforcement FAILED [  3%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_failure_classification PASSED [  4%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_patch_planning FAILED [  4%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_code_extraction PASSED [  5%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_healing_workflow PASSED [  5%]
+tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_error_handling PASSED [  5%]
+tests/integration/test_healer_integration.py::TestHealerComponentsIntegration::test_real_ai_classifier_integration FAILED [  6%]
+tests/integration/test_healer_integration.py::TestHealerComponentsIntegration::test_real_ai_planner_strategies PASSED [  6%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generation_config_initialization PASSED [  7%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_ollama_client_initialization PASSED [  7%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_test_connection_success PASSED [  8%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_test_connection_model_not_found PASSED [  8%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_test_connection_failure PASSED [  8%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generate_success PASSED [  9%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generate_with_system_prompt PASSED [  9%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generate_timeout PASSED [ 10%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generate_empty_response PASSED [ 10%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generate_code PASSED [ 11%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_generate_tests PASSED [ 11%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_get_model_info PASSED [ 11%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_get_model_info_failure PASSED [ 12%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_list_models PASSED [ 12%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_list_models_failure PASSED [ 13%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_complete_workflow_simulation PASSED [ 13%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_error_handling_scenarios PASSED [ 13%]
+tests/integration/test_ollama_client_integration.py::TestOllamaClientIntegration::test_config_validation PASSED [ 14%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_orchestrator_initialization PASSED [ 14%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_get_reports_dir PASSED [ 15%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_load_spec_file_path_from_metadata PASSED [ 15%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_run_command PASSED [ 16%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_run_mode PASSED [ 16%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage1_spec_to_scaffold PASSED [ 16%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage2_scaffold_to_requirements PASSED [ 17%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage2_handles_malformed_test_files PASSED [ 17%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage3_requirements_to_alignment PASSED [ 18%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage4_alignment_to_code_dry_run PASSED [ 18%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage4_alignment_to_code_full PASSED [ 19%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_calculate_match_score PASSED [ 19%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_full_pipeline_integration PASSED [ 19%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage1_plus_stage2_integration PASSED [ 20%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage2_plus_stage3_integration PASSED [ 20%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_stage3_plus_stage4_integration PASSED [ 21%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_error_handling_stage_failure PASSED [ 21%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_metadata_persistence_between_stages PASSED [ 22%]
+tests/integration/test_orchestrator_integration.py::TestOrchestratorIntegration::test_pipeline_with_missing_dependencies PASSED [ 22%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_organizer_initialization PASSED [ 22%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_file_categorization PASSED [ 23%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_load_integration_summary PASSED [ 23%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_extract_successful_functions PASSED [ 24%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_organize_successful_functions PASSED [ 24%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_create_module_structure PASSED [ 25%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_fix_test_imports PASSED [ 25%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_run_validation PASSED [ 25%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_run_with_no_successful_functions PASSED [ 26%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_run_with_successful_functions PASSED [ 26%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_complete_organization_workflow PASSED [ 27%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_error_handling_missing_summary PASSED [ 27%]
+tests/integration/test_organizer_integration.py::TestOrganizerIntegration::test_error_handling_corrupted_summary PASSED [ 27%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_prompt_templates_initialization PASSED [ 28%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_source_code_prompt_generation FAILED [ 28%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_test_prompt_generation PASSED [ 29%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_documentation_prompt_generation PASSED [ 29%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_system_prompt_content PASSED [ 30%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_template_integration_with_generator PASSED [ 30%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_template_customization PASSED [ 30%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_template_error_handling PASSED [ 31%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_complete_template_workflow FAILED [ 31%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_template_dataclass_properties PASSED [ 32%]
+tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_template_placeholder_validation PASSED [ 32%]
+tests/integration/test_tester_integration.py::TestTestAnalyzerIntegration::test_real_ai_single_file_analysis FAILED [ 33%]
+tests/integration/test_tester_integration.py::TestTestAnalyzerIntegration::test_real_ai_directory_analysis FAILED [ 33%]
+tests/integration/test_tester_integration.py::TestTestAnalyzerIntegration::test_real_ai_quality_validation PASSED [ 33%]
+tests/integration/test_tester_integration.py::TestTestAnalyzerIntegration::test_real_ai_error_handling PASSED [ 34%]
+tests/integration/test_tester_integration.py::TestTestSummarizerIntegration::test_real_ai_summarizer_with_context FAILED [ 34%]
+tests/integration/test_tester_integration.py::TestTestSummarizerIntegration::test_real_ai_summarizer_without_context PASSED [ 35%]
+tests/integration/test_tester_integration.py::TestTestSummarizerIntegration::test_real_ai_summarizer_batch_processing FAILED [ 35%]
+tests/test_cli.py::TestCLI::test_setup_logging_default PASSED                       [ 36%]
+tests/test_cli.py::TestCLI::test_setup_logging_verbose PASSED                       [ 36%]
+tests/test_cli.py::TestCLI::test_cmd_generate_spec_not_found PASSED                 [ 36%]
+tests/test_cli.py::TestCLI::test_cmd_generate_success PASSED                        [ 37%]
+tests/test_cli.py::TestCLI::test_cmd_generate_failure PASSED                        [ 37%]
+tests/test_cli.py::TestCLI::test_cmd_generate_exception PASSED                      [ 38%]
+tests/test_cli.py::TestCLI::test_cmd_test_success PASSED                            [ 38%]
+tests/test_cli.py::TestCLI::test_cmd_test_failure PASSED                            [ 38%]
+tests/test_cli.py::TestCLI::test_cmd_heal_success PASSED                            [ 39%]
+tests/test_cli.py::TestCLI::test_cmd_heal_failure PASSED                            [ 39%]
+tests/test_cli.py::TestCLI::test_cmd_organize_success PASSED                        [ 40%]
+tests/test_cli.py::TestCLI::test_cmd_organize_failure PASSED                        [ 40%]
+tests/test_cli.py::TestCLI::test_cmd_stage1_success PASSED                          [ 41%]
+tests/test_cli.py::TestCLI::test_cmd_stage1_failure PASSED                          [ 41%]
+tests/test_cli.py::TestCLI::test_main_generate_command PASSED                       [ 41%]
+tests/test_cli.py::TestCLI::test_main_test_command PASSED                           [ 42%]
+tests/test_cli.py::TestCLI::test_main_heal_command PASSED                           [ 42%]
+tests/test_cli.py::TestCLI::test_main_organize_command PASSED                       [ 43%]
+tests/test_cli.py::TestCLI::test_main_orchestrate_command PASSED                    [ 43%]
+tests/test_cli.py::TestCLI::test_main_no_command PASSED                             [ 44%]
+tests/test_cli.py::TestCLI::test_main_exception_handling PASSED                     [ 44%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_init PASSED           [ 44%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_load_test_behaviors PASSED [ 45%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_basic PASSED [ 45%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_coverage_analysis PASSED [ 46%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_identifies_gaps PASSED [ 46%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_identifies_strengths PASSED [ 47%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_empty_inputs PASSED [ 47%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_no_test_coverage PASSED [ 47%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_compare_behaviors_perfect_coverage PASSED [ 48%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_analyze_requirement_coverage PASSED [ 48%]
+tests/test_compare_behaviors.py::TestBehaviorComparator::test_generate_summary_report PASSED [ 49%]
+tests/test_compare_behaviors.py::TestBehaviorGap::test_behavior_gap_creation PASSED [ 49%]
+tests/test_compare_behaviors.py::TestComparisonResult::test_comparison_result_creation PASSED [ 50%]
+tests/test_end_to_end_pipeline.py::test_full_pipeline_end_to_end FAILED             [ 50%]
+tests/test_generator.py::TestCodeGenerator::test_init_with_config PASSED            [ 50%]
+tests/test_generator.py::TestCodeGenerator::test_sanitize_filename PASSED           [ 51%]
+tests/test_generator.py::TestCodeGenerator::test_load_config_default_path PASSED    [ 51%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_success PASSED  [ 52%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_overwrite_disabled PASSED [ 52%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_overwrite_enabled PASSED [ 52%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_validation_errors PASSED [ 53%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_parse_error PASSED [ 53%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_default_output_dir PASSED [ 54%]
+tests/test_generator.py::TestCodeGenerator::test_generate_from_spec_ollama_error PASSED [ 54%]
+tests/test_generator.py::TestCodeGeneratorPrivateMethods::test_generate_source_code_success PASSED [ 55%]
+tests/test_generator.py::TestCodeGeneratorPrivateMethods::test_generate_source_code_ollama_failure PASSED [ 55%]
+tests/test_generator.py::TestCodeGeneratorPrivateMethods::test_generate_documentation_success PASSED [ 55%]
+tests/test_generator.py::TestCodeGeneratorPrivateMethods::test_generate_validation_script_success PASSED [ 56%]
+tests/test_generator.py::TestCodeGeneratorPrivateMethods::test_generate_requirements_file_success PASSED [ 56%]
+tests/test_generator.py::TestGenerationResult::test_generation_result_creation PASSED [ 57%]
+tests/test_generator.py::TestGenerationResult::test_generation_result_failure PASSED [ 57%]
+tests/test_generator.py::TestGenerationResult::test_strip_markdown_code_blocks_basic PASSED [ 58%]
+tests/test_generator.py::TestGenerationResult::test_strip_markdown_code_blocks_with_instructions PASSED [ 58%]
+tests/test_generator.py::TestGenerationResult::test_strip_markdown_code_blocks_various_instructions PASSED [ 58%]
+tests/test_generator.py::TestGenerationResult::test_strip_markdown_code_blocks_preserve_valid_code PASSED [ 59%]
+tests/test_healer.py::TestHealer::test_healer_initialization PASSED                 [ 59%]
+tests/test_healer.py::TestHealer::test_healer_initialization_default_model PASSED   [ 60%]
+tests/test_healer.py::TestHealer::test_healer_initialization_custom_model PASSED    [ 60%]
+tests/test_healer.py::TestHealer::test_load_failure_classifications_success PASSED  [ 61%]
+tests/test_healer.py::TestHealer::test_load_failure_classifications_not_found PASSED [ 61%]
+tests/test_healer.py::TestHealer::test_load_function_code_success PASSED            [ 61%]
+tests/test_healer.py::TestHealer::test_heal_all_functions_no_failures PASSED        [ 62%]
+tests/test_ollama_client.py::TestGenerationConfig::test_generation_config_defaults PASSED [ 62%]
+tests/test_ollama_client.py::TestGenerationConfig::test_generation_config_custom_values PASSED [ 63%]
+tests/test_ollama_client.py::TestOllamaClient::test_init PASSED                     [ 63%]
+tests/test_ollama_client.py::TestOllamaClient::test_base_url_trailing_slash PASSED  [ 63%]
+tests/test_ollama_client.py::TestOllamaClient::test_connection_success PASSED       [ 64%]
+tests/test_ollama_client.py::TestOllamaClient::test_connection_failure_ollama_down PASSED [ 64%]
+tests/test_ollama_client.py::TestOllamaClient::test_connection_model_not_available PASSED [ 65%]
+tests/test_ollama_client.py::TestOllamaClient::test_generate_success PASSED         [ 65%]
+tests/test_ollama_client.py::TestOllamaClient::test_generate_with_system_prompt PASSED [ 66%]
+tests/test_ollama_client.py::TestOllamaClient::test_generate_failure PASSED         [ 66%]
+tests/test_ollama_client.py::TestOllamaClient::test_generate_code PASSED            [ 66%]
+tests/test_ollama_client.py::TestOllamaClient::test_generate_tests PASSED           [ 67%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_init_with_default_directory PASSED [ 67%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_init_with_custom_directory PASSED [ 68%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_get_reports_dir_with_output_dir PASSED [ 68%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_get_reports_dir_without_output_dir PASSED [ 69%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_load_spec_file_path_from_metadata PASSED [ 69%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_load_spec_file_path_from_metadata_not_found PASSED [ 69%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_load_spec_file_path_already_set PASSED [ 70%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_stage1_spec_to_scaffold_success PASSED [ 70%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_stage1_spec_to_scaffold_report_save_failure PASSED [ 71%]
+tests/test_orchestrator.py::TestIntegrationOrchestrator::test_stage1_spec_to_scaffold_exception PASSED [ 71%]
+tests/test_orchestrator.py::TestDirectoryCreation::test_reports_directory_creation_with_output_dir PASSED [ 72%]
+tests/test_orchestrator.py::TestDirectoryCreation::test_reports_directory_creation_without_output_dir PASSED [ 72%]
+tests/test_orchestrator.py::TestDirectoryCreation::test_nested_directory_creation PASSED [ 72%]
+tests/test_organizer.py::TestCodeOrganizer::test_init_default_directory PASSED      [ 73%]
+tests/test_organizer.py::TestCodeOrganizer::test_init_custom_directory PASSED       [ 73%]
+tests/test_organizer.py::TestCodeOrganizer::test_category_mapping PASSED            [ 74%]
+tests/test_organizer.py::TestCodeOrganizer::test_ensure_dir_new_directory PASSED    [ 74%]
+tests/test_organizer.py::TestCodeOrganizer::test_ensure_dir_existing_directory PASSED [ 75%]
+tests/test_organizer.py::TestCodeOrganizer::test_ensure_dir_existing_without_init PASSED [ 75%]
+tests/test_organizer.py::TestCodeOrganizer::test_categorize_file_core PASSED        [ 75%]
+tests/test_organizer.py::TestCodeOrganizer::test_categorize_file_export PASSED      [ 76%]
+tests/test_organizer.py::TestCodeOrganizer::test_categorize_file_generate PASSED    [ 76%]
+tests/test_organizer.py::TestCodeOrganizer::test_categorize_file_utils PASSED       [ 77%]
+tests/test_organizer.py::TestCodeOrganizer::test_categorize_file_unknown PASSED     [ 77%]
+tests/test_organizer.py::TestCodeOrganizer::test_load_integration_summary_success PASSED [ 77%]
+tests/test_organizer.py::TestCodeOrganizer::test_load_integration_summary_not_found PASSED [ 78%]
+tests/test_organizer.py::TestCodeOrganizer::test_extract_successful_functions PASSED [ 78%]
+tests/test_organizer.py::TestCodeOrganizer::test_copy_file_to_src PASSED            [ 79%]
+tests/test_organizer.py::TestCodeOrganizer::test_copy_file_to_src_create_directory PASSED [ 79%]
+tests/test_organizer.py::TestCodeOrganizer::test_copy_file_to_src_source_not_found PASSED [ 80%]
+tests/test_organizer.py::TestCodeOrganizer::test_copy_test_to_tests PASSED          [ 80%]
+tests/test_organizer.py::TestCodeOrganizer::test_organize_successful_functions PASSED [ 80%]
+tests/test_organizer.py::TestCodeOrganizer::test_create_module_init_files PASSED    [ 81%]
+tests/test_organizer.py::TestCodeOrganizer::test_create_main_init_file PASSED       [ 81%]
+tests/test_organizer.py::TestCodeOrganizer::test_save_organization_log PASSED       [ 82%]
+tests/test_organizer.py::TestCodeOrganizer::test_run_no_successful_functions PASSED [ 82%]
+tests/test_organizer.py::TestCodeOrganizer::test_run_with_successful_functions PASSED [ 83%]
+tests/test_parse_tests.py::TestTestInfo::test_test_info_creation PASSED             [ 83%]
+tests/test_parse_tests.py::TestTestVisitor::test_visitor_init PASSED                [ 83%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_import PASSED                [ 84%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_import_from PASSED           [ 84%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_simple_test_function PASSED  [ 85%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_test_with_inputs PASSED      [ 85%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_test_with_multiple_assertions PASSED [ 86%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_non_test_function PASSED     [ 86%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_test_with_method_calls PASSED [ 86%]
+tests/test_parse_tests.py::TestTestVisitor::test_visit_test_with_complex_expressions PASSED [ 87%]
+tests/test_parse_tests.py::TestParseTestFile::test_parse_test_file_success PASSED   [ 87%]
+tests/test_parse_tests.py::TestParseTestFile::test_parse_test_file_not_found PASSED [ 88%]
+tests/test_parse_tests.py::TestParseTestFile::test_parse_test_file_syntax_error PASSED [ 88%]
+tests/test_parse_tests.py::TestParseTestFile::test_parse_test_file_empty PASSED     [ 88%]
+tests/test_parse_tests.py::TestParseTestFile::test_parse_test_file_no_tests PASSED  [ 89%]
+tests/test_parse_tests.py::TestParseTestMain::test_main_function_exists PASSED      [ 89%]
+tests/test_spec_parser.py::TestSpecParser::test_parse_file_success PASSED           [ 90%]
+tests/test_spec_parser.py::TestSpecParser::test_parse_file_not_found PASSED         [ 90%]
+tests/test_spec_parser.py::TestSpecParser::test_parse_file_invalid_yaml PASSED      [ 91%]
+tests/test_spec_parser.py::TestSpecParser::test_validate_spec_valid PASSED          [ 91%]
+tests/test_spec_parser.py::TestSpecParser::test_validate_spec_missing_required_fields PASSED [ 91%]
+tests/test_spec_parser.py::TestSpecParser::test_validate_spec_invalid_requirement PASSED [ 92%]
+tests/test_spec_parser.py::TestSpecParser::test_validate_spec_empty_requirements PASSED [ 92%]
+tests/test_spec_parser.py::TestSpecParser::test_requirement_basic_fields PASSED     [ 93%]
+tests/test_spec_parser.py::TestOpenSpec::test_open_spec_creation PASSED             [ 93%]
+tests/test_spec_parser.py::TestRequirement::test_requirement_creation PASSED        [ 94%]
+tests/test_spec_parser.py::TestRequirement::test_requirement_optional_fields PASSED [ 94%]
+tests/test_templates.py::TestPromptTemplates::test_init_default PASSED              [ 94%]
+tests/test_templates.py::TestPromptTemplates::test_source_code_prompt_formatting FAILED [ 95%]
+tests/test_templates.py::TestPromptTemplates::test_test_prompt_formatting PASSED    [ 95%]
+tests/test_templates.py::TestPromptTemplates::test_documentation_prompt_formatting PASSED [ 96%]
+tests/test_templates.py::TestPromptTemplates::test_custom_templates PASSED          [ 96%]
+tests/test_templates.py::TestPromptTemplates::test_template_placeholders PASSED     [ 97%]
+tests/test_templates.py::TestPromptTemplates::test_template_content_quality PASSED  [ 97%]
+tests/test_tester.py::TestTestAnalyzer::test_init_default PASSED                    [ 97%]
+tests/test_tester.py::TestTestAnalyzer::test_init_custom_model PASSED               [ 98%]
+tests/test_tester.py::TestTestAnalyzer::test_init_connection_failure PASSED         [ 98%]
+tests/test_tester.py::TestTestAnalyzer::test_analyze_single_file_success PASSED     [ 99%]
+tests/test_tester.py::TestTestAnalyzer::test_analyze_single_file_parse_error PASSED [ 99%]
+tests/test_tester.py::TestTestAnalyzer::test_analyze_directory PASSED               [100%]/home/asabaal/python_env/basic_audio_env/lib/python3.12/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/config-3.py': No source for code: '/home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/config-3.py'. (couldnt-parse); see https://coverage.readthedocs.io/en/7.11.0/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/asabaal/python_env/basic_audio_env/lib/python3.12/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/config.py': No source for code: '/home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/config.py'. (couldnt-parse); see https://coverage.readthedocs.io/en/7.11.0/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+
+
+======================================== FAILURES =========================================
+____________ TestCodeGeneratorIntegration.test_real_ai_generation_simple_spec _____________
+
+self = <test_generator_integration.TestCodeGeneratorIntegration object at 0x76516926dfa0>
+real_config = PosixPath('/tmp/tmp9nma0fa3/config.yaml')
+sample_spec = PosixPath('/tmp/tmp9nma0fa3/calculator_spec.yml')
+temp_dir = PosixPath('/tmp/tmp9nma0fa3')
+
+    @pytest.mark.integration
+    def test_real_ai_generation_simple_spec(self, real_config, sample_spec, temp_dir):
+        """Test actual AI generation with simple specification."""
+    
+        # Create generator with real config
+        generator = CodeGenerator(config_path=real_config)
+    
+        # Test generation
+        output_dir = temp_dir / "output"
+        start_time = time.time()
+        result = generator.generate_from_spec(sample_spec, output_dir)
+        execution_time = time.time() - start_time
+    
+        # Verify generation succeeded
+        assert result.success, f"Generation failed: {result.errors}"
+        assert len(result.files_generated) > 0
+>       assert execution_time < 60  # Should complete within 60 seconds
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 110.59543085098267 < 60
+
+tests/integration/test_generator_integration.py:188: AssertionError
+____________ TestCodeGeneratorIntegration.test_real_ai_generation_complex_spec ____________
+
+self = <test_generator_integration.TestCodeGeneratorIntegration object at 0x765164fe28d0>
+real_config = PosixPath('/tmp/tmpjehqftyp/config.yaml')
+complex_spec = PosixPath('/tmp/tmpjehqftyp/data_processor_spec.yml')
+temp_dir = PosixPath('/tmp/tmpjehqftyp')
+
+    @pytest.mark.integration
+    def test_real_ai_generation_complex_spec(self, real_config, complex_spec, temp_dir):
+        """Test actual AI generation with complex specification."""
+    
+        # Create generator with real config
+        generator = CodeGenerator(config_path=real_config)
+    
+        # Test generation
+        output_dir = temp_dir / "output"
+        start_time = time.time()
+        result = generator.generate_from_spec(complex_spec, output_dir)
+        execution_time = time.time() - start_time
+    
+        # Verify generation succeeded
+        assert result.success, f"Generation failed: {result.errors}"
+        assert len(result.files_generated) > 0
+>       assert execution_time < 120  # Complex spec may take longer
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 291.68070888519287 < 120
+
+tests/integration/test_generator_integration.py:247: AssertionError
+________________ TestHealerIntegration.test_real_ai_signature_enforcement _________________
+
+self = <test_healer_integration.TestHealerIntegration object at 0x7651642b9910>
+healer_setup = {'artifacts_dir': PosixPath('/tmp/tmpbin_jns2/healer/artifacts'), 'broken_functions': {'add_function': '\ndef add(a, b...t_error', 'status': 'failed', ...}}, 'generated_functions_dir': PosixPath('/tmp/tmpbin_jns2/generated_functions'), ...}
+
+    @pytest.mark.integration
+    def test_real_ai_signature_enforcement(self, healer_setup):
+        """Test signature enforcement with real AI."""
+        # Integration test enabled
+    
+        enforcer = SignatureEnforcer(healer_setup['healer_dir'])
+    
+        # Test signature enforcement
+        broken_code = "def divide(a):  # Missing parameter\n    pass"
+        expected_signature = "def divide(a: float, b: float) -> float:"
+    
+        enforced_code = enforcer.enforce_signature(broken_code, expected_signature)
+    
+        # Verify signature was enforced
+>       assert enforced_code != broken_code
+E       AssertionError: assert 'def divide(a):  # Missing parameter\n    pass' != 'def divide(a):  # Missing parameter\n    pass'
+
+tests/integration/test_healer_integration.py:232: AssertionError
+---------------------------------- Captured stdout call -----------------------------------
+⚠️  No canonical signature found for def divide(a: float, b: float) -> float:
+____________________ TestHealerIntegration.test_real_ai_patch_planning ____________________
+
+self = <test_healer_integration.TestHealerIntegration object at 0x7651642b9c70>
+healer_setup = {'artifacts_dir': PosixPath('/tmp/tmpjw8pm50m/healer/artifacts'), 'broken_functions': {'add_function': '\ndef add(a, b...t_error', 'status': 'failed', ...}}, 'generated_functions_dir': PosixPath('/tmp/tmpjw8pm50m/generated_functions'), ...}
+
+    @pytest.mark.integration
+    def test_real_ai_patch_planning(self, healer_setup):
+        """Test patch planning with real AI."""
+        # Integration test enabled
+    
+        planner = PatchPlanner(healer_setup['healer_dir'])
+    
+        # Test creating repair plan for different failure types
+        test_cases = [
+            {
+                "function_name": "add_function",
+                "failure_type": "throws_on_smoke",
+                "function_code": "def add(a, b):\n    pass",
+                "error_details": "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'"
+            },
+            {
+                "function_name": "divide_function",
+                "failure_type": "signature_mismatch",
+                "function_code": "def divide(a):\n    pass",
+                "error_details": "TypeError: divide() missing 1 required positional argument: 'b'"
+            }
+        ]
+    
+        for test_case in test_cases:
+            repair_plan = planner.create_repair_plan(**test_case)
+    
+            assert "prompt" in repair_plan
+            assert "allowed_changes" in repair_plan
+            assert len(repair_plan["prompt"]) > 100
+>           assert test_case["function_name"] in repair_plan["prompt"]
+E           assert 'add_function' in "You are fixing a Python function that crashes on basic smoke test.\n\nCURRENT FUNCTION:\n```python\ndef add(a, b):\n    pass\n```\n\nSMOKE TEST ERROR:\nTypeError: unsupported operand type(s) for +: 'NoneType' and 'int'\n\nEXPECTED BEHAVIOR:\n- Function must work with no arguments (smoke test) using default parameters\n- Should not raise exceptions when called with defaults\n- Should return a reasonable default value when called with defaults\n- Should preserve core functionality when called with proper arguments\n\nREPAIR INSTRUCTIONS:\n1. Ensure all parameters have sensible defaults\n2. Add guards to prevent crashes when using defaults (e.g., empty lists, zero values)\n3. Return a reasonable default value (empty list, empty dict, None, etc.) when called with defaults\n4. Preserve the core logic for when proper arguments are provided\n5. Handle edge cases gracefully without raising exceptions\n\nReturn ONLY the complete fixed function."
+
+tests/integration/test_healer_integration.py:320: AssertionError
+___________ TestHealerComponentsIntegration.test_real_ai_classifier_integration ___________
+
+self = <test_healer_integration.TestHealerComponentsIntegration object at 0x7651642ba450>
+temp_dir = PosixPath('/tmp/tmpfuo0koq_')
+
+    @pytest.mark.integration
+    def test_real_ai_classifier_integration(self, temp_dir):
+        """Test FailureClassifier with real test data."""
+        # Integration test enabled
+    
+        # Create realistic test failure data
+        test_failures = [
+            {
+                "stdout": "",
+                "stderr": "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'",
+                "expected": "throws_on_smoke"
+            },
+            {
+                "stdout": "",
+                "stderr": "TypeError: divide() missing 1 required positional argument: 'b'",
+                "expected": "signature_mismatch"
+            },
+            {
+                "stdout": "",
+                "stderr": "NameError: name 'List' is not defined",
+                "expected": "import_error"
+            },
+            {
+                "stdout": "AssertionError: Expected 5 but got 3",
+                "stderr": "",
+                "expected": "assertion_error"
+            }
+        ]
+    
+        classifier = FailureClassifier(str(temp_dir))
+    
+        for i, failure in enumerate(test_failures):
+            failure_type = classifier.classify_failure(
+                failure["stdout"],
+                failure["stderr"],
+                f"test_function_{i}"
+            )
+    
+>           assert failure_type == failure["expected"], f"Expected {failure['expected']}, got {failure_type}"
+E           AssertionError: Expected throws_on_smoke, got type_error
+E           assert 'type_error' == 'throws_on_smoke'
+E             
+E             - throws_on_smoke
+E             + type_error
+
+tests/integration/test_healer_integration.py:501: AssertionError
+_______________ TestTemplatesIntegration.test_source_code_prompt_generation _______________
+
+self = <test_templates_integration.TestTemplatesIntegration object at 0x765164165a00>
+temp_workspace = PosixPath('/tmp/tmp64co856u')
+sample_openspec = {'description': 'Generates deterministic rhythmic patterns', 'requirements': [{'description': 'Generate time grid base...ple[float, int]]'}], 'title': 'Apply Accent Pattern', ...}], 'spec_id': 'RPG-001', 'title': 'Rhythmic Pulse Generator'}
+
+    @pytest.mark.integration
+    def test_source_code_prompt_generation(self, temp_workspace, sample_openspec):
+        """Test source code prompt generation from OpenSpec."""
+        print("\n🧪 Testing source code prompt generation...")
+    
+        templates = PromptTemplates()
+    
+        # Extract interfaces and requirements from OpenSpec
+        interfaces = []
+        requirements = []
+    
+        for req in sample_openspec["requirements"]:
+            requirements.append(f"- {req['id']}: {req['description']}")
+            for interface in req.get("interfaces", []):
+                params = ", ".join([f"{p['name']}: {p['type']}" for p in interface["parameters"]])
+                interfaces.append(f"{interface['name']}({params}) -> {interface['return_type']}")
+    
+        # Generate the prompt
+>       prompt = templates.source_code_prompt.format(
+            spec_id=sample_openspec["spec_id"],
+            interfaces="\n".join(interfaces),
+            requirements="\n".join(requirements)
+        )
+E       KeyError: 'title'
+
+tests/integration/test_templates_integration.py:133: KeyError
+---------------------------------- Captured stdout setup ----------------------------------
+
+🪛 Created temporary workspace: /tmp/tmp64co856u
+---------------------------------- Captured stdout call -----------------------------------
+
+🧪 Testing source code prompt generation...
+-------------------------------- Captured stdout teardown ---------------------------------
+🧹 Cleaned up temporary workspace: /tmp/tmp64co856u
+________________ TestTemplatesIntegration.test_complete_template_workflow _________________
+
+self = <test_templates_integration.TestTemplatesIntegration object at 0x765164188320>
+temp_workspace = PosixPath('/tmp/tmpk1ajdvjz')
+sample_openspec = {'description': 'Generates deterministic rhythmic patterns', 'requirements': [{'description': 'Generate time grid base...ple[float, int]]'}], 'title': 'Apply Accent Pattern', ...}], 'spec_id': 'RPG-001', 'title': 'Rhythmic Pulse Generator'}
+
+    @pytest.mark.integration
+    def test_complete_template_workflow(self, temp_workspace, sample_openspec):
+        """Test complete template workflow with OpenSpec."""
+        print("\n🧪 Testing complete template workflow...")
+    
+        templates = PromptTemplates()
+    
+        # Step 1: Generate source code prompt
+        interfaces = []
+        requirements = []
+    
+        for req in sample_openspec["requirements"]:
+            requirements.append(f"- {req['id']}: {req['description']}")
+            for interface in req.get("interfaces", []):
+                params = ", ".join([f"{p['name']}: {p['type']}" for p in interface["parameters"]])
+                interfaces.append(f"{interface['name']}({params}) -> {interface['return_type']}")
+    
+>       source_prompt = templates.source_code_prompt.format(
+            spec_id=sample_openspec["spec_id"],
+            interfaces="\n".join(interfaces),
+            requirements="\n".join(requirements)
+        )
+E       KeyError: 'title'
+
+tests/integration/test_templates_integration.py:331: KeyError
+---------------------------------- Captured stdout setup ----------------------------------
+
+🪛 Created temporary workspace: /tmp/tmpk1ajdvjz
+---------------------------------- Captured stdout call -----------------------------------
+
+🧪 Testing complete template workflow...
+-------------------------------- Captured stdout teardown ---------------------------------
+🧹 Cleaned up temporary workspace: /tmp/tmpk1ajdvjz
+______________ TestTestAnalyzerIntegration.test_real_ai_single_file_analysis ______________
+
+self = <test_tester_integration.TestTestAnalyzerIntegration object at 0x76516418b6e0>
+sample_test_file = PosixPath('/tmp/tmp70ifbx1t/test_calculator.py')
+sample_spec_file = PosixPath('/tmp/tmp70ifbx1t/calculator_spec.yml')
+sample_source_file = PosixPath('/tmp/tmp70ifbx1t/calculator.py')
+
+    @pytest.mark.integration
+    def test_real_ai_single_file_analysis(self, sample_test_file, sample_spec_file, sample_source_file):
+        """Test complete analysis of a single test file with real AI."""
+    
+        # Create analyzer with real context
+        analyzer = TestAnalyzer(
+            model_name="qwen3-coder:latest",
+            spec_file=sample_spec_file,
+            source_file=sample_source_file
+        )
+    
+        # Analyze the test file
+        start_time = time.time()
+        result = analyzer.analyze_single_file(sample_test_file)
+        analysis_time = time.time() - start_time
+    
+        # Verify analysis succeeded
+        assert 'error' not in result, f"Analysis failed: {result.get('error', 'Unknown error')}"
+        assert 'tests' in result
+        assert len(result['tests']) > 0
+>       assert analysis_time < 30  # Should complete within 30 seconds
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 383.9161260128021 < 30
+
+tests/integration/test_tester_integration.py:200: AssertionError
+_______________ TestTestAnalyzerIntegration.test_real_ai_directory_analysis _______________
+
+self = <test_tester_integration.TestTestAnalyzerIntegration object at 0x765164188680>
+temp_dir = PosixPath('/tmp/tmpo9insdp7')
+sample_spec_file = PosixPath('/tmp/tmpo9insdp7/calculator_spec.yml')
+sample_source_file = PosixPath('/tmp/tmpo9insdp7/calculator.py')
+
+        @pytest.mark.integration
+        def test_real_ai_directory_analysis(self, temp_dir, sample_spec_file, sample_source_file):
+            """Test analysis of multiple test files in directory."""
+    
+            # Create multiple test files
+            test_files = {
+                "test_basic_operations.py": '''
+    import pytest
+    from calculator import Calculator
+    
+    def test_add_basic():
+        calc = Calculator()
+        assert calc.add(2, 3) == 5
+    
+    def test_subtract_basic():
+        calc = Calculator()
+        assert calc.subtract(10, 4) == 6
+    ''',
+                "test_advanced_operations.py": '''
+    import pytest
+    import math
+    from calculator import Calculator
+    
+    def test_square_root_positive():
+        calc = Calculator()
+        assert calc.square_root(9) == 3.0
+    
+    def test_power_operation():
+        calc = Calculator()
+        assert calc.power(2, 3) == 8
+    ''',
+                "test_edge_cases.py": '''
+    import pytest
+    from calculator import Calculator
+    
+    def test_large_numbers():
+        calc = Calculator()
+        result = calc.add(1_000_000, 2_000_000)
+        assert result == 3_000_000
+    
+    def test_precision_floats():
+        calc = Calculator()
+        result = calc.add(0.1, 0.2)
+        assert abs(result - 0.3) < 1e-10
+    '''
+            }
+    
+            # Write test files
+            for filename, content in test_files.items():
+                (temp_dir / filename).write_text(content)
+    
+            # Create analyzer and analyze directory
+            analyzer = TestAnalyzer(
+                model_name="qwen3-coder:latest",
+                spec_file=sample_spec_file,
+                source_file=sample_source_file
+            )
+    
+            output_dir = temp_dir / "analysis_output"
+            start_time = time.time()
+            results = analyzer.analyze_directory(temp_dir, output_dir)
+            analysis_time = time.time() - start_time
+    
+            # Verify analysis succeeded
+            assert len(results) == len(test_files), f"Expected {len(test_files)} results, got {len(results)}"
+>           assert analysis_time < 60  # Should complete within 60 seconds
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert 258.6083903312683 < 60
+
+tests/integration/test_tester_integration.py:288: AssertionError
+___________ TestTestSummarizerIntegration.test_real_ai_summarizer_with_context ____________
+
+self = <test_tester_integration.TestTestSummarizerIntegration object at 0x765164189e50>
+temp_dir = PosixPath('/tmp/tmpjbadm_2z')
+
+        @pytest.mark.integration
+        def test_real_ai_summarizer_with_context(self, temp_dir):
+            """Test TestSummarizer with context files."""
+    
+            # Create context files
+            spec_file = temp_dir / "spec.yml"
+            spec_file.write_text(yaml.dump({
+                'spec_id': 'test-001',
+                'requirements': [
+                    {
+                        'id': 'req-001',
+                        'title': 'Test Requirement',
+                        'description': 'A test requirement for validation',
+                        'interface': {
+                            'function': 'test_func',
+                            'parameters': {'x': 'int'},
+                            'returns': 'bool'
+                        }
+                    }
+                ]
+            }))
+    
+            source_file = temp_dir / "source.py"
+            source_file.write_text('''
+    def test_func(x):
+        """TODO RPG-001: Test function implementation."""
+        pass
+    ''')
+    
+            # Create summarizer with context
+            summarizer = TestSummarizer(
+                model_name="qwen3-coder:latest",
+                spec_file=spec_file,
+                source_file=source_file
+            )
+    
+            # Test data
+            test_data = {
+                'name': 'test_functionality',
+                'target_function': 'test_func',
+                'inputs': {'x': 5},
+                'assertions': ['assert test_func(5) is True']
+            }
+    
+            # Generate summary
+            start_time = time.time()
+            summary = summarizer.summarize_test(test_data)
+            summary_time = time.time() - start_time
+    
+            # Verify summary quality
+            assert summary is not None
+            assert len(summary) > 20
+>           assert summary_time < 30  # Should complete within reasonable time
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert 73.40166354179382 < 30
+
+tests/integration/test_tester_integration.py:460: AssertionError
+_________ TestTestSummarizerIntegration.test_real_ai_summarizer_batch_processing __________
+
+self = <test_tester_integration.TestTestSummarizerIntegration object at 0x76516418a180>
+
+    @pytest.mark.integration
+    def test_real_ai_summarizer_batch_processing(self):
+        """Test batch processing of multiple test files."""
+    
+        summarizer = TestSummarizer(model_name="qwen3-coder:latest")
+    
+        # Create test data for multiple tests
+        parsed_data = {
+            'file': 'test_multiple.py',
+            'tests': [
+                {
+                    'name': 'test_add_positive',
+                    'target_function': 'add',
+                    'inputs': {'a': 5, 'b': 3},
+                    'assertions': ['assert add(5, 3) == 8']
+                },
+                {
+                    'name': 'test_add_negative',
+                    'target_function': 'add',
+                    'inputs': {'a': -5, 'b': -3},
+                    'assertions': ['assert add(-5, -3) == -8']
+                },
+                {
+                    'name': 'test_divide_by_zero',
+                    'target_function': 'divide',
+                    'inputs': {'a': 5, 'b': 0},
+                    'assertions': ['with pytest.raises(ZeroDivisionError): divide(5, 0)']
+                }
+            ]
+        }
+    
+        # Process all tests
+        start_time = time.time()
+        result = summarizer.summarize_test_file(parsed_data)
+        processing_time = time.time() - start_time
+    
+        # Verify results
+        assert len(result['tests']) == 3
+>       assert processing_time < 30  # Should complete within reasonable time
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 167.97644662857056 < 30
+
+tests/integration/test_tester_integration.py:530: AssertionError
+______________________________ test_full_pipeline_end_to_end ______________________________
+
+temp_dir = PosixPath('/tmp/tmp92g085m6')
+sample_spec_file = PosixPath('/tmp/tmp92g085m6/e2e_test_spec.yml')
+
+    @pytest.mark.e2e
+    def test_full_pipeline_end_to_end(temp_dir, sample_spec_file):
+        """Run the full orchestrator pipeline end-to-end."""
+        # Setup debug logging to a persistent location outside temp_dir
+        debug_log = Path("/tmp/e2e_test_debug.log")
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(debug_log),
+                logging.StreamHandler()
+            ]
+        )
+        logger = logging.getLogger(__name__)
+    
+        logger.debug(f"=== E2E TEST START ===")
+        logger.debug(f"Temp dir: {temp_dir}")
+        logger.debug(f"Temp dir contents before test: {list(temp_dir.iterdir())}")
+        logger.debug(f"Sample spec file: {sample_spec_file}")
+        logger.debug(f"Sample spec file exists: {sample_spec_file.exists()}")
+    
+        orch = IntegrationOrchestrator(base_dir=temp_dir)
+        success = orch.run_full_pipeline(spec_file=sample_spec_file, output_dir=temp_dir / "output")
+        assert success, "❌ Full end-to-end pipeline failed"
+    
+        # Verify output artifacts exist
+        reports_dir = temp_dir / "output" / "reports"
+        assert reports_dir.exists(), "Missing reports directory"
+        assert any(reports_dir.glob("*.json")), "No report JSON files found"
+    
+        # Verify alignment rate is above threshold (not 0%)
+        alignment_report_file = reports_dir / "behavioral_alignment_report.json"
+        if alignment_report_file.exists():
+            with open(alignment_report_file, 'r') as f:
+                alignment_data = json.load(f)
+            alignment_rate = alignment_data.get('summary', {}).get('alignment_rate', 0)
+>           assert alignment_rate > 0, f"❌ Alignment rate is {alignment_rate:.2%}, expected > 0%"
+E           AssertionError: ❌ Alignment rate is 0.00%, expected > 0%
+E           assert 0 > 0
+
+tests/test_end_to_end_pipeline.py:86: AssertionError
+---------------------------------- Captured stdout call -----------------------------------
+🧩 Integration Orchestrator
+📁 Base directory: /tmp/tmp92g085m6
+
+🚀 Starting full multi-stage pipeline
+📋 Spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+📁 Output directory: /tmp/tmp92g085m6/output
+============================================================
+📋 Using spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+
+🔧 Stage 1: OpenSpec → Tests/Scaffold
+🔍 Debug: output_dir = /tmp/tmp92g085m6/output
+🔍 Debug: reports_dir = /tmp/tmp92g085m6/output/reports
+🔍 Debug: reports_dir absolute = /tmp/tmp92g085m6/output/reports
+📋 Stage 1: Stored spec file path: /tmp/tmp92g085m6/e2e_test_spec.yml
+🔍 Debug: reports_dir exists after mkdir = True
+📁 Stage 1 reports directory: /tmp/tmp92g085m6/output/reports
+📝 Saved pipeline metadata to: /tmp/tmp92g085m6/output/reports/pipeline_metadata.json
+🔍 Debug: result.success = True
+🔍 Debug: result.files_generated = ['/tmp/tmp92g085m6/output/scaffolds/src/e2e_001.py', '/tmp/tmp92g085m6/output/scaffolds/docs/e2e_001.md', '/tmp/tmp92g085m6/output/scaffolds/tests/test_basic_function.py', '/tmp/tmp92g085m6/output/.github/workflows/ci.yml', '/tmp/tmp92g085m6/output/scripts/validate.sh', '/tmp/tmp92g085m6/output/requirements.txt']
+🔍 Debug: result.errors = []
+🔍 Debug: result.warnings = []
+🔍 Debug: result.execution_time = 197.06861090660095
+🔍 Debug: Attempting to save report to: /tmp/tmp92g085m6/output/reports/stage1_report.json
+🔍 Debug: reports_dir exists: True
+🔍 Debug: report_file parent exists: True
+📄 Stage 1 report saved to: /tmp/tmp92g085m6/output/reports/stage1_report.json
+
+🧠 Stage 2: Tests/Scaffold → Logical Requirements
+Looking for test files in: /tmp/tmp92g085m6/output/scaffolds/tests
+Test dir exists: True
+Found test files: [PosixPath('/tmp/tmp92g085m6/output/scaffolds/tests/test_basic_function.py')]
+📝 Saved 6 test behavior summaries to: /tmp/tmp92g085m6/output/reports/stage2_test_summaries/test_summary_tests.json
+📝 Also copied to main reports: /home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/reports/stage2_test_summaries/test_summary_tests.json
+Extracted requirements from 6 test functions
+
+⚖️  Stage 3: Logical Requirements → Alignment Checking
+🎯 Stage 3: Performing behavioral alignment...
+📋 Using specification: /tmp/tmp92g085m6/e2e_test_spec.yml
+📂 Loading test behaviors from: /tmp/tmp92g085m6/output/reports/stage2_test_summaries/test_summary_tests.json
+📊 Analyzing 6 test behaviors against 1 requirements
+✅ Alignment analysis completed
+📈 Alignment rate: 0.00%
+📄 Report saved to: /tmp/tmp92g085m6/output/reports/behavioral_alignment_report.json
+
+⚡ Stage 4: Alignment Checking → Code Generation
+📋 Copied alignment report to: /tmp/tmp92g085m6/reports/behavioral_alignment_report.json
+🔄 Step 1: Aggregating behaviors...
+✅ Behavior aggregation completed
+🔄 Step 2: Building logic catalog...
+✅ Logic catalog building completed
+🔄 Step 3: Generating prompts...
+✅ Prompt generation completed
+🔄 Step 4: Generating final implementation code...
+🔍 Looking for prompts directory at: /tmp/tmp92g085m6/prompts
+🔍 Prompts directory exists: True
+🔍 Base directory: /tmp/tmp92g085m6
+Found 5 prompt files
+🔨 Generating code from basic_function_with_bool.prompt
+📋 Using stored spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+✅ Generated 6 files from basic_function_with_bool.prompt
+🔨 Generating code from basic_function_negative_numbers.prompt
+📋 Using stored spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+✅ Generated 6 files from basic_function_negative_numbers.prompt
+🔨 Generating code from basic_function_large_numbers.prompt
+📋 Using stored spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+✅ Generated 6 files from basic_function_large_numbers.prompt
+🔨 Generating code from basic_function.prompt
+📋 Using stored spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+✅ Generated 6 files from basic_function.prompt
+🔨 Generating code from basic_function_checking.prompt
+📋 Using stored spec file: /tmp/tmp92g085m6/e2e_test_spec.yml
+✅ Generated 6 files from basic_function_checking.prompt
+🎉 Code generation completed! Generated 30 files:
+   - /tmp/tmp92g085m6/output/src/scaffolds/src/e2e_001.py
+   - /tmp/tmp92g085m6/output/src/scaffolds/docs/e2e_001.md
+   - /tmp/tmp92g085m6/output/src/scaffolds/tests/test_basic_function.py
+   - /tmp/tmp92g085m6/output/src/.github/workflows/ci.yml
+   - /tmp/tmp92g085m6/output/src/scripts/validate.sh
+   - /tmp/tmp92g085m6/output/src/requirements.txt
+   - /tmp/tmp92g085m6/output/src/scaffolds/src/e2e_001.py
+   - /tmp/tmp92g085m6/output/src/scaffolds/docs/e2e_001.md
+   - /tmp/tmp92g085m6/output/src/scaffolds/tests/test_basic_function.py
+   - /tmp/tmp92g085m6/output/src/.github/workflows/ci.yml
+   - /tmp/tmp92g085m6/output/src/scripts/validate.sh
+   - /tmp/tmp92g085m6/output/src/requirements.txt
+   - /tmp/tmp92g085m6/output/src/scaffolds/src/e2e_001.py
+   - /tmp/tmp92g085m6/output/src/scaffolds/docs/e2e_001.md
+   - /tmp/tmp92g085m6/output/src/scaffolds/tests/test_basic_function.py
+   - /tmp/tmp92g085m6/output/src/.github/workflows/ci.yml
+   - /tmp/tmp92g085m6/output/src/scripts/validate.sh
+   - /tmp/tmp92g085m6/output/src/requirements.txt
+   - /tmp/tmp92g085m6/output/src/scaffolds/src/e2e_001.py
+   - /tmp/tmp92g085m6/output/src/scaffolds/docs/e2e_001.md
+   - /tmp/tmp92g085m6/output/src/scaffolds/tests/test_basic_function.py
+   - /tmp/tmp92g085m6/output/src/.github/workflows/ci.yml
+   - /tmp/tmp92g085m6/output/src/scripts/validate.sh
+   - /tmp/tmp92g085m6/output/src/requirements.txt
+   - /tmp/tmp92g085m6/output/src/scaffolds/src/e2e_001.py
+   - /tmp/tmp92g085m6/output/src/scaffolds/docs/e2e_001.md
+   - /tmp/tmp92g085m6/output/src/scaffolds/tests/test_basic_function.py
+   - /tmp/tmp92g085m6/output/src/.github/workflows/ci.yml
+   - /tmp/tmp92g085m6/output/src/scripts/validate.sh
+   - /tmp/tmp92g085m6/output/src/requirements.txt
+📄 Generation report saved to: /tmp/tmp92g085m6/output/reports/stage4_generation_report.json
+✅ Multi-stage code generation completed
+
+✅ Full multi-stage pipeline completed successfully!
+_________________ TestPromptTemplates.test_source_code_prompt_formatting __________________
+
+self = <src.asabaal_utils.agents.spec_coder.tests.test_templates.TestPromptTemplates object at 0x7651640bac60>
+templates = PromptTemplates(source_code_prompt='Generate Python scaffolding code using the EXACT function interfaces provided.\n\n...tements.\nDo NOT implement actual functionality - only create the structure.\nMatch the reference format precisely.\n')
+
+    def test_source_code_prompt_formatting(self, templates):
+        """Test source code prompt formatting."""
+>       formatted = templates.source_code_prompt.format(
+            spec_id="test-001",
+            interfaces="def test_func(): pass",
+            requirements="Test requirement"
+        )
+E       KeyError: 'title'
+
+tests/test_templates.py:30: KeyError
+===================================== tests coverage ======================================
+_____________________ coverage: platform linux, python 3.12.3-final-0 _____________________
+
+Name                                                  Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------
+__init__.py                                               6      0   100%
+aggregate_behaviors.py                                  127    127     0%   6-274
+align_behaviors.py                                      191     70    63%   100-131, 135, 167-176, 228, 267-278, 293-298, 341-342, 344-345, 426-427, 453, 489-497, 507-508, 551-587, 591
+analyze_all_runs.py                                      27     27     0%   4-44
+analyze_tests.py                                         99     99     0%   8-207
+build_logic_catalog.py                                  135    135     0%   6-282
+cli.py                                                  248    111    55%   23-29, 62-64, 75-76, 96-101, 122-127, 146-151, 159-160, 174-179, 184-203, 208-227, 232-251, 256-279, 401, 403, 405, 407, 411-412, 419
+compare_behaviors.py                                    159     55    65%   209-210, 266-326, 334, 376, 468, 476, 587-595, 613, 632-662, 784-820, 824
+example_runner.py                                       108    108     0%   9-264
+generate_prompts.py                                     123    123     0%   6-268
+generator.py                                            279     64    77%   257, 427-428, 435, 531, 537, 539, 574, 584-586, 609-610, 658-660, 676-678, 682-718, 755-786, 815-824, 828-839
+healer/__init__.py                                        6      0   100%
+healer/classify_failures.py                              82     57    30%   20-37, 46, 58-61, 65, 69, 73, 77, 84-88, 92-112, 116-141, 146-167, 171
+healer/enforce_signature.py                             102     51    50%   25, 43-50, 58, 65-81, 103-120, 132-133, 140-147, 152, 157, 162-177, 181
+healer/heal.py                                          229     53    77%   90-91, 108-110, 129, 136-141, 176-178, 183, 189, 204, 221, 252-255, 266-267, 291-292, 299-300, 353-354, 407-442, 445
+healer/plan_patches.py                                   68     19    72%   301, 331-338, 342-345, 349, 361-383, 386
+infrastructure/__init__.py                                0      0   100%
+ollama_client.py                                         87      0   100%
+orchestrator.py                                         596    230    61%   28-29, 120-121, 199, 205, 207, 236, 239-247, 347-348, 353-354, 359-360, 365-374, 381, 477-480, 521-523, 530-532, 550-552, 589, 619-623, 658-661, 671-674, 679-680, 704, 706, 730, 733-749, 757, 768-776, 782-808, 818-819, 844-845, 863-867, 917, 968, 1021-1026, 1036, 1043, 1047-1069, 1073-1074, 1086-1089, 1093-1094, 1099, 1109-1110, 1114, 1120-1123, 1129-1131, 1137-1139, 1144-1146, 1151-1152, 1159-1163, 1167-1170, 1175, 1177-1180, 1185-1188, 1192, 1196-1204, 1210-1214, 1218-1219, 1222, 1225-1226, 1233-1237, 1241-1262, 1266-1267, 1270-1272, 1280, 1291-1338, 1340-1349
+organizer.py                                            309     36    88%   89-90, 144-159, 207-211, 226-228, 235, 506-507, 536-546, 556-557, 564-565, 571-572, 578-579, 583-584, 673, 686-689, 693
+parse_tests.py                                          148     36    76%   97, 100, 117-118, 121, 145-146, 172-184, 224-249, 253
+run_complex_integration_test.py                         103    103     0%   9-189
+run_integration_test.py                                 102    102     0%   16-236
+spec_parser.py                                          116     27    77%   66-67, 99-100, 114-119, 152-165, 172-177, 183-186, 196, 205, 207
+src/__init__.py                                           0      0   100%
+src/core/__init__.py                                      2      2     0%   1-2
+src/core/rhythm.py                                        3      3     0%   7-10
+src/core/timegrid.py                                      4      4     0%   7-11
+src/export/__init__.py                                    1      1     0%   1
+src/export/midi_export.py                                 5      5     0%   7-12
+summarize_tests.py                                      158     53    66%   16-17, 71-73, 101-103, 164-168, 175-180, 184-185, 189, 193-198, 235-238, 243-280, 284-285
+templates.py                                              7      0   100%
+tester.py                                               124     79    36%   17-19, 174-175, 191-193, 220-261, 265-298, 303-363, 367
+tests/__init__.py                                         0      0   100%
+tests/conftest.py                                        13      0   100%
+tests/integration/test_generator_integration.py         170     42    75%   191-229, 250-281, 361
+tests/integration/test_healer_integration.py            183     16    91%   179, 216, 233-238, 321-325, 447-450, 502, 542
+tests/integration/test_ollama_client_integration.py     263      1    99%   514
+tests/integration/test_orchestrator_integration.py      420      5    99%   340-341, 760, 837, 868
+tests/integration/test_organizer_integration.py         238      3    99%   500-502, 509
+tests/integration/test_templates_integration.py         211     34    84%   140-151, 308, 338-382, 450
+tests/integration/test_tester_integration.py            176     38    78%   203-221, 291-310, 461-466, 532-541, 545
+tests/run_integration_tests.py                           78     78     0%   27-155
+tests/test_cli.py                                       247      1    99%   372
+tests/test_compare_behaviors.py                         139      1    99%   349
+tests/test_end_to_end_pipeline.py                        42      2    95%   87-89
+tests/test_generator.py                                 356      7    98%   640-641, 664-665, 697-698, 702
+tests/test_healer.py                                     62      0   100%
+tests/test_ollama_client.py                             118      1    99%   225
+tests/test_orchestrator.py                              115      1    99%   183
+tests/test_organizer.py                                 223      1    99%   396
+tests/test_parse_tests.py                               150      1    99%   299
+tests/test_spec_parser.py                               112      5    96%   58-71, 267
+tests/test_templates.py                                  48      4    92%   36-38, 101
+tests/test_tester.py                                     73      5    93%   38-55, 150
+update_report.py                                         20     20     0%   4-59
+-----------------------------------------------------------------------------------
+TOTAL                                                  7211   2046    72%
+Coverage HTML written to dir htmlcov
+================================= short test summary info =================================
+FAILED tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_simple_spec - assert 110.59543085098267 < 60
+FAILED tests/integration/test_generator_integration.py::TestCodeGeneratorIntegration::test_real_ai_generation_complex_spec - assert 291.68070888519287 < 120
+FAILED tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_signature_enforcement - AssertionError: assert 'def divide(a):  # Missing parameter\n    pass' != 'def divide(...
+FAILED tests/integration/test_healer_integration.py::TestHealerIntegration::test_real_ai_patch_planning - assert 'add_function' in "You are fixing a Python function that crashes on basic smoke...
+FAILED tests/integration/test_healer_integration.py::TestHealerComponentsIntegration::test_real_ai_classifier_integration - AssertionError: Expected throws_on_smoke, got type_error
+FAILED tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_source_code_prompt_generation - KeyError: 'title'
+FAILED tests/integration/test_templates_integration.py::TestTemplatesIntegration::test_complete_template_workflow - KeyError: 'title'
+FAILED tests/integration/test_tester_integration.py::TestTestAnalyzerIntegration::test_real_ai_single_file_analysis - assert 383.9161260128021 < 30
+FAILED tests/integration/test_tester_integration.py::TestTestAnalyzerIntegration::test_real_ai_directory_analysis - assert 258.6083903312683 < 60
+FAILED tests/integration/test_tester_integration.py::TestTestSummarizerIntegration::test_real_ai_summarizer_with_context - assert 73.40166354179382 < 30
+FAILED tests/integration/test_tester_integration.py::TestTestSummarizerIntegration::test_real_ai_summarizer_batch_processing - assert 167.97644662857056 < 30
+FAILED tests/test_end_to_end_pipeline.py::test_full_pipeline_end_to_end - AssertionError: ❌ Alignment rate is 0.00%, expected > 0%
+FAILED tests/test_templates.py::TestPromptTemplates::test_source_code_prompt_formatting - KeyError: 'title'
+======================= 13 failed, 223 passed in 6014.94s (1:40:14) =======================

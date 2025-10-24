@@ -21,15 +21,98 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class TestAnalyzer:
-    """Main orchestrator for test analysis."""
+class AnalysisEngine:
+    """
+    Main orchestrator for comprehensive test analysis using AST parsing and AI summarization.
+    
+    This class combines static analysis (AST parsing) with AI-powered semantic analysis
+    to extract detailed information about test files. It analyzes test structure,
+    behavior, coverage, and relationships to provide insights into test quality
+    and completeness.
+    
+    The analyzer can process individual test files or entire directories, generating
+    detailed reports that include test behaviors, confidence scores, and coverage analysis.
+    
+    Attributes:
+        summarizer: TestSummarizer instance for AI-powered test analysis
+    
+    Example:
+        >>> analyzer = TestAnalyzer(
+        ...     model_name="qwen3-coder:latest",
+        ...     spec_file=Path("spec.yaml"),
+        ...     source_file=Path("source.py")
+        ... )
+        >>> result = analyzer.analyze_single_file(Path("test_source.py"))
+        >>> print(f"Analyzed {len(result['functions'])} test functions")
+    """
     
     def __init__(self, model_name: str = "qwen3-coder:latest", spec_file: Optional[Path] = None, source_file: Optional[Path] = None):
-        """Initialize the analyzer with a summarizer and context files."""
+        """
+        Initialize the analyzer with AI model and optional context files.
+        
+        Args:
+            model_name: Name of the AI model to use for test analysis.
+                       Defaults to "qwen3-coder:latest".
+            spec_file: Optional path to OpenSpec specification file. When provided,
+                      gives context about expected requirements for better analysis.
+            source_file: Optional path to source code file. When provided,
+                        enables better understanding of what tests are validating.
+        
+        Raises:
+            ValueError: If model_name is invalid or unavailable
+            FileNotFoundError: If spec_file or source_file are specified but don't exist
+        
+        Example:
+            >>> # Basic analyzer
+            >>> analyzer = TestAnalyzer()
+            >>> # Analyzer with specification context
+            >>> analyzer = TestAnalyzer(spec_file=Path("api_spec.yaml"))
+            >>> # Full context analyzer
+            >>> analyzer = TestAnalyzer(
+            ...     spec_file=Path("spec.yaml"),
+            ...     source_file=Path("implementation.py")
+            ... )
+        """
         self.summarizer = TestSummarizer(model_name, spec_file, source_file)
     
     def analyze_single_file(self, test_file_path: Path) -> Dict[str, Any]:
-        """Analyze a single test file."""
+        """
+        Analyze a single test file using both AST parsing and AI summarization.
+        
+        This method performs comprehensive analysis of a test file by first parsing
+        the AST to extract structural information, then using AI to understand
+        the semantic meaning and behavior of each test. The combination provides
+        detailed insights into test quality, coverage, and purpose.
+        
+        Args:
+            test_file_path: Path to the test file to analyze. Must be a valid Python
+                          file containing test functions or methods.
+        
+        Returns:
+            Dictionary containing comprehensive analysis results with the following structure:
+            {
+                'file_path': str - Path to the analyzed file,
+                'functions': List[Dict] - Detailed information about each test function,
+                'classes': List[Dict] - Information about test classes,
+                'imports': List[str] - Import statements found,
+                'behaviors': List[Dict] - AI-extracted test behaviors with confidence scores,
+                'coverage_analysis': Dict[str, Any] - Coverage and quality metrics,
+                'recommendations': List[str] - Suggestions for improvement
+            }
+        
+        Raises:
+            FileNotFoundError: If test_file_path does not exist
+            SyntaxError: If test file contains invalid Python syntax
+            ValueError: If test file is not readable or contains no test functions
+            RuntimeError: If AI analysis fails
+        
+        Example:
+            >>> analyzer = TestAnalyzer()
+            >>> result = analyzer.analyze_single_file(Path("test_calculator.py"))
+            >>> print(f"Found {len(result['functions'])} test functions")
+            >>> for func in result['functions']:
+            ...     print(f"  - {func['name']}: {func['description']}")
+        """
         logger.info(f"Analyzing test file: {test_file_path}")
         
         # Step 1: Parse the test file with AST
@@ -45,7 +128,40 @@ class TestAnalyzer:
         return summarized_data
     
     def analyze_directory(self, test_dir: Path, output_dir: Path) -> List[Dict[str, Any]]:
-        """Analyze all test files in a directory."""
+        """
+        Analyze all test files in a directory and generate comprehensive reports.
+        
+        This method recursively scans a directory for test files, analyzes each one
+        using both AST parsing and AI summarization, and generates detailed reports
+        for individual files and aggregate analysis for the entire test suite.
+        
+        Args:
+            test_dir: Directory containing test files to analyze. The method will
+                     recursively scan for Python files that appear to be tests
+                     (files starting with 'test_' or containing 'test' in the name).
+            output_dir: Directory where analysis reports will be written. Creates
+                       subdirectories for individual file reports and aggregate summaries.
+        
+        Returns:
+            List of analysis result dictionaries, one for each test file found.
+            Each result contains the same structure as analyze_single_file() output.
+        
+        Raises:
+            FileNotFoundError: If test_dir does not exist
+            OSError: If output_dir cannot be created or written to
+            ValueError: If test_dir contains no valid test files
+            RuntimeError: If analysis fails for multiple files
+        
+        Example:
+            >>> analyzer = TestAnalyzer()
+            >>> results = analyzer.analyze_directory(
+            ...     Path("tests"),
+            ...     Path("analysis_reports")
+            ... )
+            >>> print(f"Analyzed {len(results)} test files")
+            >>> total_functions = sum(len(r['functions']) for r in results)
+            >>> print(f"Total test functions: {total_functions}")
+        """
         logger.info(f"Analyzing test directory: {test_dir}")
         
         # Create output directory if it doesn't exist

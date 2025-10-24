@@ -1,0 +1,620 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testing Strategy Overview &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="OllamaClient API" href="../api/ollama_client.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Strategy Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing-philosophy">Testing Philosophy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#test-pyramid"><strong>Test Pyramid</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-driven-development"><strong>Test-Driven Development</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-gates"><strong>Quality Gates</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#test-organization">Test Organization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#directory-structure">Directory Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-categories">Test Categories</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-tools-and-frameworks">Testing Tools and Frameworks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-framework"><strong>Core Framework</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mocking-and-fakes"><strong>Mocking and Fakes</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coverage-analysis"><strong>Coverage Analysis</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-testing"><strong>Performance Testing</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#test-data-management">Test Data Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixtures">Fixtures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-data-files">Test Data Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#continuous-integration">Continuous Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#github-actions">GitHub Actions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Quality Gates</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#test-coverage">Test Coverage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coverage-goals">Coverage Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coverage-reports">Coverage Reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coverage-exclusions">Coverage Exclusions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-tests">Running Tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#local-development">Local Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-selection">Test Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugging-tests">Debugging Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#test-markers">Test Markers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-good-tests">Writing Good Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mocking-guidelines">Mocking Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Test Data Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Performance Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugging-techniques">Debugging Techniques</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Testing Strategy Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/testing/overview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="testing-strategy-overview">
+<h1>Testing Strategy Overview<a class="headerlink" href="#testing-strategy-overview" title="Link to this heading"></a></h1>
+<p>The Spec-Coder Agent employs a comprehensive testing strategy to ensure reliability, correctness, and maintainability. This document provides an overview of our testing philosophy and organization.</p>
+<section id="testing-philosophy">
+<h2>Testing Philosophy<a class="headerlink" href="#testing-philosophy" title="Link to this heading"></a></h2>
+<p>Our testing approach is based on several key principles:</p>
+<section id="test-pyramid">
+<h3><strong>Test Pyramid</strong><a class="headerlink" href="#test-pyramid" title="Link to this heading"></a></h3>
+<p>We follow the classic test pyramid model:</p>
+<ul class="simple">
+<li><p><strong>Unit Tests (70%)</strong>: Fast, isolated tests for individual components</p></li>
+<li><p><strong>Integration Tests (20%)</strong>: Tests that verify component interactions</p></li>
+<li><p><strong>End-to-End Tests (10%)</strong>: Full pipeline tests that simulate real usage</p></li>
+</ul>
+</section>
+<section id="test-driven-development">
+<h3><strong>Test-Driven Development</strong><a class="headerlink" href="#test-driven-development" title="Link to this heading"></a></h3>
+<p>While not all existing code was developed TDD, new features are expected to include:</p>
+<ol class="arabic simple">
+<li><p><strong>Tests first</strong>: Write failing tests before implementation</p></li>
+<li><p><strong>Red-Green-Refactor</strong>: Follow the TDD cycle</p></li>
+<li><p><strong>Continuous testing</strong>: Tests run automatically on changes</p></li>
+</ol>
+</section>
+<section id="quality-gates">
+<h3><strong>Quality Gates</strong><a class="headerlink" href="#quality-gates" title="Link to this heading"></a></h3>
+<p>All code must pass these quality gates:</p>
+<ul class="simple">
+<li><p><strong>100% test coverage</strong> for critical paths</p></li>
+<li><p><strong>All tests must pass</strong> in CI/CD pipeline</p></li>
+<li><p><strong>No flaky tests</strong> allowed</p></li>
+<li><p><strong>Performance tests</strong> for critical components</p></li>
+</ul>
+</section>
+</section>
+<section id="test-organization">
+<h2>Test Organization<a class="headerlink" href="#test-organization" title="Link to this heading"></a></h2>
+<section id="directory-structure">
+<h3>Directory Structure<a class="headerlink" href="#directory-structure" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tests/
+├── unit/                    # Unit tests
+│   ├── test_generator.py
+│   ├── test_orchestrator.py
+│   ├── test_tester.py
+│   └── test_healer.py
+├── integration/             # Integration tests
+│   ├── test_generator_integration.py
+│   ├── test_orchestrator_integration.py
+│   └── test_end_to_end_pipeline.py
+├── fixtures/               # Test data and fixtures
+│   ├── sample_specs/
+│   └── expected_outputs/
+└── conftest.py             # Shared test configuration
+</pre></div>
+</div>
+</section>
+<section id="test-categories">
+<h3>Test Categories<a class="headerlink" href="#test-categories" title="Link to this heading"></a></h3>
+<p><strong>Unit Tests</strong>
+- Test individual functions and classes in isolation
+- Use mocks for external dependencies
+- Fast execution (milliseconds)
+- High coverage of edge cases</p>
+<p><strong>Integration Tests</strong>
+- Test component interactions
+- Use real dependencies when possible
+- Slower execution (seconds)
+- Focus on interface contracts</p>
+<p><strong>End-to-End Tests</strong>
+- Test complete workflows
+- Use real data and configurations
+- Slowest execution (minutes)
+- Validate user-facing functionality</p>
+</section>
+</section>
+<section id="testing-tools-and-frameworks">
+<h2>Testing Tools and Frameworks<a class="headerlink" href="#testing-tools-and-frameworks" title="Link to this heading"></a></h2>
+<section id="core-framework">
+<h3><strong>Core Framework</strong><a class="headerlink" href="#core-framework" title="Link to this heading"></a></h3>
+<p>We use <a class="reference external" href="https://docs.pytest.org/">pytest</a> as our primary testing framework:</p>
+<ul class="simple">
+<li><p><strong>Powerful assertions</strong>: Rich assertion messages</p></li>
+<li><p><strong>Fixtures</strong>: Reusable test setup and teardown</p></li>
+<li><p><strong>Parametrization</strong>: Run tests with multiple inputs</p></li>
+<li><p><strong>Plugins</strong>: Extensive ecosystem for additional features</p></li>
+</ul>
+</section>
+<section id="mocking-and-fakes">
+<h3><strong>Mocking and Fakes</strong><a class="headerlink" href="#mocking-and-fakes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>unittest.mock</strong>: Python’s built-in mocking framework</p></li>
+<li><p><strong>pytest-mock</strong>: Enhanced mocking with pytest integration</p></li>
+<li><p><strong>Fake implementations</strong>: Lightweight alternatives to external services</p></li>
+</ul>
+</section>
+<section id="coverage-analysis">
+<h3><strong>Coverage Analysis</strong><a class="headerlink" href="#coverage-analysis" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>pytest-cov</strong>: Coverage reporting for pytest</p></li>
+<li><p><strong>Coverage.py</strong>: Underlying coverage measurement tool</p></li>
+<li><p><strong>Coverage thresholds</strong>: Enforced minimum coverage levels</p></li>
+</ul>
+</section>
+<section id="performance-testing">
+<h3><strong>Performance Testing</strong><a class="headerlink" href="#performance-testing" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>pytest-benchmark</strong>: Performance regression testing</p></li>
+<li><p><strong>Memory profiling</strong>: Detect memory leaks and inefficiencies</p></li>
+<li><p><strong>Load testing</strong>: Validate performance under stress</p></li>
+</ul>
+</section>
+</section>
+<section id="test-data-management">
+<h2>Test Data Management<a class="headerlink" href="#test-data-management" title="Link to this heading"></a></h2>
+<section id="fixtures">
+<h3>Fixtures<a class="headerlink" href="#fixtures" title="Link to this heading"></a></h3>
+<p>We use pytest fixtures for test data management:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_spec</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;project_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Test Project&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;functions&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_function&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A test function&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;return_type&quot;</span><span class="p">:</span> <span class="s2">&quot;void&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;behaviors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Does nothing&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">temp_workspace</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">workspace</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;workspace&quot;</span>
+    <span class="n">workspace</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">workspace</span>
+</pre></div>
+</div>
+</section>
+<section id="test-data-files">
+<h3>Test Data Files<a class="headerlink" href="#test-data-files" title="Link to this heading"></a></h3>
+<p>Sample specifications and expected outputs are stored in <code class="docutils literal notranslate"><span class="pre">tests/fixtures/</span></code>:</p>
+<ul class="simple">
+<li><p><strong>Sample specifications</strong>: Various spec formats and complexities</p></li>
+<li><p><strong>Expected outputs</strong>: Reference outputs for comparison</p></li>
+<li><p><strong>Error cases</strong>: Invalid inputs for error handling tests</p></li>
+</ul>
+</section>
+</section>
+<section id="continuous-integration">
+<h2>Continuous Integration<a class="headerlink" href="#continuous-integration" title="Link to this heading"></a></h2>
+<section id="github-actions">
+<h3>GitHub Actions<a class="headerlink" href="#github-actions" title="Link to this heading"></a></h3>
+<p>Our CI pipeline runs on every push and pull request:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tests</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3.8</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3.9</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;3.10&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;3.11&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.python-version }}</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">pip install -e .[dev,test]</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run tests</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">pytest --cov=asabaal_utils --cov-report=xml</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload coverage</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">codecov/codecov-action@v3</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>Quality Gates<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>All tests must pass</strong> across all Python versions</p></li>
+<li><p><strong>Coverage threshold</strong>: Minimum 90% line coverage</p></li>
+<li><p><strong>Performance tests</strong>: No regressions allowed</p></li>
+<li><p><strong>Security scans</strong>: No high-severity vulnerabilities</p></li>
+</ul>
+</section>
+</section>
+<section id="test-coverage">
+<h2>Test Coverage<a class="headerlink" href="#test-coverage" title="Link to this heading"></a></h2>
+<section id="coverage-goals">
+<h3>Coverage Goals<a class="headerlink" href="#coverage-goals" title="Link to this heading"></a></h3>
+<p>Our coverage targets are:</p>
+<ul class="simple">
+<li><p><strong>Overall coverage</strong>: 90% minimum</p></li>
+<li><p><strong>Critical modules</strong>: 95% minimum</p></li>
+<li><p><strong>New code</strong>: 100% coverage required</p></li>
+</ul>
+</section>
+<section id="coverage-reports">
+<h3>Coverage Reports<a class="headerlink" href="#coverage-reports" title="Link to this heading"></a></h3>
+<p>Coverage is tracked and reported:</p>
+<ul class="simple">
+<li><p><strong>Local development</strong>: Real-time coverage in terminal</p></li>
+<li><p><strong>CI/CD pipeline</strong>: XML reports for Codecov</p></li>
+<li><p><strong>Documentation</strong>: Coverage badges in README</p></li>
+<li><p><strong>Trends</strong>: Historical coverage tracking</p></li>
+</ul>
+</section>
+<section id="coverage-exclusions">
+<h3>Coverage Exclusions<a class="headerlink" href="#coverage-exclusions" title="Link to this heading"></a></h3>
+<p>Some code is excluded from coverage:</p>
+<ul class="simple">
+<li><p><strong>Test files</strong>: Don’t test the tests</p></li>
+<li><p><strong>Configuration</strong>: Simple configuration loading</p></li>
+<li><p><strong>Exception handling</strong>: Hard-to-trigger error paths</p></li>
+<li><p><strong>Type hints</strong>: Runtime type checking code</p></li>
+</ul>
+</section>
+</section>
+<section id="running-tests">
+<h2>Running Tests<a class="headerlink" href="#running-tests" title="Link to this heading"></a></h2>
+<section id="local-development">
+<h3>Local Development<a class="headerlink" href="#local-development" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install test dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>test<span class="o">]</span>
+
+<span class="c1"># Run all tests</span>
+pytest
+
+<span class="c1"># Run with coverage</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>asabaal_utils<span class="w"> </span>--cov-report<span class="o">=</span>html
+
+<span class="c1"># Run specific test file</span>
+pytest<span class="w"> </span>tests/unit/test_generator.py
+
+<span class="c1"># Run with verbose output</span>
+pytest<span class="w"> </span>-v
+
+<span class="c1"># Run only failed tests</span>
+pytest<span class="w"> </span>--lf
+</pre></div>
+</div>
+</section>
+<section id="test-selection">
+<h3>Test Selection<a class="headerlink" href="#test-selection" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run unit tests only</span>
+pytest<span class="w"> </span>tests/unit/
+
+<span class="c1"># Run integration tests only</span>
+pytest<span class="w"> </span>tests/integration/
+
+<span class="c1"># Run tests by keyword</span>
+pytest<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;test_generate&quot;</span>
+
+<span class="c1"># Run tests by marker</span>
+pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;slow&quot;</span>
+
+<span class="c1"># Run tests in parallel</span>
+pytest<span class="w"> </span>-n<span class="w"> </span>auto
+</pre></div>
+</div>
+</section>
+<section id="debugging-tests">
+<h3>Debugging Tests<a class="headerlink" href="#debugging-tests" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop on first failure</span>
+pytest<span class="w"> </span>-x
+
+<span class="c1"># Drop into debugger on failure</span>
+pytest<span class="w"> </span>--pdb
+
+<span class="c1"># Show local variables on failure</span>
+pytest<span class="w"> </span>-l
+
+<span class="c1"># Run with maximum verbosity</span>
+pytest<span class="w"> </span>-vv<span class="w"> </span>-s
+</pre></div>
+</div>
+</section>
+</section>
+<section id="test-markers">
+<h2>Test Markers<a class="headerlink" href="#test-markers" title="Link to this heading"></a></h2>
+<p>We use pytest markers to categorize tests:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">unit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generator_function</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unit test for generator function&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_pipeline_integration</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Integration test for pipeline&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">slow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_performance_regression</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Slow performance test&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">external</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_ollama_connection</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test requiring external service&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Available markers:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">unit</span></code>: Fast unit tests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">integration</span></code>: Component integration tests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slow</span></code>: Tests that take &gt; 1 second</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">external</span></code>: Tests requiring external services</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">benchmark</span></code>: Performance tests</p></li>
+</ul>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="writing-good-tests">
+<h3>Writing Good Tests<a class="headerlink" href="#writing-good-tests" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Descriptive names</strong>: Test names should describe what they test</p></li>
+<li><p><strong>Arrange-Act-Assert</strong>: Structure tests clearly</p></li>
+<li><p><strong>Single assertion</strong>: One logical assertion per test</p></li>
+<li><p><strong>Independent tests</strong>: Tests should not depend on each other</p></li>
+<li><p><strong>Repeatable</strong>: Tests should produce same results every time</p></li>
+</ol>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_generator_creates_valid_python_files</span><span class="p">(</span><span class="n">temp_workspace</span><span class="p">,</span> <span class="n">sample_spec</span><span class="p">):</span>
+    <span class="c1"># Arrange</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">()</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">temp_workspace</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span>
+
+    <span class="c1"># Act</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span><span class="n">sample_spec</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+
+    <span class="c1"># Assert</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">files_created</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.py&quot;</span>
+
+        <span class="c1"># Verify valid Python syntax</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>  <span class="c1"># Should not raise</span>
+</pre></div>
+</div>
+</section>
+<section id="mocking-guidelines">
+<h3>Mocking Guidelines<a class="headerlink" href="#mocking-guidelines" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Mock external dependencies</strong>: Don’t make real network calls</p></li>
+<li><p><strong>Use realistic mocks</strong>: Mocks should behave like real objects</p></li>
+<li><p><strong>Verify mock interactions</strong>: Ensure mocks are called correctly</p></li>
+<li><p><strong>Avoid over-mocking</strong>: Don’t mock the system under test</p></li>
+</ol>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_generator_handles_ollama_error</span><span class="p">(</span><span class="n">sample_spec</span><span class="p">,</span> <span class="n">temp_workspace</span><span class="p">):</span>
+    <span class="c1"># Arrange</span>
+    <span class="n">mock_client</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+    <span class="n">mock_client</span><span class="o">.</span><span class="n">generate</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;Service unavailable&quot;</span><span class="p">)</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">(</span><span class="n">ollama_client</span><span class="o">=</span><span class="n">mock_client</span><span class="p">)</span>
+
+    <span class="c1"># Act</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_tests</span><span class="p">(</span><span class="n">sample_spec</span><span class="p">,</span> <span class="n">temp_workspace</span><span class="p">)</span>
+
+    <span class="c1"># Assert</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span>
+    <span class="k">assert</span> <span class="s2">&quot;Service unavailable&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">error</span>
+    <span class="n">mock_client</span><span class="o">.</span><span class="n">generate</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>Test Data Management<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Use fixtures</strong>: Reusable test setup</p></li>
+<li><p><strong>Minimal data</strong>: Use smallest data that tests the feature</p></li>
+<li><p><strong>Realistic data</strong>: Test data should reflect real usage</p></li>
+<li><p><strong>Isolated data</strong>: Each test should have its own data</p></li>
+</ol>
+</section>
+<section id="id3">
+<h3>Performance Testing<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Benchmark critical paths</strong>: Measure performance of key operations</p></li>
+<li><p><strong>Set baselines</strong>: Establish performance expectations</p></li>
+<li><p><strong>Monitor regressions</strong>: Alert on performance degradation</p></li>
+<li><p><strong>Profile regularly</strong>: Identify optimization opportunities</p></li>
+</ol>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Flaky Tests</strong>
+- Identify non-deterministic behavior
+- Use proper synchronization
+- Isolate tests from external factors
+- Add retry logic with exponential backoff</p>
+<p><strong>Slow Tests</strong>
+- Profile test execution
+- Identify bottlenecks
+- Use mocks for slow dependencies
+- Consider test parallelization</p>
+<p><strong>Memory Leaks</strong>
+- Use memory profiling tools
+- Check for unclosed resources
+- Verify proper cleanup in fixtures
+- Monitor memory usage in CI</p>
+</section>
+<section id="debugging-techniques">
+<h3>Debugging Techniques<a class="headerlink" href="#debugging-techniques" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Verbose output</strong>: Use <code class="docutils literal notranslate"><span class="pre">-vv</span></code> for detailed information</p></li>
+<li><p><strong>Debugger integration</strong>: Use <code class="docutils literal notranslate"><span class="pre">--pdb</span></code> for interactive debugging</p></li>
+<li><p><strong>Logging</strong>: Add debug logging to tests</p></li>
+<li><p><strong>Isolation</strong>: Run tests individually to identify issues</p></li>
+</ol>
+</section>
+</section>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.pytest.org/">pytest documentation</a></p></li>
+<li><p><a class="reference external" href="https://pytest-mock.readthedocs.io/">pytest-mock documentation</a></p></li>
+<li><p><a class="reference external" href="https://coverage.readthedocs.io/">test coverage documentation</a></p></li>
+<li><p><a class="reference external" href="https://docs.python-guide.org/writing/tests/">Python testing best practices</a></p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><span class="xref std std-doc">unit_tests</span> - Detailed unit testing guide</p></li>
+<li><p><span class="xref std std-doc">integration_tests</span> - Integration testing approach</p></li>
+<li><p><span class="xref std std-doc">test_coverage</span> - Coverage analysis and improvement</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../api/ollama_client.html" class="btn btn-neutral float-left" title="OllamaClient API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

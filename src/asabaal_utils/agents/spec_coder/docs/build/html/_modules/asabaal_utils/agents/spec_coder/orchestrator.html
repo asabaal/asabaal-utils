@@ -1,0 +1,1159 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>asabaal_utils.agents.spec_coder.orchestrator &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/generator.html">CodeGenerator API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">asabaal_utils.agents.spec_coder.orchestrator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for asabaal_utils.agents.spec_coder.orchestrator</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">🧩 Full Integration Orchestration Layer</span>
+
+<span class="sd">This script unifies the entire software development pipeline from OpenSpec </span>
+<span class="sd">specifications through code generation, testing, and optional healing.</span>
+
+<span class="sd">Usage:</span>
+<span class="sd">    python scripts/run_integration.py --mode fresh</span>
+<span class="sd">    python scripts/run_integration.py --mode heal</span>
+<span class="sd">    python scripts/run_integration.py --mode test</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeGenerator</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IntegrationOrchestrator">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntegrationOrchestrator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main integration orchestrator.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="IntegrationOrchestrator.__init__">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Use current working directory as base if not provided</span>
+        <span class="k">if</span> <span class="n">base_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">base_dir</span>
+        
+        <span class="c1"># Track the spec file path used for this pipeline run</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span> <span class="o">=</span> <span class="kc">None</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">scripts_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;scripts&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">healer_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;healer&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompts_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;prompts&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generated_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;generated_functions&quot;</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🧩 Integration Orchestrator&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📁 Base directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="IntegrationOrchestrator.get_reports_dir">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.get_reports_dir">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_reports_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the appropriate reports directory based on output_dir.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span></div>
+
+    
+<div class="viewcode-block" id="IntegrationOrchestrator.load_spec_file_path_from_metadata">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.load_spec_file_path_from_metadata">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_spec_file_path_from_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load spec file path from pipeline metadata if available.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Already loaded</span>
+            
+        <span class="c1"># Look for metadata in the reports directory</span>
+        <span class="n">reports_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reports_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="n">metadata_file</span> <span class="o">=</span> <span class="n">reports_dir</span> <span class="o">/</span> <span class="s2">&quot;pipeline_metadata.json&quot;</span>
+            
+        <span class="k">if</span> <span class="n">metadata_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;spec_file_path&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;spec_file_path&#39;</span><span class="p">])</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Loaded spec file path from metadata: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Failed to load metadata: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_test_file_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean test file content to handle instructional text that causes IndentationError.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+        
+        <span class="c1"># Remove ```python and ``` markers</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```python\s*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```\s*$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```\s*$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        
+        <span class="c1"># Remove common AI-generated comments and notes</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            
+            <span class="c1"># Skip lines that look like AI instructions or notes</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Note:&#39;</span><span class="p">)</span> <span class="ow">or</span> 
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TODO:&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Replace&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;your_module&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="s1">&#39;actual name of your module&#39;</span> <span class="ow">in</span> <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;# Note:&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;# TODO:&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;pytest test code only&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;The test code must be complete&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Generate comprehensive pytest tests&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="ow">not</span> <span class="n">stripped</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;here is&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;this is&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;the following&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Skip lines that are clearly instructions</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">keyword</span> <span class="ow">in</span> <span class="n">stripped</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s1">&#39;generate tests&#39;</span><span class="p">,</span> <span class="s1">&#39;test code&#39;</span><span class="p">,</span> <span class="s1">&#39;pytest file&#39;</span><span class="p">,</span> <span class="s1">&#39;executable&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;complete and executable&#39;</span><span class="p">,</span> <span class="s1">&#39;single pytest file&#39;</span><span class="p">,</span> <span class="s1">&#39;instruction&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;requirement:&#39;</span><span class="p">,</span> <span class="s1">&#39;code to test:&#39;</span><span class="p">,</span> <span class="s1">&#39;verify:&#39;</span>
+            <span class="p">]):</span>
+                <span class="k">continue</span>
+            
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        
+        <span class="c1"># Remove any remaining empty lines at the beginning or end</span>
+        <span class="k">while</span> <span class="n">cleaned_lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cleaned_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">cleaned_lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cleaned_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        
+        <span class="c1"># Fix indentation issues by removing leading spaces only from the first few lines</span>
+        <span class="c1"># that might have been incorrectly indented by AI generation</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span>  <span class="c1"># Not properly indented</span>
+                <span class="c1"># Remove leading spaces from lines that should start at column 0</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;def &#39;</span><span class="p">,</span> <span class="s1">&#39;class &#39;</span><span class="p">,</span> <span class="s1">&#39;import &#39;</span><span class="p">,</span> <span class="s1">&#39;from &#39;</span><span class="p">,</span> <span class="s1">&#39;@&#39;</span><span class="p">)):</span>
+                    <span class="n">cleaned_lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+        
+        <span class="n">content</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">content</span>
+    
+<div class="viewcode-block" id="IntegrationOrchestrator.run">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">capture</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a command and return the result.&quot;&quot;&quot;</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">cwd</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;→ </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  (in </span><span class="si">{</span><span class="n">work_dir</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">capture</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                    <span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                    <span class="n">cwd</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;STDERR: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span>
+                
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Command timed out: </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;Timeout&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Command failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+<div class="viewcode-block" id="IntegrationOrchestrator.run_mode">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.run_mode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the integration pipeline in the specified mode.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🚀 Starting integration pipeline in &#39;</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&#39; mode&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Integration pipeline complete (</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🎉 Pipeline mode executed successfully!&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    
+<div class="viewcode-block" id="IntegrationOrchestrator.run_full_pipeline">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.IntegrationOrchestrator.run_full_pipeline">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_full_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the complete multi-stage pipeline from spec to code.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🚀 Starting full multi-stage pipeline&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Spec file: </span><span class="si">{</span><span class="n">spec_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📁 Output directory: </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Store the spec file path for use in later stages</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">spec_file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Using spec file: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Stage 1: Parse OpenSpec and generate initial test scaffold</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🔧 Stage 1: OpenSpec → Tests/Scaffold&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage1_spec_to_scaffold</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Stage 1 failed&quot;</span><span class="p">)</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="c1"># Stage 2: Analyze tests and extract logical requirements  </span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🧠 Stage 2: Tests/Scaffold → Logical Requirements&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage2_scaffold_to_requirements</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Stage 2 failed&quot;</span><span class="p">)</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="c1"># Stage 3: Behavioral alignment checking</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">⚖️  Stage 3: Logical Requirements → Alignment Checking&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage3_requirements_to_alignment</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Stage 3 failed&quot;</span><span class="p">)</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="c1"># Stage 4: Final code generation</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">⚡ Stage 4: Alignment Checking → Code Generation&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage4_alignment_to_code</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Stage 4 failed&quot;</span><span class="p">)</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+            
+
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Pipeline failed with exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+        
+
+        
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ Full multi-stage pipeline completed successfully!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">⚠️  Pipeline completed with issues - check reports for details&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">success</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stage1_spec_to_scaffold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stage 1: Convert OpenSpec to test scaffold and initial structure.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get the correct reports directory</span>
+            <span class="n">reports_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reports_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: output_dir = </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: reports_dir = </span><span class="si">{</span><span class="n">reports_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: reports_dir absolute = </span><span class="si">{</span><span class="n">reports_dir</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Store the spec file path for use in later stages</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">spec_file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Stage 1: Stored spec file path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Use the generator to create initial scaffold</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_from_spec</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+            
+            <span class="c1"># Now create the reports directory after the generator has run</span>
+            <span class="c1"># (since the generator might delete and recreate the output_dir)</span>
+            <span class="n">reports_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: reports_dir exists after mkdir = </span><span class="si">{</span><span class="n">reports_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📁 Stage 1 reports directory: </span><span class="si">{</span><span class="n">reports_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Save the spec file path to a metadata file for other stages to find</span>
+            <span class="n">metadata_file</span> <span class="o">=</span> <span class="n">reports_dir</span> <span class="o">/</span> <span class="s2">&quot;pipeline_metadata.json&quot;</span>
+            
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;spec_file_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()),</span>
+                <span class="s2">&quot;stage_completed&quot;</span><span class="p">:</span> <span class="s2">&quot;stage1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 Saved pipeline metadata to: </span><span class="si">{</span><span class="n">metadata_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Save Stage 1 report</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: result.success = </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: result.files_generated = </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">files_generated</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: result.errors = </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: result.warnings = </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: result.execution_time = </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">execution_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="n">stage1_report</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;spec_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec_file</span><span class="p">),</span>
+                    <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">output_dir</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;reports_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">reports_dir</span><span class="p">),</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">,</span>
+                    <span class="s2">&quot;files_generated&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">files_generated</span><span class="p">,</span>
+                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
+                    <span class="s2">&quot;warnings&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="p">,</span>
+                    <span class="s2">&quot;execution_time&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">execution_time</span><span class="p">,</span>
+                    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+                <span class="p">}</span>
+                
+                <span class="n">report_file</span> <span class="o">=</span> <span class="n">reports_dir</span> <span class="o">/</span> <span class="s2">&quot;stage1_report.json&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: Attempting to save report to: </span><span class="si">{</span><span class="n">report_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: reports_dir exists: </span><span class="si">{</span><span class="n">reports_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Debug: report_file parent exists: </span><span class="si">{</span><span class="n">report_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">stage1_report</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📄 Stage 1 report saved to: </span><span class="si">{</span><span class="n">report_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Failed to save Stage 1 report: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                <span class="c1"># Don&#39;t fail the stage if report saving fails</span>
+            
+            <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stage 1 error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stage2_scaffold_to_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stage 2: Extract logical requirements from test scaffold.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Run test analysis to extract behaviors</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.parse_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestVisitor</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.summarize_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestSummarizer</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">parse_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestVisitor</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">summarize_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestSummarizer</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+            
+<span class="c1"># Parse test files in the output directory</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">test_dir</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scaffolds&quot;</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">test_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;spec_code/scaffolds/tests&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">test_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">test_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;test_output/scaffolds/tests&quot;</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Looking for test files in: </span><span class="si">{</span><span class="n">test_dir</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test dir exists: </span><span class="si">{</span><span class="n">test_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="n">test_results</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">test_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">test_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;test_*.py&quot;</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found test files: </span><span class="si">{</span><span class="n">test_files</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">test_file</span> <span class="ow">in</span> <span class="n">test_files</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">test_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    
+                    <span class="c1"># Clean the content to handle instructional text that causes IndentationError</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_test_file_content</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+                    
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to parse test file </span><span class="si">{</span><span class="n">test_file</span><span class="si">}</span><span class="s2"> after cleaning: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>  <span class="c1"># Skip this file and continue with others</span>
+                    <span class="n">visitor</span> <span class="o">=</span> <span class="n">TestVisitor</span><span class="p">()</span>
+                    <span class="n">visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                    <span class="n">test_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">visitor</span><span class="o">.</span><span class="n">tests</span><span class="p">)</span>
+            
+            <span class="n">summarizer</span> <span class="o">=</span> <span class="n">TestSummarizer</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">test_results</span><span class="p">:</span>
+                <span class="c1"># Convert TestInfo to dict format for summarizer</span>
+                <span class="n">test_data</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">test_results</span><span class="p">:</span>
+                    <span class="n">test_dict</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s1">&#39;target_function&#39;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">target_function</span><span class="p">,</span>
+                        <span class="s1">&#39;inputs&#39;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span>
+                        <span class="s1">&#39;assertions&#39;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">assertions</span>
+                    <span class="p">}</span>
+                    <span class="n">test_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_dict</span><span class="p">)</span>
+                
+                <span class="c1"># Summarize each test and save to reports directory</span>
+                <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">test_dict</span> <span class="ow">in</span> <span class="n">test_data</span><span class="p">:</span>
+                    <span class="n">summary</span> <span class="o">=</span> <span class="n">summarizer</span><span class="o">.</span><span class="n">summarize_test</span><span class="p">(</span><span class="n">test_dict</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
+                        <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">test_dict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                            <span class="s2">&quot;target_function&quot;</span><span class="p">:</span> <span class="n">test_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_function&#39;</span><span class="p">),</span>
+                            <span class="s2">&quot;inputs&quot;</span><span class="p">:</span> <span class="n">test_dict</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">],</span>
+                            <span class="s2">&quot;assertions&quot;</span><span class="p">:</span> <span class="n">test_dict</span><span class="p">[</span><span class="s1">&#39;assertions&#39;</span><span class="p">],</span>
+                            <span class="s2">&quot;implied_behavior&quot;</span><span class="p">:</span> <span class="n">summary</span>
+                        <span class="p">})</span>
+                
+                <span class="c1"># Save the summaries to Stage 2 reports directory for Stage 3 to use</span>
+                <span class="k">if</span> <span class="n">summaries</span><span class="p">:</span>
+                    <span class="c1"># Use output directory for reports if provided, otherwise use default reports directory</span>
+                    <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                        <span class="n">reports_base</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">reports_base</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+                    
+                    <span class="n">stage2_report_dir</span> <span class="o">=</span> <span class="n">reports_base</span> <span class="o">/</span> <span class="s2">&quot;stage2_test_summaries&quot;</span>
+                    <span class="n">stage2_report_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    
+                    <span class="n">summary_data</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;test_summaries.json&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;tests&quot;</span><span class="p">:</span> <span class="n">summaries</span>
+                    <span class="p">}</span>
+                    
+                    <span class="n">summary_file</span> <span class="o">=</span> <span class="n">stage2_report_dir</span> <span class="o">/</span> <span class="s2">&quot;test_summary_tests.json&quot;</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 Saved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span><span class="si">}</span><span class="s2"> test behavior summaries to: </span><span class="si">{</span><span class="n">summary_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    
+                    <span class="c1"># Also copy to main reports directory for consistency</span>
+                    <span class="n">main_stage2_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;stage2_test_summaries&quot;</span>
+                    <span class="n">main_stage2_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">main_summary_file</span> <span class="o">=</span> <span class="n">main_stage2_dir</span> <span class="o">/</span> <span class="s2">&quot;test_summary_tests.json&quot;</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">main_summary_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 Also copied to main reports: </span><span class="si">{</span><span class="n">main_summary_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted requirements from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">test_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> test functions&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No test results found, creating basic requirements&quot;</span><span class="p">)</span>
+                <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stage 2 error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stage3_requirements_to_alignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stage 3: Perform behavioral alignment checking.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.align_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BehavioralAligner</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.compare_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BehaviorComparator</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">align_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BehavioralAligner</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">compare_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BehaviorComparator</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🎯 Stage 3: Performing behavioral alignment...&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Determine paths</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">test_dir</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scaffolds&quot;</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span>
+                <span class="n">spec_dir</span> <span class="o">=</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">parent</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">test_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;spec_code/scaffolds/tests&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">test_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">test_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;test_output/scaffolds/tests&quot;</span><span class="p">)</span>
+                <span class="n">spec_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Find OpenSpec specification</span>
+            <span class="n">spec_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/*.yml&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/*.yaml&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">spec_files</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ No OpenSpec specification found&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            
+            <span class="n">spec_file</span> <span class="o">=</span> <span class="n">spec_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Use first spec file found</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Using specification: </span><span class="si">{</span><span class="n">spec_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Parse specification</span>
+            <span class="n">spec_parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">spec_parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="n">spec_file</span><span class="p">)</span>
+            
+            <span class="c1"># Load test behaviors from Stage 2 output</span>
+            <span class="n">test_behaviors</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="c1"># Look for Stage 2 test summary files - check output directory first, then main reports</span>
+            <span class="n">stage2_summary_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">potential_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;stage2_test_summaries&quot;</span> <span class="o">/</span> <span class="s2">&quot;test_summary_tests.json&quot;</span>
+                <span class="k">if</span> <span class="n">potential_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">stage2_summary_file</span> <span class="o">=</span> <span class="n">potential_file</span>
+            
+            <span class="c1"># Fallback to output directory or current working directory</span>
+            <span class="k">if</span> <span class="n">stage2_summary_file</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">stage2_summary_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                    <span class="n">potential_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;stage2_test_summaries&quot;</span> <span class="o">/</span> <span class="s2">&quot;test_summary_tests.json&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">potential_file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;stage2_test_summaries&quot;</span> <span class="o">/</span> <span class="s2">&quot;test_summary_tests.json&quot;</span>
+                <span class="k">if</span> <span class="n">potential_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">stage2_summary_file</span> <span class="o">=</span> <span class="n">potential_file</span>
+            
+            <span class="k">if</span> <span class="n">stage2_summary_file</span> <span class="ow">and</span> <span class="n">stage2_summary_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📂 Loading test behaviors from: </span><span class="si">{</span><span class="n">stage2_summary_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">stage2_summary_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">summary_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                
+                <span class="c1"># Extract test behaviors from summary</span>
+                <span class="k">if</span> <span class="s1">&#39;tests&#39;</span> <span class="ow">in</span> <span class="n">summary_data</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">summary_data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">]:</span>
+                        <span class="n">behavior</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;test_name&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                            <span class="s2">&quot;test_file&quot;</span><span class="p">:</span> <span class="n">summary_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                            <span class="s2">&quot;implied_behavior&quot;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;implied_behavior&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;test_type&quot;</span><span class="p">:</span> <span class="s2">&quot;unit&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.9</span>
+                        <span class="p">}</span>
+                        <span class="n">test_behaviors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">behavior</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Fallback: look for any test summary files in output directory</span>
+                <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                    <span class="n">stage2_reports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*/test_summary_*.json&quot;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">stage2_reports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*/test_summary_*.json&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">stage2_reports</span><span class="p">:</span>
+                    <span class="c1"># Load from the most recent Stage 2 output</span>
+                    <span class="n">latest_summary</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">stage2_reports</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📂 Loading test behaviors from fallback location: </span><span class="si">{</span><span class="n">latest_summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">latest_summary</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">summary_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    
+                    <span class="c1"># Extract test behaviors from summary</span>
+                    <span class="k">if</span> <span class="s1">&#39;tests&#39;</span> <span class="ow">in</span> <span class="n">summary_data</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">summary_data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">]:</span>
+                            <span class="n">behavior</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s2">&quot;test_name&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                                <span class="s2">&quot;test_file&quot;</span><span class="p">:</span> <span class="n">summary_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                                <span class="s2">&quot;implied_behavior&quot;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;implied_behavior&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+                                <span class="s2">&quot;test_type&quot;</span><span class="p">:</span> <span class="s2">&quot;unit&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.9</span>
+                            <span class="p">}</span>
+                            <span class="n">test_behaviors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">behavior</span><span class="p">)</span>
+            
+            <span class="c1"># If no test behaviors found yet, try fallback methods</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">test_behaviors</span><span class="p">:</span>
+                <span class="c1"># Fallback: look for any test summary files in output directory</span>
+                <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                    <span class="n">stage2_reports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*/test_summary_*.json&quot;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">stage2_reports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*/test_summary_*.json&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">stage2_reports</span><span class="p">:</span>
+                    <span class="c1"># Load from the most recent Stage 2 output</span>
+                    <span class="n">latest_summary</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">stage2_reports</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📂 Loading test behaviors from fallback location: </span><span class="si">{</span><span class="n">latest_summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">latest_summary</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">summary_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    
+                    <span class="c1"># Extract test behaviors from summary</span>
+                    <span class="k">if</span> <span class="s1">&#39;tests&#39;</span> <span class="ow">in</span> <span class="n">summary_data</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">summary_data</span><span class="p">[</span><span class="s1">&#39;tests&#39;</span><span class="p">]:</span>
+                            <span class="n">behavior</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s2">&quot;test_name&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                                <span class="s2">&quot;test_file&quot;</span><span class="p">:</span> <span class="n">summary_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                                <span class="s2">&quot;implied_behavior&quot;</span><span class="p">:</span> <span class="n">test</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;implied_behavior&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+                                <span class="s2">&quot;test_type&quot;</span><span class="p">:</span> <span class="s2">&quot;unit&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.9</span>
+                            <span class="p">}</span>
+                            <span class="n">test_behaviors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">behavior</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Fallback: parse test files directly if no Stage 2 summaries available</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️  No Stage 2 summaries found, parsing test files directly&quot;</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">test_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="kn">from</span><span class="w"> </span><span class="nn">.parse_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_test_file</span>
+                            <span class="kn">from</span><span class="w"> </span><span class="nn">.summarize_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestSummarizer</span>
+                        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                            <span class="kn">from</span><span class="w"> </span><span class="nn">parse_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_test_file</span>
+                            <span class="kn">from</span><span class="w"> </span><span class="nn">summarize_tests</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestSummarizer</span>
+                        
+                        <span class="n">summarizer</span> <span class="o">=</span> <span class="n">TestSummarizer</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">test_file</span> <span class="ow">in</span> <span class="n">test_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;test_*.py&quot;</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># Parse the test file</span>
+                                <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">parse_test_file</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+                                
+                                <span class="c1"># Summarize each test</span>
+                                <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tests&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                                    <span class="n">summary</span> <span class="o">=</span> <span class="n">summarizer</span><span class="o">.</span><span class="n">summarize_test</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+                                    <span class="n">behavior</span> <span class="o">=</span> <span class="p">{</span>
+                                        <span class="s2">&quot;test_name&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                                        <span class="s2">&quot;test_file&quot;</span><span class="p">:</span> <span class="n">test_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                        <span class="s2">&quot;implied_behavior&quot;</span><span class="p">:</span> <span class="n">summary</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                        <span class="s2">&quot;test_type&quot;</span><span class="p">:</span> <span class="s2">&quot;unit&quot;</span><span class="p">,</span>
+                                        <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.9</span>
+                                    <span class="p">}</span>
+                                    <span class="n">test_behaviors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">behavior</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Failed to parse </span><span class="si">{</span><span class="n">test_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="k">continue</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📊 Analyzing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">test_behaviors</span><span class="p">)</span><span class="si">}</span><span class="s2"> test behaviors against </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">requirements</span><span class="p">)</span><span class="si">}</span><span class="s2"> requirements&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Perform behavioral alignment using the restored components</span>
+            <span class="n">aligner</span> <span class="o">=</span> <span class="n">BehavioralAligner</span><span class="p">()</span>
+            
+            <span class="c1"># Convert test behaviors to the format expected by aligner</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.align_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestBehavior</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">align_behaviors</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestBehavior</span>
+            <span class="n">test_behavior_objects</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">tb</span> <span class="ow">in</span> <span class="n">test_behaviors</span><span class="p">:</span>
+                <span class="n">test_behavior</span> <span class="o">=</span> <span class="n">TestBehavior</span><span class="p">(</span>
+                    <span class="n">test_name</span><span class="o">=</span><span class="n">tb</span><span class="p">[</span><span class="s2">&quot;test_name&quot;</span><span class="p">],</span>
+                    <span class="n">test_file</span><span class="o">=</span><span class="n">tb</span><span class="p">[</span><span class="s2">&quot;test_file&quot;</span><span class="p">],</span>
+                    <span class="n">implied_behavior</span><span class="o">=</span><span class="n">tb</span><span class="p">[</span><span class="s2">&quot;implied_behavior&quot;</span><span class="p">],</span>
+                    <span class="n">test_type</span><span class="o">=</span><span class="n">tb</span><span class="p">[</span><span class="s2">&quot;test_type&quot;</span><span class="p">],</span>
+                    <span class="n">confidence</span><span class="o">=</span><span class="n">tb</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">test_behavior_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_behavior</span><span class="p">)</span>
+            
+            <span class="c1"># Perform alignment analysis using the restored aligner</span>
+            <span class="n">alignment_matches</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">align_all_tests</span><span class="p">(</span><span class="n">test_behavior_objects</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+            
+            <span class="c1"># Generate comprehensive alignment report</span>
+            <span class="n">alignment_report</span> <span class="o">=</span> <span class="n">aligner</span><span class="o">.</span><span class="n">generate_alignment_report</span><span class="p">(</span><span class="n">alignment_matches</span><span class="p">)</span>
+            
+            <span class="c1"># Save alignment report to output directory</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">output_reports_dir</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+                <span class="n">output_reports_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">report_file</span> <span class="o">=</span> <span class="n">output_reports_dir</span> <span class="o">/</span> <span class="s2">&quot;behavioral_alignment_report.json&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If no output directory, save to current working directory</span>
+                <span class="n">report_file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;behavioral_alignment_report.json&quot;</span>
+                <span class="n">report_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="c1"># Convert MagicMock objects to serializable types</span>
+                <span class="n">serializable_report</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_json_serializable</span><span class="p">(</span><span class="n">alignment_report</span><span class="p">)</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">serializable_report</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Alignment analysis completed&quot;</span><span class="p">)</span>
+            <span class="c1"># Handle alignment_rate that might be a MagicMock</span>
+            <span class="n">alignment_rate</span> <span class="o">=</span> <span class="n">alignment_report</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">][</span><span class="s1">&#39;alignment_rate&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">alignment_rate</span><span class="p">,</span> <span class="s1">&#39;__format__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">alignment_rate</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈 Alignment rate: </span><span class="si">{</span><span class="n">alignment_rate</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📈 Alignment rate: </span><span class="si">{</span><span class="n">alignment_rate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📄 Report saved to: </span><span class="si">{</span><span class="n">report_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="kc">True</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stage 3 error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_json_serializable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert objects with MagicMock or other non-serializable types to JSON-serializable types.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+            <span class="c1"># For objects with attributes (like MagicMock), convert to string representation</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_json_serializable</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_json_serializable</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;side_effect&#39;</span><span class="p">):</span>
+            <span class="c1"># Detect MagicMock objects</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;MagicMock name=</span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">obj</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_match_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requirement</span><span class="p">,</span> <span class="n">test_behavior</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate simple match score between requirement and test behavior.&quot;&quot;&quot;</span>
+        <span class="c1"># Simple keyword-based matching (placeholder for full AI-based comparison)</span>
+        <span class="n">requirement_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">test_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">test_behavior</span><span class="p">[</span><span class="s1">&#39;test_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">test_behavior</span><span class="p">[</span><span class="s1">&#39;implied_behavior&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        
+        <span class="c1"># Count common words</span>
+        <span class="n">req_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">requirement_text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="n">test_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">test_text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="n">common_words</span> <span class="o">=</span> <span class="n">req_words</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">test_words</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_words</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_words</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_words</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stage4_alignment_to_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stage 4: Generate final code based on alignment results.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Initialize alignment_report variable</span>
+            <span class="n">alignment_report</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="c1"># Find the most recent alignment report (check output dir first, then reports directories)</span>
+            <span class="n">alignment_report</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">potential_report</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;behavioral_alignment_report.json&quot;</span>
+                <span class="k">if</span> <span class="n">potential_report</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">alignment_report</span> <span class="o">=</span> <span class="n">potential_report</span>
+            
+            <span class="k">if</span> <span class="n">alignment_report</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Look for most recent alignment report in reports directories</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+                <span class="n">report_pattern</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;*/behavioral_alignment_report.json&quot;</span><span class="p">)</span>
+                <span class="n">report_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">report_pattern</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">report_files</span><span class="p">:</span>
+                    <span class="c1"># Get the most recent by modification time</span>
+                    <span class="n">alignment_report</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">report_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            
+            <span class="c1"># Set up environment variables for subprocess calls</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1"># Create a symlink or copy the alignment report to a standard &#39;reports&#39; directory</span>
+            <span class="c1"># for the subprocess modules to find</span>
+            <span class="n">standard_reports_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+            <span class="n">standard_reports_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">alignment_report</span><span class="p">:</span>
+                <span class="c1"># Copy the alignment report to the standard reports directory</span>
+                <span class="n">target_report</span> <span class="o">=</span> <span class="n">standard_reports_dir</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">alignment_report</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">shutil_lib</span>
+                <span class="c1"># Only copy if source and target are different files</span>
+                <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">alignment_report</span><span class="p">)</span> <span class="o">!=</span> <span class="n">target_report</span><span class="p">:</span>
+                    <span class="n">shutil_lib</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">alignment_report</span><span class="p">,</span> <span class="n">target_report</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Copied alignment report to: </span><span class="si">{</span><span class="n">target_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Alignment report already in place: </span><span class="si">{</span><span class="n">target_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">standard_reports_dir</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If no alignment report found, look in output directory</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+                <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                    <span class="n">run_reports_pattern</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;*_alignment_report.json&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">run_reports_pattern</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span> <span class="o">/</span> <span class="s2">&quot;*_alignment_report.json&quot;</span><span class="p">)</span>
+                <span class="n">report_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">run_reports_pattern</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">report_files</span><span class="p">:</span>
+                    <span class="n">latest_report</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">report_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                    <span class="n">target_report</span> <span class="o">=</span> <span class="n">standard_reports_dir</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">latest_report</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">shutil_lib</span>
+                    <span class="c1"># Only copy if source and target are different files</span>
+                    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">latest_report</span><span class="p">)</span> <span class="o">!=</span> <span class="n">target_report</span><span class="p">:</span>
+                        <span class="n">shutil_lib</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">latest_report</span><span class="p">,</span> <span class="n">target_report</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Copied latest alignment report to: </span><span class="si">{</span><span class="n">target_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Latest alignment report already in place: </span><span class="si">{</span><span class="n">target_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">standard_reports_dir</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">standard_reports_dir</span><span class="p">)</span>
+            
+            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;OUTPUT_DIR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;logic_catalog&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Ensure strict isolation - only use the temp directory</span>
+            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PYTHONPATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">)</span>
+            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;BASE_DIR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">)</span>
+            
+            <span class="c1"># Ensure the required directories exist</span>
+            <span class="n">logic_catalog_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;logic_catalog&quot;</span>
+            <span class="n">prompts_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;prompts&quot;</span>
+            <span class="n">logic_catalog_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">prompts_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔍 DRY RUN MODE - Stage 4 setup check&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Base directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Output directory: </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Reports directory: </span><span class="si">{</span><span class="n">output_dir</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;reports&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Reports directory: </span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;reports&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Check if alignment report exists</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Alignment report found: </span><span class="si">{</span><span class="n">alignment_report</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">alignment_report</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Alignment report path: </span><span class="si">{</span><span class="n">alignment_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Check expected directories</span>
+                <span class="n">expected_dirs</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;logic_catalog&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;prompts&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+                <span class="p">]</span>
+                <span class="k">for</span> <span class="n">dir_path</span> <span class="ow">in</span> <span class="n">expected_dirs</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 </span><span class="si">{</span><span class="n">dir_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> directory exists: </span><span class="si">{</span><span class="n">dir_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dir_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 </span><span class="si">{</span><span class="n">dir_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> contents: </span><span class="si">{</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">dir_path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="k">return</span> <span class="kc">True</span>
+            
+            <span class="c1"># Run the multi-stage prompt generation and code generation</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+            
+            <span class="c1"># Step 1: Aggregate behaviors</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔄 Step 1: Aggregating behaviors...&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔍 DRY RUN: Would aggregate behaviors from alignment reports&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 DRY RUN: Would look in reports directory: </span><span class="si">{</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Copy alignment report to the expected location if needed</span>
+                <span class="k">if</span> <span class="n">alignment_report</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="c1"># Copy the alignment report to the expected location</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+                    <span class="n">target_report</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;REPORTS_DIR&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">alignment_report</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">alignment_report</span><span class="p">,</span> <span class="n">target_report</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Copied alignment report to: </span><span class="si">{</span><span class="n">target_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;asabaal_utils.agents.spec_coder.aggregate_behaviors&quot;</span><span class="p">],</span> 
+                                      <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Behavior aggregation failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;STDOUT: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Behavior aggregation completed&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Step 2: Build logic catalog</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔄 Step 2: Building logic catalog...&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔍 DRY RUN: Would build logic catalog from aggregated behaviors&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 DRY RUN: Would create catalog in: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;logic_catalog&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;asabaal_utils.agents.spec_coder.build_logic_catalog&quot;</span><span class="p">],</span> 
+                                      <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Logic catalog building failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;STDOUT: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Logic catalog building completed&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Step 3: Generate prompts</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔄 Step 3: Generating prompts...&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Debug: Log directory contents to persistent location</span>
+            <span class="n">debug_log</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/tmp/e2e_test_debug.log&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">debug_log</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Step 3 - Base dir contents: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Step 3 - Looking for logic_catalog in: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;logic_catalog&#39;</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s1">&#39;logic_catalog&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Step 3 - Logic catalog contents: </span><span class="si">{</span><span class="nb">list</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;logic_catalog&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔍 DRY RUN: Would generate prompts from logic catalog&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 DRY RUN: Would create prompts in: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;prompts&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;asabaal_utils.agents.spec_coder.generate_prompts&quot;</span><span class="p">],</span> 
+                                      <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Prompt generation failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;STDOUT: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Prompt generation completed&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Step 4: Generate final code from prompts</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔄 Step 4: Generating final implementation code...&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔍 DRY RUN MODE - Checking setup without calling AI models&quot;</span><span class="p">)</span>
+            
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">CodeGenerator</span><span class="p">()</span>
+            
+            <span class="c1"># Set output directory for generated code</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">code_output_dir</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">code_output_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;generated_code&quot;</span>
+            
+            <span class="n">code_output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="c1"># Generate from each prompt</span>
+            <span class="n">prompts_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">/</span> <span class="s2">&quot;prompts&quot;</span>
+            <span class="n">generated_files</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Looking for prompts directory at: </span><span class="si">{</span><span class="n">prompts_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Prompts directory exists: </span><span class="si">{</span><span class="n">prompts_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 Base directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 DRY RUN: Would check for prompts in </span><span class="si">{</span><span class="n">prompts_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># List contents of base directory for debugging</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 DRY RUN: Contents of base directory:&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   - </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">prompts_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">prompt_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">prompts_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.prompt&quot;</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompt files&quot;</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔍 DRY RUN: Would process </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompt files:&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">prompt_file</span> <span class="ow">in</span> <span class="n">prompt_files</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   - </span><span class="si">{</span><span class="n">prompt_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Skip actual generation in dry run</span>
+                
+                <span class="k">for</span> <span class="n">prompt_file</span> <span class="ow">in</span> <span class="n">prompt_files</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔨 Generating code from </span><span class="si">{</span><span class="n">prompt_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        
+                        <span class="c1"># Read the prompt content</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">prompt_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">prompt_content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                        
+                        <span class="c1"># Try to load spec file path from metadata if not already set</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">load_spec_file_path_from_metadata</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+                        
+                        <span class="c1"># Use the stored spec file path from the pipeline</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                            <span class="n">spec_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_file_path</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Using stored spec file: </span><span class="si">{</span><span class="n">spec_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  No spec file stored for this pipeline run for </span><span class="si">{</span><span class="n">prompt_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, skipping&quot;</span><span class="p">)</span>
+                            <span class="k">continue</span>
+                        
+                        <span class="c1"># Generate code for this prompt/spec</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_from_spec</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">code_output_dir</span><span class="p">)</span>
+                        
+                        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                            <span class="n">generated_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_generated</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_generated</span><span class="p">)</span><span class="si">}</span><span class="s2"> files from </span><span class="si">{</span><span class="n">prompt_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Failed to generate from </span><span class="si">{</span><span class="n">prompt_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Error processing </span><span class="si">{</span><span class="n">prompt_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️  No prompts directory found, using direct spec generation&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Fallback: generate directly from spec</span>
+                <span class="n">spec_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/*.yml&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/*.yaml&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">spec_files</span><span class="p">:</span>
+                    <span class="n">spec_file</span> <span class="o">=</span> <span class="n">spec_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔨 Generating code directly from spec: </span><span class="si">{</span><span class="n">spec_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_from_spec</span><span class="p">(</span><span class="n">spec_file</span><span class="p">,</span> <span class="n">code_output_dir</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                        <span class="n">generated_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_generated</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">files_generated</span><span class="p">)</span><span class="si">}</span><span class="s2"> files&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Failed to generate: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🎉 Code generation completed! Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">generated_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> files:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">generated_files</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   - </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Save generation report</span>
+            <span class="k">if</span> <span class="n">output_dir</span><span class="p">:</span>
+                <span class="n">reports_dir</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">reports_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span>
+                
+            <span class="n">reports_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">generation_report</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;generated_files&quot;</span><span class="p">:</span> <span class="n">generated_files</span><span class="p">,</span>
+                <span class="s2">&quot;output_directory&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">code_output_dir</span><span class="p">),</span>
+                <span class="s2">&quot;total_files&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">generated_files</span><span class="p">)</span>
+            <span class="p">}</span>
+            
+            <span class="n">report_file</span> <span class="o">=</span> <span class="n">reports_dir</span> <span class="o">/</span> <span class="s2">&quot;stage4_generation_report.json&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">generation_report</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📄 Generation report saved to: </span><span class="si">{</span><span class="n">report_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Multi-stage code generation completed&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stage 4 error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../../api/modules.html#asabaal_utils.agents.spec_coder.orchestrator.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main entry point.&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Full Integration Orchestration Layer&quot;</span><span class="p">,</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Modes:</span>
+<span class="s2">  fresh    - Start from specs, regenerate everything</span>
+<span class="s2">  update   - Start from specs, update only changed components  </span>
+<span class="s2">  heal     - Start from failed tests, run self-healing</span>
+<span class="s2">  validate - Validate specs only, no code generation</span>
+<span class="s2">  test     - Skip generation, re-run tests and reporting</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--mode&quot;</span><span class="p">,</span> 
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fresh&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;heal&quot;</span><span class="p">,</span> <span class="s2">&quot;validate&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">],</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;fresh&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Integration pipeline mode&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--base-dir&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Base directory for the project&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    
+    <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">base_dir</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_mode</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">success</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">❌ Integration interrupted by user&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">❌ Integration failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

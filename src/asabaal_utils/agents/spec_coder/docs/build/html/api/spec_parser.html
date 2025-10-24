@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpecParser API &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="BehavioralAligner API" href="align_behaviors.html" />
+    <link rel="prev" title="Healer API" href="healer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pipeline.html">Pipeline Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generator.html">CodeGenerator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tester.html">Tester API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="healer.html">Healer API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SpecParser API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-methods">Core Methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#parse-file">parse_file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#validate-spec">validate_spec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="align_behaviors.html">BehavioralAligner API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compare_behaviors.html">BehaviorComparator API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ollama_client.html">OllamaClient API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#core-modules">Core Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#supporting-modules">Supporting Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#utility-modules">Utility Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-index">Module Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API Reference</a></li>
+      <li class="breadcrumb-item active">SpecParser API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/spec_parser.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="specparser-api">
+<h1>SpecParser API<a class="headerlink" href="#specparser-api" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">SpecParser</span></code> class handles parsing and validation of specification files in various formats.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asabaal_utils.agents.spec_coder.spec_parser.</span></span><span class="sig-name descname"><span class="pre">SpecParser</span></span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Parser for OpenSpec YAML specification files.</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">parse_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.parse_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Parse a single OpenSpec YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="modules.html#asabaal_utils.agents.spec_coder.spec_parser.OpenSpec" title="asabaal_utils.agents.spec_coder.spec_parser.OpenSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenSpec</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">parse_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&lt;string&gt;'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.parse_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Parse OpenSpec YAML from a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="modules.html#asabaal_utils.agents.spec_coder.spec_parser.OpenSpec" title="asabaal_utils.agents.spec_coder.spec_parser.OpenSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenSpec</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">format_requirements_for_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.format_requirements_for_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Format requirements for inclusion in AI prompts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">format_function_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requirement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.format_function_signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Format a function signature from the requirement interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">format_interfaces_for_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.format_interfaces_for_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Format all function interfaces for the AI prompt.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_requirement_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.get_requirement_by_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get a specific requirement by its ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="modules.html#asabaal_utils.agents.spec_coder.spec_parser.Requirement" title="asabaal_utils.agents.spec_coder.spec_parser.Requirement"><code class="xref py py-class docutils literal notranslate"><span class="pre">Requirement</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">validate_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.validate_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Validate the specification and return any issues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="core-methods">
+<h2>Core Methods<a class="headerlink" href="#core-methods" title="Link to this heading"></a></h2>
+<section id="parse-file">
+<h3>parse_file<a class="headerlink" href="#parse-file" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.spec_parser.SpecParser.parse_file">
+<span class="sig-prename descclassname"><span class="pre">SpecParser.</span></span><span class="sig-name descname"><span class="pre">parse_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.parse_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.spec_parser.SpecParser.parse_file" title="Link to this definition"></a></dt>
+<dd><p>Parse a single OpenSpec YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="modules.html#asabaal_utils.agents.spec_coder.spec_parser.OpenSpec" title="asabaal_utils.agents.spec_coder.spec_parser.OpenSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenSpec</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Parses a specification file and returns structured data.</p>
+<p><strong>Parameters:</strong>
+- <code class="docutils literal notranslate"><span class="pre">file_path</span></code> (Path): Path to the specification file</p>
+<p><strong>Returns:</strong>
+- <code class="docutils literal notranslate"><span class="pre">dict</span></code>: Parsed specification data</p>
+</section>
+<section id="validate-spec">
+<h3>validate_spec<a class="headerlink" href="#validate-spec" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="asabaal_utils.agents.spec_coder.spec_parser.SpecParser.validate_spec">
+<span class="sig-prename descclassname"><span class="pre">SpecParser.</span></span><span class="sig-name descname"><span class="pre">validate_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/asabaal_utils/agents/spec_coder/spec_parser.html#SpecParser.validate_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#asabaal_utils.agents.spec_coder.spec_parser.SpecParser.validate_spec" title="Link to this definition"></a></dt>
+<dd><p>Validate the specification and return any issues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Validates specification structure and content.</p>
+<p><strong>Parameters:</strong>
+- <code class="docutils literal notranslate"><span class="pre">spec_data</span></code> (dict): Specification data to validate</p>
+<p><strong>Returns:</strong>
+- <code class="docutils literal notranslate"><span class="pre">ValidationResult</span></code>: Validation results</p>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asabaal_utils.agents.spec_coder.spec_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecParser</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">SpecParser</span><span class="p">()</span>
+<span class="n">spec_data</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;my_spec.yml&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">validate_spec</span><span class="p">(</span><span class="n">spec_data</span><span class="p">)</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Specification is valid&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Specification has errors&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="healer.html" class="btn btn-neutral float-left" title="Healer API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="align_behaviors.html" class="btn btn-neutral float-right" title="BehavioralAligner API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

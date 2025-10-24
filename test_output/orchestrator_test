@@ -1,0 +1,101 @@
+{
+  "version": "1.0",
+  "created_at": "2025-10-24T09:41:46.143379",
+  "metadata": {
+    "source_path": "/home/asabaal/repos/asabaal-utils/src/asabaal_utils/agents/spec_coder/orchestrator.py",
+    "description": null,
+    "scan_type": "file"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "orchestrator.main",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 1310
+      },
+      {
+        "id": "orchestrator.__init__",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 62
+      },
+      {
+        "id": "orchestrator.get_reports_dir",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 96
+      },
+      {
+        "id": "orchestrator.load_spec_file_path_from_metadata",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 103
+      },
+      {
+        "id": "orchestrator._clean_test_file_content",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 124
+      },
+      {
+        "id": "orchestrator.run",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 221
+      },
+      {
+        "id": "orchestrator.run_mode",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 265
+      },
+      {
+        "id": "orchestrator.run_full_pipeline",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 297
+      },
+      {
+        "id": "orchestrator._stage1_spec_to_scaffold",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 385
+      },
+      {
+        "id": "orchestrator._stage2_scaffold_to_requirements",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 488
+      },
+      {
+        "id": "orchestrator._stage3_requirements_to_alignment",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 625
+      },
+      {
+        "id": "orchestrator._make_json_serializable",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 874
+      },
+      {
+        "id": "orchestrator._calculate_match_score",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 926
+      },
+      {
+        "id": "orchestrator._stage4_alignment_to_code",
+        "file": "src/asabaal_utils/agents/spec_coder/orchestrator.py",
+        "line": 977
+      },
+      {
+        "id": "generator.generate_from_spec"
+      },
+      {
+        "id": "spec_parser.parse_file"
+      }
+    ],
+    "edges": [
+      {
+        "source": "orchestrator._stage4_alignment_to_code",
+        "target": "generator.generate_from_spec"
+      },
+      {
+        "source": "orchestrator._stage4_alignment_to_code",
+        "target": "spec_parser.parse_file"
+      }
+    ],
+    "directed": true,
+    "multigraph": false
+  }
+}

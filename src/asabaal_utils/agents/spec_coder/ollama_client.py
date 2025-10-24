@@ -26,15 +26,76 @@ class GenerationConfig:
 
 
 class OllamaClient:
-    """Client for interacting with Ollama API."""
+    """
+    Client for interacting with Ollama API for AI-powered code generation and analysis.
+    
+    This class provides a clean, robust interface for communicating with Ollama models,
+    specifically optimized for code generation, test analysis, and specification processing
+    tasks. It handles connection management, error recovery, and response processing.
+    
+    The client supports various generation modes including code generation, test creation,
+    and general text analysis with configurable parameters for temperature, tokens, and
+    other model settings.
+    
+    Attributes:
+        config: GenerationConfig containing model settings and parameters
+        session: Requests session for HTTP communication with Ollama
+        base_url: Base URL for Ollama API endpoints
+    
+    Example:
+        >>> config = GenerationConfig(model="qwen3-coder:latest", temperature=0.1)
+        >>> client = OllamaClient(config)
+        >>> if client.test_connection():
+        ...     response = client.generate("Write a Python function to add two numbers")
+        ...     print(response)
+    """
     
     def __init__(self, config: GenerationConfig):
+        """
+        Initialize the OllamaClient with configuration.
+        
+        Args:
+            config: GenerationConfig object containing model name, base URL, temperature,
+                   max_tokens, and other generation parameters.
+        
+        Raises:
+            ValueError: If config is None or contains invalid settings
+        
+        Example:
+            >>> config = GenerationConfig(
+            ...     model="qwen3-coder:latest",
+            ...     base_url="http://localhost:11434",
+            ...     temperature=0.1,
+            ...     max_tokens=2048
+            ... )
+            >>> client = OllamaClient(config)
+        """
         self.config = config
         self.session = requests.Session()
         self.base_url = config.base_url.rstrip('/')
     
     def test_connection(self) -> bool:
-        """Test if Ollama is accessible and model is available."""
+        """
+        Test if Ollama server is accessible and the configured model is available.
+        
+        This method performs a two-step verification:
+        1. Checks if Ollama server is running and accessible
+        2. Verifies that the specified model is available in the server
+        
+        Returns:
+            True if both server and model are accessible, False otherwise.
+        
+        Raises:
+            requests.exceptions.ConnectionError: If Ollama server is not reachable
+            requests.exceptions.Timeout: If connection times out
+        
+        Example:
+            >>> client = OllamaClient(config)
+            >>> if client.test_connection():
+            ...     print("Ollama is ready")
+            ... else:
+            ...     print("Ollama is not available")
+        """
         try:
             # Check if Ollama is running
             response = self.session.get(f"{self.base_url}/api/tags", timeout=5)
@@ -56,6 +117,42 @@ class OllamaClient:
             return False
     
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+        """
+        Generate text response using the configured Ollama model.
+        
+        This is the core generation method that sends prompts to the Ollama API
+        and returns the model's response. It supports both simple prompts and
+        prompts with system instructions for better control over output format.
+        
+        Args:
+            prompt: The main prompt text to send to the model. This should contain
+                   the specific task or question for the model to address.
+            system_prompt: Optional system prompt to set the model's behavior and
+                          response format. Useful for controlling output style,
+                          format requirements, or role-playing scenarios.
+        
+        Returns:
+            Generated text response from the model as a string.
+        
+        Raises:
+            requests.exceptions.ConnectionError: If Ollama server is not reachable
+            requests.exceptions.Timeout: If generation times out
+            ValueError: If prompt is empty or invalid
+            RuntimeError: If model returns an error response
+        
+        Example:
+            >>> client = OllamaClient(config)
+            >>> # Simple generation
+            >>> response = client.generate("Explain recursion in simple terms")
+            >>> print(response)
+            >>> 
+            >>> # Generation with system prompt
+            >>> response = client.generate(
+            ...     "Write a function to calculate factorial",
+            ...     system_prompt="You are a Python programming expert. Provide clean, well-documented code."
+            ... )
+            >>> print(response)
+        """
         """Generate text from the model."""
         # Prepare the request payload
         payload = {
@@ -106,6 +203,42 @@ class OllamaClient:
             raise
     
     def generate_code(self, prompt: str, language: str = "python") -> str:
+        """
+        Generate code in a specified programming language using optimized prompts.
+        
+        This method is specifically optimized for code generation tasks. It automatically
+        formats the prompt with appropriate system instructions to generate clean,
+        well-structured code in the specified programming language.
+        
+        Args:
+            prompt: Description of the code to generate. Should include requirements,
+                   function signatures, expected behavior, and any constraints.
+            language: Programming language for code generation. Defaults to "python".
+                     Common options include "python", "javascript", "java", "cpp", etc.
+        
+        Returns:
+            Generated code as a string. The code is typically formatted with proper
+            indentation and may include comments or docstrings depending on the language.
+        
+        Raises:
+            ValueError: If language is not supported or prompt is insufficient
+            RuntimeError: If code generation fails or returns invalid content
+        
+        Example:
+            >>> client = OllamaClient(config)
+            >>> code = client.generate_code(
+            ...     "Create a function that validates email addresses using regex",
+            ...     language="python"
+            ... )
+            >>> print(code)
+            >>> 
+            >>> # Generate JavaScript code
+            >>> js_code = client.generate_code(
+            ...     "Create a function that sorts an array of objects by a property",
+            ...     language="javascript"
+            ... )
+            >>> print(js_code)
+        """
         """Generate code with appropriate system prompt."""
         system_prompt = f"""You are an expert {language} developer. Generate clean, well-documented, and functional code.
 
@@ -122,6 +255,45 @@ Return only the code without explanations unless specifically asked."""
         return self.generate(prompt, system_prompt)
     
     def generate_tests(self, code: str, requirement_description: str) -> str:
+        """
+        Generate comprehensive tests for given code based on requirement description.
+        
+        This method analyzes the provided code and requirement description to generate
+        appropriate test cases. It considers normal operation, edge cases, error conditions,
+        and validation criteria to create thorough test coverage.
+        
+        Args:
+            code: Source code for which tests should be generated. This can be a single
+                  function, class, or module that needs testing.
+            requirement_description: Description of what the code should do, including
+                                   expected behavior, inputs, outputs, and any special
+                                   requirements or constraints.
+        
+        Returns:
+            Generated test code as a string, typically including multiple test functions
+            with different scenarios and assertions. The format depends on the language
+            of the input code (assumes Python for Python code, etc.).
+        
+        Raises:
+            ValueError: If code is empty or requirement description is insufficient
+            RuntimeError: If test generation fails or returns invalid test code
+        
+        Example:
+            >>> client = OllamaClient(config)
+            >>> code = '''
+            ... def add_numbers(a, b):
+            ...     return a + b
+            ... '''
+            >>> requirement = "Function should add two numbers and handle non-numeric inputs"
+            >>> tests = client.generate_tests(code, requirement)
+            >>> print(tests)
+            >>> 
+            >>> # Expected output might include:
+            >>> # - Test normal addition
+            >>> # - Test with negative numbers
+            >>> # - Test with non-numeric inputs (error handling)
+            >>> # - Test edge cases (zero, large numbers)
+        """
         """Generate tests for given code and requirement."""
         prompt = f"""Generate comprehensive pytest tests for the following code and requirement:
 

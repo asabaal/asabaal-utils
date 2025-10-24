@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipeline Stages &mdash; Spec-Coder Agent 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuration Guide" href="configuration.html" />
+    <link rel="prev" title="System Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Spec-Coder Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">System Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipeline Stages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#stage-1-specification-to-test-scaffold">Stage 1: Specification to Test Scaffold</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#process">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-components">Key Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-2-test-scaffold-to-requirements">Stage 2: Test Scaffold to Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-3-requirements-to-alignment">Stage 3: Requirements to Alignment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Key Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-output">Example Output</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-4-alignment-to-code-generation">Stage 4: Alignment to Code Generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Key Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-generated-code">Example Generated Code</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-5-healer-self-healing">Stage 5: Healer (Self-Healing)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Key Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-healing-process">Example Healing Process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-orchestration">Pipeline Orchestration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-and-recovery">Error Handling and Recovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-options">Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/generator.html">CodeGenerator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/orchestrator.html">IntegrationOrchestrator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tester.html">Tester API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/healer.html">Healer API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testing/overview.html">Testing Strategy Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/design.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/workflow.html">Workflow Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/components.html">Component Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing to spec-coder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/debugging.html">Debugging Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Spec-Coder Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Pipeline Stages</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user_guide/pipeline.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pipeline-stages">
+<h1>Pipeline Stages<a class="headerlink" href="#pipeline-stages" title="Link to this heading"></a></h1>
+<p>The spec-coder agent operates through a comprehensive 5-stage pipeline that transforms specifications into production-ready software with automated testing and self-healing capabilities.</p>
+<section id="stage-1-specification-to-test-scaffold">
+<h2>Stage 1: Specification to Test Scaffold<a class="headerlink" href="#stage-1-specification-to-test-scaffold" title="Link to this heading"></a></h2>
+<p><strong>Purpose</strong>: Parse specification files and generate comprehensive test scaffolds to understand requirements</p>
+<p><strong>Input</strong>: OpenSpec or YAML specification files
+<strong>Output</strong>: Complete test suite that defines the required behavior</p>
+<section id="process">
+<h3>Process<a class="headerlink" href="#process" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Specification Parsing</strong>
+* Reads OpenSpec and YAML specification files
+* Validates specification structure and content
+* Extracts requirements, interfaces, and validation criteria</p></li>
+<li><p><strong>Test Generation</strong>
+* Creates comprehensive test suites that define required behavior
+* Generates positive, negative, and edge case tests
+* Includes integration and performance tests as needed</p></li>
+<li><p><strong>Test Scaffold Creation</strong>
+* Sets up test file structure and organization
+* Creates test classes and method signatures
+* Establishes testing framework and utilities</p></li>
+</ol>
+</section>
+<section id="key-components">
+<h3>Key Components<a class="headerlink" href="#key-components" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>SpecParser</strong>: Handles specification parsing and validation</p></li>
+<li><p><strong>Template Engine</strong>: Generates code scaffolds from templates</p></li>
+</ul>
+</section>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Input specification</span>
+<span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Calculator&quot;</span>
+<span class="nt">functions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;add&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Adds</span><span class="nv"> </span><span class="s">two</span><span class="nv"> </span><span class="s">numbers&quot;</span>
+<span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;a&quot;</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;int&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;b&quot;</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;int&quot;</span>
+<span class="w">    </span><span class="nt">return_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;int&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated test scaffold</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">calculator</span><span class="w"> </span><span class="kn">import</span> <span class="n">add</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestAdd</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_positive_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding two positive numbers.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_negative_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding two negative numbers.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="o">-</span><span class="mi">5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding zero.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">5</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-2-test-scaffold-to-requirements">
+<h2>Stage 2: Test Scaffold to Requirements<a class="headerlink" href="#stage-2-test-scaffold-to-requirements" title="Link to this heading"></a></h2>
+<p><strong>Purpose</strong>: Extract logical requirements from test scaffolds to understand what the software should do</p>
+<p><strong>Input</strong>: Test scaffolds from Stage 1
+<strong>Output</strong>: Detailed requirements and behavioral specifications</p>
+<section id="id1">
+<h3>Process<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Test Planning</strong>
+* Analyzes specification requirements
+* Identifies test scenarios and edge cases
+* Plans test structure and organization</p></li>
+<li><p><strong>AI-Powered Generation</strong>
+* Uses LLMs to generate intelligent test cases
+* Creates comprehensive test coverage
+* Includes positive, negative, and edge case tests</p></li>
+<li><p><strong>Content Cleaning</strong>
+* Removes instructional text and artifacts
+* Fixes indentation and syntax issues
+* Ensures valid Python code</p></li>
+</ol>
+</section>
+<section id="key-features">
+<h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Intelligent Test Generation</strong>: AI understands context and requirements</p></li>
+<li><p><strong>Comprehensive Coverage</strong>: Tests normal operation, edge cases, and error conditions</p></li>
+<li><p><strong>Self-Healing</strong>: Automatically fixes common generation issues</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated test file</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">calculator</span><span class="w"> </span><span class="kn">import</span> <span class="n">add</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestAdd</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_positive_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding two positive numbers.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_negative_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding two negative numbers.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="o">-</span><span class="mi">5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_mixed_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding positive and negative numbers.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test adding zero.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">5</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-3-requirements-to-alignment">
+<h2>Stage 3: Requirements to Alignment<a class="headerlink" href="#stage-3-requirements-to-alignment" title="Link to this heading"></a></h2>
+<p><strong>Purpose</strong>: Perform behavioral alignment between extracted requirements and test behaviors</p>
+<p><strong>Input</strong>: Requirements from Stage 2 and test behaviors
+<strong>Output</strong>: Alignment analysis and gap identification</p>
+<section id="id3">
+<h3>Process<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Test Execution</strong>
+* Runs generated pytest test suites
+* Captures test results and performance metrics
+* Identifies failing tests and issues</p></li>
+<li><p><strong>Result Analysis</strong>
+* Analyzes test failures and errors
+* Categorizes issues by type and severity
+* Generates detailed execution reports</p></li>
+<li><p><strong>Validation</strong>
+* Validates test coverage
+* Checks for missing test scenarios
+* Assesses overall test quality</p></li>
+</ol>
+</section>
+<section id="id4">
+<h3>Key Components<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Tester</strong>: Executes tests and captures results</p></li>
+<li><p><strong>Test Analyzer</strong>: Analyzes test results and identifies issues</p></li>
+<li><p><strong>Coverage Analyzer</strong>: Assesses test coverage completeness</p></li>
+</ul>
+</section>
+<section id="example-output">
+<h3>Example Output<a class="headerlink" href="#example-output" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>============================= test session starts ==============================
+collected 4 items
+
+test_calculator.py::TestAdd::test_add_positive_numbers PASSED
+test_calculator.py::TestAdd::test_add_negative_numbers PASSED
+test_calculator.py::TestAdd::test_add_mixed_numbers PASSED
+test_calculator.py::TestAdd::test_add_zero PASSED
+
+============================== 4 passed in 0.02s ===============================
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-4-alignment-to-code-generation">
+<h2>Stage 4: Alignment to Code Generation<a class="headerlink" href="#stage-4-alignment-to-code-generation" title="Link to this heading"></a></h2>
+<p><strong>Purpose</strong>: Generate the actual software code based on aligned requirements and behaviors</p>
+<p><strong>Input</strong>: Alignment results from Stage 3
+<strong>Output</strong>: Complete, production-ready software implementation</p>
+<section id="id5">
+<h3>Process<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Code Generation</strong>
+* Uses LLMs to generate complete software implementations
+* Creates functions, classes, and modules based on requirements
+* Follows best practices and coding standards</p></li>
+<li><p><strong>Architecture Design</strong>
+* Designs appropriate software architecture
+* Creates proper module organization
+* Implements design patterns and best practices</p></li>
+<li><p><strong>Code Quality Assurance</strong>
+* Ensures generated code is maintainable and readable
+* Applies proper error handling and validation
+* Includes documentation and type hints</p></li>
+</ol>
+</section>
+<section id="id6">
+<h3>Key Features<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>AI-Powered Generation</strong>: Uses advanced LLMs for intelligent code creation</p></li>
+<li><p><strong>Production-Ready Output</strong>: Generates complete, deployable software</p></li>
+<li><p><strong>Best Practices</strong>: Follows industry standards and coding conventions</p></li>
+</ul>
+</section>
+<section id="example-generated-code">
+<h3>Example Generated Code<a class="headerlink" href="#example-generated-code" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated calculator.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add two numbers together.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a: First number to add</span>
+<span class="sd">        b: Second number to add</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The sum of a and b</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If inputs are not numbers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Both arguments must be numbers&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="stage-5-healer-self-healing">
+<h2>Stage 5: Healer (Self-Healing)<a class="headerlink" href="#stage-5-healer-self-healing" title="Link to this heading"></a></h2>
+<p><strong>Purpose</strong>: Automatically detect and fix issues in generated code before final delivery</p>
+<p><strong>Input</strong>: Generated code from Stage 4 and test results
+<strong>Output</strong>: Healed, production-ready code with all tests passing</p>
+<section id="id7">
+<h3>Process<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Issue Detection</strong>
+* Runs comprehensive test suites on generated code
+* Identifies failing tests, syntax errors, and runtime issues
+* Analyzes error messages and stack traces</p></li>
+<li><p><strong>Automatic Healing</strong>
+* Uses AI to understand and fix identified issues
+* Applies targeted fixes to specific problems
+* Iterates until all tests pass or escalation is needed</p></li>
+<li><p><strong>Validation</strong>
+* Re-runs tests to verify fixes
+* Ensures no regressions were introduced
+* Validates code quality and performance</p></li>
+</ol>
+</section>
+<section id="id8">
+<h3>Key Features<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Self-Healing</strong>: Automatically fixes common code issues</p></li>
+<li><p><strong>Intelligent Debugging</strong>: AI understands root causes of failures</p></li>
+<li><p><strong>Escalation Handling</strong>: Knows when to ask for human help</p></li>
+</ul>
+</section>
+<section id="example-healing-process">
+<h3>Example Healing Process<a class="headerlink" href="#example-healing-process" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Initial test failure:
+test_calculator.py::TestAdd::test_add_strings FAILED
+
+Error: TypeError: unsupported operand type(s) for +: &#39;str&#39; and &#39;int&#39;
+
+Healer analysis:
+- Issue: Type checking missing in add function
+- Fix: Add type validation and error handling
+
+Healed code:
+def add(a, b):
+    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        raise TypeError(&quot;Both arguments must be numbers&quot;)
+    return a + b
+
+Result: All tests passing
+</pre></div>
+</div>
+</section>
+</section>
+<section id="pipeline-orchestration">
+<h2>Pipeline Orchestration<a class="headerlink" href="#pipeline-orchestration" title="Link to this heading"></a></h2>
+<p>The <strong>IntegrationOrchestrator</strong> manages the complete pipeline workflow:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spec_coder</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationOrchestrator</span>
+
+<span class="n">orchestrator</span> <span class="o">=</span> <span class="n">IntegrationOrchestrator</span><span class="p">()</span>
+
+<span class="c1"># Run complete pipeline</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">spec_file</span><span class="o">=</span><span class="s2">&quot;calculator_spec.yml&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./generated_tests&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama3&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Access stage results</span>
+<span class="n">stage1_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stage1_result</span>
+<span class="n">stage2_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stage2_result</span>
+<span class="n">stage3_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stage3_result</span>
+<span class="n">stage4_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stage4_result</span>
+</pre></div>
+</div>
+</section>
+<section id="error-handling-and-recovery">
+<h2>Error Handling and Recovery<a class="headerlink" href="#error-handling-and-recovery" title="Link to this heading"></a></h2>
+<p>The pipeline includes robust error handling:</p>
+<ul class="simple">
+<li><p><strong>Stage Isolation</strong>: Failures in one stage don’t prevent others from running</p></li>
+<li><p><strong>Automatic Retry</strong>: Automatic retry with different models or parameters</p></li>
+<li><p><strong>Graceful Degradation</strong>: Partial results are still useful</p></li>
+<li><p><strong>Detailed Logging</strong>: Comprehensive error reporting and debugging information</p></li>
+</ul>
+</section>
+<section id="configuration-options">
+<h2>Configuration Options<a class="headerlink" href="#configuration-options" title="Link to this heading"></a></h2>
+<p>Each stage can be configured independently:</p>
+<ul class="simple">
+<li><p><strong>Model Selection</strong>: Choose different AI models for different stages</p></li>
+<li><p><strong>Timeout Settings</strong>: Configure timeouts for AI operations</p></li>
+<li><p><strong>Retry Logic</strong>: Set retry counts and backoff strategies</p></li>
+<li><p><strong>Output Formats</strong>: Customize output formats and locations</p></li>
+</ul>
+</section>
+<section id="performance-considerations">
+<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Parallel Processing</strong>: Multiple stages can run in parallel where possible</p></li>
+<li><p><strong>Caching</strong>: Results are cached to avoid redundant operations</p></li>
+<li><p><strong>Incremental Updates</strong>: Only re-run stages that need updates</p></li>
+<li><p><strong>Resource Management</strong>: Efficient use of CPU, memory, and AI resources</p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="configuration.html"><span class="doc">Configuration Guide</span></a> - Detailed configuration options</p></li>
+<li><p><a class="reference internal" href="../api/modules.html"><span class="doc">API Reference</span></a> - API reference for all components</p></li>
+<li><p><a class="reference internal" href="../testing/overview.html"><span class="doc">Testing Strategy Overview</span></a> - Testing strategy and best practices</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="overview.html" class="btn btn-neutral float-left" title="System Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="configuration.html" class="btn btn-neutral float-right" title="Configuration Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Asabaal Utils.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

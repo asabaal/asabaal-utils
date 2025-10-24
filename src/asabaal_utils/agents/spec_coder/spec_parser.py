@@ -69,8 +69,8 @@ class SpecParser:
     def _parse_data(self, data: Dict[str, Any], source: str) -> OpenSpec:
         """Parse raw YAML data into OpenSpec object."""
         # Extract basic metadata
-        spec_id = data.get('spec_id', 'unknown')
-        title = data.get('title', 'Untitled Specification')
+        spec_id = data.get('name', data.get('spec_id', 'unknown'))
+        title = data.get('title', data.get('description', 'Untitled Specification'))
         version = data.get('version', '0.1.0')
         
         # Parse requirements
@@ -89,8 +89,8 @@ class SpecParser:
     
     def _parse_requirement(self, req_data: Dict[str, Any]) -> Requirement:
         """Parse a single requirement from YAML data."""
-        req_id = req_data.get('id', 'unknown')
-        title = req_data.get('title', 'Untitled Requirement')
+        req_id = req_data.get('name', req_data.get('id', 'unknown'))
+        title = req_data.get('title', req_data.get('name', 'Untitled Requirement'))
         description = req_data.get('description', '')
         
         # Parse interface if present
