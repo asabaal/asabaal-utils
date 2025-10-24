@@ -47,7 +47,10 @@ dependencies = [
     "pandas>=1.5.0",
     "seaborn>=0.12.0",
     "pytesseract>=0.3.10",
-    "joblib>=1.3.0"
+    "joblib>=1.3.0",
+    # FlowScope dependencies
+    "networkx>=3.0",
+    "pyvis>=0.3.0"
 ]
 
 [project.urls]
@@ -79,6 +82,7 @@ detect-duplicates = "asabaal_utils.video_processing.duplicate_detection:main"
 take-ranker = "asabaal_utils.video_processing.duplicate_detection:main"
 transcript-combiner = "asabaal_utils.video_processing.transcript_combiner:main"
 spec-coder = "asabaal_utils.agents.spec_coder.cli:main"
+flowscope = "asabaal_utils.flowscope.cli:main"
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
