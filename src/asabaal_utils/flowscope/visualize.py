@@ -216,16 +216,23 @@ def create_static_graph(graph: nx.DiGraph,
 
 
 def create_module_view(graph: nx.DiGraph, 
-                      output_path: Path,
-                      title: str = "Module-Level Call Graph") -> None:
-    """Create a visualization showing module-level relationships.
+                       output_path: Path,
+                       title: str = "Module-Level Call Graph") -> None:
+    """Create a visualization showing module-level relationships with module selector.
     
     Args:
         graph: NetworkX DiGraph to visualize
         output_path: Output HTML file path
         title: Graph title
     """
-    # Create module-level graph
+    # Get all module names from the graph
+    module_names = set()
+    for node in graph.nodes():
+        if "." in node:
+            module_name = node.split(".")[0]
+            module_names.add(module_name)
+    
+    # Create module-level dependency graph
     module_graph = nx.DiGraph()
     
     for edge in graph.edges():
@@ -241,12 +248,28 @@ def create_module_view(graph: nx.DiGraph,
                 else:
                     module_graph.add_edge(source_module, target_module, weight=1)
     
-    # Create visualization
+    # Create individual module graphs
+    module_graphs = {}
+    for module_name in sorted(module_names):
+        module_graphs[module_name] = nx.DiGraph()
+        
+        # Add nodes for this module
+        for node, attrs in graph.nodes(data=True):
+            if node.startswith(module_name + "."):
+                module_graphs[module_name].add_node(node, **attrs)
+        
+        # Add edges (both internal and cross-module)
+        for source, target, attrs in graph.edges(data=True):
+            if source.startswith(module_name + "."):
+                module_graphs[module_name].add_edge(source, target, **attrs)
+    
+    # Create base visualization
     try:
         from pyvis.network import Network
     except ImportError:
         raise ImportError("pyvis is required for HTML visualization. Install with: pip install pyvis")
     
+    # Create the main module dependency graph
     net = Network(directed=True, height="600px", width="100%", notebook=False)
     net.toggle_physics(True)
     
@@ -281,8 +304,8 @@ def create_module_view(graph: nx.DiGraph,
     
     net.save_graph(str(output_path))
     
-    # Add Function Explorer to module view as well
-    _add_global_function_explorer_to_html(output_path, graph)
+    # Enhance with module selector and individual module graphs
+    _add_module_selector_to_html(output_path, graph, module_graphs, module_graph, title)
 
 
 def create_drift_visualization(old_graph: nx.DiGraph,
@@ -429,7 +452,7 @@ function addClickHandlers() {{
             console.log('Clicked node:', clickedNode);
             
             if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {{
-                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                const targetModule = clickedNode.title.match(/Target Module: ([\\w_]+)/);
                 console.log('Target module match:', targetModule);
                 if (targetModule && moduleMapping[targetModule[1]]) {{
                     console.log('Opening module report:', moduleMapping[targetModule[1]]);
@@ -861,6 +884,25 @@ def create_function_flow_data(graph: nx.DiGraph, function_name: str) -> dict:
     
     collect_descendants(function_name)
     
+    # Create subgraph for layout optimization
+    subgraph = graph.subgraph(descendants).copy()
+    
+    # Apply layout optimization if available
+    optimized_positions = None
+    try:
+        # Try to import layout optimizer
+        from .layout.graph_layout_optimizer import optimize_graph_layout
+        
+        # Optimize layout
+        optimized_positions = optimize_graph_layout(subgraph)
+    except ImportError:
+        # Layout optimizer not available, use default positioning
+        pass
+    except Exception as e:
+        # Fallback to default positioning if optimization fails
+        print(f"Layout optimization failed: {e}")
+        optimized_positions = None
+    
     # Create nodes data
     nodes = []
     for node in descendants:
@@ -881,12 +923,20 @@ def create_function_flow_data(graph: nx.DiGraph, function_name: str) -> dict:
         if node == function_name:
             color = "#ff6b6b"
         
-        nodes.append({
+        node_data = {
             "id": node,
             "label": node_name,
             "title": f"{node}\\nFile: {attrs.get('file', 'Unknown')}\\nLine: {attrs.get('line', 'Unknown')}",
             "color": color
-        })
+        }
+        
+        # Add optimized position if available
+        if optimized_positions and node in optimized_positions:
+            pos = optimized_positions[node]
+            node_data["x"] = pos[0] * 100  # Scale for better visualization
+            node_data["y"] = pos[1] * 100
+        
+        nodes.append(node_data)
     
     # Create edges data
     edges = []
@@ -1076,6 +1126,215 @@ def create_module_reports_with_explorer(graph: nx.DiGraph,
             print(f"✓ Created {module_name} report with {module_graph.number_of_nodes()} functions")
     
     print(f"Created {len(module_names)} module reports in {module_reports_dir}")
+
+
+def _add_module_selector_to_html(html_path: Path, 
+                                 graph: nx.DiGraph, 
+                                 module_graphs: dict,
+                                 module_dependency_graph: nx.DiGraph,
+                                 title: str) -> None:
+    """Add module selector functionality to HTML visualization.
+    
+    Args:
+        html_path: Path to the HTML file to modify
+        graph: NetworkX DiGraph containing all functions
+        module_graphs: Dictionary of module_name -> NetworkX graph for that module
+        module_dependency_graph: NetworkX graph showing module dependencies
+        title: Graph title
+    """
+    try:
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # Create module selector HTML
+        module_names = sorted(module_graphs.keys())
+        
+        selector_html = f'''
+<div id="module-selector" style="position: fixed; top: 10px; left: 10px; background: white; border: 1px solid #ccc; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; max-width: 300px;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Module Selector</h4>
+    <div style="margin-bottom: 10px;">
+        <label for="module-dropdown" style="display: block; margin-bottom: 5px; font-weight: bold;">Select Module:</label>
+        <select id="module-dropdown" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+            <option value="dependency-view">Module Dependencies</option>
+'''
+        
+        for module_name in module_names:
+            func_count = module_graphs[module_name].number_of_nodes()
+            selector_html += f'            <option value="{module_name}">{module_name} ({func_count} functions)</option>\n'
+        
+        selector_html += '''
+        </select>
+    </div>
+    <div style="margin-bottom: 10px;">
+        <button onclick="loadSelectedModule()" style="width: 100%; padding: 8px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">Load Module Graph</button>
+    </div>
+    <div id="module-info" style="font-size: 12px; color: #666; margin-top: 10px;">
+        Select a module to view its function call graph
+    </div>
+</div>
+'''
+        
+        # Create JavaScript for module loading
+        module_js = '''
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+// Module data storage
+const moduleGraphs = {};
+let currentNetwork = null;
+
+// Initialize module graphs data
+'''
+        
+        # Add graph data for each module
+        for module_name, module_graph in module_graphs.items():
+            # Convert NetworkX graph to vis.js format
+            nodes = []
+            edges = []
+            
+            for node, attrs in module_graph.nodes(data=True):
+                node_name = node.split(".")[-1]
+                
+                # Determine node color
+                if attrs.get("async_func"):
+                    color = "#ff9999"
+                elif module_graph.in_degree(node) == 0:
+                    color = "#90ee90"
+                elif module_graph.out_degree(node) == 0:
+                    color = "#ffd700"
+                else:
+                    color = "#97c2fc"
+                
+                nodes.append({
+                    "id": node,
+                    "label": node_name,
+                    "title": f"{node}\\nFile: {attrs.get('file', 'Unknown')}\\nLine: {attrs.get('line', 'Unknown')}\\nModule: {module_name}",
+                    "color": color,
+                    "shape": "box",
+                    "font": {"size": 12, "color": "#333333"}
+                })
+            
+            for source, target, attrs in module_graph.edges(data=True):
+                edges.append({
+                    "from": source,
+                    "to": target,
+                    "title": f"{source} → {target}",
+                    "arrows": "to",
+                    "color": {"color": "#666666", "highlight": "#ff0000"}
+                })
+            
+            module_js += f'''
+moduleGraphs['{module_name}'] = {{
+    nodes: {json.dumps(nodes)},
+    edges: {json.dumps(edges)}
+}};
+'''
+        
+        module_js += '''
+function loadSelectedModule() {
+    const selectedModule = document.getElementById('module-dropdown').value;
+    const container = document.getElementById('mynetwork');
+    const infoDiv = document.getElementById('module-info');
+    
+    if (selectedModule === 'dependency-view') {
+        // Load the original module dependency graph
+        location.reload();
+        return;
+    }
+    
+    const moduleData = moduleGraphs[selectedModule];
+    if (!moduleData) {
+        infoDiv.innerHTML = '<span style="color: red;">Module data not found</span>';
+        return;
+    }
+    
+    // Update info
+    const funcCount = moduleData.nodes.length;
+    const callCount = moduleData.edges.length;
+    infoDiv.innerHTML = `<strong>${selectedModule}</strong><br>${funcCount} functions, ${callCount} calls`;
+    
+    // Clear existing network
+    if (currentNetwork) {
+        currentNetwork.destroy();
+    }
+    
+    // Create new network
+    const nodes = new vis.DataSet(moduleData.nodes);
+    const edges = new vis.DataSet(moduleData.edges);
+    
+    const data = { nodes: nodes, edges: edges };
+    
+    const options = {
+        physics: {
+            enabled: true,
+            stabilization: {
+                iterations: 100
+            }
+        },
+        interaction: {
+            hover: true,
+            tooltipDelay: 200
+        },
+        layout: {
+            improvedLayout: false
+        },
+        nodes: {
+            borderWidth: 1,
+            borderColor: '#666666',
+            font: { color: '#333' }
+        },
+        edges: {
+            smooth: {
+                type: 'dynamic'
+            }
+        }
+    };
+    
+    currentNetwork = new vis.Network(container, data, options);
+    
+    // Fit network to show all nodes
+    currentNetwork.once('stabilized', function() {
+        currentNetwork.fit({
+            animation: {
+                duration: 1000,
+                easingFunction: 'easeInOutQuad'
+            }
+        });
+    });
+}
+
+// Auto-load first module on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const dropdown = document.getElementById('module-dropdown');
+        if (dropdown && dropdown.options.length > 1) {
+            dropdown.selectedIndex = 1; // Select first module (not dependency view)
+            loadSelectedModule();
+        }
+    }, 1000);
+});
+</script>
+'''
+        
+        # Insert the selector HTML after the opening body tag
+        if '<body>' in html_content:
+            html_content = html_content.replace('<body>', f'<body>{selector_html}')
+        else:
+            html_content = f'<body>{selector_html}{html_content}'
+        
+        # Insert the JavaScript before the closing </body> tag
+        if '</body>' in html_content:
+            html_content = html_content.replace('</body>', module_js + '</body>')
+        else:
+            html_content += module_js
+        
+        # Write back to file
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+            
+        print(f"✓ Enhanced {html_path.name} with Module Selector")
+            
+    except Exception as e:
+        print(f"Warning: Could not add Module Selector to {html_path}: {e}")
 
 
 def _add_global_function_explorer_to_html(html_path: Path, graph: nx.DiGraph) -> None:

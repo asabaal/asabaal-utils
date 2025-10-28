@@ -112,6 +112,9 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
         current_module = file.stem
         imported_modules = module_imports.get(current_module, set())
         
+        # Build function registry for this module
+        registry = _build_function_registry(tree, current_module, imported_modules)
+        
         # First pass: find all function definitions in this file
         function_nodes = []
         for node in ast.walk(tree):
@@ -130,7 +133,7 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
             # Look for calls only within this function
             for node in ast.walk(func_node):
                 if isinstance(node, ast.Call):
-                    called_name = _extract_called_name(node, imported_modules, current_module)
+                    called_name = _extract_called_name(node, registry)
                     if called_name and not _is_external_function(called_name, local_modules):
                         # Check if this is a cross-module call
                         if "." in called_name:
@@ -155,15 +158,77 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
     return graph
 
 
-def _extract_called_name(call_node: ast.Call, imported_modules: Set[str], current_module: str) -> Optional[str]:
+class FunctionRegistry:
+    """Registry to track all defined functions in a module for call resolution."""
+    
+    def __init__(self, module_name: str):
+        self.module_name = module_name
+        self.functions = set()  # All function names in this module
+        self.classes = {}  # Class name -> set of method names
+        self.imported_modules = set()  # Imported module names
+    
+    def add_function(self, func_name: str, is_class_method: bool = False, class_name: Optional[str] = None):
+        """Add a function to the registry."""
+        if is_class_method and class_name:
+            if class_name not in self.classes:
+                self.classes[class_name] = set()
+            self.classes[class_name].add(func_name)
+        else:
+            self.functions.add(func_name)
+    
+    def is_local_function(self, func_name: str) -> bool:
+        """Check if a function is defined in this module."""
+        return func_name in self.functions
+    
+    def is_class_method(self, func_name: str, class_name: Optional[str] = None) -> bool:
+        """Check if a function is a method of a class in this module."""
+        if class_name:
+            return class_name in self.classes and func_name in self.classes[class_name]
+        # Check if it's a method in any class
+        for methods in self.classes.values():
+            if func_name in methods:
+                return True
+        return False
+    
+    def get_all_function_names(self) -> Set[str]:
+        """Get all function names defined in this module."""
+        all_names = self.functions.copy()
+        for methods in self.classes.values():
+            all_names.update(methods)
+        return all_names
+
+
+def _build_function_registry(tree: ast.AST, module_name: str, imported_modules: Set[str]) -> FunctionRegistry:
+    """Build a registry of all functions defined in this module."""
+    registry = FunctionRegistry(module_name)
+    registry.imported_modules = imported_modules
+    
+    # Track current class context
+    current_class = None
+    
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            current_class = node.name
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            is_method = current_class is not None
+            registry.add_function(node.name, is_method, current_class or "")
+        # Reset class context when we leave the class
+        elif isinstance(node, ast.ClassDef) and current_class:
+            # This handles nested classes - we'll reset when we encounter the next class or function at module level
+            pass
+    
+    return registry
+
+
+def _extract_called_name(call_node: ast.Call, registry: FunctionRegistry) -> Optional[str]:
     """Extract name of called function from an AST Call node.
     
-    Only captures module-level function calls that are explicitly imported.
+    Enhanced to capture same-module function calls through registry lookup.
     """
     if isinstance(call_node.func, ast.Name):
         # This is a bare function call like foo()
-        # Only capture if it's a user-defined function (not built-in)
         func_name = call_node.func.id
+        
         # Skip built-ins and common functions
         built_ins = {
             'print', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple',
@@ -171,10 +236,22 @@ def _extract_called_name(call_node: ast.Call, imported_modules: Set[str], curren
             'max', 'min', 'sorted', 'reversed', 'isinstance', 'hasattr', 'getattr',
             'setattr', 'delattr', 'callable', 'type', 'isinstance', 'issubclass',
             'open', 'input', 'eval', 'exec', 'compile', 'globals', 'locals',
-            'vars', 'dir', 'help', 'repr', 'ascii', 'format', 'vars'
+            'vars', 'dir', 'help', 'repr', 'ascii', 'format', 'vars', 'super',
+            'property', 'staticmethod', 'classmethod', 'next', 'iter', 'bool'
         }
-        if func_name not in built_ins:
-            return func_name
+        
+        if func_name in built_ins:
+            return None
+        
+        # Check if this is a local function call
+        if registry.is_local_function(func_name):
+            return f"{registry.module_name}.{func_name}"
+        
+        # Check if this is a class method call (without self)
+        if registry.is_class_method(func_name):
+            return f"{registry.module_name}.{func_name}"
+        
+        # Not a local function, skip it
         return None
         
     elif isinstance(call_node.func, ast.Attribute):
@@ -189,31 +266,71 @@ def _extract_called_name(call_node: ast.Call, imported_modules: Set[str], curren
             parts.append(node.id)
             full_name = ".".join(reversed(parts))
             
-            # Capture self.method() and self._method() calls (internal methods) FIRST
-            # Only capture direct self.method() calls, not self.attribute.method()
-            if len(parts) == 2 and parts[-1] == 'self':
+            # Handle self.method() calls
+            if len(parts) >= 2 and parts[-1] == 'self':
                 method_name = parts[0]
-                # Return with current module prefix
-                full_method_name = f"{current_module}.{method_name}"
+                
+                # Check if this is a valid method in any class
+                if registry.is_class_method(method_name):
+                    full_method_name = f"{registry.module_name}.{method_name}"
+                    return full_method_name
+                
+                # Even if not in registry, treat as local method call
+                full_method_name = f"{registry.module_name}.{method_name}"
                 return full_method_name
             
-            # Capture self.attribute.method() calls as cross-module calls
+            # Handle self.attribute.method() calls
             elif len(parts) >= 3 and parts[-1] == 'self':
-                # This is like self.spec_parser.parse_file
-                # Treat as cross-module call to attribute.method
                 method_name = parts[0]
                 attribute_name = parts[1]
-                cross_module_call = f"{attribute_name}.{method_name}"
-                return cross_module_call
+                
+                # This could be self.other_class.method() - treat as cross-module call
+                if attribute_name in registry.imported_modules:
+                    return f"{attribute_name}.{method_name}"
+                
+                # Or it could be self.instance.method() where instance is of a local class
+                if attribute_name in registry.classes:
+                    if method_name in registry.classes[attribute_name]:
+                        return f"{registry.module_name}.{method_name}"
+                
+                # Fallback: treat as cross-module call
+                return f"{attribute_name}.{method_name}"
             
-            # Capture module.function calls where module is imported
+            # Handle module.function() calls
             elif len(parts) == 2:
                 module_name, func_name = parts[1], parts[0]
-                # Only capture if module is explicitly imported
-                if module_name in imported_modules:
+                
+                # Only capture if module is imported
+                if module_name in registry.imported_modules:
                     return full_name
+                
+                # Check if it's a same-module call with module prefix
+                if module_name == registry.module_name:
+                    return f"{registry.module_name}.{func_name}"
             
-            # Exclude other method calls and longer chains
+            # Handle class.method() calls (direct class method calls)
+            elif len(parts) == 2:
+                class_name, method_name = parts[1], parts[0]
+                
+                # Check if this is a local class method call
+                if class_name in registry.classes and method_name in registry.classes[class_name]:
+                    return f"{registry.module_name}.{method_name}"
+            
+            # Handle longer chains like obj.attr.method() - try to resolve
+            elif len(parts) >= 3:
+                # Look for patterns that might indicate local function calls
+                method_name = parts[0]
+                
+                # If the last part is a known local class, this might be a method call
+                if parts[-1] in registry.classes:
+                    if method_name in registry.classes[parts[-1]]:
+                        return f"{registry.module_name}.{method_name}"
+                
+                # If the method name is a local function, capture it
+                if registry.is_local_function(method_name):
+                    return f"{registry.module_name}.{method_name}"
+            
+            # Default: exclude complex method chains
             return None
     
     return None
@@ -239,7 +356,6 @@ def scan_file(file_path: Path) -> nx.DiGraph:
     except (SyntaxError, UnicodeDecodeError) as e:
         raise ValueError(f"Failed to parse {file_path}: {e}")
 
-    current_func = None
     current_module = file_path.stem
     
     # Extract imports to know what modules are available
@@ -251,6 +367,9 @@ def scan_file(file_path: Path) -> nx.DiGraph:
         elif isinstance(node, ast.ImportFrom):
             if node.module:
                 imported_modules.add(node.module)
+    
+    # Build function registry for this module
+    registry = _build_function_registry(tree, current_module, imported_modules)
     
     # For single file, assume only this module is local
     local_modules = {current_module}
@@ -273,7 +392,7 @@ def scan_file(file_path: Path) -> nx.DiGraph:
         # Look for calls only within this function
         for node in ast.walk(func_node):
             if isinstance(node, ast.Call):
-                called_name = _extract_called_name(node, imported_modules, current_module)
+                called_name = _extract_called_name(node, registry)
                 if called_name and not _is_external_function(called_name, local_modules):
                     # Check if this is a cross-module call
                     if "." in called_name:

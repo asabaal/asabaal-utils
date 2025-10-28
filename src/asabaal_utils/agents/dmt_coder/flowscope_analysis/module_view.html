@@ -1,0 +1,306 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div id="module-selector" style="position: fixed; top: 10px; left: 10px; background: white; border: 1px solid #ccc; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; max-width: 300px;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Module Selector</h4>
+    <div style="margin-bottom: 10px;">
+        <label for="module-dropdown" style="display: block; margin-bottom: 5px; font-weight: bold;">Select Module:</label>
+        <select id="module-dropdown" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+            <option value="dependency-view">Module Dependencies</option>
+            <option value="cli">cli (1 functions)</option>
+            <option value="parser">parser (2 functions)</option>
+            <option value="planner">planner (2 functions)</option>
+            <option value="renderer">renderer (6 functions)</option>
+            <option value="runner">runner (3 functions)</option>
+            <option value="schema">schema (6 functions)</option>
+            <option value="validator">validator (1 functions)</option>
+
+        </select>
+    </div>
+    <div style="margin-bottom: 10px;">
+        <button onclick="loadSelectedModule()" style="width: 100%; padding: 8px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">Load Module Graph</button>
+    </div>
+    <div id="module-info" style="font-size: 12px; color: #666; margin-top: 10px;">
+        Select a module to view its function call graph
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+// Module data storage
+const moduleGraphs = {};
+let currentNetwork = null;
+
+// Initialize module graphs data
+
+moduleGraphs['cli'] = {
+    nodes: [{"id": "cli.main", "label": "main", "title": "cli.main\\nFile: agents/dmt_coder/src/dmtcoder/stage1/cli.py\\nLine: 6\\nModule: cli", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
+};
+
+moduleGraphs['parser'] = {
+    nodes: [{"id": "parser._sig_parts", "label": "_sig_parts", "title": "parser._sig_parts\\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\\nLine: 6\\nModule: parser", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "parser.load_spec", "label": "load_spec", "title": "parser.load_spec\\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\\nLine: 17\\nModule: parser", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: [{"from": "parser.load_spec", "to": "parser._sig_parts", "title": "parser.load_spec \u2192 parser._sig_parts", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}]
+};
+
+moduleGraphs['planner'] = {
+    nodes: [{"id": "planner._norm_pkg", "label": "_norm_pkg", "title": "planner._norm_pkg\\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\\nLine: 6\\nModule: planner", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "planner.build_plan", "label": "build_plan", "title": "planner.build_plan\\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\\nLine: 9\\nModule: planner", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: [{"from": "planner.build_plan", "to": "planner._norm_pkg", "title": "planner.build_plan \u2192 planner._norm_pkg", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}]
+};
+
+moduleGraphs['renderer'] = {
+    nodes: [{"id": "renderer._ensure_dir", "label": "_ensure_dir", "title": "renderer._ensure_dir\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 8\\nModule: renderer", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "renderer._summarize_io", "label": "_summarize_io", "title": "renderer._summarize_io\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 11\\nModule: renderer", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "renderer._block", "label": "_block", "title": "renderer._block\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 17\\nModule: renderer", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "renderer._behavior_lines", "label": "_behavior_lines", "title": "renderer._behavior_lines\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 20\\nModule: renderer", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "renderer._validation_lines", "label": "_validation_lines", "title": "renderer._validation_lines\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 30\\nModule: renderer", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "renderer.render_plan_to_disk", "label": "render_plan_to_disk", "title": "renderer.render_plan_to_disk\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 42\\nModule: renderer", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: [{"from": "renderer.render_plan_to_disk", "to": "renderer._ensure_dir", "title": "renderer.render_plan_to_disk \u2192 renderer._ensure_dir", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "renderer.render_plan_to_disk", "to": "renderer._behavior_lines", "title": "renderer.render_plan_to_disk \u2192 renderer._behavior_lines", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "renderer.render_plan_to_disk", "to": "renderer._summarize_io", "title": "renderer.render_plan_to_disk \u2192 renderer._summarize_io", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "renderer.render_plan_to_disk", "to": "renderer._validation_lines", "title": "renderer.render_plan_to_disk \u2192 renderer._validation_lines", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "renderer.render_plan_to_disk", "to": "renderer._block", "title": "renderer.render_plan_to_disk \u2192 renderer._block", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}]
+};
+
+moduleGraphs['runner'] = {
+    nodes: [{"id": "runner.check", "label": "check", "title": "runner.check\\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\\nLine: 11\\nModule: runner", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "runner.plan", "label": "plan", "title": "runner.plan\\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\\nLine: 17\\nModule: runner", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "runner.generate", "label": "generate", "title": "runner.generate\\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\\nLine: 25\\nModule: runner", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
+};
+
+moduleGraphs['schema'] = {
+    nodes: [{"id": "schema._is_list", "label": "_is_list", "title": "schema._is_list\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 7\\nModule: schema", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema._is_dict", "label": "_is_dict", "title": "schema._is_dict\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 8\\nModule: schema", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema._is_str", "label": "_is_str", "title": "schema._is_str\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 9\\nModule: schema", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema.validate_top", "label": "validate_top", "title": "schema.validate_top\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 11\\nModule: schema", "color": "#97c2fc", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema.validate_function", "label": "validate_function", "title": "schema.validate_function\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 20\\nModule: schema", "color": "#97c2fc", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema.validate_doc", "label": "validate_doc", "title": "schema.validate_doc\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 79\\nModule: schema", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: [{"from": "schema.validate_top", "to": "schema._is_list", "title": "schema.validate_top \u2192 schema._is_list", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_function", "to": "schema._is_dict", "title": "schema.validate_function \u2192 schema._is_dict", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_function", "to": "schema._is_list", "title": "schema.validate_function \u2192 schema._is_list", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_function", "to": "schema._is_str", "title": "schema.validate_function \u2192 schema._is_str", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_doc", "to": "schema.validate_top", "title": "schema.validate_doc \u2192 schema.validate_top", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_doc", "to": "schema.validate_function", "title": "schema.validate_doc \u2192 schema.validate_function", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}]
+};
+
+moduleGraphs['validator'] = {
+    nodes: [{"id": "validator.validate_spec", "label": "validate_spec", "title": "validator.validate_spec\\nFile: agents/dmt_coder/src/dmtcoder/stage1/validator.py\\nLine: 7\\nModule: validator", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
+};
+
+function loadSelectedModule() {
+    const selectedModule = document.getElementById('module-dropdown').value;
+    const container = document.getElementById('mynetwork');
+    const infoDiv = document.getElementById('module-info');
+    
+    if (selectedModule === 'dependency-view') {
+        // Load the original module dependency graph
+        location.reload();
+        return;
+    }
+    
+    const moduleData = moduleGraphs[selectedModule];
+    if (!moduleData) {
+        infoDiv.innerHTML = '<span style="color: red;">Module data not found</span>';
+        return;
+    }
+    
+    // Update info
+    const funcCount = moduleData.nodes.length;
+    const callCount = moduleData.edges.length;
+    infoDiv.innerHTML = `<strong>${selectedModule}</strong><br>${funcCount} functions, ${callCount} calls`;
+    
+    // Clear existing network
+    if (currentNetwork) {
+        currentNetwork.destroy();
+    }
+    
+    // Create new network
+    const nodes = new vis.DataSet(moduleData.nodes);
+    const edges = new vis.DataSet(moduleData.edges);
+    
+    const data = { nodes: nodes, edges: edges };
+    
+    const options = {
+        physics: {
+            enabled: true,
+            stabilization: {
+                iterations: 100
+            }
+        },
+        interaction: {
+            hover: true,
+            tooltipDelay: 200
+        },
+        layout: {
+            improvedLayout: false
+        },
+        nodes: {
+            borderWidth: 1,
+            borderColor: '#666666',
+            font: { color: '#333' }
+        },
+        edges: {
+            smooth: {
+                type: 'dynamic'
+            }
+        }
+    };
+    
+    currentNetwork = new vis.Network(container, data, options);
+    
+    // Fit network to show all nodes
+    currentNetwork.once('stabilized', function() {
+        currentNetwork.fit({
+            animation: {
+                duration: 1000,
+                easingFunction: 'easeInOutQuad'
+            }
+        });
+    });
+}
+
+// Auto-load first module on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const dropdown = document.getElementById('module-dropdown');
+        if (dropdown && dropdown.options.length > 1) {
+            dropdown.selectedIndex = 1; // Select first module (not dependency view)
+            loadSelectedModule();
+        }
+    }, 1000);
+});
+</script>
+</body>
+</html>

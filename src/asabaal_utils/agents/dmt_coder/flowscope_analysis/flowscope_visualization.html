@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html>
+    <head><title>FlowScope Analysis - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "validator.validate_spec", "label": "validate_spec", "shape": "dot", "title": "Function: validator.validate_spec\nFile: agents/dmt_coder/src/dmtcoder/stage1/validator.py\nLine: 7\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "schema._is_list", "label": "_is_list", "shape": "dot", "title": "Function: schema._is_list\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\nLine: 7\nIn-degree: 2\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "schema._is_dict", "label": "_is_dict", "shape": "dot", "title": "Function: schema._is_dict\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\nLine: 8\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "schema._is_str", "label": "_is_str", "shape": "dot", "title": "Function: schema._is_str\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\nLine: 9\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "schema.validate_top", "label": "validate_top", "shape": "dot", "title": "Function: schema.validate_top\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\nLine: 11\nIn-degree: 1\nOut-degree: 1"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "schema.validate_function", "label": "validate_function", "shape": "dot", "title": "Function: schema.validate_function\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\nLine: 20\nIn-degree: 1\nOut-degree: 3"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "schema.validate_doc", "label": "validate_doc", "shape": "dot", "title": "Function: schema.validate_doc\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\nLine: 79\nIn-degree: 0\nOut-degree: 2"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "renderer._ensure_dir", "label": "_ensure_dir", "shape": "dot", "title": "Function: renderer._ensure_dir\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\nLine: 8\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "renderer._summarize_io", "label": "_summarize_io", "shape": "dot", "title": "Function: renderer._summarize_io\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\nLine: 11\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "renderer._block", "label": "_block", "shape": "dot", "title": "Function: renderer._block\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\nLine: 17\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "renderer._behavior_lines", "label": "_behavior_lines", "shape": "dot", "title": "Function: renderer._behavior_lines\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\nLine: 20\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "renderer._validation_lines", "label": "_validation_lines", "shape": "dot", "title": "Function: renderer._validation_lines\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\nLine: 30\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "renderer.render_plan_to_disk", "label": "render_plan_to_disk", "shape": "dot", "title": "Function: renderer.render_plan_to_disk\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\nLine: 42\nIn-degree: 0\nOut-degree: 5"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "planner._norm_pkg", "label": "_norm_pkg", "shape": "dot", "title": "Function: planner._norm_pkg\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\nLine: 6\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "planner.build_plan", "label": "build_plan", "shape": "dot", "title": "Function: planner.build_plan\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\nLine: 9\nIn-degree: 0\nOut-degree: 1"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "runner.check", "label": "check", "shape": "dot", "title": "Function: runner.check\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\nLine: 11\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "runner.plan", "label": "plan", "shape": "dot", "title": "Function: runner.plan\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\nLine: 17\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "runner.generate", "label": "generate", "shape": "dot", "title": "Function: runner.generate\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\nLine: 25\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "cli.main", "label": "main", "shape": "dot", "title": "Function: cli.main\nFile: agents/dmt_coder/src/dmtcoder/stage1/cli.py\nLine: 6\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "parser._sig_parts", "label": "_sig_parts", "shape": "dot", "title": "Function: parser._sig_parts\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\nLine: 6\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "parser.load_spec", "label": "load_spec", "shape": "dot", "title": "Function: parser.load_spec\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\nLine: 17\nIn-degree: 0\nOut-degree: 1"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "schema.validate_top", "title": "schema.validate_top \u2192 schema._is_list", "to": "schema._is_list"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "schema.validate_function", "title": "schema.validate_function \u2192 schema._is_dict", "to": "schema._is_dict"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "schema.validate_function", "title": "schema.validate_function \u2192 schema._is_list", "to": "schema._is_list"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "schema.validate_function", "title": "schema.validate_function \u2192 schema._is_str", "to": "schema._is_str"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "schema.validate_doc", "title": "schema.validate_doc \u2192 schema.validate_top", "to": "schema.validate_top"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "schema.validate_doc", "title": "schema.validate_doc \u2192 schema.validate_function", "to": "schema.validate_function"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "renderer.render_plan_to_disk", "title": "renderer.render_plan_to_disk \u2192 renderer._ensure_dir", "to": "renderer._ensure_dir"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "renderer.render_plan_to_disk", "title": "renderer.render_plan_to_disk \u2192 renderer._behavior_lines", "to": "renderer._behavior_lines"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "renderer.render_plan_to_disk", "title": "renderer.render_plan_to_disk \u2192 renderer._summarize_io", "to": "renderer._summarize_io"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "renderer.render_plan_to_disk", "title": "renderer.render_plan_to_disk \u2192 renderer._validation_lines", "to": "renderer._validation_lines"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "renderer.render_plan_to_disk", "title": "renderer.render_plan_to_disk \u2192 renderer._block", "to": "renderer._block"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "planner.build_plan", "title": "planner.build_plan \u2192 planner._norm_pkg", "to": "planner._norm_pkg"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "parser.load_spec", "title": "parser.load_spec \u2192 parser._sig_parts", "to": "parser._sig_parts"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"validator.validate_spec": {"nodes": [{"id": "validator.validate_spec", "label": "validate_spec", "title": "validator.validate_spec\\nFile: agents/dmt_coder/src/dmtcoder/stage1/validator.py\\nLine: 7", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "schema._is_list": {"nodes": [{"id": "schema._is_list", "label": "_is_list", "title": "schema._is_list\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 7", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "schema._is_dict": {"nodes": [{"id": "schema._is_dict", "label": "_is_dict", "title": "schema._is_dict\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 8", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "schema._is_str": {"nodes": [{"id": "schema._is_str", "label": "_is_str", "title": "schema._is_str\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 9", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "schema.validate_top": {"nodes": [{"id": "schema._is_list", "label": "_is_list", "title": "schema._is_list\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 7", "color": "#ffd700", "x": -99.99999999999991, "y": 98.48987466229836}, {"id": "schema.validate_top", "label": "validate_top", "title": "schema.validate_top\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 11", "color": "#ff6b6b", "x": 100.0, "y": -98.48987466229819}], "edges": [{"from": "schema.validate_top", "to": "schema._is_list"}]}, "schema.validate_function": {"nodes": [{"id": "schema._is_list", "label": "_is_list", "title": "schema._is_list\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 7", "color": "#ffd700", "x": 74.42633078053446, "y": 61.01736472682102}, {"id": "schema.validate_function", "label": "validate_function", "title": "schema.validate_function\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 20", "color": "#ff6b6b", "x": 1.0082175613911806, "y": -1.1843937936140045}, {"id": "schema._is_str", "label": "_is_str", "title": "schema._is_str\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 9", "color": "#ffd700", "x": 5.319668248278736, "y": -100.0}, {"id": "schema._is_dict", "label": "_is_dict", "title": "schema._is_dict\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 8", "color": "#ffd700", "x": -80.75421659020438, "y": 40.167029066792985}], "edges": [{"from": "schema.validate_function", "to": "schema._is_dict"}, {"from": "schema.validate_function", "to": "schema._is_str"}, {"from": "schema.validate_function", "to": "schema._is_list"}]}, "schema.validate_doc": {"nodes": [{"id": "schema.validate_function", "label": "validate_function", "title": "schema.validate_function\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 20", "color": "#97c2fc", "x": 4.833681061533494, "y": 5.855314249264241}, {"id": "schema._is_dict", "label": "_is_dict", "title": "schema._is_dict\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 8", "color": "#ffd700", "x": 92.30193203347801, "y": -8.42912335281377}, {"id": "schema._is_list", "label": "_is_list", "title": "schema._is_list\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 7", "color": "#ffd700", "x": -70.13128619960925, "y": -66.90562358094566}, {"id": "schema.validate_top", "label": "validate_top", "title": "schema.validate_top\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 11", "color": "#97c2fc", "x": -51.38838799493497, "y": -48.71309544822523}, {"id": "schema.validate_doc", "label": "validate_doc", "title": "schema.validate_doc\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 79", "color": "#ff6b6b", "x": -32.64548979026069, "y": -30.52056731550481}, {"id": "schema._is_str", "label": "_is_str", "title": "schema._is_str\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 9", "color": "#ffd700", "x": 5.641162894858458, "y": 100.0}], "edges": [{"from": "schema.validate_function", "to": "schema._is_dict"}, {"from": "schema.validate_doc", "to": "schema.validate_top"}, {"from": "schema.validate_function", "to": "schema._is_list"}, {"from": "schema.validate_doc", "to": "schema.validate_function"}, {"from": "schema.validate_top", "to": "schema._is_list"}, {"from": "schema.validate_function", "to": "schema._is_str"}]}, "renderer._ensure_dir": {"nodes": [{"id": "renderer._ensure_dir", "label": "_ensure_dir", "title": "renderer._ensure_dir\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 8", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "renderer._summarize_io": {"nodes": [{"id": "renderer._summarize_io", "label": "_summarize_io", "title": "renderer._summarize_io\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 11", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "renderer._block": {"nodes": [{"id": "renderer._block", "label": "_block", "title": "renderer._block\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 17", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "renderer._behavior_lines": {"nodes": [{"id": "renderer._behavior_lines", "label": "_behavior_lines", "title": "renderer._behavior_lines\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 20", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "renderer._validation_lines": {"nodes": [{"id": "renderer._validation_lines", "label": "_validation_lines", "title": "renderer._validation_lines\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 30", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "renderer.render_plan_to_disk": {"nodes": [{"id": "renderer._ensure_dir", "label": "_ensure_dir", "title": "renderer._ensure_dir\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 8", "color": "#ffd700", "x": 57.412669594442015, "y": 78.2964073608202}, {"id": "renderer._validation_lines", "label": "_validation_lines", "title": "renderer._validation_lines\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 30", "color": "#ffd700", "x": 95.0627786042047, "y": -32.63333092117759}, {"id": "renderer._block", "label": "_block", "title": "renderer._block\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 17", "color": "#ffd700", "x": -7.20127642793462, "y": -100.0}, {"id": "renderer._summarize_io", "label": "_summarize_io", "title": "renderer._summarize_io\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 11", "color": "#ffd700", "x": -90.70018777899374, "y": -24.51280998317428}, {"id": "renderer.render_plan_to_disk", "label": "render_plan_to_disk", "title": "renderer.render_plan_to_disk\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 42", "color": "#ff6b6b", "x": 0.7360267359900547, "y": -0.46266067192332566}, {"id": "renderer._behavior_lines", "label": "_behavior_lines", "title": "renderer._behavior_lines\\nFile: agents/dmt_coder/src/dmtcoder/stage1/renderer.py\\nLine: 20", "color": "#ffd700", "x": -55.3100107277084, "y": 79.31239421545499}], "edges": [{"from": "renderer.render_plan_to_disk", "to": "renderer._behavior_lines"}, {"from": "renderer.render_plan_to_disk", "to": "renderer._block"}, {"from": "renderer.render_plan_to_disk", "to": "renderer._summarize_io"}, {"from": "renderer.render_plan_to_disk", "to": "renderer._ensure_dir"}, {"from": "renderer.render_plan_to_disk", "to": "renderer._validation_lines"}]}, "planner._norm_pkg": {"nodes": [{"id": "planner._norm_pkg", "label": "_norm_pkg", "title": "planner._norm_pkg\\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\\nLine: 6", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "planner.build_plan": {"nodes": [{"id": "planner._norm_pkg", "label": "_norm_pkg", "title": "planner._norm_pkg\\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\\nLine: 6", "color": "#ffd700", "x": -99.99999999999991, "y": 98.48987466229836}, {"id": "planner.build_plan", "label": "build_plan", "title": "planner.build_plan\\nFile: agents/dmt_coder/src/dmtcoder/stage1/planner.py\\nLine: 9", "color": "#ff6b6b", "x": 100.0, "y": -98.48987466229819}], "edges": [{"from": "planner.build_plan", "to": "planner._norm_pkg"}]}, "runner.check": {"nodes": [{"id": "runner.check", "label": "check", "title": "runner.check\\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\\nLine: 11", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "runner.plan": {"nodes": [{"id": "runner.plan", "label": "plan", "title": "runner.plan\\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\\nLine: 17", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "runner.generate": {"nodes": [{"id": "runner.generate", "label": "generate", "title": "runner.generate\\nFile: agents/dmt_coder/src/dmtcoder/stage1/runner.py\\nLine: 25", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "cli.main": {"nodes": [{"id": "cli.main", "label": "main", "title": "cli.main\\nFile: agents/dmt_coder/src/dmtcoder/stage1/cli.py\\nLine: 6", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "parser._sig_parts": {"nodes": [{"id": "parser._sig_parts", "label": "_sig_parts", "title": "parser._sig_parts\\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\\nLine: 6", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "parser.load_spec": {"nodes": [{"id": "parser.load_spec", "label": "load_spec", "title": "parser.load_spec\\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\\nLine: 17", "color": "#ff6b6b", "x": -100.0, "y": 98.4898746622981}, {"id": "parser._sig_parts", "label": "_sig_parts", "title": "parser._sig_parts\\nFile: agents/dmt_coder/src/dmtcoder/stage1/parser.py\\nLine: 6", "color": "#ffd700", "x": 99.99999999999983, "y": -98.48987466229802}], "edges": [{"from": "parser.load_spec", "to": "parser._sig_parts"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Global Function Explorer - All Modules
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions across all modules..." 
+                   style="width: 400px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 500px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="_behavior_lines" data-module="renderer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('renderer._behavior_lines', '_behavior_lines', 'renderer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_behavior_lines</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">renderer</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/renderer.py:20
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_block" data-module="renderer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('renderer._block', '_block', 'renderer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_block</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">renderer</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/renderer.py:17
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_ensure_dir" data-module="renderer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('renderer._ensure_dir', '_ensure_dir', 'renderer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_ensure_dir</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">renderer</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/renderer.py:8
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_is_dict" data-module="schema" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('schema._is_dict', '_is_dict', 'schema')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_is_dict</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">schema</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/schema.py:8
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_is_list" data-module="schema" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('schema._is_list', '_is_list', 'schema')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_is_list</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">schema</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓2</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/schema.py:7
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_is_str" data-module="schema" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('schema._is_str', '_is_str', 'schema')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_is_str</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">schema</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/schema.py:9
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_norm_pkg" data-module="planner" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('planner._norm_pkg', '_norm_pkg', 'planner')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_norm_pkg</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">planner</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/planner.py:6
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_sig_parts" data-module="parser" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('parser._sig_parts', '_sig_parts', 'parser')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_sig_parts</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">parser</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/parser.py:6
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_summarize_io" data-module="renderer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('renderer._summarize_io', '_summarize_io', 'renderer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_summarize_io</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">renderer</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/renderer.py:11
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_validation_lines" data-module="renderer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('renderer._validation_lines', '_validation_lines', 'renderer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_validation_lines</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">renderer</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/renderer.py:30
+                </div>
+            </div>
+
+            <div class="function-item" data-name="build_plan" data-module="planner" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('planner.build_plan', 'build_plan', 'planner')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>build_plan</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">planner</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/planner.py:9
+                </div>
+            </div>
+
+            <div class="function-item" data-name="check" data-module="runner" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('runner.check', 'check', 'runner')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>check</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">runner</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/runner.py:11
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate" data-module="runner" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('runner.generate', 'generate', 'runner')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">runner</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/runner.py:25
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_spec" data-module="parser" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('parser.load_spec', 'load_spec', 'parser')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_spec</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">parser</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/parser.py:17
+                </div>
+            </div>
+
+            <div class="function-item" data-name="main" data-module="cli" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('cli.main', 'main', 'cli')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>main</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">cli</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/cli.py:6
+                </div>
+            </div>
+
+            <div class="function-item" data-name="plan" data-module="runner" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('runner.plan', 'plan', 'runner')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>plan</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">runner</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/runner.py:17
+                </div>
+            </div>
+
+            <div class="function-item" data-name="render_plan_to_disk" data-module="renderer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('renderer.render_plan_to_disk', 'render_plan_to_disk', 'renderer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>render_plan_to_disk</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">renderer</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑5</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/renderer.py:42
+                </div>
+            </div>
+
+            <div class="function-item" data-name="validate_doc" data-module="schema" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('schema.validate_doc', 'validate_doc', 'schema')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>validate_doc</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">schema</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑2</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/schema.py:79
+                </div>
+            </div>
+
+            <div class="function-item" data-name="validate_function" data-module="schema" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('schema.validate_function', 'validate_function', 'schema')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>validate_function</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">schema</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑3</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/schema.py:20
+                </div>
+            </div>
+
+            <div class="function-item" data-name="validate_spec" data-module="validator" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('validator.validate_spec', 'validate_spec', 'validator')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>validate_spec</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">validator</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/validator.py:7
+                </div>
+            </div>
+
+            <div class="function-item" data-name="validate_top" data-module="schema" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('schema.validate_top', 'validate_top', 'schema')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>validate_top</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">schema</span>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑1</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    agents/dmt_coder/src/dmtcoder/stage1/schema.py:11
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph <small style="color: #666; font-size: 12px;">(drag bottom-right corner to resize)</small></h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 600px; background: white; resize: vertical; overflow: auto; min-height: 400px;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            const module = item.getAttribute('data-module');
+            if (name.includes(searchTerm) || module.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName, moduleName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + moduleName + '.' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName, moduleName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName, moduleName) {
+        // Set function name in header
+        document.getElementById('function-name-display').textContent = moduleName + '.' + functionName;
+        
+        // This will be populated with actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName, moduleName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName, moduleName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '600px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        networkContainer.style.resize = 'vertical';
+        networkContainer.style.overflow = 'auto';
+        networkContainer.style.minHeight = '400px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id.includes(functionName) },
+            borderWidth: node.id.includes(functionName) ? 3 : 1,
+            borderColor: node.id.includes(functionName) ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                // Use physics-based layout for free movement
+                randomSeed: 42,
+                improvedLayout: true
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>
