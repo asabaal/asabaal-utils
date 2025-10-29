@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Function Flow - build_plan</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-size: 12px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        #network {
+            height: 70vh;
+            min-height: 500px;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 0 20px 20px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid #666;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dynamic Function Flow Visualization</h1>
+        <div class="subtitle">build_plan function from parser module • DMT Coder Project</div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Layout:</label>
+            <select id="layoutSelect">
+                <option value="free">Free Form (Default)</option>
+                <option value="hierarchical">Hierarchical</option>
+                <option value="physics">Physics-based</option>
+                <option value="circular">Circular</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-primary" onclick="changeLayout()">Apply Layout</button>
+            <button class="btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+            <button class="btn-success" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Node Size:</label>
+            <select id="nodeSizeSelect">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-secondary" onclick="exportImage()">Export Image</button>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <h3 style="margin: 0; color: #333;">Function Information</h3>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="nodeCount">328</div>
+                <div class="stat-label">Control Flow Nodes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="edgeCount">332</div>
+                <div class="stat-label">Flow Edges</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">parser.py</div>
+                <div class="stat-label">Source File</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">DMT Coder</div>
+                <div class="stat-label">Module</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div id="network" class="loading">Loading function flow graph...</div>
+    </div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <span>Merge Point</span>
+        </div>
+    </div>
+    
+    <script>
+        // Function flow data for build_plan function
+        const functionFlowData = {
+            "entry_point": {
+                "id": "node_0",
+                "type": "entry",
+                "label": "Enter build_plan",
+                "line": 0
+            },
+            "exit_point": {
+                "id": "node_1",
+                "type": "exit",
+                "label": "Exit build_plan",
+                "line": 0
+            },
+            "nodes": [
+                {"id": "node_0", "type": "entry", "label": "Enter build_plan", "line": 0},
+                {"id": "node_1", "type": "exit", "label": "Exit build_plan", "line": 0},
+                {"id": "node_2", "type": "statement", "label": "def build_plan(doc: dict) -> Plan:", "line": 45},
+                {"id": "node_3", "type": "assignment", "label": "spec = doc.get('spec', '')", "line": 46},
+                {"id": "node_4", "type": "statement", "label": "doc", "line": 46},
+                {"id": "node_5", "type": "statement", "label": "'spec'", "line": 46},
+                {"id": "node_6", "type": "statement", "label": "''", "line": 46},
+                {"id": "node_7", "type": "assignment", "label": "version = doc.get('version', '0.1.0')", "line": 47},
+                {"id": "node_8", "type": "statement", "label": "doc", "line": 47},
+                {"id": "node_9", "type": "statement", "label": "'version'", "line": 47},
+                {"id": "node_10", "type": "statement", "label": "'0.1.0'", "line": 47},
+                {"id": "node_11", "type": "assignment", "label": "description = doc.get('description', '')", "line": 48},
+                {"id": "node_12", "type": "statement", "label": "doc", "line": 48},
+                {"id": "node_13", "type": "statement", "label": "'description'", "line": 48},
+                {"id": "node_14", "type": "statement", "label": "''", "line": 48},
+                {"id": "node_15", "type": "assignment", "label": "functions = doc.get('functions', [])", "line": 49},
+                {"id": "node_16", "type": "statement", "label": "doc", "line": 49},
+                {"id": "node_17", "type": "statement", "label": "'functions'", "line": 49},
+                {"id": "node_18", "type": "statement", "label": "[]", "line": 49},
+                {"id": "node_19", "type": "assignment", "label": "plan = Plan(spec=spec, version=version, description=description)", "line": 50},
+                {"id": "node_20", "type": "statement", "label": "Plan", "line": 50},
+                {"id": "node_21", "type": "statement", "label": "spec=spec", "line": 50},
+                {"id": "node_22", "type": "statement", "label": "version=version", "line": 50},
+                {"id": "node_23", "type": "statement", "label": "description=description", "line": 50},
+                {"id": "node_24", "type": "assignment", "label": "items = []", "line": 51},
+                {"id": "node_25", "type": "statement", "label": "[]", "line": 51},
+                {"id": "node_26", "type": "loop", "label": "for func in functions:", "line": 52},
+                {"id": "node_27", "type": "statement", "label": "functions", "line": 52},
+                {"id": "node_28", "type": "assignment", "label": "func_id = func.get('id', '')", "line": 53},
+                {"id": "node_29", "type": "statement", "label": "func", "line": 53},
+                {"id": "node_30", "type": "statement", "label": "'id'", "line": 53},
+                {"id": "node_31", "type": "statement", "label": "''", "line": 53},
+                {"id": "node_32", "type": "assignment", "label": "func_name = func.get('name', '')", "line": 54},
+                {"id": "node_33", "type": "statement", "label": "func", "line": 54},
+                {"id": "node_34", "type": "statement", "label": "'name'", "line": 54},
+                {"id": "node_35", "type": "statement", "label": "''", "line": 54},
+                {"id": "node_36", "type": "assignment", "label": "signature = func.get('signature', '')", "line": 55},
+                {"id": "node_37", "type": "statement", "label": "func", "line": 55},
+                {"id": "node_38", "type": "statement", "label": "'signature'", "line": 55},
+                {"id": "node_39", "type": "statement", "label": "''", "line": 55},
+                {"id": "node_40", "type": "assignment", "label": "io = func.get('io', {})", "line": 56},
+                {"id": "node_41", "type": "statement", "label": "func", "line": 56},
+                {"id": "node_42", "type": "statement", "label": "'io'", "line": 56},
+                {"id": "node_43", "type": "statement", "label": "{}", "line": 56},
+                {"id": "node_44", "type": "assignment", "label": "behavior = func.get('behavior', [])", "line": 57},
+                {"id": "node_45", "type": "statement", "label": "func", "line": 57},
+                {"id": "node_46", "type": "statement", "label": "'behavior'", "line": 57},
+                {"id": "node_47", "type": "statement", "label": "[]", "line": 57},
+                {"id": "node_48", "type": "assignment", "label": "validation = func.get('validation', [])", "line": 58},
+                {"id": "node_49", "type": "statement", "label": "func", "line": 58},
+                {"id": "node_50", "type": "statement", "label": "'validation'", "line": 58},
+                {"id": "node_51", "type": "statement", "label": "[]", "line": 58},
+                {"id": "node_52", "type": "assignment", "label": "dmt = func.get('dmt', {})", "line": 59},
+                {"id": "node_53", "type": "statement", "label": "func", "line": 59},
+                {"id": "node_54", "type": "statement", "label": "'dmt'", "line": 59},
+                {"id": "node_55", "type": "statement", "label": "{}", "line": 59},
+                {"id": "node_56", "type": "assignment", "label": "code_stub = CodeStub(func_id=func_id, func_name=func_name, signature=signature, io=io)", "line": 60},
+                {"id": "node_57", "type": "statement", "label": "CodeStub", "line": 60},
+                {"id": "node_58", "type": "statement", "label": "func_id=func_id", "line": 60},
+                {"id": "node_59", "type": "statement", "label": "func_name=func_name", "line": 60},
+                {"id": "node_60", "type": "statement", "label": "signature=signature", "line": 60},
+                {"id": "node_61", "type": "statement", "label": "io=io", "line": 60},
+                {"id": "node_62", "type": "assignment", "label": "test_stub = TestStub(func_id=func_id, func_name=func_name, signature=signature)", "line": 61},
+                {"id": "node_63", "type": "statement", "label": "TestStub", "line": 61},
+                {"id": "node_64", "type": "statement", "label": "func_id=func_id", "line": 61},
+                {"id": "node_65", "type": "statement", "label": "func_name=func_name", "line": 61},
+                {"id": "node_66", "type": "statement", "label": "signature=signature", "line": 61},
+                {"id": "node_67", "type": "conditional", "label": "if dmt:", "line": 62},
+                {"id": "node_68", "type": "statement", "label": "dmt", "line": 62},
+                {"id": "node_69", "type": "assignment", "label": "teach = dmt.get('teach', {})", "line": 63},
+                {"id": "node_70", "type": "statement", "label": "dmt", "line": 63},
+                {"id": "node_71", "type": "statement", "label": "'teach'", "line": 63},
+                {"id": "node_72", "type": "statement", "label": "{}", "line": 63},
+                {"id": "node_73", "type": "assignment", "label": "teach_stub = TeachStub(func_id=func_id, func_name=func_name, teach=teach)", "line": 64},
+                {"id": "node_74", "type": "statement", "label": "TeachStub", "line": 64},
+                {"id": "node_75", "type": "statement", "label": "func_id=func_id", "line": 64},
+                {"id": "node_76", "type": "statement", "label": "func_name=func_name", "line": 64},
+                {"id": "node_77", "type": "statement", "label": "teach=teach", "line": 64},
+                {"id": "node_78", "type": "assignment", "label": "doc_stub = DocStub(func_id=func_id, func_name=func_name, behavior=behavior, validation=validation)", "line": 65},
+                {"id": "node_79", "type": "statement", "label": "DocStub", "line": 65},
+                {"id": "node_80", "type": "statement", "label": "func_id=func_id", "line": 65},
+                {"id": "node_81", "type": "statement", "label": "func_name=func_name", "line": 65},
+                {"id": "node_82", "type": "statement", "label": "behavior=behavior", "line": 65},
+                {"id": "node_83", "type": "statement", "label": "validation=validation", "line": 65},
+                {"id": "node_84", "type": "assignment", "label": "items.extend([code_stub, test_stub, teach_stub, doc_stub])", "line": 66},
+                {"id": "node_85", "type": "statement", "label": "items", "line": 66},
+                {"id": "node_86", "type": "statement", "label": "[code_stub, test_stub, teach_stub, doc_stub]", "line": 66},
+                {"id": "node_87", "type": "merge", "label": "else branch merge", "line": 67},
+                {"id": "node_88", "type": "assignment", "label": "doc_stub = DocStub(func_id=func_id, func_name=func_name, behavior=behavior, validation=validation)", "line": 68},
+                {"id": "node_89", "type": "statement", "label": "DocStub", "line": 68},
+                {"id": "node_90", "type": "statement", "label": "func_id=func_id", "line": 68},
+                {"id": "node_91", "type": "statement", "label": "func_name=func_name", "line": 68},
+                {"id": "node_92", "type": "statement", "label": "behavior=behavior", "line": 68},
+                {"id": "node_93", "type": "statement", "label": "validation=validation", "line": 68},
+                {"id": "node_94", "type": "assignment", "label": "items.extend([code_stub, test_stub, doc_stub])", "line": 69},
+                {"id": "node_95", "type": "statement", "label": "items", "line": 69},
+                {"id": "node_96", "type": "statement", "label": "[code_stub, test_stub, doc_stub]", "line": 69},
+                {"id": "node_97", "type": "merge", "label": "loop merge", "line": 70},
+                {"id": "node_98", "type": "assignment", "label": "plan.items = items", "line": 71},
+                {"id": "node_99", "type": "statement", "label": "plan", "line": 71},
+                {"id": "node_100", "type": "statement", "label": "items", "line": 71},
+                {"id": "node_101", "type": "return", "label": "return plan", "line": 72},
+                {"id": "node_102", "type": "statement", "label": "plan", "line": 72}
+            ],
+            "edges": [
+                {"from": "node_0", "to": "node_2"},
+                {"from": "node_2", "to": "node_3"},
+                {"from": "node_3", "to": "node_4"},
+                {"from": "node_4", "to": "node_5"},
+                {"from": "node_5", "to": "node_6"},
+                {"from": "node_3", "to": "node_7"},
+                {"from": "node_7", "to": "node_8"},
+                {"from": "node_8", "to": "node_9"},
+                {"from": "node_9", "to": "node_10"},
+                {"from": "node_7", "to": "node_11"},
+                {"from": "node_11", "to": "node_12"},
+                {"from": "node_12", "to": "node_13"},
+                {"from": "node_13", "to": "node_14"},
+                {"from": "node_11", "to": "node_15"},
+                {"from": "node_15", "to": "node_16"},
+                {"from": "node_16", "to": "node_17"},
+                {"from": "node_17", "to": "node_18"},
+                {"from": "node_15", "to": "node_19"},
+                {"from": "node_19", "to": "node_20"},
+                {"from": "node_20", "to": "node_21"},
+                {"from": "node_21", "to": "node_22"},
+                {"from": "node_22", "to": "node_23"},
+                {"from": "node_19", "to": "node_24"},
+                {"from": "node_24", "to": "node_25"},
+                {"from": "node_24", "to": "node_26"},
+                {"from": "node_26", "to": "node_27"},
+                {"from": "node_26", "to": "node_28"},
+                {"from": "node_28", "to": "node_29"},
+                {"from": "node_29", "to": "node_30"},
+                {"from": "node_30", "to": "node_31"},
+                {"from": "node_28", "to": "node_32"},
+                {"from": "node_32", "to": "node_33"},
+                {"from": "node_33", "to": "node_34"},
+                {"from": "node_34", "to": "node_35"},
+                {"from": "node_32", "to": "node_36"},
+                {"from": "node_36", "to": "node_37"},
+                {"from": "node_37", "to": "node_38"},
+                {"from": "node_38", "to": "node_39"},
+                {"from": "node_36", "to": "node_40"},
+                {"from": "node_40", "to": "node_41"},
+                {"from": "node_41", "to": "node_42"},
+                {"from": "node_42", "to": "node_43"},
+                {"from": "node_40", "to": "node_44"},
+                {"from": "node_44", "to": "node_45"},
+                {"from": "node_45", "to": "node_46"},
+                {"from": "node_46", "to": "node_47"},
+                {"from": "node_44", "to": "node_48"},
+                {"from": "node_48", "to": "node_49"},
+                {"from": "node_49", "to": "node_50"},
+                {"from": "node_50", "to": "node_51"},
+                {"from": "node_48", "to": "node_52"},
+                {"from": "node_52", "to": "node_53"},
+                {"from": "node_53", "to": "node_54"},
+                {"from": "node_54", "to": "node_55"},
+                {"from": "node_52", "to": "node_56"},
+                {"from": "node_56", "to": "node_57"},
+                {"from": "node_57", "to": "node_58"},
+                {"from": "node_58", "to": "node_59"},
+                {"from": "node_59", "to": "node_60"},
+                {"from": "node_60", "to": "node_61"},
+                {"from": "node_56", "to": "node_62"},
+                {"from": "node_62", "to": "node_63"},
+                {"from": "node_63", "to": "node_64"},
+                {"from": "node_64", "to": "node_65"},
+                {"from": "node_65", "to": "node_66"},
+                {"from": "node_62", "to": "node_67"},
+                {"from": "node_67", "to": "node_68"},
+                {"from": "node_68", "to": "node_69"},
+                {"from": "node_69", "to": "node_70"},
+                {"from": "node_70", "to": "node_71"},
+                {"from": "node_72", "to": "node_73"},
+                {"from": "node_73", "to": "node_74"},
+                {"from": "node_74", "to": "node_75"},
+                {"from": "node_75", "to": "node_76"},
+                {"from": "node_76", "to": "node_77"},
+                {"from": "node_73", "to": "node_78"},
+                {"from": "node_78", "to": "node_79"},
+                {"from": "node_79", "to": "node_80"},
+                {"from": "node_80", "to": "node_81"},
+                {"from": "node_81", "to": "node_82"},
+                {"from": "node_82", "to": "node_83"},
+                {"from": "node_78", "to": "node_84"},
+                {"from": "node_84", "to": "node_85"},
+                {"from": "node_85", "to": "node_86"},
+                {"from": "node_67", "to": "node_87"},
+                {"from": "node_87", "to": "node_88"},
+                {"from": "node_88", "to": "node_89"},
+                {"from": "node_89", "to": "node_90"},
+                {"from": "node_90", "to": "node_91"},
+                {"from": "node_91", "to": "node_92"},
+                {"from": "node_92", "to": "node_93"},
+                {"from": "node_88", "to": "node_94"},
+                {"from": "node_94", "to": "node_95"},
+                {"from": "node_95", "to": "node_96"},
+                {"from": "node_26", "to": "node_97"},
+                {"from": "node_97", "to": "node_98"},
+                {"from": "node_98", "to": "node_99"},
+                {"from": "node_99", "to": "node_100"},
+                {"from": "node_98", "to": "node_101"},
+                {"from": "node_101", "to": "node_102"},
+                {"from": "node_102", "to": "node_1"}
+            ]
+        };
+        
+        let network = null;
+        let physicsEnabled = false;
+        
+        // Color mapping for node types
+        const colorMap = {
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'return': '#90ee90',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3'
+        };
+        
+        // Shape mapping for node types
+        const shapeMap = {
+            'entry': 'ellipse',
+            'exit': 'ellipse',
+            'conditional': 'diamond',
+            'loop': 'diamond',
+            'merge': 'circle'
+        };
+        
+        function initializeNetwork() {
+            const container = document.getElementById('network');
+            
+            // Create nodes
+            const nodes = new vis.DataSet([
+                {
+                    id: functionFlowData.entry_point.id,
+                    label: functionFlowData.entry_point.label,
+                    title: `${functionFlowData.entry_point.label}\\nType: ${functionFlowData.entry_point.type}\\nLine: ${functionFlowData.entry_point.line}`,
+                    color: colorMap[functionFlowData.entry_point.type],
+                    shape: shapeMap[functionFlowData.entry_point.type] || 'box',
+                    font: {size: 16, bold: true, color: '#333'},
+                    borderWidth: 3,
+                    borderColor: '#28a745'
+                },
+                {
+                    id: functionFlowData.exit_point.id,
+                    label: functionFlowData.exit_point.label,
+                    title: `${functionFlowData.exit_point.label}\\nType: ${functionFlowData.exit_point.type}\\nLine: ${functionFlowData.exit_point.line}`,
+                    color: colorMap[functionFlowData.exit_point.type],
+                    shape: shapeMap[functionFlowData.exit_point.type] || 'box',
+                    font: {size: 16, bold: true, color: '#333'},
+                    borderWidth: 3,
+                    borderColor: '#dc3545'
+                }
+            ]);
+            
+            // Add control flow nodes
+            functionFlowData.nodes.forEach(node => {
+                if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+                    const color = colorMap[node.type] || '#97c2fc';
+                    const shape = shapeMap[node.type] || 'box';
+                    
+                    let label = node.label;
+                    if (label.length > 50) {
+                        label = label.substring(0, 47) + '...';
+                    }
+                    
+                    nodes.add({
+                        id: node.id,
+                        label: label,
+                        title: `${node.label}\\nType: ${node.type}\\nLine: ${node.line}`,
+                        color: color,
+                        shape: shape,
+                        font: {size: 12, color: '#333'},
+                        borderWidth: 1,
+                        borderColor: '#666666'
+                    });
+                }
+            });
+            
+            // Create edges
+            const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
+                from: edge.from,
+                to: edge.to,
+                label: edge.label || '',
+                arrows: 'to',
+                color: {color: '#666666', highlight: '#007bff'},
+                width: 2,
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.2
+                }
+            })));
+            
+            // Create network
+            const data = { nodes: nodes, edges: edges };
+            
+            const options = {
+                layout: {
+                    randomSeed: 42,
+                    improvedLayout: true
+                },
+                physics: {
+                    enabled: false
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    zoomView: true,
+                    dragView: true,
+                    navigationButtons: true,
+                    keyboard: true
+                },
+                nodes: {
+                    borderWidth: 1,
+                    borderColor: '#666666',
+                    font: {color: '#333'},
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 5,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    },
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 3,
+                        x: 1,
+                        y: 1
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+            
+            // Fit network after stabilization
+            network.once('stabilized', function() {
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuad'
+                    }
+                });
+            });
+            
+            // Add click event for node details
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    console.log('Clicked node:', node);
+                }
+            });
+        }
+        
+        function changeLayout() {
+            const layoutType = document.getElementById('layoutSelect').value;
+            const nodeSize = document.getElementById('nodeSizeSelect').value;
+            
+            let nodeSizeValue = 20;
+            if (nodeSize === 'small') nodeSizeValue = 15;
+            else if (nodeSize === 'large') nodeSizeValue = 30;
+            
+            const options = {
+                layout: {
+                    randomSeed: 42,
+                    improvedLayout: true
+                },
+                physics: { enabled: physicsEnabled },
+                nodes: { size: nodeSizeValue }
+            };
+            
+            if (layoutType === 'hierarchical') {
+                options.layout = {
+                    hierarchical: {
+                        direction: 'UD',
+                        sortMethod: 'directed',
+                        levelSeparation: 150,
+                        nodeSpacing: 200
+                    }
+                };
+                options.physics = { enabled: false };
+            } else if (layoutType === 'physics') {
+                options.physics = {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                };
+            } else if (layoutType === 'circular') {
+                options.physics = { enabled: false };
+                
+                // Manually arrange nodes in a circle
+                const nodeIds = network.body.data.nodes.getIds();
+                const radius = 300;
+                const center = { x: 0, y: 0 };
+                
+                nodeIds.forEach((id, index) => {
+                    const angle = (2 * Math.PI * index) / nodeIds.length;
+                    const x = center.x + radius * Math.cos(angle);
+                    const y = center.y + radius * Math.sin(angle);
+                    network.moveNode(id, x, y);
+                });
+            }
+            
+            network.setOptions(options);
+        }
+        
+        function resetZoom() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        }
+        
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled,
+                    stabilization: { iterations: physicsEnabled ? 100 : 0 }
+                }
+            });
+        }
+        
+        function exportImage() {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get the network canvas
+            const networkCanvas = network.canvas.frame.canvas;
+            
+            // Set canvas size
+            canvas.width = networkCanvas.width;
+            canvas.height = networkCanvas.height;
+            
+            // Draw the network canvas to our canvas
+            ctx.drawImage(networkCanvas, 0, 0);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'build_plan_function_flow.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Initialize network when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNetwork();
+        });
+    </script>
+</body>
+</html>
