@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Function Flow - build_plan</title>
+    <title>Dynamic Function Flow - validate_spec</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
         body {
@@ -255,7 +255,7 @@
 <body>
     <div class="header">
         <h1>Dynamic Function Flow Visualization</h1>
-        <div class="subtitle">build_plan function from planner module • FlowScope Analysis</div>
+        <div class="subtitle">validate_spec function from parser module • FlowScope Analysis</div>
     </div>
     
     <div class="controls">
@@ -282,19 +282,19 @@
         <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
             <div class="stat-item">
-                <div class="stat-value">330</div>
+                <div class="stat-value">264</div>
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">332</div>
+                <div class="stat-value">269</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">planner.py</div>
+                <div class="stat-value">validator.py</div>
                 <div class="stat-label">Source File</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">planner</div>
+                <div class="stat-value">parser</div>
                 <div class="stat-label">Module</div>
             </div>
         </div>
@@ -302,19 +302,19 @@
     
     <div class="graph-container">
         <div class="graph-header">
-            <h2 class="graph-title" id="graph-title">build_plan Function Flow</h2>
+            <h2 class="graph-title" id="graph-title">validate_spec Function Flow</h2>
             <div class="graph-metadata" id="graph-metadata">
                 <div class="metadata-item">
                     <span class="metadata-label">Module:</span>
-                    <span class="metadata-value">planner</span>
+                    <span class="metadata-value">parser</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Nodes:</span>
-                    <span class="metadata-value" id="node-count">330</span>
+                    <span class="metadata-value" id="node-count">264</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">332</span>
+                    <span class="metadata-value" id="edge-count">269</span>
                 </div>
 
             </div>
@@ -363,29 +363,29 @@
     </div>
     
     <script>
-        // Function flow data for build_plan function
+        // Function flow data for validate_spec function
         const functionFlowData = {
-        "function_name": "build_plan",
-        "module": "planner",
-        "file_path": "agents/dmt_coder/src/dmtcoder/stage1/planner.py",
+        "function_name": "validate_spec",
+        "module": "validator",
+        "file_path": "agents/dmt_coder/src/dmtcoder/stage1/validator.py",
         "entry_point": {
                 "id": "node_0",
                 "type": "entry",
-                "label": "Enter build_plan",
+                "label": "Enter validate_spec",
                 "line": 0
         },
         "exit_point": {
                 "id": "node_1",
                 "type": "exit",
-                "label": "Exit build_plan",
+                "label": "Exit validate_spec",
                 "line": 0
         },
         "nodes": [
                 {
                         "id": "node_2",
                         "type": "statement",
-                        "label": "def build_plan(doc: Dict[str, Any]) -> Plan:\n    spec_name = doc.get('spec', 'unnamed')\n    version = doc.get('version', '0.0.0')\n    pkg = _norm_pkg(spec_name)\n    plan = Plan(spec_name=spec_name, version=version, items=[])\n    plan.items.append(PlanItem(kind='plan_file', path='build/plan.json'))\n    plan.items.append(PlanItem(kind='manifest_file', path='artifacts/manifest.json'))\n    for fn in doc.get('functions', []) or []:\n        f_id = fn.get('id', '')\n        f_name = fn.get('name', '')\n        plan.items.append(PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}))\n        plan.items.append(PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name}))\n        lessons = ((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []\n        for lesson in lessons:\n            lesson_name = lesson.get('name', 'lesson')\n            script = (lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'\n            plan.items.append(PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}))\n            plan.items.append(PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script}))\n            for exp in (lesson.get('demo') or {}).get('expects', []) or []:\n                if isinstance(exp, dict) and exp:\n                    out_path = list(exp.values())[0]\n                    plan.items.append(PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]}))\n        plan.items.append(PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name}))\n    return plan",
-                        "line": 9,
+                        "label": "def validate_spec(doc: Dict[str, Any]) -> ValidationReport:\n    messages: List[str] = []\n    messages.extend(validate_doc(doc))\n    for i, fn in enumerate(doc.get('functions', []) or []):\n        path = f'functions[{i}]'\n        name = fn.get('name', '')\n        sig_name = (fn.get('_derived') or {}).get('name_from_signature', '')\n        if name and sig_name and (name != sig_name):\n            messages.append(f\"{path}.signature name '{sig_name}' does not match 'name' '{name}'\")\n        params = (fn.get('_derived') or {}).get('params_from_signature', [])\n        io = fn.get('io', {})\n        inps = [i.get('name') for i in io.get('inputs', []) if isinstance(i, dict)]\n        for p in inps:\n            if p and (not any((p.split(':')[0].strip() == q.split(':')[0].strip() for q in params))):\n                messages.append(f\"{path}.io.inputs contains '{p}' not present in signature params\")\n        for j, step in enumerate(fn.get('behavior', []) or []):\n            if isinstance(step, dict):\n                s = step.get('step', '').strip()\n            else:\n                s = str(step).strip()\n            if not s:\n                messages.append(f'{path}.behavior[{j}] empty step')\n        teach = (fn.get('dmt') or {}).get('teach') or {}\n        seen_scripts = set()\n        for k, lesson in enumerate(teach.get('lessons', []) or []):\n            demo = (lesson or {}).get('demo') or {}\n            script = demo.get('script')\n            if script in seen_scripts:\n                messages.append(f'{path}.dmt.teach.lessons[{k}].demo.script duplicate: {script}')\n            if script:\n                seen_scripts.add(script)\n            expects = demo.get('expects') or []\n            exp_paths = []\n            for m, exp in enumerate(expects):\n                if isinstance(exp, dict) and exp:\n                    v = list(exp.values())[0]\n                    if v in exp_paths:\n                        messages.append(f'{path}.dmt.teach.lessons[{k}].demo.expects[{m}] duplicate path: {v}')\n                    exp_paths.append(v)\n    return ValidationReport(passed=len(messages) == 0, messages=messages)",
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
@@ -393,7 +393,7 @@
                         "id": "node_3",
                         "type": "statement",
                         "label": "doc: Dict[str, Any]",
-                        "line": 9,
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
@@ -401,7 +401,7 @@
                         "id": "node_4",
                         "type": "statement",
                         "label": "Dict[str, Any]",
-                        "line": 9,
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
@@ -409,7 +409,7 @@
                         "id": "node_5",
                         "type": "statement",
                         "label": "Dict",
-                        "line": 9,
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
@@ -417,7 +417,7 @@
                         "id": "node_6",
                         "type": "statement",
                         "label": "(str, Any)",
-                        "line": 9,
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
@@ -425,7 +425,7 @@
                         "id": "node_7",
                         "type": "statement",
                         "label": "str",
-                        "line": 9,
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
@@ -433,142 +433,142 @@
                         "id": "node_8",
                         "type": "statement",
                         "label": "Any",
-                        "line": 9,
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_9",
-                        "type": "assignment",
-                        "label": "spec_name = doc.get('spec', 'unnamed')",
-                        "line": 10,
+                        "type": "statement",
+                        "label": "messages: List[str] = []",
+                        "line": 8,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_10",
                         "type": "statement",
-                        "label": "spec_name = doc.get('spec', 'unnamed')",
-                        "line": 10,
+                        "label": "messages",
+                        "line": 8,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_11",
                         "type": "statement",
-                        "label": "spec_name",
-                        "line": 10,
+                        "label": "List[str]",
+                        "line": 8,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_12",
                         "type": "statement",
-                        "label": "doc.get('spec', 'unnamed')",
-                        "line": 10,
+                        "label": "List",
+                        "line": 8,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_13",
                         "type": "statement",
-                        "label": "doc.get",
-                        "line": 10,
+                        "label": "str",
+                        "line": 8,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_14",
                         "type": "statement",
-                        "label": "doc",
-                        "line": 10,
+                        "label": "[]",
+                        "line": 8,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_15",
                         "type": "statement",
-                        "label": "'spec'",
-                        "line": 10,
+                        "label": "messages.extend(validate_doc(doc))",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_16",
                         "type": "statement",
-                        "label": "'unnamed'",
-                        "line": 10,
+                        "label": "messages.extend(validate_doc(doc))",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_17",
-                        "type": "assignment",
-                        "label": "version = doc.get('version', '0.0.0')",
-                        "line": 11,
+                        "type": "statement",
+                        "label": "messages.extend",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_18",
                         "type": "statement",
-                        "label": "version = doc.get('version', '0.0.0')",
-                        "line": 11,
+                        "label": "messages",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_19",
                         "type": "statement",
-                        "label": "version",
-                        "line": 11,
+                        "label": "validate_doc(doc)",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_20",
                         "type": "statement",
-                        "label": "doc.get('version', '0.0.0')",
-                        "line": 11,
+                        "label": "validate_doc",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_21",
                         "type": "statement",
-                        "label": "doc.get",
-                        "line": 11,
+                        "label": "doc",
+                        "line": 9,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_22",
-                        "type": "statement",
-                        "label": "doc",
+                        "type": "loop",
+                        "label": "for (i, fn) in enumerate(doc.get('functions', []) or [])",
                         "line": 11,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_23",
-                        "type": "statement",
-                        "label": "'version'",
-                        "line": 11,
+                        "type": "assignment",
+                        "label": "path = f'functions[{i}]'",
+                        "line": 12,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_24",
                         "type": "statement",
-                        "label": "'0.0.0'",
-                        "line": 11,
+                        "label": "path = f'functions[{i}]'",
+                        "line": 12,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_25",
-                        "type": "assignment",
-                        "label": "pkg = _norm_pkg(spec_name)",
+                        "type": "statement",
+                        "label": "path",
                         "line": 12,
                         "condition": null,
                         "targets": []
@@ -576,7 +576,7 @@
                 {
                         "id": "node_26",
                         "type": "statement",
-                        "label": "pkg = _norm_pkg(spec_name)",
+                        "label": "f'functions[{i}]'",
                         "line": 12,
                         "condition": null,
                         "targets": []
@@ -584,7 +584,7 @@
                 {
                         "id": "node_27",
                         "type": "statement",
-                        "label": "pkg",
+                        "label": "'functions['",
                         "line": 12,
                         "condition": null,
                         "targets": []
@@ -592,7 +592,7 @@
                 {
                         "id": "node_28",
                         "type": "statement",
-                        "label": "_norm_pkg(spec_name)",
+                        "label": "{i}",
                         "line": 12,
                         "condition": null,
                         "targets": []
@@ -600,7 +600,7 @@
                 {
                         "id": "node_29",
                         "type": "statement",
-                        "label": "_norm_pkg",
+                        "label": "i",
                         "line": 12,
                         "condition": null,
                         "targets": []
@@ -608,7 +608,7 @@
                 {
                         "id": "node_30",
                         "type": "statement",
-                        "label": "spec_name",
+                        "label": "']'",
                         "line": 12,
                         "condition": null,
                         "targets": []
@@ -616,7 +616,7 @@
                 {
                         "id": "node_31",
                         "type": "assignment",
-                        "label": "plan = Plan(spec_name=spec_name, version=version, items=[])",
+                        "label": "name = fn.get('name', '')",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -624,7 +624,7 @@
                 {
                         "id": "node_32",
                         "type": "statement",
-                        "label": "plan = Plan(spec_name=spec_name, version=version, items=[])",
+                        "label": "name = fn.get('name', '')",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -632,7 +632,7 @@
                 {
                         "id": "node_33",
                         "type": "statement",
-                        "label": "plan",
+                        "label": "name",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -640,7 +640,7 @@
                 {
                         "id": "node_34",
                         "type": "statement",
-                        "label": "Plan(spec_name=spec_name, version=version, items=[])",
+                        "label": "fn.get('name', '')",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -648,7 +648,7 @@
                 {
                         "id": "node_35",
                         "type": "statement",
-                        "label": "Plan",
+                        "label": "fn.get",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -656,7 +656,7 @@
                 {
                         "id": "node_36",
                         "type": "statement",
-                        "label": "spec_name=spec_name",
+                        "label": "fn",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -664,7 +664,7 @@
                 {
                         "id": "node_37",
                         "type": "statement",
-                        "label": "spec_name",
+                        "label": "'name'",
                         "line": 13,
                         "condition": null,
                         "targets": []
@@ -672,127 +672,127 @@
                 {
                         "id": "node_38",
                         "type": "statement",
-                        "label": "version=version",
+                        "label": "''",
                         "line": 13,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_39",
-                        "type": "statement",
-                        "label": "version",
-                        "line": 13,
+                        "type": "assignment",
+                        "label": "sig_name = (fn.get('_derived') or {}).get('name_from_signature', '')",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_40",
                         "type": "statement",
-                        "label": "items=[]",
-                        "line": 13,
+                        "label": "sig_name = (fn.get('_derived') or {}).get('name_from_signature', '')",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_41",
                         "type": "statement",
-                        "label": "[]",
-                        "line": 13,
+                        "label": "sig_name",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_42",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='plan_file', path='build/plan.json'))",
-                        "line": 15,
+                        "label": "(fn.get('_derived') or {}).get('name_from_signature', '')",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_43",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='plan_file', path='build/plan.json'))",
-                        "line": 15,
+                        "label": "(fn.get('_derived') or {}).get",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_44",
                         "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 15,
+                        "label": "fn.get('_derived') or {}",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_45",
                         "type": "statement",
-                        "label": "plan.items",
-                        "line": 15,
+                        "label": "fn.get('_derived')",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_46",
                         "type": "statement",
-                        "label": "plan",
-                        "line": 15,
+                        "label": "fn.get",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_47",
                         "type": "statement",
-                        "label": "PlanItem(kind='plan_file', path='build/plan.json')",
-                        "line": 15,
+                        "label": "fn",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_48",
                         "type": "statement",
-                        "label": "PlanItem",
-                        "line": 15,
+                        "label": "'_derived'",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_49",
                         "type": "statement",
-                        "label": "kind='plan_file'",
-                        "line": 15,
+                        "label": "{}",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_50",
                         "type": "statement",
-                        "label": "'plan_file'",
-                        "line": 15,
+                        "label": "'name_from_signature'",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_51",
                         "type": "statement",
-                        "label": "path='build/plan.json'",
-                        "line": 15,
+                        "label": "''",
+                        "line": 14,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_52",
-                        "type": "statement",
-                        "label": "'build/plan.json'",
+                        "type": "conditional",
+                        "label": "if name and sig_name and (name != sig_name)",
                         "line": 15,
-                        "condition": null,
+                        "condition": "name and sig_name and (name != sig_name)",
                         "targets": []
                 },
                 {
                         "id": "node_53",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='manifest_file', path='artifacts/manifest.json'))",
+                        "label": "messages.append(f\"{path}.signature name '{sig_name}' does not match 'name' '{name}'\")",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -800,7 +800,7 @@
                 {
                         "id": "node_54",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='manifest_file', path='artifacts/manifest.json'))",
+                        "label": "messages.append(f\"{path}.signature name '{sig_name}' does not match 'name' '{name}'\")",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -808,7 +808,7 @@
                 {
                         "id": "node_55",
                         "type": "statement",
-                        "label": "plan.items.append",
+                        "label": "messages.append",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -816,7 +816,7 @@
                 {
                         "id": "node_56",
                         "type": "statement",
-                        "label": "plan.items",
+                        "label": "messages",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -824,7 +824,7 @@
                 {
                         "id": "node_57",
                         "type": "statement",
-                        "label": "plan",
+                        "label": "f\"{path}.signature name '{sig_name}' does not match 'name' '{name}'\"",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -832,7 +832,7 @@
                 {
                         "id": "node_58",
                         "type": "statement",
-                        "label": "PlanItem(kind='manifest_file', path='artifacts/manifest.json')",
+                        "label": "{path}",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -840,7 +840,7 @@
                 {
                         "id": "node_59",
                         "type": "statement",
-                        "label": "PlanItem",
+                        "label": "path",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -848,7 +848,7 @@
                 {
                         "id": "node_60",
                         "type": "statement",
-                        "label": "kind='manifest_file'",
+                        "label": "\".signature name '\"",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -856,7 +856,7 @@
                 {
                         "id": "node_61",
                         "type": "statement",
-                        "label": "'manifest_file'",
+                        "label": "{sig_name}",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -864,7 +864,7 @@
                 {
                         "id": "node_62",
                         "type": "statement",
-                        "label": "path='artifacts/manifest.json'",
+                        "label": "sig_name",
                         "line": 16,
                         "condition": null,
                         "targets": []
@@ -872,479 +872,479 @@
                 {
                         "id": "node_63",
                         "type": "statement",
-                        "label": "'artifacts/manifest.json'",
+                        "label": "\"' does not match 'name' '\"",
                         "line": 16,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_64",
-                        "type": "loop",
-                        "label": "for fn in doc.get('functions', []) or []",
-                        "line": 18,
+                        "type": "statement",
+                        "label": "{name}",
+                        "line": 16,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_65",
-                        "type": "assignment",
-                        "label": "f_id = fn.get('id', '')",
-                        "line": 19,
+                        "type": "statement",
+                        "label": "name",
+                        "line": 16,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_66",
                         "type": "statement",
-                        "label": "f_id = fn.get('id', '')",
-                        "line": 19,
+                        "label": "\"'\"",
+                        "line": 16,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_67",
-                        "type": "statement",
-                        "label": "f_id",
-                        "line": 19,
+                        "type": "assignment",
+                        "label": "params = (fn.get('_derived') or {}).get('params_from_signature', [])",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_68",
                         "type": "statement",
-                        "label": "fn.get('id', '')",
-                        "line": 19,
+                        "label": "params = (fn.get('_derived') or {}).get('params_from_signature', [])",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_69",
                         "type": "statement",
-                        "label": "fn.get",
-                        "line": 19,
+                        "label": "params",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_70",
                         "type": "statement",
-                        "label": "fn",
-                        "line": 19,
+                        "label": "(fn.get('_derived') or {}).get('params_from_signature', [])",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_71",
                         "type": "statement",
-                        "label": "'id'",
-                        "line": 19,
+                        "label": "(fn.get('_derived') or {}).get",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_72",
                         "type": "statement",
-                        "label": "''",
-                        "line": 19,
+                        "label": "fn.get('_derived') or {}",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_73",
-                        "type": "assignment",
-                        "label": "f_name = fn.get('name', '')",
-                        "line": 20,
+                        "type": "statement",
+                        "label": "fn.get('_derived')",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_74",
                         "type": "statement",
-                        "label": "f_name = fn.get('name', '')",
-                        "line": 20,
+                        "label": "fn.get",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_75",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 20,
+                        "label": "fn",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_76",
                         "type": "statement",
-                        "label": "fn.get('name', '')",
-                        "line": 20,
+                        "label": "'_derived'",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_77",
                         "type": "statement",
-                        "label": "fn.get",
-                        "line": 20,
+                        "label": "{}",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_78",
                         "type": "statement",
-                        "label": "fn",
-                        "line": 20,
+                        "label": "'params_from_signature'",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_79",
                         "type": "statement",
-                        "label": "'name'",
-                        "line": 20,
+                        "label": "[]",
+                        "line": 17,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_80",
-                        "type": "statement",
-                        "label": "''",
-                        "line": 20,
+                        "type": "assignment",
+                        "label": "io = fn.get('io', {})",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_81",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}))",
-                        "line": 21,
+                        "label": "io = fn.get('io', {})",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_82",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}))",
-                        "line": 21,
+                        "label": "io",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_83",
                         "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 21,
+                        "label": "fn.get('io', {})",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_84",
                         "type": "statement",
-                        "label": "plan.items",
-                        "line": 21,
+                        "label": "fn.get",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_85",
                         "type": "statement",
-                        "label": "plan",
-                        "line": 21,
+                        "label": "fn",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_86",
                         "type": "statement",
-                        "label": "PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})})",
-                        "line": 21,
+                        "label": "'io'",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_87",
                         "type": "statement",
-                        "label": "PlanItem",
-                        "line": 21,
+                        "label": "{}",
+                        "line": 18,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_88",
-                        "type": "statement",
-                        "label": "kind='code_stub'",
-                        "line": 21,
+                        "type": "assignment",
+                        "label": "inps = [i.get('name') for i in io.get('inputs', []) if isinstance(i, dict)]",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_89",
                         "type": "statement",
-                        "label": "'code_stub'",
-                        "line": 21,
+                        "label": "inps = [i.get('name') for i in io.get('inputs', []) if isinstance(i, dict)]",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_90",
                         "type": "statement",
-                        "label": "path=f'scaffolds/src/{pkg}/{f_name}.py'",
-                        "line": 22,
+                        "label": "inps",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_91",
                         "type": "statement",
-                        "label": "f'scaffolds/src/{pkg}/{f_name}.py'",
-                        "line": 22,
+                        "label": "[i.get('name') for i in io.get('inputs', []) if isinstance(i, dict)]",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_92",
                         "type": "statement",
-                        "label": "'scaffolds/src/'",
-                        "line": 22,
+                        "label": "i.get('name')",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_93",
                         "type": "statement",
-                        "label": "{pkg}",
-                        "line": 22,
+                        "label": "i.get",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_94",
                         "type": "statement",
-                        "label": "pkg",
-                        "line": 22,
+                        "label": "i",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_95",
                         "type": "statement",
-                        "label": "'/'",
-                        "line": 22,
+                        "label": "'name'",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_96",
                         "type": "statement",
-                        "label": "{f_name}",
-                        "line": 22,
+                        "label": "i",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_97",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 22,
+                        "label": "io.get('inputs', [])",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_98",
                         "type": "statement",
-                        "label": "'.py'",
-                        "line": 22,
+                        "label": "io.get",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_99",
                         "type": "statement",
-                        "label": "function_id=f_id",
-                        "line": 23,
+                        "label": "io",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_100",
                         "type": "statement",
-                        "label": "f_id",
-                        "line": 23,
+                        "label": "'inputs'",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_101",
                         "type": "statement",
-                        "label": "function_name=f_name",
-                        "line": 23,
+                        "label": "[]",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_102",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 23,
+                        "label": "isinstance(i, dict)",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_103",
                         "type": "statement",
-                        "label": "template_id='code_stub'",
-                        "line": 23,
+                        "label": "isinstance",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_104",
                         "type": "statement",
-                        "label": "'code_stub'",
-                        "line": 23,
+                        "label": "i",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_105",
                         "type": "statement",
-                        "label": "notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}",
-                        "line": 24,
+                        "label": "dict",
+                        "line": 19,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_106",
-                        "type": "statement",
-                        "label": "{'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}",
-                        "line": 24,
+                        "type": "loop",
+                        "label": "for p in inps",
+                        "line": 20,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_107",
-                        "type": "statement",
-                        "label": "'behavior'",
-                        "line": 24,
-                        "condition": null,
+                        "type": "conditional",
+                        "label": "if p and (not any((p.split(':')[0].strip() == q.split(':')[0].strip() for q in params)))",
+                        "line": 21,
+                        "condition": "p and (not any((p.split(':')[0].strip() == q.split(':')[0].strip() for q in params)))",
                         "targets": []
                 },
                 {
                         "id": "node_108",
                         "type": "statement",
-                        "label": "'io'",
-                        "line": 24,
+                        "label": "messages.append(f\"{path}.io.inputs contains '{p}' not present in signature params\")",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_109",
                         "type": "statement",
-                        "label": "fn.get('behavior', [])",
-                        "line": 24,
+                        "label": "messages.append(f\"{path}.io.inputs contains '{p}' not present in signature params\")",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_110",
                         "type": "statement",
-                        "label": "fn.get",
-                        "line": 24,
+                        "label": "messages.append",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_111",
                         "type": "statement",
-                        "label": "fn",
-                        "line": 24,
+                        "label": "messages",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_112",
                         "type": "statement",
-                        "label": "'behavior'",
-                        "line": 24,
+                        "label": "f\"{path}.io.inputs contains '{p}' not present in signature params\"",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_113",
                         "type": "statement",
-                        "label": "[]",
-                        "line": 24,
+                        "label": "{path}",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_114",
                         "type": "statement",
-                        "label": "fn.get('io', {})",
-                        "line": 24,
+                        "label": "path",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_115",
                         "type": "statement",
-                        "label": "fn.get",
-                        "line": 24,
+                        "label": "\".io.inputs contains '\"",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_116",
                         "type": "statement",
-                        "label": "fn",
-                        "line": 24,
+                        "label": "{p}",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_117",
                         "type": "statement",
-                        "label": "'io'",
-                        "line": 24,
+                        "label": "p",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_118",
                         "type": "statement",
-                        "label": "{}",
-                        "line": 24,
+                        "label": "\"' not present in signature params\"",
+                        "line": 22,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_119",
-                        "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name}))",
-                        "line": 25,
+                        "type": "loop_exit",
+                        "label": "exit for p",
+                        "line": 20,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_120",
-                        "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name}))",
-                        "line": 25,
+                        "type": "loop",
+                        "label": "for (j, step) in enumerate(fn.get('behavior', []) or [])",
+                        "line": 23,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_121",
-                        "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 25,
-                        "condition": null,
+                        "type": "conditional",
+                        "label": "if isinstance(step, dict)",
+                        "line": 24,
+                        "condition": "isinstance(step, dict)",
                         "targets": []
                 },
                 {
                         "id": "node_122",
-                        "type": "statement",
-                        "label": "plan.items",
+                        "type": "assignment",
+                        "label": "s = step.get('step', '').strip()",
                         "line": 25,
                         "condition": null,
                         "targets": []
@@ -1352,7 +1352,7 @@
                 {
                         "id": "node_123",
                         "type": "statement",
-                        "label": "plan",
+                        "label": "s = step.get('step', '').strip()",
                         "line": 25,
                         "condition": null,
                         "targets": []
@@ -1360,7 +1360,7 @@
                 {
                         "id": "node_124",
                         "type": "statement",
-                        "label": "PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name})",
+                        "label": "s",
                         "line": 25,
                         "condition": null,
                         "targets": []
@@ -1368,7 +1368,7 @@
                 {
                         "id": "node_125",
                         "type": "statement",
-                        "label": "PlanItem",
+                        "label": "step.get('step', '').strip()",
                         "line": 25,
                         "condition": null,
                         "targets": []
@@ -1376,7 +1376,7 @@
                 {
                         "id": "node_126",
                         "type": "statement",
-                        "label": "kind='test_stub'",
+                        "label": "step.get('step', '').strip",
                         "line": 25,
                         "condition": null,
                         "targets": []
@@ -1384,7 +1384,7 @@
                 {
                         "id": "node_127",
                         "type": "statement",
-                        "label": "'test_stub'",
+                        "label": "step.get('step', '')",
                         "line": 25,
                         "condition": null,
                         "targets": []
@@ -1392,55 +1392,55 @@
                 {
                         "id": "node_128",
                         "type": "statement",
-                        "label": "path=f'scaffolds/tests/test_{f_name}.py'",
-                        "line": 26,
+                        "label": "step.get",
+                        "line": 25,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_129",
                         "type": "statement",
-                        "label": "f'scaffolds/tests/test_{f_name}.py'",
-                        "line": 26,
+                        "label": "step",
+                        "line": 25,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_130",
                         "type": "statement",
-                        "label": "'scaffolds/tests/test_'",
-                        "line": 26,
+                        "label": "'step'",
+                        "line": 25,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_131",
                         "type": "statement",
-                        "label": "{f_name}",
-                        "line": 26,
+                        "label": "''",
+                        "line": 25,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_132",
-                        "type": "statement",
-                        "label": "f_name",
-                        "line": 26,
+                        "type": "assignment",
+                        "label": "s = str(step).strip()",
+                        "line": 27,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_133",
                         "type": "statement",
-                        "label": "'.py'",
-                        "line": 26,
+                        "label": "s = str(step).strip()",
+                        "line": 27,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_134",
                         "type": "statement",
-                        "label": "function_id=f_id",
+                        "label": "s",
                         "line": 27,
                         "condition": null,
                         "targets": []
@@ -1448,7 +1448,7 @@
                 {
                         "id": "node_135",
                         "type": "statement",
-                        "label": "f_id",
+                        "label": "str(step).strip()",
                         "line": 27,
                         "condition": null,
                         "targets": []
@@ -1456,7 +1456,7 @@
                 {
                         "id": "node_136",
                         "type": "statement",
-                        "label": "function_name=f_name",
+                        "label": "str(step).strip",
                         "line": 27,
                         "condition": null,
                         "targets": []
@@ -1464,7 +1464,7 @@
                 {
                         "id": "node_137",
                         "type": "statement",
-                        "label": "f_name",
+                        "label": "str(step)",
                         "line": 27,
                         "condition": null,
                         "targets": []
@@ -1472,7 +1472,7 @@
                 {
                         "id": "node_138",
                         "type": "statement",
-                        "label": "template_id='test_stub'",
+                        "label": "str",
                         "line": 27,
                         "condition": null,
                         "targets": []
@@ -1480,95 +1480,95 @@
                 {
                         "id": "node_139",
                         "type": "statement",
-                        "label": "'test_stub'",
+                        "label": "step",
                         "line": 27,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_140",
-                        "type": "statement",
-                        "label": "notes={'validation': fn.get('validation', []), 'function': f_name}",
-                        "line": 28,
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 24,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_141",
-                        "type": "statement",
-                        "label": "{'validation': fn.get('validation', []), 'function': f_name}",
+                        "type": "conditional",
+                        "label": "if not s",
                         "line": 28,
-                        "condition": null,
+                        "condition": "not s",
                         "targets": []
                 },
                 {
                         "id": "node_142",
                         "type": "statement",
-                        "label": "'validation'",
-                        "line": 28,
+                        "label": "messages.append(f'{path}.behavior[{j}] empty step')",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_143",
                         "type": "statement",
-                        "label": "'function'",
-                        "line": 28,
+                        "label": "messages.append(f'{path}.behavior[{j}] empty step')",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_144",
                         "type": "statement",
-                        "label": "fn.get('validation', [])",
-                        "line": 28,
+                        "label": "messages.append",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_145",
                         "type": "statement",
-                        "label": "fn.get",
-                        "line": 28,
+                        "label": "messages",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_146",
                         "type": "statement",
-                        "label": "fn",
-                        "line": 28,
+                        "label": "f'{path}.behavior[{j}] empty step'",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_147",
                         "type": "statement",
-                        "label": "'validation'",
-                        "line": 28,
+                        "label": "{path}",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_148",
                         "type": "statement",
-                        "label": "[]",
-                        "line": 28,
+                        "label": "path",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_149",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 28,
+                        "label": "'.behavior['",
+                        "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_150",
-                        "type": "assignment",
-                        "label": "lessons = ((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []",
+                        "type": "statement",
+                        "label": "{j}",
                         "line": 29,
                         "condition": null,
                         "targets": []
@@ -1576,7 +1576,7 @@
                 {
                         "id": "node_151",
                         "type": "statement",
-                        "label": "lessons = ((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []",
+                        "label": "j",
                         "line": 29,
                         "condition": null,
                         "targets": []
@@ -1584,159 +1584,159 @@
                 {
                         "id": "node_152",
                         "type": "statement",
-                        "label": "lessons",
+                        "label": "'] empty step'",
                         "line": 29,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_153",
-                        "type": "statement",
-                        "label": "((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []",
-                        "line": 29,
+                        "type": "loop_exit",
+                        "label": "exit for (j, step)",
+                        "line": 23,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_154",
-                        "type": "statement",
-                        "label": "((fn.get('dmt') or {}).get('teach') or {}).get('lessons', [])",
-                        "line": 29,
+                        "type": "assignment",
+                        "label": "teach = (fn.get('dmt') or {}).get('teach') or {}",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_155",
                         "type": "statement",
-                        "label": "((fn.get('dmt') or {}).get('teach') or {}).get",
-                        "line": 29,
+                        "label": "teach = (fn.get('dmt') or {}).get('teach') or {}",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_156",
                         "type": "statement",
-                        "label": "(fn.get('dmt') or {}).get('teach') or {}",
-                        "line": 29,
+                        "label": "teach",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_157",
                         "type": "statement",
-                        "label": "(fn.get('dmt') or {}).get('teach')",
-                        "line": 29,
+                        "label": "(fn.get('dmt') or {}).get('teach') or {}",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_158",
                         "type": "statement",
-                        "label": "(fn.get('dmt') or {}).get",
-                        "line": 29,
+                        "label": "(fn.get('dmt') or {}).get('teach')",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_159",
                         "type": "statement",
-                        "label": "fn.get('dmt') or {}",
-                        "line": 29,
+                        "label": "(fn.get('dmt') or {}).get",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_160",
                         "type": "statement",
-                        "label": "fn.get('dmt')",
-                        "line": 29,
+                        "label": "fn.get('dmt') or {}",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_161",
                         "type": "statement",
-                        "label": "fn.get",
-                        "line": 29,
+                        "label": "fn.get('dmt')",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_162",
                         "type": "statement",
-                        "label": "fn",
-                        "line": 29,
+                        "label": "fn.get",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_163",
                         "type": "statement",
-                        "label": "'dmt'",
-                        "line": 29,
+                        "label": "fn",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_164",
                         "type": "statement",
-                        "label": "{}",
-                        "line": 29,
+                        "label": "'dmt'",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_165",
                         "type": "statement",
-                        "label": "'teach'",
-                        "line": 29,
+                        "label": "{}",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_166",
                         "type": "statement",
-                        "label": "{}",
-                        "line": 29,
+                        "label": "'teach'",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_167",
                         "type": "statement",
-                        "label": "'lessons'",
-                        "line": 29,
+                        "label": "{}",
+                        "line": 30,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_168",
-                        "type": "statement",
-                        "label": "[]",
-                        "line": 29,
+                        "type": "assignment",
+                        "label": "seen_scripts = set()",
+                        "line": 31,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_169",
                         "type": "statement",
-                        "label": "[]",
-                        "line": 29,
+                        "label": "seen_scripts = set()",
+                        "line": 31,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_170",
-                        "type": "loop",
-                        "label": "for lesson in lessons",
-                        "line": 30,
+                        "type": "statement",
+                        "label": "seen_scripts",
+                        "line": 31,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_171",
-                        "type": "assignment",
-                        "label": "lesson_name = lesson.get('name', 'lesson')",
+                        "type": "statement",
+                        "label": "set()",
                         "line": 31,
                         "condition": null,
                         "targets": []
@@ -1744,152 +1744,152 @@
                 {
                         "id": "node_172",
                         "type": "statement",
-                        "label": "lesson_name = lesson.get('name', 'lesson')",
+                        "label": "set",
                         "line": 31,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_173",
-                        "type": "statement",
-                        "label": "lesson_name",
-                        "line": 31,
+                        "type": "loop",
+                        "label": "for (k, lesson) in enumerate(teach.get('lessons', []) or [])",
+                        "line": 32,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_174",
-                        "type": "statement",
-                        "label": "lesson.get('name', 'lesson')",
-                        "line": 31,
+                        "type": "assignment",
+                        "label": "demo = (lesson or {}).get('demo') or {}",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_175",
                         "type": "statement",
-                        "label": "lesson.get",
-                        "line": 31,
+                        "label": "demo = (lesson or {}).get('demo') or {}",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_176",
                         "type": "statement",
-                        "label": "lesson",
-                        "line": 31,
+                        "label": "demo",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_177",
                         "type": "statement",
-                        "label": "'name'",
-                        "line": 31,
+                        "label": "(lesson or {}).get('demo') or {}",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_178",
                         "type": "statement",
-                        "label": "'lesson'",
-                        "line": 31,
+                        "label": "(lesson or {}).get('demo')",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_179",
-                        "type": "assignment",
-                        "label": "script = (lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'",
-                        "line": 32,
+                        "type": "statement",
+                        "label": "(lesson or {}).get",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_180",
                         "type": "statement",
-                        "label": "script = (lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'",
-                        "line": 32,
+                        "label": "lesson or {}",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_181",
                         "type": "statement",
-                        "label": "script",
-                        "line": 32,
+                        "label": "lesson",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_182",
                         "type": "statement",
-                        "label": "(lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'",
-                        "line": 32,
+                        "label": "{}",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_183",
                         "type": "statement",
-                        "label": "(lesson.get('demo') or {}).get('script')",
-                        "line": 32,
+                        "label": "'demo'",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_184",
                         "type": "statement",
-                        "label": "(lesson.get('demo') or {}).get",
-                        "line": 32,
+                        "label": "{}",
+                        "line": 33,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_185",
-                        "type": "statement",
-                        "label": "lesson.get('demo') or {}",
-                        "line": 32,
+                        "type": "assignment",
+                        "label": "script = demo.get('script')",
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_186",
                         "type": "statement",
-                        "label": "lesson.get('demo')",
-                        "line": 32,
+                        "label": "script = demo.get('script')",
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_187",
                         "type": "statement",
-                        "label": "lesson.get",
-                        "line": 32,
+                        "label": "script",
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_188",
                         "type": "statement",
-                        "label": "lesson",
-                        "line": 32,
+                        "label": "demo.get('script')",
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_189",
                         "type": "statement",
-                        "label": "'demo'",
-                        "line": 32,
+                        "label": "demo.get",
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_190",
                         "type": "statement",
-                        "label": "{}",
-                        "line": 32,
+                        "label": "demo",
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
@@ -1897,1111 +1897,583 @@
                         "id": "node_191",
                         "type": "statement",
                         "label": "'script'",
-                        "line": 32,
+                        "line": 34,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_192",
-                        "type": "statement",
-                        "label": "f'notebooks/{f_name}_taught.py'",
-                        "line": 32,
-                        "condition": null,
+                        "type": "conditional",
+                        "label": "if script in seen_scripts",
+                        "line": 35,
+                        "condition": "script in seen_scripts",
                         "targets": []
                 },
                 {
                         "id": "node_193",
                         "type": "statement",
-                        "label": "'notebooks/'",
-                        "line": 32,
+                        "label": "messages.append(f'{path}.dmt.teach.lessons[{k}].demo.script duplicate: {script}')",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_194",
                         "type": "statement",
-                        "label": "{f_name}",
-                        "line": 32,
+                        "label": "messages.append(f'{path}.dmt.teach.lessons[{k}].demo.script duplicate: {script}')",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_195",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 32,
+                        "label": "messages.append",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_196",
                         "type": "statement",
-                        "label": "'_taught.py'",
-                        "line": 32,
+                        "label": "messages",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_197",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}))",
-                        "line": 33,
+                        "label": "f'{path}.dmt.teach.lessons[{k}].demo.script duplicate: {script}'",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_198",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}))",
-                        "line": 33,
+                        "label": "{path}",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_199",
                         "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 33,
+                        "label": "path",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_200",
                         "type": "statement",
-                        "label": "plan.items",
-                        "line": 33,
+                        "label": "'.dmt.teach.lessons['",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_201",
                         "type": "statement",
-                        "label": "plan",
-                        "line": 33,
+                        "label": "{k}",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_202",
                         "type": "statement",
-                        "label": "PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])})",
-                        "line": 33,
+                        "label": "k",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_203",
                         "type": "statement",
-                        "label": "PlanItem",
-                        "line": 33,
+                        "label": "'].demo.script duplicate: '",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_204",
                         "type": "statement",
-                        "label": "kind='teach_stub'",
-                        "line": 33,
+                        "label": "{script}",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_205",
                         "type": "statement",
-                        "label": "'teach_stub'",
-                        "line": 33,
+                        "label": "script",
+                        "line": 36,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_206",
-                        "type": "statement",
-                        "label": "path=f'scaffolds/{script}'",
-                        "line": 34,
-                        "condition": null,
+                        "type": "conditional",
+                        "label": "if script",
+                        "line": 37,
+                        "condition": "script",
                         "targets": []
                 },
                 {
                         "id": "node_207",
                         "type": "statement",
-                        "label": "f'scaffolds/{script}'",
-                        "line": 34,
+                        "label": "seen_scripts.add(script)",
+                        "line": 37,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_208",
                         "type": "statement",
-                        "label": "'scaffolds/'",
-                        "line": 34,
+                        "label": "seen_scripts.add(script)",
+                        "line": 37,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_209",
                         "type": "statement",
-                        "label": "{script}",
-                        "line": 34,
+                        "label": "seen_scripts.add",
+                        "line": 37,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_210",
                         "type": "statement",
-                        "label": "script",
-                        "line": 34,
+                        "label": "seen_scripts",
+                        "line": 37,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_211",
                         "type": "statement",
-                        "label": "function_id=f_id",
-                        "line": 35,
+                        "label": "script",
+                        "line": 37,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_212",
-                        "type": "statement",
-                        "label": "f_id",
-                        "line": 35,
+                        "type": "assignment",
+                        "label": "expects = demo.get('expects') or []",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_213",
                         "type": "statement",
-                        "label": "function_name=f_name",
-                        "line": 35,
+                        "label": "expects = demo.get('expects') or []",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_214",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 35,
+                        "label": "expects",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_215",
                         "type": "statement",
-                        "label": "template_id='teach_stub'",
-                        "line": 35,
+                        "label": "demo.get('expects') or []",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_216",
                         "type": "statement",
-                        "label": "'teach_stub'",
-                        "line": 35,
+                        "label": "demo.get('expects')",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_217",
                         "type": "statement",
-                        "label": "notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}",
-                        "line": 36,
+                        "label": "demo.get",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_218",
                         "type": "statement",
-                        "label": "{'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}",
-                        "line": 36,
+                        "label": "demo",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_219",
                         "type": "statement",
-                        "label": "'lesson_name'",
-                        "line": 36,
+                        "label": "'expects'",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_220",
                         "type": "statement",
-                        "label": "'expects'",
-                        "line": 36,
+                        "label": "[]",
+                        "line": 38,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_221",
-                        "type": "statement",
-                        "label": "lesson_name",
-                        "line": 36,
+                        "type": "assignment",
+                        "label": "exp_paths = []",
+                        "line": 39,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_222",
                         "type": "statement",
-                        "label": "(lesson.get('demo') or {}).get('expects', [])",
-                        "line": 36,
+                        "label": "exp_paths = []",
+                        "line": 39,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_223",
                         "type": "statement",
-                        "label": "(lesson.get('demo') or {}).get",
-                        "line": 36,
+                        "label": "exp_paths",
+                        "line": 39,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_224",
                         "type": "statement",
-                        "label": "lesson.get('demo') or {}",
-                        "line": 36,
+                        "label": "[]",
+                        "line": 39,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_225",
-                        "type": "statement",
-                        "label": "lesson.get('demo')",
-                        "line": 36,
+                        "type": "loop",
+                        "label": "for (m, exp) in enumerate(expects)",
+                        "line": 40,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_226",
-                        "type": "statement",
-                        "label": "lesson.get",
-                        "line": 36,
-                        "condition": null,
+                        "type": "conditional",
+                        "label": "if isinstance(exp, dict) and exp",
+                        "line": 41,
+                        "condition": "isinstance(exp, dict) and exp",
                         "targets": []
                 },
                 {
                         "id": "node_227",
-                        "type": "statement",
-                        "label": "lesson",
-                        "line": 36,
+                        "type": "assignment",
+                        "label": "v = list(exp.values())[0]",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_228",
                         "type": "statement",
-                        "label": "'demo'",
-                        "line": 36,
+                        "label": "v = list(exp.values())[0]",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_229",
                         "type": "statement",
-                        "label": "{}",
-                        "line": 36,
+                        "label": "v",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_230",
                         "type": "statement",
-                        "label": "'expects'",
-                        "line": 36,
+                        "label": "list(exp.values())[0]",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_231",
                         "type": "statement",
-                        "label": "[]",
-                        "line": 36,
+                        "label": "list(exp.values())",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_232",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script}))",
-                        "line": 37,
+                        "label": "list",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_233",
                         "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script}))",
-                        "line": 37,
+                        "label": "exp.values()",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_234",
                         "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 37,
+                        "label": "exp.values",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_235",
                         "type": "statement",
-                        "label": "plan.items",
-                        "line": 37,
+                        "label": "exp",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_236",
                         "type": "statement",
-                        "label": "plan",
-                        "line": 37,
+                        "label": "0",
+                        "line": 42,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_237",
-                        "type": "statement",
-                        "label": "PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script})",
-                        "line": 37,
-                        "condition": null,
+                        "type": "conditional",
+                        "label": "if v in exp_paths",
+                        "line": 43,
+                        "condition": "v in exp_paths",
                         "targets": []
                 },
                 {
                         "id": "node_238",
                         "type": "statement",
-                        "label": "PlanItem",
-                        "line": 37,
+                        "label": "messages.append(f'{path}.dmt.teach.lessons[{k}].demo.expects[{m}] duplicate path: {v}')",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_239",
                         "type": "statement",
-                        "label": "kind='validate_step'",
-                        "line": 37,
+                        "label": "messages.append(f'{path}.dmt.teach.lessons[{k}].demo.expects[{m}] duplicate path: {v}')",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_240",
                         "type": "statement",
-                        "label": "'validate_step'",
-                        "line": 37,
+                        "label": "messages.append",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_241",
                         "type": "statement",
-                        "label": "path=f'validate:teach:{f_name}:{lesson_name}'",
-                        "line": 38,
+                        "label": "messages",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_242",
                         "type": "statement",
-                        "label": "f'validate:teach:{f_name}:{lesson_name}'",
-                        "line": 38,
+                        "label": "f'{path}.dmt.teach.lessons[{k}].demo.expects[{m}] duplicate path: {v}'",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_243",
                         "type": "statement",
-                        "label": "'validate:teach:'",
-                        "line": 38,
+                        "label": "{path}",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_244",
                         "type": "statement",
-                        "label": "{f_name}",
-                        "line": 38,
+                        "label": "path",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_245",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 38,
+                        "label": "'.dmt.teach.lessons['",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_246",
                         "type": "statement",
-                        "label": "':'",
-                        "line": 38,
+                        "label": "{k}",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_247",
                         "type": "statement",
-                        "label": "{lesson_name}",
-                        "line": 38,
+                        "label": "k",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_248",
                         "type": "statement",
-                        "label": "lesson_name",
-                        "line": 38,
+                        "label": "'].demo.expects['",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_249",
                         "type": "statement",
-                        "label": "function_id=f_id",
-                        "line": 39,
+                        "label": "{m}",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_250",
                         "type": "statement",
-                        "label": "f_id",
-                        "line": 39,
+                        "label": "m",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_251",
                         "type": "statement",
-                        "label": "function_name=f_name",
-                        "line": 39,
+                        "label": "'] duplicate path: '",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_252",
                         "type": "statement",
-                        "label": "f_name",
-                        "line": 39,
+                        "label": "{v}",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_253",
                         "type": "statement",
-                        "label": "template_id=None",
-                        "line": 39,
+                        "label": "v",
+                        "line": 44,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_254",
                         "type": "statement",
-                        "label": "None",
-                        "line": 39,
+                        "label": "exp_paths.append(v)",
+                        "line": 45,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_255",
                         "type": "statement",
-                        "label": "notes={'script': script}",
-                        "line": 40,
+                        "label": "exp_paths.append(v)",
+                        "line": 45,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_256",
                         "type": "statement",
-                        "label": "{'script': script}",
-                        "line": 40,
+                        "label": "exp_paths.append",
+                        "line": 45,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_257",
                         "type": "statement",
-                        "label": "'script'",
-                        "line": 40,
+                        "label": "exp_paths",
+                        "line": 45,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_258",
                         "type": "statement",
-                        "label": "script",
-                        "line": 40,
+                        "label": "v",
+                        "line": 45,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_259",
-                        "type": "loop",
-                        "label": "for exp in (lesson.get('demo') or {}).get('expects', []) or []",
-                        "line": 41,
+                        "type": "loop_exit",
+                        "label": "exit for (m, exp)",
+                        "line": 40,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_260",
-                        "type": "conditional",
-                        "label": "if isinstance(exp, dict) and exp",
-                        "line": 42,
-                        "condition": "isinstance(exp, dict) and exp",
+                        "type": "loop_exit",
+                        "label": "exit for (k, lesson)",
+                        "line": 32,
+                        "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_261",
-                        "type": "assignment",
-                        "label": "out_path = list(exp.values())[0]",
-                        "line": 43,
+                        "type": "loop_exit",
+                        "label": "exit for (i, fn)",
+                        "line": 11,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_262",
-                        "type": "statement",
-                        "label": "out_path = list(exp.values())[0]",
-                        "line": 43,
+                        "type": "return",
+                        "label": "return ValidationReport(passed=len(messages) == 0, messages=messages)",
+                        "line": 46,
                         "condition": null,
                         "targets": []
                 },
                 {
                         "id": "node_263",
                         "type": "statement",
-                        "label": "out_path",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_264",
-                        "type": "statement",
-                        "label": "list(exp.values())[0]",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_265",
-                        "type": "statement",
-                        "label": "list(exp.values())",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_266",
-                        "type": "statement",
-                        "label": "list",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_267",
-                        "type": "statement",
-                        "label": "exp.values()",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_268",
-                        "type": "statement",
-                        "label": "exp.values",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_269",
-                        "type": "statement",
-                        "label": "exp",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_270",
-                        "type": "statement",
-                        "label": "0",
-                        "line": 43,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_271",
-                        "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]}))",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_272",
-                        "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]}))",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_273",
-                        "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_274",
-                        "type": "statement",
-                        "label": "plan.items",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_275",
-                        "type": "statement",
-                        "label": "plan",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_276",
-                        "type": "statement",
-                        "label": "PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]})",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_277",
-                        "type": "statement",
-                        "label": "PlanItem",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_278",
-                        "type": "statement",
-                        "label": "kind='manifest_entry'",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_279",
-                        "type": "statement",
-                        "label": "'manifest_entry'",
-                        "line": 44,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_280",
-                        "type": "statement",
-                        "label": "path='artifacts/manifest.json'",
-                        "line": 45,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_281",
-                        "type": "statement",
-                        "label": "'artifacts/manifest.json'",
-                        "line": 45,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_282",
-                        "type": "statement",
-                        "label": "function_id=f_id",
-                        "line": 46,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_283",
-                        "type": "statement",
-                        "label": "f_id",
-                        "line": 46,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_284",
-                        "type": "statement",
-                        "label": "function_name=f_name",
-                        "line": 46,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_285",
-                        "type": "statement",
-                        "label": "f_name",
-                        "line": 46,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_286",
-                        "type": "statement",
-                        "label": "template_id=None",
-                        "line": 46,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_287",
-                        "type": "statement",
-                        "label": "None",
-                        "line": 46,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_288",
-                        "type": "statement",
-                        "label": "notes={'artifact': out_path, 'type': list(exp.keys())[0]}",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_289",
-                        "type": "statement",
-                        "label": "{'artifact': out_path, 'type': list(exp.keys())[0]}",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_290",
-                        "type": "statement",
-                        "label": "'artifact'",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_291",
-                        "type": "statement",
-                        "label": "'type'",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_292",
-                        "type": "statement",
-                        "label": "out_path",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_293",
-                        "type": "statement",
-                        "label": "list(exp.keys())[0]",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_294",
-                        "type": "statement",
-                        "label": "list(exp.keys())",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_295",
-                        "type": "statement",
-                        "label": "list",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_296",
-                        "type": "statement",
-                        "label": "exp.keys()",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_297",
-                        "type": "statement",
-                        "label": "exp.keys",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_298",
-                        "type": "statement",
-                        "label": "exp",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_299",
-                        "type": "statement",
-                        "label": "0",
-                        "line": 47,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_300",
-                        "type": "loop_exit",
-                        "label": "exit for exp",
-                        "line": 41,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_301",
-                        "type": "loop_exit",
-                        "label": "exit for lesson",
-                        "line": 30,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_302",
-                        "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name}))",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_303",
-                        "type": "statement",
-                        "label": "plan.items.append(PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name}))",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_304",
-                        "type": "statement",
-                        "label": "plan.items.append",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_305",
-                        "type": "statement",
-                        "label": "plan.items",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_306",
-                        "type": "statement",
-                        "label": "plan",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_307",
-                        "type": "statement",
-                        "label": "PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name})",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_308",
-                        "type": "statement",
-                        "label": "PlanItem",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_309",
-                        "type": "statement",
-                        "label": "kind='doc_stub'",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_310",
-                        "type": "statement",
-                        "label": "'doc_stub'",
-                        "line": 48,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_311",
-                        "type": "statement",
-                        "label": "path=f'scaffolds/docs/{f_name}.md'",
-                        "line": 49,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_312",
-                        "type": "statement",
-                        "label": "f'scaffolds/docs/{f_name}.md'",
-                        "line": 49,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_313",
-                        "type": "statement",
-                        "label": "'scaffolds/docs/'",
-                        "line": 49,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_314",
-                        "type": "statement",
-                        "label": "{f_name}",
-                        "line": 49,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_315",
-                        "type": "statement",
-                        "label": "f_name",
-                        "line": 49,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_316",
-                        "type": "statement",
-                        "label": "'.md'",
-                        "line": 49,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_317",
-                        "type": "statement",
-                        "label": "function_id=f_id",
-                        "line": 50,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_318",
-                        "type": "statement",
-                        "label": "f_id",
-                        "line": 50,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_319",
-                        "type": "statement",
-                        "label": "function_name=f_name",
-                        "line": 50,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_320",
-                        "type": "statement",
-                        "label": "f_name",
-                        "line": 50,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_321",
-                        "type": "statement",
-                        "label": "template_id='doc_stub'",
-                        "line": 50,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_322",
-                        "type": "statement",
-                        "label": "'doc_stub'",
-                        "line": 50,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_323",
-                        "type": "statement",
-                        "label": "notes={'function': f_name}",
-                        "line": 51,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_324",
-                        "type": "statement",
-                        "label": "{'function': f_name}",
-                        "line": 51,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_325",
-                        "type": "statement",
-                        "label": "'function'",
-                        "line": 51,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_326",
-                        "type": "statement",
-                        "label": "f_name",
-                        "line": 51,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_327",
-                        "type": "loop_exit",
-                        "label": "exit for fn",
-                        "line": 18,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_328",
-                        "type": "return",
-                        "label": "return plan",
-                        "line": 52,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_329",
-                        "type": "statement",
-                        "label": "Plan",
-                        "line": 9,
+                        "label": "ValidationReport",
+                        "line": 7,
                         "condition": null,
                         "targets": []
                 }
@@ -3594,8 +3066,13 @@
                 },
                 {
                         "from": "node_118",
+                        "to": "node_106",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_106",
                         "to": "node_119",
-                        "label": null
+                        "label": "break/complete"
                 },
                 {
                         "from": "node_119",
@@ -3658,7 +3135,7 @@
                         "label": null
                 },
                 {
-                        "from": "node_131",
+                        "from": "node_121",
                         "to": "node_132",
                         "label": null
                 },
@@ -3698,9 +3175,14 @@
                         "label": null
                 },
                 {
+                        "from": "node_131",
+                        "to": "node_140",
+                        "label": "end if"
+                },
+                {
                         "from": "node_139",
                         "to": "node_140",
-                        "label": null
+                        "label": "end else"
                 },
                 {
                         "from": "node_140",
@@ -3764,8 +3246,13 @@
                 },
                 {
                         "from": "node_152",
+                        "to": "node_120",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_120",
                         "to": "node_153",
-                        "label": null
+                        "label": "break/complete"
                 },
                 {
                         "from": "node_153",
@@ -4294,18 +3781,33 @@
                 },
                 {
                         "from": "node_258",
+                        "to": "node_225",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_225",
                         "to": "node_259",
-                        "label": null
+                        "label": "break/complete"
                 },
                 {
                         "from": "node_259",
+                        "to": "node_173",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_173",
                         "to": "node_260",
-                        "label": null
+                        "label": "break/complete"
                 },
                 {
                         "from": "node_260",
+                        "to": "node_22",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_22",
                         "to": "node_261",
-                        "label": null
+                        "label": "break/complete"
                 },
                 {
                         "from": "node_261",
@@ -4314,356 +3816,11 @@
                 },
                 {
                         "from": "node_262",
-                        "to": "node_263",
-                        "label": null
-                },
-                {
-                        "from": "node_263",
-                        "to": "node_264",
-                        "label": null
-                },
-                {
-                        "from": "node_264",
-                        "to": "node_265",
-                        "label": null
-                },
-                {
-                        "from": "node_265",
-                        "to": "node_266",
-                        "label": null
-                },
-                {
-                        "from": "node_266",
-                        "to": "node_267",
-                        "label": null
-                },
-                {
-                        "from": "node_267",
-                        "to": "node_268",
-                        "label": null
-                },
-                {
-                        "from": "node_268",
-                        "to": "node_269",
-                        "label": null
-                },
-                {
-                        "from": "node_269",
-                        "to": "node_270",
-                        "label": null
-                },
-                {
-                        "from": "node_270",
-                        "to": "node_271",
-                        "label": null
-                },
-                {
-                        "from": "node_271",
-                        "to": "node_272",
-                        "label": null
-                },
-                {
-                        "from": "node_272",
-                        "to": "node_273",
-                        "label": null
-                },
-                {
-                        "from": "node_273",
-                        "to": "node_274",
-                        "label": null
-                },
-                {
-                        "from": "node_274",
-                        "to": "node_275",
-                        "label": null
-                },
-                {
-                        "from": "node_275",
-                        "to": "node_276",
-                        "label": null
-                },
-                {
-                        "from": "node_276",
-                        "to": "node_277",
-                        "label": null
-                },
-                {
-                        "from": "node_277",
-                        "to": "node_278",
-                        "label": null
-                },
-                {
-                        "from": "node_278",
-                        "to": "node_279",
-                        "label": null
-                },
-                {
-                        "from": "node_279",
-                        "to": "node_280",
-                        "label": null
-                },
-                {
-                        "from": "node_280",
-                        "to": "node_281",
-                        "label": null
-                },
-                {
-                        "from": "node_281",
-                        "to": "node_282",
-                        "label": null
-                },
-                {
-                        "from": "node_282",
-                        "to": "node_283",
-                        "label": null
-                },
-                {
-                        "from": "node_283",
-                        "to": "node_284",
-                        "label": null
-                },
-                {
-                        "from": "node_284",
-                        "to": "node_285",
-                        "label": null
-                },
-                {
-                        "from": "node_285",
-                        "to": "node_286",
-                        "label": null
-                },
-                {
-                        "from": "node_286",
-                        "to": "node_287",
-                        "label": null
-                },
-                {
-                        "from": "node_287",
-                        "to": "node_288",
-                        "label": null
-                },
-                {
-                        "from": "node_288",
-                        "to": "node_289",
-                        "label": null
-                },
-                {
-                        "from": "node_289",
-                        "to": "node_290",
-                        "label": null
-                },
-                {
-                        "from": "node_290",
-                        "to": "node_291",
-                        "label": null
-                },
-                {
-                        "from": "node_291",
-                        "to": "node_292",
-                        "label": null
-                },
-                {
-                        "from": "node_292",
-                        "to": "node_293",
-                        "label": null
-                },
-                {
-                        "from": "node_293",
-                        "to": "node_294",
-                        "label": null
-                },
-                {
-                        "from": "node_294",
-                        "to": "node_295",
-                        "label": null
-                },
-                {
-                        "from": "node_295",
-                        "to": "node_296",
-                        "label": null
-                },
-                {
-                        "from": "node_296",
-                        "to": "node_297",
-                        "label": null
-                },
-                {
-                        "from": "node_297",
-                        "to": "node_298",
-                        "label": null
-                },
-                {
-                        "from": "node_298",
-                        "to": "node_299",
-                        "label": null
-                },
-                {
-                        "from": "node_299",
-                        "to": "node_259",
-                        "label": "continue"
-                },
-                {
-                        "from": "node_259",
-                        "to": "node_300",
-                        "label": "break/complete"
-                },
-                {
-                        "from": "node_300",
-                        "to": "node_170",
-                        "label": "continue"
-                },
-                {
-                        "from": "node_170",
-                        "to": "node_301",
-                        "label": "break/complete"
-                },
-                {
-                        "from": "node_301",
-                        "to": "node_302",
-                        "label": null
-                },
-                {
-                        "from": "node_302",
-                        "to": "node_303",
-                        "label": null
-                },
-                {
-                        "from": "node_303",
-                        "to": "node_304",
-                        "label": null
-                },
-                {
-                        "from": "node_304",
-                        "to": "node_305",
-                        "label": null
-                },
-                {
-                        "from": "node_305",
-                        "to": "node_306",
-                        "label": null
-                },
-                {
-                        "from": "node_306",
-                        "to": "node_307",
-                        "label": null
-                },
-                {
-                        "from": "node_307",
-                        "to": "node_308",
-                        "label": null
-                },
-                {
-                        "from": "node_308",
-                        "to": "node_309",
-                        "label": null
-                },
-                {
-                        "from": "node_309",
-                        "to": "node_310",
-                        "label": null
-                },
-                {
-                        "from": "node_310",
-                        "to": "node_311",
-                        "label": null
-                },
-                {
-                        "from": "node_311",
-                        "to": "node_312",
-                        "label": null
-                },
-                {
-                        "from": "node_312",
-                        "to": "node_313",
-                        "label": null
-                },
-                {
-                        "from": "node_313",
-                        "to": "node_314",
-                        "label": null
-                },
-                {
-                        "from": "node_314",
-                        "to": "node_315",
-                        "label": null
-                },
-                {
-                        "from": "node_315",
-                        "to": "node_316",
-                        "label": null
-                },
-                {
-                        "from": "node_316",
-                        "to": "node_317",
-                        "label": null
-                },
-                {
-                        "from": "node_317",
-                        "to": "node_318",
-                        "label": null
-                },
-                {
-                        "from": "node_318",
-                        "to": "node_319",
-                        "label": null
-                },
-                {
-                        "from": "node_319",
-                        "to": "node_320",
-                        "label": null
-                },
-                {
-                        "from": "node_320",
-                        "to": "node_321",
-                        "label": null
-                },
-                {
-                        "from": "node_321",
-                        "to": "node_322",
-                        "label": null
-                },
-                {
-                        "from": "node_322",
-                        "to": "node_323",
-                        "label": null
-                },
-                {
-                        "from": "node_323",
-                        "to": "node_324",
-                        "label": null
-                },
-                {
-                        "from": "node_324",
-                        "to": "node_325",
-                        "label": null
-                },
-                {
-                        "from": "node_325",
-                        "to": "node_326",
-                        "label": null
-                },
-                {
-                        "from": "node_326",
-                        "to": "node_64",
-                        "label": "continue"
-                },
-                {
-                        "from": "node_64",
-                        "to": "node_327",
-                        "label": "break/complete"
-                },
-                {
-                        "from": "node_327",
-                        "to": "node_328",
-                        "label": null
-                },
-                {
-                        "from": "node_328",
                         "to": "node_1",
                         "label": null
                 },
                 {
-                        "from": "node_329",
+                        "from": "node_263",
                         "to": "node_1",
                         "label": null
                 }
@@ -4886,7 +4043,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'build_plan_function_flow.png';
+                a.download = 'validate_spec_function_flow.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
