@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Function Flow: test_sig_parts</title>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .flow-image {
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .flow-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .metadata {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .metadata h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .node-list {
+            list-style: none;
+            padding: 0;
+        }
+        .node-item {
+            background: white;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 3px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Function Flow Analysis</h1>
+            <h2>test_sig_parts</h2>
+        </div>
+        
+        <div class="info">
+            <strong>Module:</strong> test_stage1_parser<br>
+            <strong>File:</strong> agents/dmt_coder/tests/test_stage1_parser.py<br>
+            <strong>Control Flow Nodes:</strong> 21<br>
+            <strong>Edges:</strong> 22
+        </div>
+        
+        <div class="flow-image">
+            <h3>Control Flow Visualization</h3>
+            <img src="test_sig_parts_flow.png" alt="Function Flow Diagram" />
+        </div>
+        
+        <div class="legend">
+            <strong>Node Types:</strong><br>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90ee90;"></span>
+                Entry/Exit Points
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffd700;"></span>
+                Assignment
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffa500;"></span>
+                Conditional
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ff9999;"></span>
+                Loop
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90ee90;"></span>
+                Return
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #dda0dd;"></span>
+                Try/Except
+            </div>
+        </div>
+        
+        <div class="metadata">
+            <h3>Flow Sequence</h3>
+            <ol class="node-list">
+                <li>node_0 → node_2</li>
+<li>node_2 → node_3</li>
+<li>node_3 → node_4</li>
+<li>node_4 → node_5</li>
+<li>node_5 → node_6</li>
+<li>node_6 → node_7</li>
+<li>node_7 → node_8</li>
+<li>node_8 → node_9</li>
+<li>node_9 → node_10</li>
+<li>node_10 → node_11</li>
+<li>node_11 → node_12</li>
+<li>node_12 → node_13</li>
+<li>node_13 → node_14</li>
+<li>node_14 → node_15</li>
+<li>node_15 → node_16</li>
+<li>node_16 → node_17</li>
+<li>node_17 → node_18</li>
+<li>node_18 → node_19</li>
+<li>node_19 → node_20</li>
+<li>node_20 → node_21</li>
+<li>node_21 → node_22</li>
+<li>node_22 → node_1</li>
+            </ol>
+        </div>
+        
+        <div class="metadata">
+            <h3>Node Details</h3>
+            <div class="node-list">
+                
+                <div class="node-item">
+                    <strong>node_2:</strong> statement<br>
+                    <small>def test_sig_parts():
+    n, p, r = _sig_parts("f(a: int, b: str='x') -> float")
+    assert n == 'f' and 'a:' in p and (r == 'float')</small><br>
+                    <small>Line 2</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_3:</strong> assignment<br>
+                    <small>(n, p, r) = _sig_parts("f(a: int, b: str='x') -> float")</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_4:</strong> statement<br>
+                    <small>n, p, r = _sig_parts("f(a: int, b: str='x') -> float")</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_5:</strong> statement<br>
+                    <small>(n, p, r)</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_6:</strong> statement<br>
+                    <small>n</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_7:</strong> statement<br>
+                    <small>p</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_8:</strong> statement<br>
+                    <small>r</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_9:</strong> statement<br>
+                    <small>_sig_parts("f(a: int, b: str='x') -> float")</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_10:</strong> statement<br>
+                    <small>_sig_parts</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_11:</strong> statement<br>
+                    <small>"f(a: int, b: str='x') -> float"</small><br>
+                    <small>Line 3</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_12:</strong> statement<br>
+                    <small>assert n == 'f' and 'a:' in p and (r == 'float')</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_13:</strong> statement<br>
+                    <small>n == 'f' and 'a:' in p and (r == 'float')</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_14:</strong> statement<br>
+                    <small>n == 'f'</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_15:</strong> statement<br>
+                    <small>n</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_16:</strong> statement<br>
+                    <small>'f'</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_17:</strong> statement<br>
+                    <small>'a:' in p</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_18:</strong> statement<br>
+                    <small>'a:'</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_19:</strong> statement<br>
+                    <small>p</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_20:</strong> statement<br>
+                    <small>r == 'float'</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_21:</strong> statement<br>
+                    <small>r</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_22:</strong> statement<br>
+                    <small>'float'</small><br>
+                    <small>Line 4</small>
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+        

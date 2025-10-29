@@ -62,6 +62,10 @@
             <option value="renderer">renderer (6 functions)</option>
             <option value="runner">runner (3 functions)</option>
             <option value="schema">schema (6 functions)</option>
+            <option value="test_stage1_integration">test_stage1_integration (1 functions)</option>
+            <option value="test_stage1_parser">test_stage1_parser (1 functions)</option>
+            <option value="test_stage1_planner">test_stage1_planner (1 functions)</option>
+            <option value="test_stage1_validator">test_stage1_validator (1 functions)</option>
             <option value="validator">validator (1 functions)</option>
 
         </select>
@@ -212,6 +216,26 @@ moduleGraphs['runner'] = {
 moduleGraphs['schema'] = {
     nodes: [{"id": "schema._is_list", "label": "_is_list", "title": "schema._is_list\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 7\\nModule: schema", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema._is_dict", "label": "_is_dict", "title": "schema._is_dict\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 8\\nModule: schema", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema._is_str", "label": "_is_str", "title": "schema._is_str\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 9\\nModule: schema", "color": "#ffd700", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema.validate_top", "label": "validate_top", "title": "schema.validate_top\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 11\\nModule: schema", "color": "#97c2fc", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema.validate_function", "label": "validate_function", "title": "schema.validate_function\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 20\\nModule: schema", "color": "#97c2fc", "shape": "box", "font": {"size": 12, "color": "#333333"}}, {"id": "schema.validate_doc", "label": "validate_doc", "title": "schema.validate_doc\\nFile: agents/dmt_coder/src/dmtcoder/stage1/schema.py\\nLine: 79\\nModule: schema", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
     edges: [{"from": "schema.validate_top", "to": "schema._is_list", "title": "schema.validate_top \u2192 schema._is_list", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_function", "to": "schema._is_dict", "title": "schema.validate_function \u2192 schema._is_dict", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_function", "to": "schema._is_list", "title": "schema.validate_function \u2192 schema._is_list", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_function", "to": "schema._is_str", "title": "schema.validate_function \u2192 schema._is_str", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_doc", "to": "schema.validate_top", "title": "schema.validate_doc \u2192 schema.validate_top", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}, {"from": "schema.validate_doc", "to": "schema.validate_function", "title": "schema.validate_doc \u2192 schema.validate_function", "arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}}]
+};
+
+moduleGraphs['test_stage1_integration'] = {
+    nodes: [{"id": "test_stage1_integration.test_integration_minimal", "label": "test_integration_minimal", "title": "test_stage1_integration.test_integration_minimal\\nFile: agents/dmt_coder/tests/test_stage1_integration.py\\nLine: 2\\nModule: test_stage1_integration", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
+};
+
+moduleGraphs['test_stage1_parser'] = {
+    nodes: [{"id": "test_stage1_parser.test_sig_parts", "label": "test_sig_parts", "title": "test_stage1_parser.test_sig_parts\\nFile: agents/dmt_coder/tests/test_stage1_parser.py\\nLine: 2\\nModule: test_stage1_parser", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
+};
+
+moduleGraphs['test_stage1_planner'] = {
+    nodes: [{"id": "test_stage1_planner.test_plan_shapes", "label": "test_plan_shapes", "title": "test_stage1_planner.test_plan_shapes\\nFile: agents/dmt_coder/tests/test_stage1_planner.py\\nLine: 2\\nModule: test_stage1_planner", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
+};
+
+moduleGraphs['test_stage1_validator'] = {
+    nodes: [{"id": "test_stage1_validator.test_validator_catches_missing", "label": "test_validator_catches_missing", "title": "test_stage1_validator.test_validator_catches_missing\\nFile: agents/dmt_coder/tests/test_stage1_validator.py\\nLine: 2\\nModule: test_stage1_validator", "color": "#90ee90", "shape": "box", "font": {"size": 12, "color": "#333333"}}],
+    edges: []
 };
 
 moduleGraphs['validator'] = {

@@ -1,0 +1,3132 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Function Flow: render_plan_to_disk</title>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .flow-image {
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .flow-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .metadata {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .metadata h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .node-list {
+            list-style: none;
+            padding: 0;
+        }
+        .node-item {
+            background: white;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 3px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Function Flow Analysis</h1>
+            <h2>render_plan_to_disk</h2>
+        </div>
+        
+        <div class="info">
+            <strong>Module:</strong> renderer<br>
+            <strong>File:</strong> agents/dmt_coder/src/dmtcoder/stage1/renderer.py<br>
+            <strong>Control Flow Nodes:</strong> 365<br>
+            <strong>Edges:</strong> 376
+        </div>
+        
+        <div class="flow-image">
+            <h3>Control Flow Visualization</h3>
+            <img src="render_plan_to_disk_flow.png" alt="Function Flow Diagram" />
+        </div>
+        
+        <div class="legend">
+            <strong>Node Types:</strong><br>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90ee90;"></span>
+                Entry/Exit Points
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffd700;"></span>
+                Assignment
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffa500;"></span>
+                Conditional
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ff9999;"></span>
+                Loop
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90ee90;"></span>
+                Return
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #dda0dd;"></span>
+                Try/Except
+            </div>
+        </div>
+        
+        <div class="metadata">
+            <h3>Flow Sequence</h3>
+            <ol class="node-list">
+                <li>node_0 → node_2</li>
+<li>node_2 → node_3</li>
+<li>node_3 → node_4</li>
+<li>node_4 → node_5</li>
+<li>node_5 → node_6</li>
+<li>node_6 → node_7</li>
+<li>node_7 → node_8</li>
+<li>node_8 → node_9</li>
+<li>node_9 → node_10</li>
+<li>node_10 → node_11</li>
+<li>node_11 → node_12</li>
+<li>node_12 → node_13</li>
+<li>node_13 → node_14</li>
+<li>node_14 → node_15</li>
+<li>node_15 → node_16</li>
+<li>node_16 → node_17</li>
+<li>node_17 → node_18</li>
+<li>node_18 → node_19</li>
+<li>node_19 → node_20</li>
+<li>node_20 → node_21</li>
+<li>node_21 → node_22</li>
+<li>node_22 → node_23</li>
+<li>node_23 → node_24</li>
+<li>node_24 → node_25</li>
+<li>node_25 → node_26</li>
+<li>node_26 → node_27</li>
+<li>node_27 → node_28</li>
+<li>node_28 → node_29</li>
+<li>node_29 → node_30</li>
+<li>node_30 → node_31</li>
+<li>node_31 → node_32</li>
+<li>node_32 → node_33</li>
+<li>node_33 → node_34</li>
+<li>node_34 → node_35</li>
+<li>node_35 → node_36</li>
+<li>node_36 → node_37</li>
+<li>node_37 → node_38</li>
+<li>node_38 → node_39</li>
+<li>node_39 → node_40</li>
+<li>node_40 → node_41</li>
+<li>node_41 → node_42</li>
+<li>node_42 → node_43</li>
+<li>node_43 → node_44</li>
+<li>node_44 → node_45</li>
+<li>node_45 → node_46</li>
+<li>node_46 → node_47</li>
+<li>node_47 → node_48</li>
+<li>node_48 → node_49</li>
+<li>node_49 → node_50</li>
+<li>node_50 → node_51</li>
+<li>node_51 → node_52</li>
+<li>node_52 → node_53</li>
+<li>node_53 → node_54</li>
+<li>node_54 → node_55</li>
+<li>node_55 → node_56</li>
+<li>node_56 → node_57</li>
+<li>node_57 → node_58</li>
+<li>node_58 → node_59</li>
+<li>node_59 → node_60</li>
+<li>node_60 → node_61</li>
+<li>node_61 → node_62</li>
+<li>node_62 → node_63</li>
+<li>node_63 → node_64</li>
+<li>node_64 → node_65</li>
+<li>node_65 → node_66</li>
+<li>node_66 → node_67</li>
+<li>node_67 → node_68</li>
+<li>node_68 → node_69</li>
+<li>node_69 → node_70</li>
+<li>node_70 → node_71</li>
+<li>node_71 → node_72</li>
+<li>node_72 → node_73</li>
+<li>node_73 → node_74</li>
+<li>node_74 → node_75</li>
+<li>node_75 → node_76</li>
+<li>node_76 → node_77</li>
+<li>node_68 → node_78</li>
+<li>node_68 → node_79</li>
+<li>node_79 → node_80</li>
+<li>node_80 → node_81</li>
+<li>node_81 → node_82</li>
+<li>node_82 → node_83</li>
+<li>node_83 → node_84</li>
+<li>node_77 → node_85</li>
+<li>node_84 → node_85</li>
+<li>node_67 → node_86</li>
+<li>node_86 → node_87</li>
+<li>node_87 → node_88</li>
+<li>node_88 → node_89</li>
+<li>node_89 → node_90</li>
+<li>node_90 → node_91</li>
+<li>node_85 → node_92</li>
+<li>node_91 → node_92</li>
+<li>node_92 → node_93</li>
+<li>node_93 → node_94</li>
+<li>node_94 → node_95</li>
+<li>node_95 → node_96</li>
+<li>node_96 → node_97</li>
+<li>node_97 → node_98</li>
+<li>node_98 → node_99</li>
+<li>node_99 → node_100</li>
+<li>node_100 → node_101</li>
+<li>node_101 → node_102</li>
+<li>node_102 → node_103</li>
+<li>node_103 → node_104</li>
+<li>node_104 → node_105</li>
+<li>node_105 → node_106</li>
+<li>node_106 → node_107</li>
+<li>node_107 → node_108</li>
+<li>node_108 → node_109</li>
+<li>node_109 → node_110</li>
+<li>node_110 → node_111</li>
+<li>node_111 → node_112</li>
+<li>node_112 → node_113</li>
+<li>node_113 → node_114</li>
+<li>node_114 → node_115</li>
+<li>node_115 → node_116</li>
+<li>node_116 → node_117</li>
+<li>node_117 → node_118</li>
+<li>node_118 → node_119</li>
+<li>node_119 → node_120</li>
+<li>node_120 → node_121</li>
+<li>node_121 → node_122</li>
+<li>node_122 → node_123</li>
+<li>node_123 → node_124</li>
+<li>node_124 → node_125</li>
+<li>node_125 → node_126</li>
+<li>node_126 → node_127</li>
+<li>node_127 → node_128</li>
+<li>node_128 → node_129</li>
+<li>node_129 → node_130</li>
+<li>node_130 → node_131</li>
+<li>node_131 → node_132</li>
+<li>node_132 → node_133</li>
+<li>node_133 → node_134</li>
+<li>node_134 → node_135</li>
+<li>node_135 → node_136</li>
+<li>node_136 → node_137</li>
+<li>node_137 → node_138</li>
+<li>node_138 → node_139</li>
+<li>node_139 → node_140</li>
+<li>node_140 → node_141</li>
+<li>node_141 → node_142</li>
+<li>node_142 → node_143</li>
+<li>node_143 → node_144</li>
+<li>node_144 → node_145</li>
+<li>node_145 → node_146</li>
+<li>node_146 → node_147</li>
+<li>node_106 → node_148</li>
+<li>node_148 → node_149</li>
+<li>node_149 → node_150</li>
+<li>node_150 → node_151</li>
+<li>node_151 → node_152</li>
+<li>node_152 → node_153</li>
+<li>node_153 → node_154</li>
+<li>node_154 → node_155</li>
+<li>node_155 → node_156</li>
+<li>node_156 → node_157</li>
+<li>node_157 → node_158</li>
+<li>node_158 → node_159</li>
+<li>node_159 → node_160</li>
+<li>node_160 → node_161</li>
+<li>node_161 → node_162</li>
+<li>node_162 → node_163</li>
+<li>node_163 → node_164</li>
+<li>node_164 → node_165</li>
+<li>node_165 → node_166</li>
+<li>node_166 → node_167</li>
+<li>node_167 → node_168</li>
+<li>node_168 → node_169</li>
+<li>node_169 → node_170</li>
+<li>node_170 → node_171</li>
+<li>node_171 → node_172</li>
+<li>node_172 → node_173</li>
+<li>node_173 → node_174</li>
+<li>node_148 → node_175</li>
+<li>node_175 → node_176</li>
+<li>node_176 → node_177</li>
+<li>node_177 → node_178</li>
+<li>node_178 → node_179</li>
+<li>node_179 → node_180</li>
+<li>node_180 → node_181</li>
+<li>node_181 → node_182</li>
+<li>node_182 → node_183</li>
+<li>node_183 → node_184</li>
+<li>node_184 → node_185</li>
+<li>node_185 → node_186</li>
+<li>node_186 → node_187</li>
+<li>node_187 → node_188</li>
+<li>node_188 → node_189</li>
+<li>node_189 → node_190</li>
+<li>node_190 → node_191</li>
+<li>node_191 → node_192</li>
+<li>node_192 → node_193</li>
+<li>node_193 → node_194</li>
+<li>node_194 → node_195</li>
+<li>node_195 → node_196</li>
+<li>node_196 → node_197</li>
+<li>node_197 → node_198</li>
+<li>node_198 → node_199</li>
+<li>node_199 → node_200</li>
+<li>node_200 → node_201</li>
+<li>node_201 → node_202</li>
+<li>node_202 → node_203</li>
+<li>node_203 → node_204</li>
+<li>node_204 → node_205</li>
+<li>node_205 → node_206</li>
+<li>node_206 → node_207</li>
+<li>node_207 → node_208</li>
+<li>node_208 → node_209</li>
+<li>node_209 → node_210</li>
+<li>node_210 → node_211</li>
+<li>node_211 → node_212</li>
+<li>node_212 → node_213</li>
+<li>node_213 → node_214</li>
+<li>node_214 → node_190</li>
+<li>node_190 → node_215</li>
+<li>node_215 → node_216</li>
+<li>node_216 → node_217</li>
+<li>node_217 → node_218</li>
+<li>node_218 → node_219</li>
+<li>node_219 → node_220</li>
+<li>node_220 → node_221</li>
+<li>node_221 → node_222</li>
+<li>node_222 → node_223</li>
+<li>node_223 → node_224</li>
+<li>node_224 → node_225</li>
+<li>node_225 → node_226</li>
+<li>node_226 → node_227</li>
+<li>node_227 → node_228</li>
+<li>node_228 → node_229</li>
+<li>node_229 → node_230</li>
+<li>node_230 → node_231</li>
+<li>node_231 → node_232</li>
+<li>node_232 → node_233</li>
+<li>node_233 → node_234</li>
+<li>node_234 → node_235</li>
+<li>node_235 → node_236</li>
+<li>node_236 → node_237</li>
+<li>node_237 → node_238</li>
+<li>node_175 → node_239</li>
+<li>node_239 → node_240</li>
+<li>node_240 → node_241</li>
+<li>node_241 → node_242</li>
+<li>node_242 → node_243</li>
+<li>node_243 → node_244</li>
+<li>node_244 → node_245</li>
+<li>node_245 → node_246</li>
+<li>node_246 → node_247</li>
+<li>node_247 → node_248</li>
+<li>node_248 → node_249</li>
+<li>node_249 → node_250</li>
+<li>node_250 → node_251</li>
+<li>node_251 → node_252</li>
+<li>node_252 → node_253</li>
+<li>node_253 → node_254</li>
+<li>node_254 → node_255</li>
+<li>node_255 → node_256</li>
+<li>node_256 → node_257</li>
+<li>node_257 → node_258</li>
+<li>node_258 → node_259</li>
+<li>node_259 → node_260</li>
+<li>node_260 → node_261</li>
+<li>node_261 → node_262</li>
+<li>node_262 → node_263</li>
+<li>node_263 → node_264</li>
+<li>node_264 → node_265</li>
+<li>node_265 → node_266</li>
+<li>node_266 → node_267</li>
+<li>node_267 → node_268</li>
+<li>node_268 → node_269</li>
+<li>node_269 → node_270</li>
+<li>node_270 → node_271</li>
+<li>node_271 → node_272</li>
+<li>node_272 → node_273</li>
+<li>node_273 → node_274</li>
+<li>node_274 → node_275</li>
+<li>node_275 → node_276</li>
+<li>node_276 → node_277</li>
+<li>node_277 → node_278</li>
+<li>node_278 → node_254</li>
+<li>node_254 → node_279</li>
+<li>node_279 → node_280</li>
+<li>node_280 → node_281</li>
+<li>node_281 → node_282</li>
+<li>node_282 → node_283</li>
+<li>node_283 → node_284</li>
+<li>node_284 → node_285</li>
+<li>node_285 → node_286</li>
+<li>node_286 → node_287</li>
+<li>node_287 → node_288</li>
+<li>node_288 → node_289</li>
+<li>node_289 → node_290</li>
+<li>node_290 → node_291</li>
+<li>node_291 → node_292</li>
+<li>node_292 → node_293</li>
+<li>node_293 → node_294</li>
+<li>node_294 → node_295</li>
+<li>node_295 → node_296</li>
+<li>node_296 → node_297</li>
+<li>node_297 → node_298</li>
+<li>node_298 → node_299</li>
+<li>node_299 → node_300</li>
+<li>node_300 → node_301</li>
+<li>node_301 → node_302</li>
+<li>node_239 → node_303</li>
+<li>node_303 → node_304</li>
+<li>node_304 → node_305</li>
+<li>node_305 → node_306</li>
+<li>node_302 → node_307</li>
+<li>node_306 → node_307</li>
+<li>node_238 → node_308</li>
+<li>node_307 → node_308</li>
+<li>node_174 → node_309</li>
+<li>node_308 → node_309</li>
+<li>node_147 → node_310</li>
+<li>node_309 → node_310</li>
+<li>node_310 → node_311</li>
+<li>node_311 → node_312</li>
+<li>node_312 → node_313</li>
+<li>node_313 → node_314</li>
+<li>node_314 → node_315</li>
+<li>node_315 → node_316</li>
+<li>node_316 → node_317</li>
+<li>node_94 → node_318</li>
+<li>node_318 → node_319</li>
+<li>node_319 → node_320</li>
+<li>node_320 → node_321</li>
+<li>node_321 → node_322</li>
+<li>node_322 → node_323</li>
+<li>node_323 → node_324</li>
+<li>node_324 → node_325</li>
+<li>node_325 → node_326</li>
+<li>node_326 → node_327</li>
+<li>node_327 → node_328</li>
+<li>node_328 → node_329</li>
+<li>node_329 → node_330</li>
+<li>node_330 → node_331</li>
+<li>node_331 → node_332</li>
+<li>node_332 → node_333</li>
+<li>node_333 → node_334</li>
+<li>node_334 → node_335</li>
+<li>node_335 → node_336</li>
+<li>node_336 → node_337</li>
+<li>node_337 → node_338</li>
+<li>node_338 → node_339</li>
+<li>node_339 → node_340</li>
+<li>node_340 → node_341</li>
+<li>node_341 → node_342</li>
+<li>node_342 → node_343</li>
+<li>node_343 → node_344</li>
+<li>node_344 → node_345</li>
+<li>node_345 → node_346</li>
+<li>node_346 → node_347</li>
+<li>node_347 → node_348</li>
+<li>node_317 → node_349</li>
+<li>node_348 → node_349</li>
+<li>node_349 → node_93</li>
+<li>node_93 → node_350</li>
+<li>node_350 → node_351</li>
+<li>node_351 → node_352</li>
+<li>node_352 → node_353</li>
+<li>node_353 → node_354</li>
+<li>node_354 → node_355</li>
+<li>node_355 → node_356</li>
+<li>node_356 → node_357</li>
+<li>node_357 → node_358</li>
+<li>node_358 → node_359</li>
+<li>node_359 → node_360</li>
+<li>node_360 → node_361</li>
+<li>node_361 → node_362</li>
+<li>node_362 → node_363</li>
+<li>node_363 → node_364</li>
+<li>node_364 → node_365</li>
+<li>node_365 → node_366</li>
+<li>node_366 → node_1</li>
+            </ol>
+        </div>
+        
+        <div class="metadata">
+            <h3>Node Details</h3>
+            <div class="node-list">
+                
+                <div class="node-item">
+                    <strong>node_2:</strong> statement<br>
+                    <small>def render_plan_to_disk(plan: Plan, out_dir: str):
+    root = pathlib.Path(out_dir)
+    plan_file = root / 'build' / 'plan.json'
+    _ensure_dir(plan_file)
+    with plan_file.open('w', encoding='utf-8') as f:
+        json.dump({'spec_name': plan.spec_name, 'version': plan.version, 'items': [i.__dict__ for i in plan.items]}, f, indent=2)
+    manifest_path = root / 'artifacts' / 'manifest.json'
+    _ensure_dir(manifest_path)
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text())
+        except Exception:
+            manifest = {'artifacts': []}
+    else:
+        manifest = {'artifacts': []}
+    for it in plan.items:
+        if it.kind.endswith('_stub'):
+            p = root / it.path
+            _ensure_dir(p)
+            if it.kind == 'code_stub':
+                behavior_lines = _behavior_lines(it.notes.get('behavior'))
+                io_summary = _summarize_io(it.notes.get('io', {}))
+                content = CODE_STUB.format(function_name=it.function_name, function_id=it.function_id, io_summary=io_summary, behavior_block=_block(behavior_lines, prefix='- '))
+            elif it.kind == 'test_stub':
+                validation_lines = _validation_lines(it.notes.get('validation'))
+                content = TEST_STUB.format(function_name=it.function_name, validation_block='\n'.join(validation_lines) or '# (no validation rules)')
+            elif it.kind == 'teach_stub':
+                expects = it.notes.get('expects') or []
+                exp_lines = []
+                for exp in expects:
+                    if isinstance(exp, dict) and exp:
+                        k, v = list(exp.items())[0]
+                        exp_lines.append(f'- {k}: {v}')
+                content = TEACH_STUB.format(function_name=it.function_name, lesson_name=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '# (no expected artifacts declared)')
+            elif it.kind == 'doc_stub':
+                expects = it.notes.get('expects') or []
+                exp_lines = []
+                for exp in expects:
+                    if isinstance(exp, dict) and exp:
+                        k, v = list(exp.items())[0]
+                        exp_lines.append(f'  - {k}: {v}')
+                content = DOC_STUB.format(function_name=it.function_name, lesson_hint=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '  - (none)')
+            else:
+                content = ''
+            p.write_text(content, encoding='utf-8')
+        elif it.kind == 'manifest_entry':
+            art = it.notes.get('artifact')
+            typ = it.notes.get('type')
+            if art:
+                manifest['artifacts'].append({'path': art, 'type': typ, 'checksum': None})
+    with manifest_path.open('w', encoding='utf-8') as f:
+        json.dump(manifest, f, indent=2)</small><br>
+                    <small>Line 42</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_3:</strong> statement<br>
+                    <small>plan: Plan</small><br>
+                    <small>Line 42</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_4:</strong> statement<br>
+                    <small>Plan</small><br>
+                    <small>Line 42</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_5:</strong> statement<br>
+                    <small>out_dir: str</small><br>
+                    <small>Line 42</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_6:</strong> statement<br>
+                    <small>str</small><br>
+                    <small>Line 42</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_7:</strong> assignment<br>
+                    <small>root = pathlib.Path(out_dir)</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_8:</strong> statement<br>
+                    <small>root = pathlib.Path(out_dir)</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_9:</strong> statement<br>
+                    <small>root</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_10:</strong> statement<br>
+                    <small>pathlib.Path(out_dir)</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_11:</strong> statement<br>
+                    <small>pathlib.Path</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_12:</strong> statement<br>
+                    <small>pathlib</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_13:</strong> statement<br>
+                    <small>out_dir</small><br>
+                    <small>Line 43</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_14:</strong> assignment<br>
+                    <small>plan_file = root / 'build' / 'plan.json'</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_15:</strong> statement<br>
+                    <small>plan_file = root / 'build' / 'plan.json'</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_16:</strong> statement<br>
+                    <small>plan_file</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_17:</strong> statement<br>
+                    <small>root / 'build' / 'plan.json'</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_18:</strong> statement<br>
+                    <small>root / 'build'</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_19:</strong> statement<br>
+                    <small>root</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_20:</strong> statement<br>
+                    <small>'build'</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_21:</strong> statement<br>
+                    <small>'plan.json'</small><br>
+                    <small>Line 46</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_22:</strong> statement<br>
+                    <small>_ensure_dir(plan_file)</small><br>
+                    <small>Line 47</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_23:</strong> statement<br>
+                    <small>_ensure_dir(plan_file)</small><br>
+                    <small>Line 47</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_24:</strong> statement<br>
+                    <small>_ensure_dir</small><br>
+                    <small>Line 47</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_25:</strong> statement<br>
+                    <small>plan_file</small><br>
+                    <small>Line 47</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_26:</strong> statement<br>
+                    <small>with plan_file.open('w', encoding='utf-8') as f:
+    json.dump({'spec_name': plan.spec_name, 'version': plan.version, 'items': [i.__dict__ for i in plan.items]}, f, indent=2)</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_27:</strong> statement<br>
+                    <small>plan_file.open('w', encoding='utf-8')</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_28:</strong> statement<br>
+                    <small>plan_file.open</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_29:</strong> statement<br>
+                    <small>plan_file</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_30:</strong> statement<br>
+                    <small>'w'</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_31:</strong> statement<br>
+                    <small>encoding='utf-8'</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_32:</strong> statement<br>
+                    <small>'utf-8'</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_33:</strong> statement<br>
+                    <small>f</small><br>
+                    <small>Line 48</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_34:</strong> statement<br>
+                    <small>json.dump({'spec_name': plan.spec_name, 'version': plan.version, 'items': [i.__dict__ for i in plan.items]}, f, indent=2)</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_35:</strong> statement<br>
+                    <small>json.dump({'spec_name': plan.spec_name, 'version': plan.version, 'items': [i.__dict__ for i in plan.items]}, f, indent=2)</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_36:</strong> statement<br>
+                    <small>json.dump</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_37:</strong> statement<br>
+                    <small>json</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_38:</strong> statement<br>
+                    <small>{'spec_name': plan.spec_name, 'version': plan.version, 'items': [i.__dict__ for i in plan.items]}</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_39:</strong> statement<br>
+                    <small>'spec_name'</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_40:</strong> statement<br>
+                    <small>'version'</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_41:</strong> statement<br>
+                    <small>'items'</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_42:</strong> statement<br>
+                    <small>plan.spec_name</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_43:</strong> statement<br>
+                    <small>plan</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_44:</strong> statement<br>
+                    <small>plan.version</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_45:</strong> statement<br>
+                    <small>plan</small><br>
+                    <small>Line 49</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_46:</strong> statement<br>
+                    <small>[i.__dict__ for i in plan.items]</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_47:</strong> statement<br>
+                    <small>i.__dict__</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_48:</strong> statement<br>
+                    <small>i</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_49:</strong> statement<br>
+                    <small>i</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_50:</strong> statement<br>
+                    <small>plan.items</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_51:</strong> statement<br>
+                    <small>plan</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_52:</strong> statement<br>
+                    <small>f</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_53:</strong> statement<br>
+                    <small>indent=2</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_54:</strong> statement<br>
+                    <small>2</small><br>
+                    <small>Line 50</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_55:</strong> assignment<br>
+                    <small>manifest_path = root / 'artifacts' / 'manifest.json'</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_56:</strong> statement<br>
+                    <small>manifest_path = root / 'artifacts' / 'manifest.json'</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_57:</strong> statement<br>
+                    <small>manifest_path</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_58:</strong> statement<br>
+                    <small>root / 'artifacts' / 'manifest.json'</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_59:</strong> statement<br>
+                    <small>root / 'artifacts'</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_60:</strong> statement<br>
+                    <small>root</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_61:</strong> statement<br>
+                    <small>'artifacts'</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_62:</strong> statement<br>
+                    <small>'manifest.json'</small><br>
+                    <small>Line 53</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_63:</strong> statement<br>
+                    <small>_ensure_dir(manifest_path)</small><br>
+                    <small>Line 54</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_64:</strong> statement<br>
+                    <small>_ensure_dir(manifest_path)</small><br>
+                    <small>Line 54</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_65:</strong> statement<br>
+                    <small>_ensure_dir</small><br>
+                    <small>Line 54</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_66:</strong> statement<br>
+                    <small>manifest_path</small><br>
+                    <small>Line 54</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_67:</strong> conditional<br>
+                    <small>if manifest_path.exists()</small><br>
+                    <small>Line 55</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_68:</strong> try<br>
+                    <small>try</small><br>
+                    <small>Line 56</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_69:</strong> assignment<br>
+                    <small>manifest = json.loads(manifest_path.read_text())</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_70:</strong> statement<br>
+                    <small>manifest = json.loads(manifest_path.read_text())</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_71:</strong> statement<br>
+                    <small>manifest</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_72:</strong> statement<br>
+                    <small>json.loads(manifest_path.read_text())</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_73:</strong> statement<br>
+                    <small>json.loads</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_74:</strong> statement<br>
+                    <small>json</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_75:</strong> statement<br>
+                    <small>manifest_path.read_text()</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_76:</strong> statement<br>
+                    <small>manifest_path.read_text</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_77:</strong> statement<br>
+                    <small>manifest_path</small><br>
+                    <small>Line 57</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_78:</strong> except<br>
+                    <small>except Exception</small><br>
+                    <small>Line 58</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_79:</strong> assignment<br>
+                    <small>manifest = {'artifacts': []}</small><br>
+                    <small>Line 59</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_80:</strong> statement<br>
+                    <small>manifest = {'artifacts': []}</small><br>
+                    <small>Line 59</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_81:</strong> statement<br>
+                    <small>manifest</small><br>
+                    <small>Line 59</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_82:</strong> statement<br>
+                    <small>{'artifacts': []}</small><br>
+                    <small>Line 59</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_83:</strong> statement<br>
+                    <small>'artifacts'</small><br>
+                    <small>Line 59</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_84:</strong> statement<br>
+                    <small>[]</small><br>
+                    <small>Line 59</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_85:</strong> merge<br>
+                    <small>merge try-except</small><br>
+                    <small>Line 56</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_86:</strong> assignment<br>
+                    <small>manifest = {'artifacts': []}</small><br>
+                    <small>Line 61</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_87:</strong> statement<br>
+                    <small>manifest = {'artifacts': []}</small><br>
+                    <small>Line 61</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_88:</strong> statement<br>
+                    <small>manifest</small><br>
+                    <small>Line 61</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_89:</strong> statement<br>
+                    <small>{'artifacts': []}</small><br>
+                    <small>Line 61</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_90:</strong> statement<br>
+                    <small>'artifacts'</small><br>
+                    <small>Line 61</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_91:</strong> statement<br>
+                    <small>[]</small><br>
+                    <small>Line 61</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_92:</strong> merge<br>
+                    <small>merge</small><br>
+                    <small>Line 55</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_93:</strong> loop<br>
+                    <small>for it in plan.items</small><br>
+                    <small>Line 63</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_94:</strong> conditional<br>
+                    <small>if it.kind.endswith('_stub')</small><br>
+                    <small>Line 64</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_95:</strong> assignment<br>
+                    <small>p = root / it.path</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_96:</strong> statement<br>
+                    <small>p = root / it.path</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_97:</strong> statement<br>
+                    <small>p</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_98:</strong> statement<br>
+                    <small>root / it.path</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_99:</strong> statement<br>
+                    <small>root</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_100:</strong> statement<br>
+                    <small>it.path</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_101:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 65</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_102:</strong> statement<br>
+                    <small>_ensure_dir(p)</small><br>
+                    <small>Line 66</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_103:</strong> statement<br>
+                    <small>_ensure_dir(p)</small><br>
+                    <small>Line 66</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_104:</strong> statement<br>
+                    <small>_ensure_dir</small><br>
+                    <small>Line 66</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_105:</strong> statement<br>
+                    <small>p</small><br>
+                    <small>Line 66</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_106:</strong> conditional<br>
+                    <small>if it.kind == 'code_stub'</small><br>
+                    <small>Line 67</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_107:</strong> assignment<br>
+                    <small>behavior_lines = _behavior_lines(it.notes.get('behavior'))</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_108:</strong> statement<br>
+                    <small>behavior_lines = _behavior_lines(it.notes.get('behavior'))</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_109:</strong> statement<br>
+                    <small>behavior_lines</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_110:</strong> statement<br>
+                    <small>_behavior_lines(it.notes.get('behavior'))</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_111:</strong> statement<br>
+                    <small>_behavior_lines</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_112:</strong> statement<br>
+                    <small>it.notes.get('behavior')</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_113:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_114:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_115:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_116:</strong> statement<br>
+                    <small>'behavior'</small><br>
+                    <small>Line 68</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_117:</strong> assignment<br>
+                    <small>io_summary = _summarize_io(it.notes.get('io', {}))</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_118:</strong> statement<br>
+                    <small>io_summary = _summarize_io(it.notes.get('io', {}))</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_119:</strong> statement<br>
+                    <small>io_summary</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_120:</strong> statement<br>
+                    <small>_summarize_io(it.notes.get('io', {}))</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_121:</strong> statement<br>
+                    <small>_summarize_io</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_122:</strong> statement<br>
+                    <small>it.notes.get('io', {})</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_123:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_124:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_125:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_126:</strong> statement<br>
+                    <small>'io'</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_127:</strong> statement<br>
+                    <small>{}</small><br>
+                    <small>Line 69</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_128:</strong> assignment<br>
+                    <small>content = CODE_STUB.format(function_name=it.function_name, function_id=it.function_id, io_summary=io_summary, behavior_block=_block(behavior_lines, prefix='- '))</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_129:</strong> statement<br>
+                    <small>content = CODE_STUB.format(function_name=it.function_name, function_id=it.function_id, io_summary=io_summary, behavior_block=_block(behavior_lines, prefix='- '))</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_130:</strong> statement<br>
+                    <small>content</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_131:</strong> statement<br>
+                    <small>CODE_STUB.format(function_name=it.function_name, function_id=it.function_id, io_summary=io_summary, behavior_block=_block(behavior_lines, prefix='- '))</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_132:</strong> statement<br>
+                    <small>CODE_STUB.format</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_133:</strong> statement<br>
+                    <small>CODE_STUB</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_134:</strong> statement<br>
+                    <small>function_name=it.function_name</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_135:</strong> statement<br>
+                    <small>it.function_name</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_136:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 70</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_137:</strong> statement<br>
+                    <small>function_id=it.function_id</small><br>
+                    <small>Line 71</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_138:</strong> statement<br>
+                    <small>it.function_id</small><br>
+                    <small>Line 71</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_139:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 71</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_140:</strong> statement<br>
+                    <small>io_summary=io_summary</small><br>
+                    <small>Line 72</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_141:</strong> statement<br>
+                    <small>io_summary</small><br>
+                    <small>Line 72</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_142:</strong> statement<br>
+                    <small>behavior_block=_block(behavior_lines, prefix='- ')</small><br>
+                    <small>Line 73</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_143:</strong> statement<br>
+                    <small>_block(behavior_lines, prefix='- ')</small><br>
+                    <small>Line 73</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_144:</strong> statement<br>
+                    <small>_block</small><br>
+                    <small>Line 73</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_145:</strong> statement<br>
+                    <small>behavior_lines</small><br>
+                    <small>Line 73</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_146:</strong> statement<br>
+                    <small>prefix='- '</small><br>
+                    <small>Line 73</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_147:</strong> statement<br>
+                    <small>'- '</small><br>
+                    <small>Line 73</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_148:</strong> conditional<br>
+                    <small>if it.kind == 'test_stub'</small><br>
+                    <small>Line 74</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_149:</strong> assignment<br>
+                    <small>validation_lines = _validation_lines(it.notes.get('validation'))</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_150:</strong> statement<br>
+                    <small>validation_lines = _validation_lines(it.notes.get('validation'))</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_151:</strong> statement<br>
+                    <small>validation_lines</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_152:</strong> statement<br>
+                    <small>_validation_lines(it.notes.get('validation'))</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_153:</strong> statement<br>
+                    <small>_validation_lines</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_154:</strong> statement<br>
+                    <small>it.notes.get('validation')</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_155:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_156:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_157:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_158:</strong> statement<br>
+                    <small>'validation'</small><br>
+                    <small>Line 75</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_159:</strong> assignment<br>
+                    <small>content = TEST_STUB.format(function_name=it.function_name, validation_block='\n'.join(validation_lines) or '# (no validation rules)')</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_160:</strong> statement<br>
+                    <small>content = TEST_STUB.format(function_name=it.function_name, validation_block='\n'.join(validation_lines) or '# (no validation rules)')</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_161:</strong> statement<br>
+                    <small>content</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_162:</strong> statement<br>
+                    <small>TEST_STUB.format(function_name=it.function_name, validation_block='\n'.join(validation_lines) or '# (no validation rules)')</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_163:</strong> statement<br>
+                    <small>TEST_STUB.format</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_164:</strong> statement<br>
+                    <small>TEST_STUB</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_165:</strong> statement<br>
+                    <small>function_name=it.function_name</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_166:</strong> statement<br>
+                    <small>it.function_name</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_167:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 76</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_168:</strong> statement<br>
+                    <small>validation_block='\n'.join(validation_lines) or '# (no validation rules)'</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_169:</strong> statement<br>
+                    <small>'\n'.join(validation_lines) or '# (no validation rules)'</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_170:</strong> statement<br>
+                    <small>'\n'.join(validation_lines)</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_171:</strong> statement<br>
+                    <small>'\n'.join</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_172:</strong> statement<br>
+                    <small>'\n'</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_173:</strong> statement<br>
+                    <small>validation_lines</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_174:</strong> statement<br>
+                    <small>'# (no validation rules)'</small><br>
+                    <small>Line 77</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_175:</strong> conditional<br>
+                    <small>if it.kind == 'teach_stub'</small><br>
+                    <small>Line 78</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_176:</strong> assignment<br>
+                    <small>expects = it.notes.get('expects') or []</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_177:</strong> statement<br>
+                    <small>expects = it.notes.get('expects') or []</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_178:</strong> statement<br>
+                    <small>expects</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_179:</strong> statement<br>
+                    <small>it.notes.get('expects') or []</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_180:</strong> statement<br>
+                    <small>it.notes.get('expects')</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_181:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_182:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_183:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_184:</strong> statement<br>
+                    <small>'expects'</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_185:</strong> statement<br>
+                    <small>[]</small><br>
+                    <small>Line 79</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_186:</strong> assignment<br>
+                    <small>exp_lines = []</small><br>
+                    <small>Line 80</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_187:</strong> statement<br>
+                    <small>exp_lines = []</small><br>
+                    <small>Line 80</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_188:</strong> statement<br>
+                    <small>exp_lines</small><br>
+                    <small>Line 80</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_189:</strong> statement<br>
+                    <small>[]</small><br>
+                    <small>Line 80</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_190:</strong> loop<br>
+                    <small>for exp in expects</small><br>
+                    <small>Line 81</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_191:</strong> conditional<br>
+                    <small>if isinstance(exp, dict) and exp</small><br>
+                    <small>Line 82</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_192:</strong> assignment<br>
+                    <small>(k, v) = list(exp.items())[0]</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_193:</strong> statement<br>
+                    <small>k, v = list(exp.items())[0]</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_194:</strong> statement<br>
+                    <small>(k, v)</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_195:</strong> statement<br>
+                    <small>k</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_196:</strong> statement<br>
+                    <small>v</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_197:</strong> statement<br>
+                    <small>list(exp.items())[0]</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_198:</strong> statement<br>
+                    <small>list(exp.items())</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_199:</strong> statement<br>
+                    <small>list</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_200:</strong> statement<br>
+                    <small>exp.items()</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_201:</strong> statement<br>
+                    <small>exp.items</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_202:</strong> statement<br>
+                    <small>exp</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_203:</strong> statement<br>
+                    <small>0</small><br>
+                    <small>Line 83</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_204:</strong> statement<br>
+                    <small>exp_lines.append(f'- {k}: {v}')</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_205:</strong> statement<br>
+                    <small>exp_lines.append(f'- {k}: {v}')</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_206:</strong> statement<br>
+                    <small>exp_lines.append</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_207:</strong> statement<br>
+                    <small>exp_lines</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_208:</strong> statement<br>
+                    <small>f'- {k}: {v}'</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_209:</strong> statement<br>
+                    <small>'- '</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_210:</strong> statement<br>
+                    <small>{k}</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_211:</strong> statement<br>
+                    <small>k</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_212:</strong> statement<br>
+                    <small>': '</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_213:</strong> statement<br>
+                    <small>{v}</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_214:</strong> statement<br>
+                    <small>v</small><br>
+                    <small>Line 84</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_215:</strong> loop_exit<br>
+                    <small>exit for exp</small><br>
+                    <small>Line 81</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_216:</strong> assignment<br>
+                    <small>content = TEACH_STUB.format(function_name=it.function_name, lesson_name=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '# (no expected artifacts declared)')</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_217:</strong> statement<br>
+                    <small>content = TEACH_STUB.format(function_name=it.function_name, lesson_name=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '# (no expected artifacts declared)')</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_218:</strong> statement<br>
+                    <small>content</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_219:</strong> statement<br>
+                    <small>TEACH_STUB.format(function_name=it.function_name, lesson_name=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '# (no expected artifacts declared)')</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_220:</strong> statement<br>
+                    <small>TEACH_STUB.format</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_221:</strong> statement<br>
+                    <small>TEACH_STUB</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_222:</strong> statement<br>
+                    <small>function_name=it.function_name</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_223:</strong> statement<br>
+                    <small>it.function_name</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_224:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 85</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_225:</strong> statement<br>
+                    <small>lesson_name=it.notes.get('lesson_name', 'lesson')</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_226:</strong> statement<br>
+                    <small>it.notes.get('lesson_name', 'lesson')</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_227:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_228:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_229:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_230:</strong> statement<br>
+                    <small>'lesson_name'</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_231:</strong> statement<br>
+                    <small>'lesson'</small><br>
+                    <small>Line 86</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_232:</strong> statement<br>
+                    <small>expects_block='\n'.join(exp_lines) or '# (no expected artifacts declared)'</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_233:</strong> statement<br>
+                    <small>'\n'.join(exp_lines) or '# (no expected artifacts declared)'</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_234:</strong> statement<br>
+                    <small>'\n'.join(exp_lines)</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_235:</strong> statement<br>
+                    <small>'\n'.join</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_236:</strong> statement<br>
+                    <small>'\n'</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_237:</strong> statement<br>
+                    <small>exp_lines</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_238:</strong> statement<br>
+                    <small>'# (no expected artifacts declared)'</small><br>
+                    <small>Line 87</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_239:</strong> conditional<br>
+                    <small>if it.kind == 'doc_stub'</small><br>
+                    <small>Line 88</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_240:</strong> assignment<br>
+                    <small>expects = it.notes.get('expects') or []</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_241:</strong> statement<br>
+                    <small>expects = it.notes.get('expects') or []</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_242:</strong> statement<br>
+                    <small>expects</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_243:</strong> statement<br>
+                    <small>it.notes.get('expects') or []</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_244:</strong> statement<br>
+                    <small>it.notes.get('expects')</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_245:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_246:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_247:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_248:</strong> statement<br>
+                    <small>'expects'</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_249:</strong> statement<br>
+                    <small>[]</small><br>
+                    <small>Line 89</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_250:</strong> assignment<br>
+                    <small>exp_lines = []</small><br>
+                    <small>Line 90</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_251:</strong> statement<br>
+                    <small>exp_lines = []</small><br>
+                    <small>Line 90</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_252:</strong> statement<br>
+                    <small>exp_lines</small><br>
+                    <small>Line 90</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_253:</strong> statement<br>
+                    <small>[]</small><br>
+                    <small>Line 90</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_254:</strong> loop<br>
+                    <small>for exp in expects</small><br>
+                    <small>Line 91</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_255:</strong> conditional<br>
+                    <small>if isinstance(exp, dict) and exp</small><br>
+                    <small>Line 92</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_256:</strong> assignment<br>
+                    <small>(k, v) = list(exp.items())[0]</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_257:</strong> statement<br>
+                    <small>k, v = list(exp.items())[0]</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_258:</strong> statement<br>
+                    <small>(k, v)</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_259:</strong> statement<br>
+                    <small>k</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_260:</strong> statement<br>
+                    <small>v</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_261:</strong> statement<br>
+                    <small>list(exp.items())[0]</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_262:</strong> statement<br>
+                    <small>list(exp.items())</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_263:</strong> statement<br>
+                    <small>list</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_264:</strong> statement<br>
+                    <small>exp.items()</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_265:</strong> statement<br>
+                    <small>exp.items</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_266:</strong> statement<br>
+                    <small>exp</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_267:</strong> statement<br>
+                    <small>0</small><br>
+                    <small>Line 93</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_268:</strong> statement<br>
+                    <small>exp_lines.append(f'  - {k}: {v}')</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_269:</strong> statement<br>
+                    <small>exp_lines.append(f'  - {k}: {v}')</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_270:</strong> statement<br>
+                    <small>exp_lines.append</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_271:</strong> statement<br>
+                    <small>exp_lines</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_272:</strong> statement<br>
+                    <small>f'  - {k}: {v}'</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_273:</strong> statement<br>
+                    <small>'  - '</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_274:</strong> statement<br>
+                    <small>{k}</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_275:</strong> statement<br>
+                    <small>k</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_276:</strong> statement<br>
+                    <small>': '</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_277:</strong> statement<br>
+                    <small>{v}</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_278:</strong> statement<br>
+                    <small>v</small><br>
+                    <small>Line 94</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_279:</strong> loop_exit<br>
+                    <small>exit for exp</small><br>
+                    <small>Line 91</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_280:</strong> assignment<br>
+                    <small>content = DOC_STUB.format(function_name=it.function_name, lesson_hint=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '  - (none)')</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_281:</strong> statement<br>
+                    <small>content = DOC_STUB.format(function_name=it.function_name, lesson_hint=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '  - (none)')</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_282:</strong> statement<br>
+                    <small>content</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_283:</strong> statement<br>
+                    <small>DOC_STUB.format(function_name=it.function_name, lesson_hint=it.notes.get('lesson_name', 'lesson'), expects_block='\n'.join(exp_lines) or '  - (none)')</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_284:</strong> statement<br>
+                    <small>DOC_STUB.format</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_285:</strong> statement<br>
+                    <small>DOC_STUB</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_286:</strong> statement<br>
+                    <small>function_name=it.function_name</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_287:</strong> statement<br>
+                    <small>it.function_name</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_288:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 95</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_289:</strong> statement<br>
+                    <small>lesson_hint=it.notes.get('lesson_name', 'lesson')</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_290:</strong> statement<br>
+                    <small>it.notes.get('lesson_name', 'lesson')</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_291:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_292:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_293:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_294:</strong> statement<br>
+                    <small>'lesson_name'</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_295:</strong> statement<br>
+                    <small>'lesson'</small><br>
+                    <small>Line 96</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_296:</strong> statement<br>
+                    <small>expects_block='\n'.join(exp_lines) or '  - (none)'</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_297:</strong> statement<br>
+                    <small>'\n'.join(exp_lines) or '  - (none)'</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_298:</strong> statement<br>
+                    <small>'\n'.join(exp_lines)</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_299:</strong> statement<br>
+                    <small>'\n'.join</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_300:</strong> statement<br>
+                    <small>'\n'</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_301:</strong> statement<br>
+                    <small>exp_lines</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_302:</strong> statement<br>
+                    <small>'  - (none)'</small><br>
+                    <small>Line 97</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_303:</strong> assignment<br>
+                    <small>content = ''</small><br>
+                    <small>Line 99</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_304:</strong> statement<br>
+                    <small>content = ''</small><br>
+                    <small>Line 99</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_305:</strong> statement<br>
+                    <small>content</small><br>
+                    <small>Line 99</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_306:</strong> statement<br>
+                    <small>''</small><br>
+                    <small>Line 99</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_307:</strong> merge<br>
+                    <small>merge</small><br>
+                    <small>Line 88</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_308:</strong> merge<br>
+                    <small>merge</small><br>
+                    <small>Line 78</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_309:</strong> merge<br>
+                    <small>merge</small><br>
+                    <small>Line 74</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_310:</strong> merge<br>
+                    <small>merge</small><br>
+                    <small>Line 67</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_311:</strong> statement<br>
+                    <small>p.write_text(content, encoding='utf-8')</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_312:</strong> statement<br>
+                    <small>p.write_text(content, encoding='utf-8')</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_313:</strong> statement<br>
+                    <small>p.write_text</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_314:</strong> statement<br>
+                    <small>p</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_315:</strong> statement<br>
+                    <small>content</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_316:</strong> statement<br>
+                    <small>encoding='utf-8'</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_317:</strong> statement<br>
+                    <small>'utf-8'</small><br>
+                    <small>Line 100</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_318:</strong> conditional<br>
+                    <small>if it.kind == 'manifest_entry'</small><br>
+                    <small>Line 102</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_319:</strong> assignment<br>
+                    <small>art = it.notes.get('artifact')</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_320:</strong> statement<br>
+                    <small>art = it.notes.get('artifact')</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_321:</strong> statement<br>
+                    <small>art</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_322:</strong> statement<br>
+                    <small>it.notes.get('artifact')</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_323:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_324:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_325:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_326:</strong> statement<br>
+                    <small>'artifact'</small><br>
+                    <small>Line 103</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_327:</strong> assignment<br>
+                    <small>typ = it.notes.get('type')</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_328:</strong> statement<br>
+                    <small>typ = it.notes.get('type')</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_329:</strong> statement<br>
+                    <small>typ</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_330:</strong> statement<br>
+                    <small>it.notes.get('type')</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_331:</strong> statement<br>
+                    <small>it.notes.get</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_332:</strong> statement<br>
+                    <small>it.notes</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_333:</strong> statement<br>
+                    <small>it</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_334:</strong> statement<br>
+                    <small>'type'</small><br>
+                    <small>Line 104</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_335:</strong> conditional<br>
+                    <small>if art</small><br>
+                    <small>Line 105</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_336:</strong> statement<br>
+                    <small>manifest['artifacts'].append({'path': art, 'type': typ, 'checksum': None})</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_337:</strong> statement<br>
+                    <small>manifest['artifacts'].append({'path': art, 'type': typ, 'checksum': None})</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_338:</strong> statement<br>
+                    <small>manifest['artifacts'].append</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_339:</strong> statement<br>
+                    <small>manifest['artifacts']</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_340:</strong> statement<br>
+                    <small>manifest</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_341:</strong> statement<br>
+                    <small>'artifacts'</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_342:</strong> statement<br>
+                    <small>{'path': art, 'type': typ, 'checksum': None}</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_343:</strong> statement<br>
+                    <small>'path'</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_344:</strong> statement<br>
+                    <small>'type'</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_345:</strong> statement<br>
+                    <small>'checksum'</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_346:</strong> statement<br>
+                    <small>art</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_347:</strong> statement<br>
+                    <small>typ</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_348:</strong> statement<br>
+                    <small>None</small><br>
+                    <small>Line 106</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_349:</strong> merge<br>
+                    <small>merge</small><br>
+                    <small>Line 64</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_350:</strong> loop_exit<br>
+                    <small>exit for it</small><br>
+                    <small>Line 63</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_351:</strong> statement<br>
+                    <small>with manifest_path.open('w', encoding='utf-8') as f:
+    json.dump(manifest, f, indent=2)</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_352:</strong> statement<br>
+                    <small>manifest_path.open('w', encoding='utf-8')</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_353:</strong> statement<br>
+                    <small>manifest_path.open</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_354:</strong> statement<br>
+                    <small>manifest_path</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_355:</strong> statement<br>
+                    <small>'w'</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_356:</strong> statement<br>
+                    <small>encoding='utf-8'</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_357:</strong> statement<br>
+                    <small>'utf-8'</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_358:</strong> statement<br>
+                    <small>f</small><br>
+                    <small>Line 108</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_359:</strong> statement<br>
+                    <small>json.dump(manifest, f, indent=2)</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_360:</strong> statement<br>
+                    <small>json.dump(manifest, f, indent=2)</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_361:</strong> statement<br>
+                    <small>json.dump</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_362:</strong> statement<br>
+                    <small>json</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_363:</strong> statement<br>
+                    <small>manifest</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_364:</strong> statement<br>
+                    <small>f</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_365:</strong> statement<br>
+                    <small>indent=2</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+
+                <div class="node-item">
+                    <strong>node_366:</strong> statement<br>
+                    <small>2</small><br>
+                    <small>Line 109</small>
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+        

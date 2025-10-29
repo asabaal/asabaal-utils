@@ -1,9 +1,39 @@
 import ast
 import sys
 import pkgutil
+import fnmatch
 from pathlib import Path
 import networkx as nx
-from typing import Set, Optional, List
+from typing import Set, Optional, List, Dict
+
+# Function flow analysis imports
+# These will be imported when needed to avoid circular dependencies
+
+
+def _should_exclude_file(file_path: Path, exclude_patterns: Set[str]) -> bool:
+    """Check if a file should be excluded based on patterns.
+    
+    Args:
+        file_path: Path to the file
+        exclude_patterns: Set of patterns to exclude
+        
+    Returns:
+        True if file should be excluded, False otherwise
+    """
+    # Convert to relative path for pattern matching
+    path_str = str(file_path)
+    
+    # Check each pattern
+    for pattern in exclude_patterns:
+        # Use fnmatch for glob-style pattern matching
+        if fnmatch.fnmatch(path_str, f"*{pattern}*"):
+            return True
+        # Also check individual path components
+        for part in file_path.parts:
+            if fnmatch.fnmatch(part, pattern):
+                return True
+    
+    return False
 
 
 def _is_external_function(func_name: str, local_modules: Set[str]) -> bool:
@@ -56,18 +86,21 @@ def _is_external_function(func_name: str, local_modules: Set[str]) -> bool:
         return False
 
 
-def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> nx.DiGraph:
+def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None, 
+                   analyze_functions: bool = False, output_dir: Optional[Path] = None) -> nx.DiGraph:
     """Scan directory recursively and build call graph.
     
     Args:
         path: Directory path to scan
         exclude_patterns: Set of directory/file patterns to exclude
+        analyze_functions: Whether to perform intra-function flow analysis
+        output_dir: Directory to save function flow analysis results
         
     Returns:
         NetworkX DiGraph representing function call relationships
     """
     if exclude_patterns is None:
-        exclude_patterns = {"__pycache__", ".git", ".venv", "venv", "node_modules"}
+        exclude_patterns = {"__pycache__", ".git", ".venv", "venv", "node_modules", "flowscope_analysis"}
     
     graph = nx.DiGraph()
     local_modules = set()
@@ -75,7 +108,7 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
     
     # First pass: collect all local module names and imports
     for file in path.rglob("*.py"):
-        if any(pattern in str(file) for pattern in exclude_patterns):
+        if _should_exclude_file(file, exclude_patterns):
             continue
         local_modules.add(file.stem)
         
@@ -100,7 +133,7 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
     # Second pass: build graph with filtering and cross-module detection
     for file in path.rglob("*.py"):
         # Skip excluded patterns
-        if any(pattern in str(file) for pattern in exclude_patterns):
+        if _should_exclude_file(file, exclude_patterns):
             continue
             
         try:
@@ -155,7 +188,75 @@ def scan_directory(path: Path, exclude_patterns: Optional[Set[str]] = None) -> n
                         
                         graph.add_edge(func_name, called_name, line=node.lineno)
     
+    # Perform function flow analysis if requested
+    if analyze_functions:
+        if output_dir is None:
+            output_dir = Path.cwd()
+        # If output_dir is a file path, use its parent for function flows
+        elif output_dir.is_file():
+            output_dir = output_dir.parent
+        _analyze_function_flows(path, exclude_patterns, output_dir)
+    
     return graph
+
+
+def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: Path):
+    """Analyze function flows for all Python files in the directory.
+    
+    Args:
+        path: Directory path to analyze
+        exclude_patterns: Set of directory/file patterns to exclude
+        output_dir: Directory to save function flow analysis results
+    """
+    # Import function flow analysis modules
+    try:
+        from asabaal_utils.flowscope.function_flow_parser import FunctionFlowParser
+        from asabaal_utils.flowscope.function_flow_renderer import FunctionFlowRenderer
+    except ImportError:
+        try:
+            # Try relative import
+            from .function_flow_parser import FunctionFlowParser
+            from .function_flow_renderer import FunctionFlowRenderer
+        except ImportError:
+            try:
+                # Try direct import
+                from function_flow_parser import FunctionFlowParser
+                from function_flow_renderer import FunctionFlowRenderer
+            except ImportError:
+                print("Warning: Function flow analysis modules not available. Skipping function flow analysis.")
+                return
+    
+    parser = FunctionFlowParser()
+    renderer = FunctionFlowRenderer(output_dir)
+    
+    print("Analyzing function flows...")
+    
+# Analyze each file
+    for file in path.rglob("*.py"):
+        if _should_exclude_file(file, exclude_patterns):
+            continue
+        
+        try:
+            module_name = file.stem
+            function_flows = parser.parse_file(file, module_name)
+            
+            if function_flows:
+                print(f"  Analyzed {len(function_flows)} functions in {module_name}")
+                
+                # Save JSON data for loading in visualizations
+                renderer.save_function_flows_json(parser, module_name)
+                
+                # Render individual function flows
+                for func_name, flow in function_flows.items():
+                    renderer.render_function_flow(flow)
+                
+                # Render module overview
+                renderer.render_module_function_flows(function_flows, module_name)
+        
+        except Exception as e:
+            print(f"  Error analyzing {file}: {e}")
+    
+    print(f"Function flow analysis complete. Results saved to {output_dir}")
 
 
 class FunctionRegistry:

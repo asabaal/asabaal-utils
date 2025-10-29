@@ -7,22 +7,36 @@ from typing import Optional
 import networkx as nx
 
 # Import flowscope modules
-from .scanner import scan_directory, scan_file
-from .snapshot import save_graph, load_graph, get_snapshot_metadata
-from .drift import compare_graphs, generate_drift_report
-from .visualize import (
-    create_pyvis_graph, 
-    create_static_graph, 
-    create_module_view,
-    create_drift_visualization,
-    create_summary_report,
-    export_graph_data,
-    create_module_reports_with_explorer
-)
+try:
+    from .scanner import scan_directory, scan_file
+    from .snapshot import save_graph, load_graph, get_snapshot_metadata
+    from .drift import compare_graphs, generate_drift_report
+    from .visualize import (
+        create_pyvis_graph, 
+        create_static_graph, 
+        create_module_view,
+        create_drift_visualization,
+        create_summary_report,
+        export_graph_data,
+        create_module_reports_with_explorer
+    )
+except ImportError:
+    from scanner import scan_directory, scan_file
+    from snapshot import save_graph, load_graph, get_snapshot_metadata
+    from drift import compare_graphs, generate_drift_report
+    from visualize import (
+        create_pyvis_graph, 
+        create_static_graph, 
+        create_module_view,
+        create_drift_visualization,
+        create_summary_report,
+        export_graph_data,
+        create_module_reports_with_explorer
+    )
 
 
 def cmd_scan(args) -> None:
-    """Scan a directory or file and create a graph snapshot."""
+    """Scan a directory or file and create a complete analysis."""
     path = Path(args.path)
     
     if not path.exists():
@@ -32,35 +46,55 @@ def cmd_scan(args) -> None:
     print(f"Scanning '{path}'...")
     
     try:
+        # Always enable all features
+        analyze_functions = True
+        exclude_patterns = set(args.exclude) if args.exclude else None
+        
+        # Set up output directory
         if path.is_file():
+            output_dir = path.parent / "flowscope_analysis"
             graph = scan_file(path)
         else:
-            exclude_patterns = set(args.exclude) if args.exclude else None
-            graph = scan_directory(path, exclude_patterns)
+            output_dir = path / "flowscope_analysis"
+            graph = scan_directory(path, exclude_patterns, analyze_functions, output_dir)
+        
+        # Ensure output directory exists
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Set output file paths
+        graph_file = output_dir / "flowscope.json"
+        viz_file = output_dir / "flowscope_visualization.html"
+        module_view_path = output_dir / "module_view.html"
+        summary_path = output_dir / "flowscope_report.md"
         
         print(f"Found {graph.number_of_nodes()} functions and {graph.number_of_edges()} calls")
         
         # Create metadata
         metadata = {
             "source_path": str(path.absolute()),
-            "description": args.description,
+            "description": getattr(args, 'description', f"FlowScope analysis of {path.name}"),
             "scan_type": "file" if path.is_file() else "directory"
         }
         
         # Save graph
-        output_path = Path(args.output)
-        save_graph(graph, output_path, metadata)
+        save_graph(graph, graph_file, metadata)
+        print(f"Graph saved to '{graph_file}'")
         
-        print(f"Graph saved to '{output_path}'")
+        # Always generate all visualizations and reports
+        # Create module view
+        create_module_view(graph, module_view_path, title=f"Module View: {path.name}")
+        print(f"Module view saved to '{module_view_path}'")
         
-        # Generate visualization if requested
-        if args.visualize:
-            viz_path = output_path.with_suffix(".html")
-            module_reports_dir = Path(args.module_reports) if args.module_reports else None
-            create_pyvis_graph(graph, viz_path, title=f"Call Graph: {path.name}", module_reports_dir=module_reports_dir)
-            print(f"Visualization saved to '{viz_path}'")
-            if module_reports_dir:
-                print(f"Cross-module nodes will link to reports in: {module_reports_dir}")
+        # Create summary report
+        create_summary_report(graph, summary_path)
+        print(f"Summary report saved to '{summary_path}'")
+        
+        # Create main visualization with module reports
+        create_pyvis_graph(graph, viz_file, title=f"Call Graph: {path.name}", module_reports_dir=output_dir)
+        print(f"Visualization saved to '{viz_file}'")
+        print(f"Module reports available in: {output_dir}")
+        
+        print(f"\nAnalysis complete! Open '{viz_file}' to start exploring.")
             
     except Exception as e:
         print(f"Error during scanning: {e}", file=sys.stderr)
@@ -305,100 +339,34 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  flowscope analyze src/ --output analysis/ --modules
-  flowscope scan src/ --output project.json
-  flowscope scan main.py --output main.json --visualize
-  flowscope compare old.json new.json --output diff.txt --visualize drift.html
-  flowscope visualize project.json --output viz.html --type interactive
-  flowscope info project.json --detailed
+  flowscope src/
+  flowscope . --exclude out node_modules
         """
     )
     
-    subparsers = parser.add_subparsers(dest="cmd", help="Available commands")
-    
-    # Scan command
-    scan_parser = subparsers.add_parser("scan", help="Scan directory or file")
-    scan_parser.add_argument("path", help="Path to scan")
-    scan_parser.add_argument("--output", "-o", default="flow_graph.json", 
-                           help="Output file path (default: flow_graph.json)")
-    scan_parser.add_argument("--exclude", nargs="*", 
-                           help="Patterns to exclude from scanning")
-    scan_parser.add_argument("--description", help="Description for this snapshot")
-    scan_parser.add_argument("--visualize", action="store_true",
-                           help="Generate HTML visualization")
-    scan_parser.add_argument("--module-reports", 
-                           help="Directory containing module-specific HTML reports for cross-module linking")
-    scan_parser.set_defaults(func=cmd_scan)
-    
-    # Compare command
-    compare_parser = subparsers.add_parser("compare", help="Compare two snapshots")
-    compare_parser.add_argument("old", help="Old snapshot file")
-    compare_parser.add_argument("new", help="New snapshot file")
-    compare_parser.add_argument("--output", "-o", help="Output file for detailed report")
-    compare_parser.add_argument("--visualize", help="Generate drift visualization")
-    compare_parser.set_defaults(func=cmd_compare)
-    
-    # Visualize command
-    viz_parser = subparsers.add_parser("visualize", help="Create visualization")
-    viz_parser.add_argument("graph", help="Graph snapshot file")
-    viz_parser.add_argument("--output", "-o", default="flow_graph.html",
-                          help="Output file path (default: flow_graph.html)")
-    viz_parser.add_argument("--type", choices=["interactive", "static", "modules"],
-                           default="interactive", help="Visualization type")
-    viz_parser.add_argument("--title", default="Function Call Graph",
-                           help="Graph title")
-    viz_parser.add_argument("--layout", choices=["spring", "circular", "random", "shell"],
-                           default="spring", help="Layout for static visualization")
-    viz_parser.add_argument("--width", type=int, default=12, help="Width for static visualization")
-    viz_parser.add_argument("--height", type=int, default=8, help="Height for static visualization")
-    viz_parser.add_argument("--module-reports", 
-                           help="Directory containing module-specific HTML reports for cross-module linking")
-    viz_parser.set_defaults(func=cmd_visualize)
-    
-    # Info command
-    info_parser = subparsers.add_parser("info", help="Show graph information")
-    info_parser.add_argument("graph", help="Graph snapshot file")
-    info_parser.add_argument("--detailed", action="store_true",
-                           help="Show detailed statistics")
-    info_parser.set_defaults(func=cmd_info)
-    
-    # Export command
-    export_parser = subparsers.add_parser("export", help="Export graph data")
-    export_parser.add_argument("graph", help="Graph snapshot file")
-    export_parser.add_argument("--output", "-o", required=True, help="Output file path")
-    export_parser.add_argument("--format", choices=["json", "gexf", "graphml", "csv"],
-                              default="json", help="Export format")
-    export_parser.set_defaults(func=cmd_export)
-    
-    # Report command
-    report_parser = subparsers.add_parser("report", help="Generate summary report")
-    report_parser.add_argument("graph", help="Graph snapshot file")
-    report_parser.add_argument("--output", "-o", default="flow_report.txt",
-                             help="Output file path (default: flow_report.txt)")
-    report_parser.set_defaults(func=cmd_report)
-    
-    # Analyze command - comprehensive analysis with Function Explorer
-    analyze_parser = subparsers.add_parser("analyze", help="Analyze directory with Function Explorer")
-    analyze_parser.add_argument("path", help="Path to analyze")
-    analyze_parser.add_argument("--output", "-o", default="flowscope_analysis",
-                              help="Output directory (default: flowscope_analysis)")
-    analyze_parser.add_argument("--exclude", nargs="*",
-                               help="Patterns to exclude from scanning")
-    analyze_parser.add_argument("--modules", action="store_true", default=True,
-                               help="Create module-specific reports with Function Explorer")
-    analyze_parser.add_argument("--module-view", action="store_true",
-                               help="Create module-level relationship view")
-    analyze_parser.set_defaults(func=cmd_analyze)
+    # Main arguments
+    parser.add_argument("path", help="Path to scan")
+    parser.add_argument("--exclude", nargs="*", 
+                       help="Patterns to exclude from scanning")
     
     # Parse arguments
     args = parser.parse_args()
     
-    if not args.cmd:
-        parser.print_help()
-        sys.exit(1)
+    # Set up automatic output directory and enable all features
+    target_path = Path(args.path)
+    if target_path.is_file():
+        output_dir = target_path.parent / "flowscope_analysis"
+    else:
+        output_dir = target_path / "flowscope_analysis"
     
-    # Execute command
-    args.func(args)
+    # Configure args for full analysis
+    args.output = output_dir / "flowscope.json"
+    args.visualize = True
+    args.analyze_functions = True
+    args.description = f"FlowScope analysis of {target_path.name}"
+    
+    # Execute main scan logic
+    cmd_scan(args)
 
 
 if __name__ == "__main__":

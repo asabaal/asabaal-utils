@@ -5,6 +5,8 @@
         
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
             <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="module_mapping.js"></script>
+
             
         
 <center>
@@ -137,7 +139,7 @@
         </script>
     
 <script>
-window.functionFlowData = {"example_runner.create_example_spec": {"nodes": [{"id": "example_runner.create_example_spec", "label": "create_example_spec", "title": "example_runner.create_example_spec\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 26", "color": "#ff6b6b"}], "edges": []}, "example_runner.setup_output_directory": {"nodes": [{"id": "example_runner.setup_output_directory", "label": "setup_output_directory", "title": "example_runner.setup_output_directory\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 77", "color": "#ff6b6b"}], "edges": []}, "example_runner.run_pipeline": {"nodes": [{"id": "example_runner.run_pipeline", "label": "run_pipeline", "title": "example_runner.run_pipeline\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 85", "color": "#ff6b6b"}], "edges": []}, "example_runner.organize_output_files": {"nodes": [{"id": "example_runner.organize_output_files", "label": "organize_output_files", "title": "example_runner.organize_output_files\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 107", "color": "#ff6b6b"}], "edges": []}, "example_runner.create_summary": {"nodes": [{"id": "example_runner.create_summary", "label": "create_summary", "title": "example_runner.create_summary\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 159", "color": "#ff6b6b"}], "edges": []}, "example_runner.print_final_instructions": {"nodes": [{"id": "example_runner.print_final_instructions", "label": "print_final_instructions", "title": "example_runner.print_final_instructions\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 216", "color": "#ff6b6b"}], "edges": []}, "example_runner.main": {"nodes": [{"id": "example_runner.main", "label": "main", "title": "example_runner.main\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 233", "color": "#ff6b6b"}], "edges": []}};
+window.functionFlowData = {"example_runner.create_example_spec": {"nodes": [{"id": "example_runner.create_example_spec", "label": "create_example_spec", "title": "example_runner.create_example_spec\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 26", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "example_runner.setup_output_directory": {"nodes": [{"id": "example_runner.setup_output_directory", "label": "setup_output_directory", "title": "example_runner.setup_output_directory\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 77", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "example_runner.run_pipeline": {"nodes": [{"id": "example_runner.run_pipeline", "label": "run_pipeline", "title": "example_runner.run_pipeline\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 85", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "example_runner.organize_output_files": {"nodes": [{"id": "example_runner.organize_output_files", "label": "organize_output_files", "title": "example_runner.organize_output_files\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 107", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "example_runner.create_summary": {"nodes": [{"id": "example_runner.create_summary", "label": "create_summary", "title": "example_runner.create_summary\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 159", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "example_runner.print_final_instructions": {"nodes": [{"id": "example_runner.print_final_instructions", "label": "print_final_instructions", "title": "example_runner.print_final_instructions\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 216", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}, "example_runner.main": {"nodes": [{"id": "example_runner.main", "label": "main", "title": "example_runner.main\\nFile: src/asabaal_utils/agents/spec_coder/examples/example_runner.py\\nLine: 233", "color": "#ff6b6b", "x": 0.0, "y": 0.0}], "edges": []}};
 </script>
 
     <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
@@ -440,5 +442,43 @@ window.functionFlowData = {"example_runner.create_example_spec": {"nodes": [{"id
         }
     });
     </script>
+
+<script>
+// Add click handlers for cross-module nodes
+// Module mapping loaded from shared file
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
 </body>
 </html>
