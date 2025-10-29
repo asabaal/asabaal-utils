@@ -9,21 +9,21 @@ import json
 from typing import Dict, Any
 from pathlib import Path
 
-# Import dynamic generator
+# Import hierarchical generator (NEW!)
 try:
-    from asabaal_utils.flowscope.dynamic_function_flow_generator import generate_dynamic_function_flow
+    from .hierarchical_flow_generator import generate_hierarchical_function_flow
 except ImportError:
     try:
-        from . import dynamic_function_flow_generator
-        generate_dynamic_function_flow = dynamic_function_flow_generator.generate_dynamic_function_flow
+        import hierarchical_flow_generator
+        generate_hierarchical_function_flow = hierarchical_flow_generator.generate_hierarchical_function_flow
     except ImportError:
+        # Fallback to old dynamic generator
         try:
-            import dynamic_function_flow_generator
-            generate_dynamic_function_flow = dynamic_function_flow_generator.generate_dynamic_function_flow
+            from .dynamic_function_flow_generator import generate_dynamic_function_flow
+            generate_hierarchical_function_flow = generate_dynamic_function_flow
         except ImportError:
-            # Fallback: define a stub that raises an informative error
-            def generate_dynamic_function_flow(*args, **kwargs):
-                raise ImportError("Dynamic function flow generator not available. Install required dependencies.")
+            def generate_hierarchical_function_flow(*args, **kwargs):
+                raise ImportError("Function flow generator not available. Install required dependencies.")
 
 
 class FunctionFlowRenderer:
@@ -37,14 +37,14 @@ class FunctionFlowRenderer:
     def render_function_flow(self, function_flow) -> Path:
         """Render a single function flow to HTML using dynamic visualization."""
         
-        # Use new dynamic generator with proper data conversion
+        # Use new hierarchical generator with proper data conversion
         flow_data = function_flow.to_dict()
         
         # Create filename
         safe_function_name = function_flow.function_name.replace('.', '_').replace('<', '_').replace('>', '_')
         output_file = self.function_flows_dir / f"{safe_function_name}_flow.html"
         
-        generate_dynamic_function_flow(
+        generate_hierarchical_function_flow(
             flow_data,
             output_file,
             function_name=function_flow.function_name,

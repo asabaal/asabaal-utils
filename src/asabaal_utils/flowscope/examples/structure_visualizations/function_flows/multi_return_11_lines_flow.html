@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchical Function Flow - multi_return_11_lines</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .structure-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .structure-type {
+            font-size: 18px;
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 85vh;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Hierarchical Function Flow - multi_return_11_lines</h1>
+        <div class="subtitle">Module: flowscope.examples.structure_examples | Structure: Nested</div>
+    </div>
+    
+    <div class="structure-info">
+        <div class="structure-type">Structure Type: Nested</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">11</div>
+                <div class="stat-label">Nodes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Edges</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div id="network"></div>
+        <div class="controls">
+            <button class="btn-primary" onclick="network.fit()">Fit to Screen</button>
+            <button class="btn-secondary" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Function flow data
+        const functionFlowData = {
+        "function_name": "multi_return_11_lines",
+        "module": "flowscope.examples.structure_examples",
+        "file_path": "flowscope/examples/structure_examples.py",
+        "entry_point": {
+                "id": "node_0",
+                "type": "entry",
+                "label": "Enter multi_return_11_lines",
+                "line": 0
+        },
+        "exit_point": {
+                "id": "node_1",
+                "type": "exit",
+                "label": "Exit multi_return_11_lines",
+                "line": 0
+        },
+        "nodes": [
+                {
+                        "id": "node_2",
+                        "type": "statement",
+                        "label": "def multi_return_11_lines(text):\n    if not text:\n        return False\n    if len(text) < 3:\n        return False\n    if not text.isalnum():\n        return False\n    return True",
+                        "line": 352,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_3",
+                        "type": "statement",
+                        "label": "text",
+                        "line": 352,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_4",
+                        "type": "conditional",
+                        "label": "if not text",
+                        "line": 353,
+                        "condition": "not text",
+                        "targets": []
+                },
+                {
+                        "id": "node_5",
+                        "type": "return",
+                        "label": "return False",
+                        "line": 354,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_6",
+                        "type": "conditional",
+                        "label": "if len(text) < 3",
+                        "line": 355,
+                        "condition": "len(text) < 3",
+                        "targets": []
+                },
+                {
+                        "id": "node_7",
+                        "type": "return",
+                        "label": "return False",
+                        "line": 356,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_8",
+                        "type": "conditional",
+                        "label": "if not text.isalnum()",
+                        "line": 357,
+                        "condition": "not text.isalnum()",
+                        "targets": []
+                },
+                {
+                        "id": "node_9",
+                        "type": "return",
+                        "label": "return False",
+                        "line": 358,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_10",
+                        "type": "return",
+                        "label": "return True",
+                        "line": 359,
+                        "condition": null,
+                        "targets": []
+                }
+        ],
+        "edges": [
+                {
+                        "from": "node_0",
+                        "to": "node_2",
+                        "label": null
+                },
+                {
+                        "from": "node_2",
+                        "to": "node_3",
+                        "label": null
+                },
+                {
+                        "from": "node_3",
+                        "to": "node_4",
+                        "label": null
+                },
+                {
+                        "from": "node_4",
+                        "to": "node_5",
+                        "label": null
+                },
+                {
+                        "from": "node_5",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_6",
+                        "to": "node_7",
+                        "label": null
+                },
+                {
+                        "from": "node_7",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_8",
+                        "to": "node_9",
+                        "label": null
+                },
+                {
+                        "from": "node_9",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_10",
+                        "to": "node_1",
+                        "label": null
+                }
+        ]
+};
+        
+        // Pre-calculated hierarchical positions
+        const hierarchicalPositions = {
+        "node_0": {
+                "x": 0,
+                "y": 0,
+                "level": 0
+        },
+        "node_2": {
+                "x": 0,
+                "y": 150,
+                "level": 1
+        },
+        "node_3": {
+                "x": 0,
+                "y": 300,
+                "level": 2
+        },
+        "node_4": {
+                "x": 0,
+                "y": 450,
+                "level": 3
+        },
+        "node_5": {
+                "x": 0,
+                "y": 600,
+                "level": 4
+        },
+        "node_1": {
+                "x": 0,
+                "y": 750,
+                "level": 5
+        }
+};
+        
+        // Color and shape mappings
+        const colorMap = {
+            'entry': '#28a745',
+            'exit': '#dc3545', 
+            'conditional': '#ffc107',
+            'return': '#17a2b8',
+            'statement': '#007bff',
+            'assignment': '#6f42c1',
+            'loop': '#fd7e14',
+            'merge': '#20c997'
+        };
+        
+        const shapeMap = {
+            'entry': 'circle',
+            'exit': 'circle',
+            'conditional': 'diamond',
+            'return': 'triangleDown',
+            'statement': 'box',
+            'assignment': 'box',
+            'loop': 'box',
+            'merge': 'circle'
+        };
+        
+        // Create nodes with hierarchical positions
+        const nodes = new vis.DataSet([
+            {
+                id: functionFlowData.entry_point.id,
+                label: functionFlowData.entry_point.label,
+                title: `${functionFlowData.entry_point.label}\nType: ${functionFlowData.entry_point.type}\nLine: ${functionFlowData.entry_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.entry_point.type],
+                    border: '#28a745'
+                },
+                shape: shapeMap[functionFlowData.entry_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.entry_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.entry_point.id]?.y || 0
+            },
+            {
+                id: functionFlowData.exit_point.id,
+                label: functionFlowData.exit_point.label,
+                title: `${functionFlowData.exit_point.label}\nType: ${functionFlowData.exit_point.type}\nLine: ${functionFlowData.exit_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.exit_point.type],
+                    border: '#dc3545'
+                },
+                shape: shapeMap[functionFlowData.exit_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.exit_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.exit_point.id]?.y || 0
+            }
+        ]);
+        
+        // Add control flow nodes with hierarchical positions
+        functionFlowData.nodes.forEach(node => {
+            if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+                const color = colorMap[node.type] || '#97c2fc';
+                const shape = shapeMap[node.type] || 'box';
+                
+                let label = node.label;
+                if (label.length > 30) {
+                    label = label.substring(0, 27) + '...';
+                }
+                
+                nodes.add({
+                    id: node.id,
+                    label: label,
+                    title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                    color: {
+                        background: color,
+                        border: '#333'
+                    },
+                    shape: shape,
+                    font: {size: 12, color: '#333'},
+                    borderWidth: 2,
+                    x: hierarchicalPositions[node.id]?.x || 0,
+                    y: hierarchicalPositions[node.id]?.y || 0
+                });
+            }
+        });
+        
+        // Create edges with appropriate styling
+        const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            label: edge.label || '',
+            arrows: 'to',
+            color: {color: '#666666', highlight: '#007bff'},
+            width: 2,
+            smooth: {
+                type: 'cubicBezier',
+                roundness: 0.1
+            }
+        })));
+        
+        // Create network with hierarchical layout
+        const container = document.getElementById('network');
+        const data = { nodes, edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    enabled: false,  // Use our manual positions
+                    levelSeparation: 150,
+                    nodeSpacing: 200,
+                    treeSpacing: 200
+                }
+            },
+            physics: {
+                enabled: false,  // Start with physics disabled
+                stabilization: {
+                    enabled: true,
+                    iterations: 100
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            },
+            nodes: {
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.2
+                }
+            }
+        };
+        
+        const network = new vis.Network(container, data, options);
+        
+        // Fit to screen after network is ready
+        network.once('stabilizationIterationsDone', function() {
+            network.fit();
+        });
+        
+        // Control functions
+        function togglePhysics() {
+            const physicsEnabled = !network.physics.physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled
+                }
+            });
+        }
+    </script>
+</body>
+</html>

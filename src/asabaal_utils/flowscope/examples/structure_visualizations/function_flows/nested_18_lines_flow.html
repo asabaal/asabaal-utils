@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchical Function Flow - nested_18_lines</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .structure-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .structure-type {
+            font-size: 18px;
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 85vh;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Hierarchical Function Flow - nested_18_lines</h1>
+        <div class="subtitle">Module: flowscope.examples.structure_examples | Structure: Nested</div>
+    </div>
+    
+    <div class="structure-info">
+        <div class="structure-type">Structure Type: Nested</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">35</div>
+                <div class="stat-label">Nodes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">36</div>
+                <div class="stat-label">Edges</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div id="network"></div>
+        <div class="controls">
+            <button class="btn-primary" onclick="network.fit()">Fit to Screen</button>
+            <button class="btn-secondary" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Function flow data
+        const functionFlowData = {
+        "function_name": "nested_18_lines",
+        "module": "flowscope.examples.structure_examples",
+        "file_path": "flowscope/examples/structure_examples.py",
+        "entry_point": {
+                "id": "node_0",
+                "type": "entry",
+                "label": "Enter nested_18_lines",
+                "line": 0
+        },
+        "exit_point": {
+                "id": "node_1",
+                "type": "exit",
+                "label": "Exit nested_18_lines",
+                "line": 0
+        },
+        "nodes": [
+                {
+                        "id": "node_2",
+                        "type": "statement",
+                        "label": "def nested_18_lines(data, filters):\n    results = []\n    for category in data:\n        if category in filters:\n            for item in data[category]:\n                if item.get('active', False):\n                    processed = {'id': item['id'], 'name': item['name'], 'category': category}\n                    results.append(processed)\n    return results",
+                        "line": 248,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_3",
+                        "type": "statement",
+                        "label": "data",
+                        "line": 248,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_4",
+                        "type": "statement",
+                        "label": "filters",
+                        "line": 248,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_5",
+                        "type": "assignment",
+                        "label": "results = []",
+                        "line": 249,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_6",
+                        "type": "statement",
+                        "label": "results = []",
+                        "line": 249,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_7",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 249,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_8",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 249,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_9",
+                        "type": "loop",
+                        "label": "for category in data",
+                        "line": 250,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_10",
+                        "type": "conditional",
+                        "label": "if category in filters",
+                        "line": 251,
+                        "condition": "category in filters",
+                        "targets": []
+                },
+                {
+                        "id": "node_11",
+                        "type": "loop",
+                        "label": "for item in data[category]",
+                        "line": 252,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_12",
+                        "type": "conditional",
+                        "label": "if item.get('active', False)",
+                        "line": 253,
+                        "condition": "item.get('active', False)",
+                        "targets": []
+                },
+                {
+                        "id": "node_13",
+                        "type": "assignment",
+                        "label": "processed = {'id': item['id'], 'name': item['name'], 'category': category}",
+                        "line": 254,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_14",
+                        "type": "statement",
+                        "label": "processed = {'id': item['id'], 'name': item['name'], 'category': category}",
+                        "line": 254,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_15",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 254,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_16",
+                        "type": "statement",
+                        "label": "{'id': item['id'], 'name': item['name'], 'category': category}",
+                        "line": 254,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_17",
+                        "type": "statement",
+                        "label": "'id'",
+                        "line": 255,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_18",
+                        "type": "statement",
+                        "label": "'name'",
+                        "line": 256,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_19",
+                        "type": "statement",
+                        "label": "'category'",
+                        "line": 257,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_20",
+                        "type": "statement",
+                        "label": "item['id']",
+                        "line": 255,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_21",
+                        "type": "statement",
+                        "label": "item",
+                        "line": 255,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_22",
+                        "type": "statement",
+                        "label": "'id'",
+                        "line": 255,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_23",
+                        "type": "statement",
+                        "label": "item['name']",
+                        "line": 256,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_24",
+                        "type": "statement",
+                        "label": "item",
+                        "line": 256,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_25",
+                        "type": "statement",
+                        "label": "'name'",
+                        "line": 256,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_26",
+                        "type": "statement",
+                        "label": "category",
+                        "line": 257,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_27",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 259,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_28",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 259,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_29",
+                        "type": "statement",
+                        "label": "results.append",
+                        "line": 259,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_30",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 259,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_31",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 259,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_32",
+                        "type": "loop_exit",
+                        "label": "exit for item",
+                        "line": 252,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_33",
+                        "type": "loop_exit",
+                        "label": "exit for category",
+                        "line": 250,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_34",
+                        "type": "return",
+                        "label": "return results",
+                        "line": 260,
+                        "condition": null,
+                        "targets": []
+                }
+        ],
+        "edges": [
+                {
+                        "from": "node_0",
+                        "to": "node_2",
+                        "label": null
+                },
+                {
+                        "from": "node_2",
+                        "to": "node_3",
+                        "label": null
+                },
+                {
+                        "from": "node_3",
+                        "to": "node_4",
+                        "label": null
+                },
+                {
+                        "from": "node_4",
+                        "to": "node_5",
+                        "label": null
+                },
+                {
+                        "from": "node_5",
+                        "to": "node_6",
+                        "label": null
+                },
+                {
+                        "from": "node_6",
+                        "to": "node_7",
+                        "label": null
+                },
+                {
+                        "from": "node_7",
+                        "to": "node_8",
+                        "label": null
+                },
+                {
+                        "from": "node_8",
+                        "to": "node_9",
+                        "label": null
+                },
+                {
+                        "from": "node_9",
+                        "to": "node_10",
+                        "label": null
+                },
+                {
+                        "from": "node_10",
+                        "to": "node_11",
+                        "label": null
+                },
+                {
+                        "from": "node_11",
+                        "to": "node_12",
+                        "label": null
+                },
+                {
+                        "from": "node_12",
+                        "to": "node_13",
+                        "label": null
+                },
+                {
+                        "from": "node_13",
+                        "to": "node_14",
+                        "label": null
+                },
+                {
+                        "from": "node_14",
+                        "to": "node_15",
+                        "label": null
+                },
+                {
+                        "from": "node_15",
+                        "to": "node_16",
+                        "label": null
+                },
+                {
+                        "from": "node_16",
+                        "to": "node_17",
+                        "label": null
+                },
+                {
+                        "from": "node_17",
+                        "to": "node_18",
+                        "label": null
+                },
+                {
+                        "from": "node_18",
+                        "to": "node_19",
+                        "label": null
+                },
+                {
+                        "from": "node_19",
+                        "to": "node_20",
+                        "label": null
+                },
+                {
+                        "from": "node_20",
+                        "to": "node_21",
+                        "label": null
+                },
+                {
+                        "from": "node_21",
+                        "to": "node_22",
+                        "label": null
+                },
+                {
+                        "from": "node_22",
+                        "to": "node_23",
+                        "label": null
+                },
+                {
+                        "from": "node_23",
+                        "to": "node_24",
+                        "label": null
+                },
+                {
+                        "from": "node_24",
+                        "to": "node_25",
+                        "label": null
+                },
+                {
+                        "from": "node_25",
+                        "to": "node_26",
+                        "label": null
+                },
+                {
+                        "from": "node_26",
+                        "to": "node_27",
+                        "label": null
+                },
+                {
+                        "from": "node_27",
+                        "to": "node_28",
+                        "label": null
+                },
+                {
+                        "from": "node_28",
+                        "to": "node_29",
+                        "label": null
+                },
+                {
+                        "from": "node_29",
+                        "to": "node_30",
+                        "label": null
+                },
+                {
+                        "from": "node_30",
+                        "to": "node_31",
+                        "label": null
+                },
+                {
+                        "from": "node_31",
+                        "to": "node_11",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_11",
+                        "to": "node_32",
+                        "label": "break/complete"
+                },
+                {
+                        "from": "node_32",
+                        "to": "node_9",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_9",
+                        "to": "node_33",
+                        "label": "break/complete"
+                },
+                {
+                        "from": "node_33",
+                        "to": "node_34",
+                        "label": null
+                },
+                {
+                        "from": "node_34",
+                        "to": "node_1",
+                        "label": null
+                }
+        ]
+};
+        
+        // Pre-calculated hierarchical positions
+        const hierarchicalPositions = {
+        "node_0": {
+                "x": 0,
+                "y": 0,
+                "level": 0
+        },
+        "node_2": {
+                "x": 0,
+                "y": 150,
+                "level": 1
+        },
+        "node_3": {
+                "x": 0,
+                "y": 300,
+                "level": 2
+        },
+        "node_4": {
+                "x": 0,
+                "y": 450,
+                "level": 3
+        },
+        "node_5": {
+                "x": 0,
+                "y": 600,
+                "level": 4
+        },
+        "node_6": {
+                "x": 0,
+                "y": 750,
+                "level": 5
+        },
+        "node_7": {
+                "x": 0,
+                "y": 900,
+                "level": 6
+        },
+        "node_8": {
+                "x": 0,
+                "y": 1050,
+                "level": 7
+        },
+        "node_9": {
+                "x": 0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_10": {
+                "x": -125.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_33": {
+                "x": 125.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_11": {
+                "x": -125.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_34": {
+                "x": 125.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_12": {
+                "x": -250.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_32": {
+                "x": 0.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_1": {
+                "x": 250.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_13": {
+                "x": 0,
+                "y": 1800,
+                "level": 12
+        },
+        "node_14": {
+                "x": 0,
+                "y": 1950,
+                "level": 13
+        },
+        "node_15": {
+                "x": 0,
+                "y": 2100,
+                "level": 14
+        },
+        "node_16": {
+                "x": 0,
+                "y": 2250,
+                "level": 15
+        },
+        "node_17": {
+                "x": 0,
+                "y": 2400,
+                "level": 16
+        },
+        "node_18": {
+                "x": 0,
+                "y": 2550,
+                "level": 17
+        },
+        "node_19": {
+                "x": 0,
+                "y": 2700,
+                "level": 18
+        },
+        "node_20": {
+                "x": 0,
+                "y": 2850,
+                "level": 19
+        },
+        "node_21": {
+                "x": 0,
+                "y": 3000,
+                "level": 20
+        },
+        "node_22": {
+                "x": 0,
+                "y": 3150,
+                "level": 21
+        },
+        "node_23": {
+                "x": 0,
+                "y": 3300,
+                "level": 22
+        },
+        "node_24": {
+                "x": 0,
+                "y": 3450,
+                "level": 23
+        },
+        "node_25": {
+                "x": 0,
+                "y": 3600,
+                "level": 24
+        },
+        "node_26": {
+                "x": 0,
+                "y": 3750,
+                "level": 25
+        },
+        "node_27": {
+                "x": 0,
+                "y": 3900,
+                "level": 26
+        },
+        "node_28": {
+                "x": 0,
+                "y": 4050,
+                "level": 27
+        },
+        "node_29": {
+                "x": 0,
+                "y": 4200,
+                "level": 28
+        },
+        "node_30": {
+                "x": 0,
+                "y": 4350,
+                "level": 29
+        },
+        "node_31": {
+                "x": 0,
+                "y": 4500,
+                "level": 30
+        }
+};
+        
+        // Color and shape mappings
+        const colorMap = {
+            'entry': '#28a745',
+            'exit': '#dc3545', 
+            'conditional': '#ffc107',
+            'return': '#17a2b8',
+            'statement': '#007bff',
+            'assignment': '#6f42c1',
+            'loop': '#fd7e14',
+            'merge': '#20c997'
+        };
+        
+        const shapeMap = {
+            'entry': 'circle',
+            'exit': 'circle',
+            'conditional': 'diamond',
+            'return': 'triangleDown',
+            'statement': 'box',
+            'assignment': 'box',
+            'loop': 'box',
+            'merge': 'circle'
+        };
+        
+        // Create nodes with hierarchical positions
+        const nodes = new vis.DataSet([
+            {
+                id: functionFlowData.entry_point.id,
+                label: functionFlowData.entry_point.label,
+                title: `${functionFlowData.entry_point.label}\nType: ${functionFlowData.entry_point.type}\nLine: ${functionFlowData.entry_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.entry_point.type],
+                    border: '#28a745'
+                },
+                shape: shapeMap[functionFlowData.entry_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.entry_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.entry_point.id]?.y || 0
+            },
+            {
+                id: functionFlowData.exit_point.id,
+                label: functionFlowData.exit_point.label,
+                title: `${functionFlowData.exit_point.label}\nType: ${functionFlowData.exit_point.type}\nLine: ${functionFlowData.exit_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.exit_point.type],
+                    border: '#dc3545'
+                },
+                shape: shapeMap[functionFlowData.exit_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.exit_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.exit_point.id]?.y || 0
+            }
+        ]);
+        
+        // Add control flow nodes with hierarchical positions
+        functionFlowData.nodes.forEach(node => {
+            if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+                const color = colorMap[node.type] || '#97c2fc';
+                const shape = shapeMap[node.type] || 'box';
+                
+                let label = node.label;
+                if (label.length > 30) {
+                    label = label.substring(0, 27) + '...';
+                }
+                
+                nodes.add({
+                    id: node.id,
+                    label: label,
+                    title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                    color: {
+                        background: color,
+                        border: '#333'
+                    },
+                    shape: shape,
+                    font: {size: 12, color: '#333'},
+                    borderWidth: 2,
+                    x: hierarchicalPositions[node.id]?.x || 0,
+                    y: hierarchicalPositions[node.id]?.y || 0
+                });
+            }
+        });
+        
+        // Create edges with appropriate styling
+        const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            label: edge.label || '',
+            arrows: 'to',
+            color: {color: '#666666', highlight: '#007bff'},
+            width: 2,
+            smooth: {
+                type: 'cubicBezier',
+                roundness: 0.1
+            }
+        })));
+        
+        // Create network with hierarchical layout
+        const container = document.getElementById('network');
+        const data = { nodes, edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    enabled: false,  // Use our manual positions
+                    levelSeparation: 150,
+                    nodeSpacing: 200,
+                    treeSpacing: 200
+                }
+            },
+            physics: {
+                enabled: false,  // Start with physics disabled
+                stabilization: {
+                    enabled: true,
+                    iterations: 100
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            },
+            nodes: {
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.2
+                }
+            }
+        };
+        
+        const network = new vis.Network(container, data, options);
+        
+        // Fit to screen after network is ready
+        network.once('stabilizationIterationsDone', function() {
+            network.fit();
+        });
+        
+        // Control functions
+        function togglePhysics() {
+            const physicsEnabled = !network.physics.physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled
+                }
+            });
+        }
+    </script>
+</body>
+</html>

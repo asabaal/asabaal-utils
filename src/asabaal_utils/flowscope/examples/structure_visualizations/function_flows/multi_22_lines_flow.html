@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchical Function Flow - multi_22_lines</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .structure-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .structure-type {
+            font-size: 18px;
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 85vh;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Hierarchical Function Flow - multi_22_lines</h1>
+        <div class="subtitle">Module: flowscope.examples.structure_examples | Structure: Nested</div>
+    </div>
+    
+    <div class="structure-info">
+        <div class="structure-type">Structure Type: Nested</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">97</div>
+                <div class="stat-label">Nodes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">100</div>
+                <div class="stat-label">Edges</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div id="network"></div>
+        <div class="controls">
+            <button class="btn-primary" onclick="network.fit()">Fit to Screen</button>
+            <button class="btn-secondary" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Function flow data
+        const functionFlowData = {
+        "function_name": "multi_22_lines",
+        "module": "flowscope.examples.structure_examples",
+        "file_path": "flowscope/examples/structure_examples.py",
+        "entry_point": {
+                "id": "node_0",
+                "type": "entry",
+                "label": "Enter multi_22_lines",
+                "line": 0
+        },
+        "exit_point": {
+                "id": "node_1",
+                "type": "exit",
+                "label": "Exit multi_22_lines",
+                "line": 0
+        },
+        "nodes": [
+                {
+                        "id": "node_2",
+                        "type": "statement",
+                        "label": "def multi_22_lines(user_role, permissions):\n    if user_role == 'admin':\n        access_level = 'full'\n        allowed_actions = ['create', 'read', 'update', 'delete', 'manage']\n        rate_limit = 10000\n    elif user_role == 'moderator':\n        access_level = 'high'\n        allowed_actions = ['create', 'read', 'update', 'moderate']\n        rate_limit = 5000\n    elif user_role == 'editor':\n        access_level = 'medium'\n        allowed_actions = ['create', 'read', 'update']\n        rate_limit = 2000\n    elif user_role == 'viewer':\n        access_level = 'low'\n        allowed_actions = ['read']\n        rate_limit = 1000\n    else:\n        access_level = 'none'\n        allowed_actions = []\n        rate_limit = 100\n    final_permissions = [p for p in allowed_actions if p in permissions]\n    return {'access_level': access_level, 'permissions': final_permissions, 'rate_limit': rate_limit}",
+                        "line": 165,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_3",
+                        "type": "statement",
+                        "label": "user_role",
+                        "line": 165,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_4",
+                        "type": "statement",
+                        "label": "permissions",
+                        "line": 165,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_5",
+                        "type": "conditional",
+                        "label": "if user_role == 'admin'",
+                        "line": 166,
+                        "condition": "user_role == 'admin'",
+                        "targets": []
+                },
+                {
+                        "id": "node_6",
+                        "type": "assignment",
+                        "label": "access_level = 'full'",
+                        "line": 167,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_7",
+                        "type": "statement",
+                        "label": "access_level = 'full'",
+                        "line": 167,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_8",
+                        "type": "statement",
+                        "label": "access_level",
+                        "line": 167,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_9",
+                        "type": "statement",
+                        "label": "'full'",
+                        "line": 167,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_10",
+                        "type": "assignment",
+                        "label": "allowed_actions = ['create', 'read', 'update', 'delete', 'manage']",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_11",
+                        "type": "statement",
+                        "label": "allowed_actions = ['create', 'read', 'update', 'delete', 'manage']",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_12",
+                        "type": "statement",
+                        "label": "allowed_actions",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_13",
+                        "type": "statement",
+                        "label": "['create', 'read', 'update', 'delete', 'manage']",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_14",
+                        "type": "statement",
+                        "label": "'create'",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_15",
+                        "type": "statement",
+                        "label": "'read'",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_16",
+                        "type": "statement",
+                        "label": "'update'",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_17",
+                        "type": "statement",
+                        "label": "'delete'",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_18",
+                        "type": "statement",
+                        "label": "'manage'",
+                        "line": 168,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_19",
+                        "type": "assignment",
+                        "label": "rate_limit = 10000",
+                        "line": 169,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_20",
+                        "type": "statement",
+                        "label": "rate_limit = 10000",
+                        "line": 169,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_21",
+                        "type": "statement",
+                        "label": "rate_limit",
+                        "line": 169,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_22",
+                        "type": "statement",
+                        "label": "10000",
+                        "line": 169,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_23",
+                        "type": "conditional",
+                        "label": "if user_role == 'moderator'",
+                        "line": 170,
+                        "condition": "user_role == 'moderator'",
+                        "targets": []
+                },
+                {
+                        "id": "node_24",
+                        "type": "assignment",
+                        "label": "access_level = 'high'",
+                        "line": 171,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_25",
+                        "type": "statement",
+                        "label": "access_level = 'high'",
+                        "line": 171,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_26",
+                        "type": "statement",
+                        "label": "access_level",
+                        "line": 171,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_27",
+                        "type": "statement",
+                        "label": "'high'",
+                        "line": 171,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_28",
+                        "type": "assignment",
+                        "label": "allowed_actions = ['create', 'read', 'update', 'moderate']",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_29",
+                        "type": "statement",
+                        "label": "allowed_actions = ['create', 'read', 'update', 'moderate']",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_30",
+                        "type": "statement",
+                        "label": "allowed_actions",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_31",
+                        "type": "statement",
+                        "label": "['create', 'read', 'update', 'moderate']",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_32",
+                        "type": "statement",
+                        "label": "'create'",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_33",
+                        "type": "statement",
+                        "label": "'read'",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_34",
+                        "type": "statement",
+                        "label": "'update'",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_35",
+                        "type": "statement",
+                        "label": "'moderate'",
+                        "line": 172,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_36",
+                        "type": "assignment",
+                        "label": "rate_limit = 5000",
+                        "line": 173,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_37",
+                        "type": "statement",
+                        "label": "rate_limit = 5000",
+                        "line": 173,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_38",
+                        "type": "statement",
+                        "label": "rate_limit",
+                        "line": 173,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_39",
+                        "type": "statement",
+                        "label": "5000",
+                        "line": 173,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_40",
+                        "type": "conditional",
+                        "label": "if user_role == 'editor'",
+                        "line": 174,
+                        "condition": "user_role == 'editor'",
+                        "targets": []
+                },
+                {
+                        "id": "node_41",
+                        "type": "assignment",
+                        "label": "access_level = 'medium'",
+                        "line": 175,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_42",
+                        "type": "statement",
+                        "label": "access_level = 'medium'",
+                        "line": 175,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_43",
+                        "type": "statement",
+                        "label": "access_level",
+                        "line": 175,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_44",
+                        "type": "statement",
+                        "label": "'medium'",
+                        "line": 175,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_45",
+                        "type": "assignment",
+                        "label": "allowed_actions = ['create', 'read', 'update']",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_46",
+                        "type": "statement",
+                        "label": "allowed_actions = ['create', 'read', 'update']",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_47",
+                        "type": "statement",
+                        "label": "allowed_actions",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_48",
+                        "type": "statement",
+                        "label": "['create', 'read', 'update']",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_49",
+                        "type": "statement",
+                        "label": "'create'",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_50",
+                        "type": "statement",
+                        "label": "'read'",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_51",
+                        "type": "statement",
+                        "label": "'update'",
+                        "line": 176,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_52",
+                        "type": "assignment",
+                        "label": "rate_limit = 2000",
+                        "line": 177,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_53",
+                        "type": "statement",
+                        "label": "rate_limit = 2000",
+                        "line": 177,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_54",
+                        "type": "statement",
+                        "label": "rate_limit",
+                        "line": 177,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_55",
+                        "type": "statement",
+                        "label": "2000",
+                        "line": 177,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_56",
+                        "type": "conditional",
+                        "label": "if user_role == 'viewer'",
+                        "line": 178,
+                        "condition": "user_role == 'viewer'",
+                        "targets": []
+                },
+                {
+                        "id": "node_57",
+                        "type": "assignment",
+                        "label": "access_level = 'low'",
+                        "line": 179,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_58",
+                        "type": "statement",
+                        "label": "access_level = 'low'",
+                        "line": 179,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_59",
+                        "type": "statement",
+                        "label": "access_level",
+                        "line": 179,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_60",
+                        "type": "statement",
+                        "label": "'low'",
+                        "line": 179,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_61",
+                        "type": "assignment",
+                        "label": "allowed_actions = ['read']",
+                        "line": 180,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_62",
+                        "type": "statement",
+                        "label": "allowed_actions = ['read']",
+                        "line": 180,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_63",
+                        "type": "statement",
+                        "label": "allowed_actions",
+                        "line": 180,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_64",
+                        "type": "statement",
+                        "label": "['read']",
+                        "line": 180,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_65",
+                        "type": "statement",
+                        "label": "'read'",
+                        "line": 180,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_66",
+                        "type": "assignment",
+                        "label": "rate_limit = 1000",
+                        "line": 181,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_67",
+                        "type": "statement",
+                        "label": "rate_limit = 1000",
+                        "line": 181,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_68",
+                        "type": "statement",
+                        "label": "rate_limit",
+                        "line": 181,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_69",
+                        "type": "statement",
+                        "label": "1000",
+                        "line": 181,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_70",
+                        "type": "assignment",
+                        "label": "access_level = 'none'",
+                        "line": 183,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_71",
+                        "type": "statement",
+                        "label": "access_level = 'none'",
+                        "line": 183,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_72",
+                        "type": "statement",
+                        "label": "access_level",
+                        "line": 183,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_73",
+                        "type": "statement",
+                        "label": "'none'",
+                        "line": 183,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_74",
+                        "type": "assignment",
+                        "label": "allowed_actions = []",
+                        "line": 184,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_75",
+                        "type": "statement",
+                        "label": "allowed_actions = []",
+                        "line": 184,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_76",
+                        "type": "statement",
+                        "label": "allowed_actions",
+                        "line": 184,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_77",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 184,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_78",
+                        "type": "assignment",
+                        "label": "rate_limit = 100",
+                        "line": 185,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_79",
+                        "type": "statement",
+                        "label": "rate_limit = 100",
+                        "line": 185,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_80",
+                        "type": "statement",
+                        "label": "rate_limit",
+                        "line": 185,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_81",
+                        "type": "statement",
+                        "label": "100",
+                        "line": 185,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_82",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 178,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_83",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 174,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_84",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 170,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_85",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 166,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_86",
+                        "type": "assignment",
+                        "label": "final_permissions = [p for p in allowed_actions if p in permissions]",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_87",
+                        "type": "statement",
+                        "label": "final_permissions = [p for p in allowed_actions if p in permissions]",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_88",
+                        "type": "statement",
+                        "label": "final_permissions",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_89",
+                        "type": "statement",
+                        "label": "[p for p in allowed_actions if p in permissions]",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_90",
+                        "type": "statement",
+                        "label": "p",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_91",
+                        "type": "statement",
+                        "label": "p",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_92",
+                        "type": "statement",
+                        "label": "allowed_actions",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_93",
+                        "type": "statement",
+                        "label": "p in permissions",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_94",
+                        "type": "statement",
+                        "label": "p",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_95",
+                        "type": "statement",
+                        "label": "permissions",
+                        "line": 188,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_96",
+                        "type": "return",
+                        "label": "return {'access_level': access_level, 'permissions': final_permissions, 'rate_limit': rate_limit}",
+                        "line": 190,
+                        "condition": null,
+                        "targets": []
+                }
+        ],
+        "edges": [
+                {
+                        "from": "node_0",
+                        "to": "node_2",
+                        "label": null
+                },
+                {
+                        "from": "node_2",
+                        "to": "node_3",
+                        "label": null
+                },
+                {
+                        "from": "node_3",
+                        "to": "node_4",
+                        "label": null
+                },
+                {
+                        "from": "node_4",
+                        "to": "node_5",
+                        "label": null
+                },
+                {
+                        "from": "node_5",
+                        "to": "node_6",
+                        "label": null
+                },
+                {
+                        "from": "node_6",
+                        "to": "node_7",
+                        "label": null
+                },
+                {
+                        "from": "node_7",
+                        "to": "node_8",
+                        "label": null
+                },
+                {
+                        "from": "node_8",
+                        "to": "node_9",
+                        "label": null
+                },
+                {
+                        "from": "node_9",
+                        "to": "node_10",
+                        "label": null
+                },
+                {
+                        "from": "node_10",
+                        "to": "node_11",
+                        "label": null
+                },
+                {
+                        "from": "node_11",
+                        "to": "node_12",
+                        "label": null
+                },
+                {
+                        "from": "node_12",
+                        "to": "node_13",
+                        "label": null
+                },
+                {
+                        "from": "node_13",
+                        "to": "node_14",
+                        "label": null
+                },
+                {
+                        "from": "node_14",
+                        "to": "node_15",
+                        "label": null
+                },
+                {
+                        "from": "node_15",
+                        "to": "node_16",
+                        "label": null
+                },
+                {
+                        "from": "node_16",
+                        "to": "node_17",
+                        "label": null
+                },
+                {
+                        "from": "node_17",
+                        "to": "node_18",
+                        "label": null
+                },
+                {
+                        "from": "node_18",
+                        "to": "node_19",
+                        "label": null
+                },
+                {
+                        "from": "node_19",
+                        "to": "node_20",
+                        "label": null
+                },
+                {
+                        "from": "node_20",
+                        "to": "node_21",
+                        "label": null
+                },
+                {
+                        "from": "node_21",
+                        "to": "node_22",
+                        "label": null
+                },
+                {
+                        "from": "node_5",
+                        "to": "node_23",
+                        "label": null
+                },
+                {
+                        "from": "node_23",
+                        "to": "node_24",
+                        "label": null
+                },
+                {
+                        "from": "node_24",
+                        "to": "node_25",
+                        "label": null
+                },
+                {
+                        "from": "node_25",
+                        "to": "node_26",
+                        "label": null
+                },
+                {
+                        "from": "node_26",
+                        "to": "node_27",
+                        "label": null
+                },
+                {
+                        "from": "node_27",
+                        "to": "node_28",
+                        "label": null
+                },
+                {
+                        "from": "node_28",
+                        "to": "node_29",
+                        "label": null
+                },
+                {
+                        "from": "node_29",
+                        "to": "node_30",
+                        "label": null
+                },
+                {
+                        "from": "node_30",
+                        "to": "node_31",
+                        "label": null
+                },
+                {
+                        "from": "node_31",
+                        "to": "node_32",
+                        "label": null
+                },
+                {
+                        "from": "node_32",
+                        "to": "node_33",
+                        "label": null
+                },
+                {
+                        "from": "node_33",
+                        "to": "node_34",
+                        "label": null
+                },
+                {
+                        "from": "node_34",
+                        "to": "node_35",
+                        "label": null
+                },
+                {
+                        "from": "node_35",
+                        "to": "node_36",
+                        "label": null
+                },
+                {
+                        "from": "node_36",
+                        "to": "node_37",
+                        "label": null
+                },
+                {
+                        "from": "node_37",
+                        "to": "node_38",
+                        "label": null
+                },
+                {
+                        "from": "node_38",
+                        "to": "node_39",
+                        "label": null
+                },
+                {
+                        "from": "node_23",
+                        "to": "node_40",
+                        "label": null
+                },
+                {
+                        "from": "node_40",
+                        "to": "node_41",
+                        "label": null
+                },
+                {
+                        "from": "node_41",
+                        "to": "node_42",
+                        "label": null
+                },
+                {
+                        "from": "node_42",
+                        "to": "node_43",
+                        "label": null
+                },
+                {
+                        "from": "node_43",
+                        "to": "node_44",
+                        "label": null
+                },
+                {
+                        "from": "node_44",
+                        "to": "node_45",
+                        "label": null
+                },
+                {
+                        "from": "node_45",
+                        "to": "node_46",
+                        "label": null
+                },
+                {
+                        "from": "node_46",
+                        "to": "node_47",
+                        "label": null
+                },
+                {
+                        "from": "node_47",
+                        "to": "node_48",
+                        "label": null
+                },
+                {
+                        "from": "node_48",
+                        "to": "node_49",
+                        "label": null
+                },
+                {
+                        "from": "node_49",
+                        "to": "node_50",
+                        "label": null
+                },
+                {
+                        "from": "node_50",
+                        "to": "node_51",
+                        "label": null
+                },
+                {
+                        "from": "node_51",
+                        "to": "node_52",
+                        "label": null
+                },
+                {
+                        "from": "node_52",
+                        "to": "node_53",
+                        "label": null
+                },
+                {
+                        "from": "node_53",
+                        "to": "node_54",
+                        "label": null
+                },
+                {
+                        "from": "node_54",
+                        "to": "node_55",
+                        "label": null
+                },
+                {
+                        "from": "node_40",
+                        "to": "node_56",
+                        "label": null
+                },
+                {
+                        "from": "node_56",
+                        "to": "node_57",
+                        "label": null
+                },
+                {
+                        "from": "node_57",
+                        "to": "node_58",
+                        "label": null
+                },
+                {
+                        "from": "node_58",
+                        "to": "node_59",
+                        "label": null
+                },
+                {
+                        "from": "node_59",
+                        "to": "node_60",
+                        "label": null
+                },
+                {
+                        "from": "node_60",
+                        "to": "node_61",
+                        "label": null
+                },
+                {
+                        "from": "node_61",
+                        "to": "node_62",
+                        "label": null
+                },
+                {
+                        "from": "node_62",
+                        "to": "node_63",
+                        "label": null
+                },
+                {
+                        "from": "node_63",
+                        "to": "node_64",
+                        "label": null
+                },
+                {
+                        "from": "node_64",
+                        "to": "node_65",
+                        "label": null
+                },
+                {
+                        "from": "node_65",
+                        "to": "node_66",
+                        "label": null
+                },
+                {
+                        "from": "node_66",
+                        "to": "node_67",
+                        "label": null
+                },
+                {
+                        "from": "node_67",
+                        "to": "node_68",
+                        "label": null
+                },
+                {
+                        "from": "node_68",
+                        "to": "node_69",
+                        "label": null
+                },
+                {
+                        "from": "node_56",
+                        "to": "node_70",
+                        "label": null
+                },
+                {
+                        "from": "node_70",
+                        "to": "node_71",
+                        "label": null
+                },
+                {
+                        "from": "node_71",
+                        "to": "node_72",
+                        "label": null
+                },
+                {
+                        "from": "node_72",
+                        "to": "node_73",
+                        "label": null
+                },
+                {
+                        "from": "node_73",
+                        "to": "node_74",
+                        "label": null
+                },
+                {
+                        "from": "node_74",
+                        "to": "node_75",
+                        "label": null
+                },
+                {
+                        "from": "node_75",
+                        "to": "node_76",
+                        "label": null
+                },
+                {
+                        "from": "node_76",
+                        "to": "node_77",
+                        "label": null
+                },
+                {
+                        "from": "node_77",
+                        "to": "node_78",
+                        "label": null
+                },
+                {
+                        "from": "node_78",
+                        "to": "node_79",
+                        "label": null
+                },
+                {
+                        "from": "node_79",
+                        "to": "node_80",
+                        "label": null
+                },
+                {
+                        "from": "node_80",
+                        "to": "node_81",
+                        "label": null
+                },
+                {
+                        "from": "node_69",
+                        "to": "node_82",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_81",
+                        "to": "node_82",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_55",
+                        "to": "node_83",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_82",
+                        "to": "node_83",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_39",
+                        "to": "node_84",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_83",
+                        "to": "node_84",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_22",
+                        "to": "node_85",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_84",
+                        "to": "node_85",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_85",
+                        "to": "node_86",
+                        "label": null
+                },
+                {
+                        "from": "node_86",
+                        "to": "node_87",
+                        "label": null
+                },
+                {
+                        "from": "node_87",
+                        "to": "node_88",
+                        "label": null
+                },
+                {
+                        "from": "node_88",
+                        "to": "node_89",
+                        "label": null
+                },
+                {
+                        "from": "node_89",
+                        "to": "node_90",
+                        "label": null
+                },
+                {
+                        "from": "node_90",
+                        "to": "node_91",
+                        "label": null
+                },
+                {
+                        "from": "node_91",
+                        "to": "node_92",
+                        "label": null
+                },
+                {
+                        "from": "node_92",
+                        "to": "node_93",
+                        "label": null
+                },
+                {
+                        "from": "node_93",
+                        "to": "node_94",
+                        "label": null
+                },
+                {
+                        "from": "node_94",
+                        "to": "node_95",
+                        "label": null
+                },
+                {
+                        "from": "node_95",
+                        "to": "node_96",
+                        "label": null
+                },
+                {
+                        "from": "node_96",
+                        "to": "node_1",
+                        "label": null
+                }
+        ]
+};
+        
+        // Pre-calculated hierarchical positions
+        const hierarchicalPositions = {
+        "node_0": {
+                "x": 0,
+                "y": 0,
+                "level": 0
+        },
+        "node_2": {
+                "x": 0,
+                "y": 150,
+                "level": 1
+        },
+        "node_3": {
+                "x": 0,
+                "y": 300,
+                "level": 2
+        },
+        "node_4": {
+                "x": 0,
+                "y": 450,
+                "level": 3
+        },
+        "node_5": {
+                "x": 0,
+                "y": 600,
+                "level": 4
+        },
+        "node_6": {
+                "x": -125.0,
+                "y": 750,
+                "level": 5
+        },
+        "node_23": {
+                "x": 125.0,
+                "y": 750,
+                "level": 5
+        },
+        "node_7": {
+                "x": -250.0,
+                "y": 900,
+                "level": 6
+        },
+        "node_24": {
+                "x": 0.0,
+                "y": 900,
+                "level": 6
+        },
+        "node_40": {
+                "x": 250.0,
+                "y": 900,
+                "level": 6
+        },
+        "node_8": {
+                "x": -375.0,
+                "y": 1050,
+                "level": 7
+        },
+        "node_25": {
+                "x": -125.0,
+                "y": 1050,
+                "level": 7
+        },
+        "node_41": {
+                "x": 125.0,
+                "y": 1050,
+                "level": 7
+        },
+        "node_56": {
+                "x": 375.0,
+                "y": 1050,
+                "level": 7
+        },
+        "node_9": {
+                "x": -500.0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_26": {
+                "x": -250.0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_42": {
+                "x": 0.0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_57": {
+                "x": 250.0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_70": {
+                "x": 500.0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_10": {
+                "x": -500.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_27": {
+                "x": -250.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_43": {
+                "x": 0.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_58": {
+                "x": 250.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_71": {
+                "x": 500.0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_11": {
+                "x": -500.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_28": {
+                "x": -250.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_44": {
+                "x": 0.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_59": {
+                "x": 250.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_72": {
+                "x": 500.0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_12": {
+                "x": -500.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_29": {
+                "x": -250.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_45": {
+                "x": 0.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_60": {
+                "x": 250.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_73": {
+                "x": 500.0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_13": {
+                "x": -500.0,
+                "y": 1800,
+                "level": 12
+        },
+        "node_30": {
+                "x": -250.0,
+                "y": 1800,
+                "level": 12
+        },
+        "node_46": {
+                "x": 0.0,
+                "y": 1800,
+                "level": 12
+        },
+        "node_61": {
+                "x": 250.0,
+                "y": 1800,
+                "level": 12
+        },
+        "node_74": {
+                "x": 500.0,
+                "y": 1800,
+                "level": 12
+        },
+        "node_14": {
+                "x": -500.0,
+                "y": 1950,
+                "level": 13
+        },
+        "node_31": {
+                "x": -250.0,
+                "y": 1950,
+                "level": 13
+        },
+        "node_47": {
+                "x": 0.0,
+                "y": 1950,
+                "level": 13
+        },
+        "node_62": {
+                "x": 250.0,
+                "y": 1950,
+                "level": 13
+        },
+        "node_75": {
+                "x": 500.0,
+                "y": 1950,
+                "level": 13
+        },
+        "node_15": {
+                "x": -500.0,
+                "y": 2100,
+                "level": 14
+        },
+        "node_32": {
+                "x": -250.0,
+                "y": 2100,
+                "level": 14
+        },
+        "node_48": {
+                "x": 0.0,
+                "y": 2100,
+                "level": 14
+        },
+        "node_63": {
+                "x": 250.0,
+                "y": 2100,
+                "level": 14
+        },
+        "node_76": {
+                "x": 500.0,
+                "y": 2100,
+                "level": 14
+        },
+        "node_16": {
+                "x": -500.0,
+                "y": 2250,
+                "level": 15
+        },
+        "node_33": {
+                "x": -250.0,
+                "y": 2250,
+                "level": 15
+        },
+        "node_49": {
+                "x": 0.0,
+                "y": 2250,
+                "level": 15
+        },
+        "node_64": {
+                "x": 250.0,
+                "y": 2250,
+                "level": 15
+        },
+        "node_77": {
+                "x": 500.0,
+                "y": 2250,
+                "level": 15
+        },
+        "node_17": {
+                "x": -500.0,
+                "y": 2400,
+                "level": 16
+        },
+        "node_34": {
+                "x": -250.0,
+                "y": 2400,
+                "level": 16
+        },
+        "node_50": {
+                "x": 0.0,
+                "y": 2400,
+                "level": 16
+        },
+        "node_65": {
+                "x": 250.0,
+                "y": 2400,
+                "level": 16
+        },
+        "node_78": {
+                "x": 500.0,
+                "y": 2400,
+                "level": 16
+        },
+        "node_18": {
+                "x": -500.0,
+                "y": 2550,
+                "level": 17
+        },
+        "node_35": {
+                "x": -250.0,
+                "y": 2550,
+                "level": 17
+        },
+        "node_51": {
+                "x": 0.0,
+                "y": 2550,
+                "level": 17
+        },
+        "node_66": {
+                "x": 250.0,
+                "y": 2550,
+                "level": 17
+        },
+        "node_79": {
+                "x": 500.0,
+                "y": 2550,
+                "level": 17
+        },
+        "node_19": {
+                "x": -500.0,
+                "y": 2700,
+                "level": 18
+        },
+        "node_36": {
+                "x": -250.0,
+                "y": 2700,
+                "level": 18
+        },
+        "node_52": {
+                "x": 0.0,
+                "y": 2700,
+                "level": 18
+        },
+        "node_67": {
+                "x": 250.0,
+                "y": 2700,
+                "level": 18
+        },
+        "node_80": {
+                "x": 500.0,
+                "y": 2700,
+                "level": 18
+        },
+        "node_20": {
+                "x": -500.0,
+                "y": 2850,
+                "level": 19
+        },
+        "node_37": {
+                "x": -250.0,
+                "y": 2850,
+                "level": 19
+        },
+        "node_53": {
+                "x": 0.0,
+                "y": 2850,
+                "level": 19
+        },
+        "node_68": {
+                "x": 250.0,
+                "y": 2850,
+                "level": 19
+        },
+        "node_81": {
+                "x": 500.0,
+                "y": 2850,
+                "level": 19
+        },
+        "node_21": {
+                "x": -500.0,
+                "y": 3000,
+                "level": 20
+        },
+        "node_38": {
+                "x": -250.0,
+                "y": 3000,
+                "level": 20
+        },
+        "node_54": {
+                "x": 0.0,
+                "y": 3000,
+                "level": 20
+        },
+        "node_69": {
+                "x": 250.0,
+                "y": 3000,
+                "level": 20
+        },
+        "node_82": {
+                "x": 500.0,
+                "y": 3000,
+                "level": 20
+        },
+        "node_22": {
+                "x": -375.0,
+                "y": 3150,
+                "level": 21
+        },
+        "node_39": {
+                "x": -125.0,
+                "y": 3150,
+                "level": 21
+        },
+        "node_55": {
+                "x": 125.0,
+                "y": 3150,
+                "level": 21
+        },
+        "node_83": {
+                "x": 375.0,
+                "y": 3150,
+                "level": 21
+        },
+        "node_85": {
+                "x": -125.0,
+                "y": 3300,
+                "level": 22
+        },
+        "node_84": {
+                "x": 125.0,
+                "y": 3300,
+                "level": 22
+        },
+        "node_86": {
+                "x": 0,
+                "y": 3450,
+                "level": 23
+        },
+        "node_87": {
+                "x": 0,
+                "y": 3600,
+                "level": 24
+        },
+        "node_88": {
+                "x": 0,
+                "y": 3750,
+                "level": 25
+        },
+        "node_89": {
+                "x": 0,
+                "y": 3900,
+                "level": 26
+        },
+        "node_90": {
+                "x": 0,
+                "y": 4050,
+                "level": 27
+        },
+        "node_91": {
+                "x": 0,
+                "y": 4200,
+                "level": 28
+        },
+        "node_92": {
+                "x": 0,
+                "y": 4350,
+                "level": 29
+        },
+        "node_93": {
+                "x": 0,
+                "y": 4500,
+                "level": 30
+        },
+        "node_94": {
+                "x": 0,
+                "y": 4650,
+                "level": 31
+        },
+        "node_95": {
+                "x": 0,
+                "y": 4800,
+                "level": 32
+        },
+        "node_96": {
+                "x": 0,
+                "y": 4950,
+                "level": 33
+        },
+        "node_1": {
+                "x": 0,
+                "y": 5100,
+                "level": 34
+        }
+};
+        
+        // Color and shape mappings
+        const colorMap = {
+            'entry': '#28a745',
+            'exit': '#dc3545', 
+            'conditional': '#ffc107',
+            'return': '#17a2b8',
+            'statement': '#007bff',
+            'assignment': '#6f42c1',
+            'loop': '#fd7e14',
+            'merge': '#20c997'
+        };
+        
+        const shapeMap = {
+            'entry': 'circle',
+            'exit': 'circle',
+            'conditional': 'diamond',
+            'return': 'triangleDown',
+            'statement': 'box',
+            'assignment': 'box',
+            'loop': 'box',
+            'merge': 'circle'
+        };
+        
+        // Create nodes with hierarchical positions
+        const nodes = new vis.DataSet([
+            {
+                id: functionFlowData.entry_point.id,
+                label: functionFlowData.entry_point.label,
+                title: `${functionFlowData.entry_point.label}\nType: ${functionFlowData.entry_point.type}\nLine: ${functionFlowData.entry_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.entry_point.type],
+                    border: '#28a745'
+                },
+                shape: shapeMap[functionFlowData.entry_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.entry_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.entry_point.id]?.y || 0
+            },
+            {
+                id: functionFlowData.exit_point.id,
+                label: functionFlowData.exit_point.label,
+                title: `${functionFlowData.exit_point.label}\nType: ${functionFlowData.exit_point.type}\nLine: ${functionFlowData.exit_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.exit_point.type],
+                    border: '#dc3545'
+                },
+                shape: shapeMap[functionFlowData.exit_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.exit_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.exit_point.id]?.y || 0
+            }
+        ]);
+        
+        // Add control flow nodes with hierarchical positions
+        functionFlowData.nodes.forEach(node => {
+            if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+                const color = colorMap[node.type] || '#97c2fc';
+                const shape = shapeMap[node.type] || 'box';
+                
+                let label = node.label;
+                if (label.length > 30) {
+                    label = label.substring(0, 27) + '...';
+                }
+                
+                nodes.add({
+                    id: node.id,
+                    label: label,
+                    title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                    color: {
+                        background: color,
+                        border: '#333'
+                    },
+                    shape: shape,
+                    font: {size: 12, color: '#333'},
+                    borderWidth: 2,
+                    x: hierarchicalPositions[node.id]?.x || 0,
+                    y: hierarchicalPositions[node.id]?.y || 0
+                });
+            }
+        });
+        
+        // Create edges with appropriate styling
+        const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            label: edge.label || '',
+            arrows: 'to',
+            color: {color: '#666666', highlight: '#007bff'},
+            width: 2,
+            smooth: {
+                type: 'cubicBezier',
+                roundness: 0.1
+            }
+        })));
+        
+        // Create network with hierarchical layout
+        const container = document.getElementById('network');
+        const data = { nodes, edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    enabled: false,  // Use our manual positions
+                    levelSeparation: 150,
+                    nodeSpacing: 200,
+                    treeSpacing: 200
+                }
+            },
+            physics: {
+                enabled: false,  // Start with physics disabled
+                stabilization: {
+                    enabled: true,
+                    iterations: 100
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            },
+            nodes: {
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.2
+                }
+            }
+        };
+        
+        const network = new vis.Network(container, data, options);
+        
+        // Fit to screen after network is ready
+        network.once('stabilizationIterationsDone', function() {
+            network.fit();
+        });
+        
+        // Control functions
+        function togglePhysics() {
+            const physicsEnabled = !network.physics.physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled
+                }
+            });
+        }
+    </script>
+</body>
+</html>

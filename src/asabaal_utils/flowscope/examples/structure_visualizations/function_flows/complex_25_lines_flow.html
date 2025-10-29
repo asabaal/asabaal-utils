@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchical Function Flow - complex_25_lines</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .structure-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .structure-type {
+            font-size: 18px;
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 85vh;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Hierarchical Function Flow - complex_25_lines</h1>
+        <div class="subtitle">Module: flowscope.examples.structure_examples | Structure: Nested</div>
+    </div>
+    
+    <div class="structure-info">
+        <div class="structure-type">Structure Type: Nested</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">65</div>
+                <div class="stat-label">Nodes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">69</div>
+                <div class="stat-label">Edges</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div id="network"></div>
+        <div class="controls">
+            <button class="btn-primary" onclick="network.fit()">Fit to Screen</button>
+            <button class="btn-secondary" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Function flow data
+        const functionFlowData = {
+        "function_name": "complex_25_lines",
+        "module": "flowscope.examples.structure_examples",
+        "file_path": "flowscope/examples/structure_examples.py",
+        "entry_point": {
+                "id": "node_0",
+                "type": "entry",
+                "label": "Enter complex_25_lines",
+                "line": 0
+        },
+        "exit_point": {
+                "id": "node_1",
+                "type": "exit",
+                "label": "Exit complex_25_lines",
+                "line": 0
+        },
+        "nodes": [
+                {
+                        "id": "node_2",
+                        "type": "statement",
+                        "label": "def complex_25_lines(data, options):\n    \"\"\"Complex function combining multiple structures.\"\"\"\n    results = []\n    if not data:\n        return []\n    if not options.get('enabled', True):\n        return []\n    for item in data:\n        if item.get('type') == 'special':\n            processed = process_special_item(item)\n        else:\n            processed = process_regular_item(item)\n        if processed['status'] == 'success':\n            results.append(processed)\n        elif processed['status'] == 'warning':\n            if options.get('include_warnings', False):\n                results.append(processed)\n        elif processed['status'] == 'error':\n            if options.get('include_errors', False):\n                results.append(processed)\n    try:\n        final_results = apply_transformations(results, options)\n    except TransformationError as e:\n        return {'error': str(e), 'partial_results': results}\n    return final_results",
+                        "line": 384,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_3",
+                        "type": "statement",
+                        "label": "data",
+                        "line": 384,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_4",
+                        "type": "statement",
+                        "label": "options",
+                        "line": 384,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_5",
+                        "type": "statement",
+                        "label": "'Complex function combining multiple structures.'",
+                        "line": 385,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_6",
+                        "type": "statement",
+                        "label": "'Complex function combining multiple structures.'",
+                        "line": 385,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_7",
+                        "type": "assignment",
+                        "label": "results = []",
+                        "line": 386,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_8",
+                        "type": "statement",
+                        "label": "results = []",
+                        "line": 386,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_9",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 386,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_10",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 386,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_11",
+                        "type": "conditional",
+                        "label": "if not data",
+                        "line": 389,
+                        "condition": "not data",
+                        "targets": []
+                },
+                {
+                        "id": "node_12",
+                        "type": "return",
+                        "label": "return []",
+                        "line": 390,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_13",
+                        "type": "conditional",
+                        "label": "if not options.get('enabled', True)",
+                        "line": 391,
+                        "condition": "not options.get('enabled', True)",
+                        "targets": []
+                },
+                {
+                        "id": "node_14",
+                        "type": "return",
+                        "label": "return []",
+                        "line": 392,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_15",
+                        "type": "loop",
+                        "label": "for item in data",
+                        "line": 395,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_16",
+                        "type": "conditional",
+                        "label": "if item.get('type') == 'special'",
+                        "line": 397,
+                        "condition": "item.get('type') == 'special'",
+                        "targets": []
+                },
+                {
+                        "id": "node_17",
+                        "type": "assignment",
+                        "label": "processed = process_special_item(item)",
+                        "line": 398,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_18",
+                        "type": "statement",
+                        "label": "processed = process_special_item(item)",
+                        "line": 398,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_19",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 398,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_20",
+                        "type": "statement",
+                        "label": "process_special_item(item)",
+                        "line": 398,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_21",
+                        "type": "statement",
+                        "label": "process_special_item",
+                        "line": 398,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_22",
+                        "type": "statement",
+                        "label": "item",
+                        "line": 398,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_23",
+                        "type": "assignment",
+                        "label": "processed = process_regular_item(item)",
+                        "line": 400,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_24",
+                        "type": "statement",
+                        "label": "processed = process_regular_item(item)",
+                        "line": 400,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_25",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 400,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_26",
+                        "type": "statement",
+                        "label": "process_regular_item(item)",
+                        "line": 400,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_27",
+                        "type": "statement",
+                        "label": "process_regular_item",
+                        "line": 400,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_28",
+                        "type": "statement",
+                        "label": "item",
+                        "line": 400,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_29",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 397,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_30",
+                        "type": "conditional",
+                        "label": "if processed['status'] == 'success'",
+                        "line": 403,
+                        "condition": "processed['status'] == 'success'",
+                        "targets": []
+                },
+                {
+                        "id": "node_31",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 404,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_32",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 404,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_33",
+                        "type": "statement",
+                        "label": "results.append",
+                        "line": 404,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_34",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 404,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_35",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 404,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_36",
+                        "type": "conditional",
+                        "label": "if processed['status'] == 'warning'",
+                        "line": 405,
+                        "condition": "processed['status'] == 'warning'",
+                        "targets": []
+                },
+                {
+                        "id": "node_37",
+                        "type": "conditional",
+                        "label": "if options.get('include_warnings', False)",
+                        "line": 406,
+                        "condition": "options.get('include_warnings', False)",
+                        "targets": []
+                },
+                {
+                        "id": "node_38",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 407,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_39",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 407,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_40",
+                        "type": "statement",
+                        "label": "results.append",
+                        "line": 407,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_41",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 407,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_42",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 407,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_43",
+                        "type": "conditional",
+                        "label": "if processed['status'] == 'error'",
+                        "line": 408,
+                        "condition": "processed['status'] == 'error'",
+                        "targets": []
+                },
+                {
+                        "id": "node_44",
+                        "type": "conditional",
+                        "label": "if options.get('include_errors', False)",
+                        "line": 409,
+                        "condition": "options.get('include_errors', False)",
+                        "targets": []
+                },
+                {
+                        "id": "node_45",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 410,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_46",
+                        "type": "statement",
+                        "label": "results.append(processed)",
+                        "line": 410,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_47",
+                        "type": "statement",
+                        "label": "results.append",
+                        "line": 410,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_48",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 410,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_49",
+                        "type": "statement",
+                        "label": "processed",
+                        "line": 410,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_50",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 405,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_51",
+                        "type": "merge",
+                        "label": "merge",
+                        "line": 403,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_52",
+                        "type": "loop_exit",
+                        "label": "exit for item",
+                        "line": 395,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_53",
+                        "type": "try",
+                        "label": "try",
+                        "line": 413,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_54",
+                        "type": "assignment",
+                        "label": "final_results = apply_transformations(results, options)",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_55",
+                        "type": "statement",
+                        "label": "final_results = apply_transformations(results, options)",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_56",
+                        "type": "statement",
+                        "label": "final_results",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_57",
+                        "type": "statement",
+                        "label": "apply_transformations(results, options)",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_58",
+                        "type": "statement",
+                        "label": "apply_transformations",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_59",
+                        "type": "statement",
+                        "label": "results",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_60",
+                        "type": "statement",
+                        "label": "options",
+                        "line": 414,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_61",
+                        "type": "except",
+                        "label": "except TransformationError",
+                        "line": 415,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_62",
+                        "type": "return",
+                        "label": "return {'error': str(e), 'partial_results': results}",
+                        "line": 416,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_63",
+                        "type": "merge",
+                        "label": "merge try-except",
+                        "line": 413,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_64",
+                        "type": "return",
+                        "label": "return final_results",
+                        "line": 418,
+                        "condition": null,
+                        "targets": []
+                }
+        ],
+        "edges": [
+                {
+                        "from": "node_0",
+                        "to": "node_2",
+                        "label": null
+                },
+                {
+                        "from": "node_2",
+                        "to": "node_3",
+                        "label": null
+                },
+                {
+                        "from": "node_3",
+                        "to": "node_4",
+                        "label": null
+                },
+                {
+                        "from": "node_4",
+                        "to": "node_5",
+                        "label": null
+                },
+                {
+                        "from": "node_5",
+                        "to": "node_6",
+                        "label": null
+                },
+                {
+                        "from": "node_6",
+                        "to": "node_7",
+                        "label": null
+                },
+                {
+                        "from": "node_7",
+                        "to": "node_8",
+                        "label": null
+                },
+                {
+                        "from": "node_8",
+                        "to": "node_9",
+                        "label": null
+                },
+                {
+                        "from": "node_9",
+                        "to": "node_10",
+                        "label": null
+                },
+                {
+                        "from": "node_10",
+                        "to": "node_11",
+                        "label": null
+                },
+                {
+                        "from": "node_11",
+                        "to": "node_12",
+                        "label": null
+                },
+                {
+                        "from": "node_12",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_13",
+                        "to": "node_14",
+                        "label": null
+                },
+                {
+                        "from": "node_14",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_15",
+                        "to": "node_16",
+                        "label": null
+                },
+                {
+                        "from": "node_16",
+                        "to": "node_17",
+                        "label": null
+                },
+                {
+                        "from": "node_17",
+                        "to": "node_18",
+                        "label": null
+                },
+                {
+                        "from": "node_18",
+                        "to": "node_19",
+                        "label": null
+                },
+                {
+                        "from": "node_19",
+                        "to": "node_20",
+                        "label": null
+                },
+                {
+                        "from": "node_20",
+                        "to": "node_21",
+                        "label": null
+                },
+                {
+                        "from": "node_21",
+                        "to": "node_22",
+                        "label": null
+                },
+                {
+                        "from": "node_16",
+                        "to": "node_23",
+                        "label": null
+                },
+                {
+                        "from": "node_23",
+                        "to": "node_24",
+                        "label": null
+                },
+                {
+                        "from": "node_24",
+                        "to": "node_25",
+                        "label": null
+                },
+                {
+                        "from": "node_25",
+                        "to": "node_26",
+                        "label": null
+                },
+                {
+                        "from": "node_26",
+                        "to": "node_27",
+                        "label": null
+                },
+                {
+                        "from": "node_27",
+                        "to": "node_28",
+                        "label": null
+                },
+                {
+                        "from": "node_22",
+                        "to": "node_29",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_28",
+                        "to": "node_29",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_29",
+                        "to": "node_30",
+                        "label": null
+                },
+                {
+                        "from": "node_30",
+                        "to": "node_31",
+                        "label": null
+                },
+                {
+                        "from": "node_31",
+                        "to": "node_32",
+                        "label": null
+                },
+                {
+                        "from": "node_32",
+                        "to": "node_33",
+                        "label": null
+                },
+                {
+                        "from": "node_33",
+                        "to": "node_34",
+                        "label": null
+                },
+                {
+                        "from": "node_34",
+                        "to": "node_35",
+                        "label": null
+                },
+                {
+                        "from": "node_30",
+                        "to": "node_36",
+                        "label": null
+                },
+                {
+                        "from": "node_36",
+                        "to": "node_37",
+                        "label": null
+                },
+                {
+                        "from": "node_37",
+                        "to": "node_38",
+                        "label": null
+                },
+                {
+                        "from": "node_38",
+                        "to": "node_39",
+                        "label": null
+                },
+                {
+                        "from": "node_39",
+                        "to": "node_40",
+                        "label": null
+                },
+                {
+                        "from": "node_40",
+                        "to": "node_41",
+                        "label": null
+                },
+                {
+                        "from": "node_41",
+                        "to": "node_42",
+                        "label": null
+                },
+                {
+                        "from": "node_36",
+                        "to": "node_43",
+                        "label": null
+                },
+                {
+                        "from": "node_43",
+                        "to": "node_44",
+                        "label": null
+                },
+                {
+                        "from": "node_44",
+                        "to": "node_45",
+                        "label": null
+                },
+                {
+                        "from": "node_45",
+                        "to": "node_46",
+                        "label": null
+                },
+                {
+                        "from": "node_46",
+                        "to": "node_47",
+                        "label": null
+                },
+                {
+                        "from": "node_47",
+                        "to": "node_48",
+                        "label": null
+                },
+                {
+                        "from": "node_48",
+                        "to": "node_49",
+                        "label": null
+                },
+                {
+                        "from": "node_42",
+                        "to": "node_50",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_49",
+                        "to": "node_50",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_35",
+                        "to": "node_51",
+                        "label": "end if"
+                },
+                {
+                        "from": "node_50",
+                        "to": "node_51",
+                        "label": "end else"
+                },
+                {
+                        "from": "node_51",
+                        "to": "node_15",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_15",
+                        "to": "node_52",
+                        "label": "break/complete"
+                },
+                {
+                        "from": "node_52",
+                        "to": "node_53",
+                        "label": null
+                },
+                {
+                        "from": "node_53",
+                        "to": "node_54",
+                        "label": null
+                },
+                {
+                        "from": "node_54",
+                        "to": "node_55",
+                        "label": null
+                },
+                {
+                        "from": "node_55",
+                        "to": "node_56",
+                        "label": null
+                },
+                {
+                        "from": "node_56",
+                        "to": "node_57",
+                        "label": null
+                },
+                {
+                        "from": "node_57",
+                        "to": "node_58",
+                        "label": null
+                },
+                {
+                        "from": "node_58",
+                        "to": "node_59",
+                        "label": null
+                },
+                {
+                        "from": "node_59",
+                        "to": "node_60",
+                        "label": null
+                },
+                {
+                        "from": "node_53",
+                        "to": "node_61",
+                        "label": null
+                },
+                {
+                        "from": "node_53",
+                        "to": "node_62",
+                        "label": null
+                },
+                {
+                        "from": "node_62",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_60",
+                        "to": "node_63",
+                        "label": "end try"
+                },
+                {
+                        "from": "node_63",
+                        "to": "node_64",
+                        "label": null
+                },
+                {
+                        "from": "node_64",
+                        "to": "node_1",
+                        "label": null
+                }
+        ]
+};
+        
+        // Pre-calculated hierarchical positions
+        const hierarchicalPositions = {
+        "node_0": {
+                "x": 0,
+                "y": 0,
+                "level": 0
+        },
+        "node_2": {
+                "x": 0,
+                "y": 150,
+                "level": 1
+        },
+        "node_3": {
+                "x": 0,
+                "y": 300,
+                "level": 2
+        },
+        "node_4": {
+                "x": 0,
+                "y": 450,
+                "level": 3
+        },
+        "node_5": {
+                "x": 0,
+                "y": 600,
+                "level": 4
+        },
+        "node_6": {
+                "x": 0,
+                "y": 750,
+                "level": 5
+        },
+        "node_7": {
+                "x": 0,
+                "y": 900,
+                "level": 6
+        },
+        "node_8": {
+                "x": 0,
+                "y": 1050,
+                "level": 7
+        },
+        "node_9": {
+                "x": 0,
+                "y": 1200,
+                "level": 8
+        },
+        "node_10": {
+                "x": 0,
+                "y": 1350,
+                "level": 9
+        },
+        "node_11": {
+                "x": 0,
+                "y": 1500,
+                "level": 10
+        },
+        "node_12": {
+                "x": 0,
+                "y": 1650,
+                "level": 11
+        },
+        "node_1": {
+                "x": 0,
+                "y": 1800,
+                "level": 12
+        }
+};
+        
+        // Color and shape mappings
+        const colorMap = {
+            'entry': '#28a745',
+            'exit': '#dc3545', 
+            'conditional': '#ffc107',
+            'return': '#17a2b8',
+            'statement': '#007bff',
+            'assignment': '#6f42c1',
+            'loop': '#fd7e14',
+            'merge': '#20c997'
+        };
+        
+        const shapeMap = {
+            'entry': 'circle',
+            'exit': 'circle',
+            'conditional': 'diamond',
+            'return': 'triangleDown',
+            'statement': 'box',
+            'assignment': 'box',
+            'loop': 'box',
+            'merge': 'circle'
+        };
+        
+        // Create nodes with hierarchical positions
+        const nodes = new vis.DataSet([
+            {
+                id: functionFlowData.entry_point.id,
+                label: functionFlowData.entry_point.label,
+                title: `${functionFlowData.entry_point.label}\nType: ${functionFlowData.entry_point.type}\nLine: ${functionFlowData.entry_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.entry_point.type],
+                    border: '#28a745'
+                },
+                shape: shapeMap[functionFlowData.entry_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.entry_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.entry_point.id]?.y || 0
+            },
+            {
+                id: functionFlowData.exit_point.id,
+                label: functionFlowData.exit_point.label,
+                title: `${functionFlowData.exit_point.label}\nType: ${functionFlowData.exit_point.type}\nLine: ${functionFlowData.exit_point.line}`,
+                color: {
+                    background: colorMap[functionFlowData.exit_point.type],
+                    border: '#dc3545'
+                },
+                shape: shapeMap[functionFlowData.exit_point.type] || 'box',
+                font: {size: 16, bold: true, color: '#333'},
+                borderWidth: 3,
+                x: hierarchicalPositions[functionFlowData.exit_point.id]?.x || 0,
+                y: hierarchicalPositions[functionFlowData.exit_point.id]?.y || 0
+            }
+        ]);
+        
+        // Add control flow nodes with hierarchical positions
+        functionFlowData.nodes.forEach(node => {
+            if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+                const color = colorMap[node.type] || '#97c2fc';
+                const shape = shapeMap[node.type] || 'box';
+                
+                let label = node.label;
+                if (label.length > 30) {
+                    label = label.substring(0, 27) + '...';
+                }
+                
+                nodes.add({
+                    id: node.id,
+                    label: label,
+                    title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                    color: {
+                        background: color,
+                        border: '#333'
+                    },
+                    shape: shape,
+                    font: {size: 12, color: '#333'},
+                    borderWidth: 2,
+                    x: hierarchicalPositions[node.id]?.x || 0,
+                    y: hierarchicalPositions[node.id]?.y || 0
+                });
+            }
+        });
+        
+        // Create edges with appropriate styling
+        const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            label: edge.label || '',
+            arrows: 'to',
+            color: {color: '#666666', highlight: '#007bff'},
+            width: 2,
+            smooth: {
+                type: 'cubicBezier',
+                roundness: 0.1
+            }
+        })));
+        
+        // Create network with hierarchical layout
+        const container = document.getElementById('network');
+        const data = { nodes, edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    enabled: false,  // Use our manual positions
+                    levelSeparation: 150,
+                    nodeSpacing: 200,
+                    treeSpacing: 200
+                }
+            },
+            physics: {
+                enabled: false,  // Start with physics disabled
+                stabilization: {
+                    enabled: true,
+                    iterations: 100
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            },
+            nodes: {
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                shadow: true,
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.2
+                }
+            }
+        };
+        
+        const network = new vis.Network(container, data, options);
+        
+        // Fit to screen after network is ready
+        network.once('stabilizationIterationsDone', function() {
+            network.fit();
+        });
+        
+        // Control functions
+        function togglePhysics() {
+            const physicsEnabled = !network.physics.physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled
+                }
+            });
+        }
+    </script>
+</body>
+</html>
