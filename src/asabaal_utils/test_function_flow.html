@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Function Flow Test</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style type="text/css">
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #network { height: 400px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Function Flow Test</h1>
+    <div id="network"></div>
+    
+    <script type="text/javascript">
+        console.log("Starting script...");
+        
+        try {
+            var nodes = [
+                {id: 'node_0', label: 'Enter main', color: '#90ee90', shape: 'ellipse'},
+                {id: 'node_1', label: 'Exit main', color: '#ff6b6b', shape: 'ellipse'},
+                {id: 'node_2', label: "prog='dmtc.stage1'", title: "prog='dmtc.stage1'\\nLine: 7\\nType: statement", color: '#97c2fc', shape: 'box'}
+            ];
+            
+            var edges = [
+                {from: 'node_0', to: 'node_2', arrows: 'to'},
+                {from: 'node_2', to: 'node_1', arrows: 'to'}
+            ];
+            
+            console.log("Nodes:", nodes);
+            console.log("Edges:", edges);
+            
+            var container = document.getElementById('network');
+            var data = {nodes: nodes, edges: edges};
+            var options = {
+                layout: {hierarchical: {direction: 'UD', sortMethod: 'directed'}},
+                physics: {enabled: false}
+            };
+            
+            console.log("Creating network...");
+            var network = new vis.Network(container, data, options);
+            console.log("Network created successfully!");
+            
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+    <head><title>professional_renderer Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer.create_professional_config", "label": "create_professional_config", "shape": "dot", "title": "Function: professional_renderer.create_professional_config\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 63\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer.__init__", "label": "__init__", "shape": "dot", "title": "Function: professional_renderer.__init__\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 82\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer.render_word", "label": "render_word", "shape": "dot", "title": "Function: professional_renderer.render_word\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 94\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer.render_lyric_line", "label": "render_lyric_line", "shape": "dot", "title": "Function: professional_renderer.render_lyric_line\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 131\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer.setup_from_config", "label": "setup_from_config", "shape": "dot", "title": "Function: professional_renderer.setup_from_config\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 202\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer.render_text_professional", "label": "render_text_professional", "shape": "dot", "title": "Function: professional_renderer.render_text_professional\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 207\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._get_style_config", "label": "_get_style_config", "shape": "dot", "title": "Function: professional_renderer._get_style_config\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 215\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._render_shadow", "label": "_render_shadow", "shape": "dot", "title": "Function: professional_renderer._render_shadow\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 300\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._render_glow", "label": "_render_glow", "shape": "dot", "title": "Function: professional_renderer._render_glow\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 321\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._render_outline", "label": "_render_outline", "shape": "dot", "title": "Function: professional_renderer._render_outline\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 346\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._render_fill", "label": "_render_fill", "shape": "dot", "title": "Function: professional_renderer._render_fill\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 355\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._alpha_blend", "label": "_alpha_blend", "shape": "dot", "title": "Function: professional_renderer._alpha_blend\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 361\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "professional_renderer._normalize_text_encoding", "label": "_normalize_text_encoding", "shape": "dot", "title": "Function: professional_renderer._normalize_text_encoding\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\nLine: 368\nIn-degree: 1\nOut-degree: 8"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._normalize_text_encoding", "to": "professional_renderer._normalize_text_encoding"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._get_style_config", "to": "professional_renderer._get_style_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._render_shadow", "to": "professional_renderer._render_shadow"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._render_glow", "to": "professional_renderer._render_glow"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._render_outline", "to": "professional_renderer._render_outline"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._render_fill", "to": "professional_renderer._render_fill"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer.render_word", "to": "professional_renderer.render_word"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "professional_renderer._normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding \u2192 professional_renderer._alpha_blend", "to": "professional_renderer._alpha_blend"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"professional_renderer.create_professional_config": {"nodes": [{"id": "professional_renderer.create_professional_config", "label": "create_professional_config", "title": "professional_renderer.create_professional_config\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 63", "color": "#ff6b6b"}], "edges": []}, "professional_renderer.__init__": {"nodes": [{"id": "professional_renderer.__init__", "label": "__init__", "title": "professional_renderer.__init__\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 82", "color": "#ff6b6b"}], "edges": []}, "professional_renderer.render_word": {"nodes": [{"id": "professional_renderer.render_word", "label": "render_word", "title": "professional_renderer.render_word\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 94", "color": "#ff6b6b"}], "edges": []}, "professional_renderer.render_lyric_line": {"nodes": [{"id": "professional_renderer.render_lyric_line", "label": "render_lyric_line", "title": "professional_renderer.render_lyric_line\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 131", "color": "#ff6b6b"}], "edges": []}, "professional_renderer.setup_from_config": {"nodes": [{"id": "professional_renderer.setup_from_config", "label": "setup_from_config", "title": "professional_renderer.setup_from_config\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 202", "color": "#ff6b6b"}], "edges": []}, "professional_renderer.render_text_professional": {"nodes": [{"id": "professional_renderer.render_text_professional", "label": "render_text_professional", "title": "professional_renderer.render_text_professional\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 207", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._get_style_config": {"nodes": [{"id": "professional_renderer._get_style_config", "label": "_get_style_config", "title": "professional_renderer._get_style_config\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 215", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._render_shadow": {"nodes": [{"id": "professional_renderer._render_shadow", "label": "_render_shadow", "title": "professional_renderer._render_shadow\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 300", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._render_glow": {"nodes": [{"id": "professional_renderer._render_glow", "label": "_render_glow", "title": "professional_renderer._render_glow\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 321", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._render_outline": {"nodes": [{"id": "professional_renderer._render_outline", "label": "_render_outline", "title": "professional_renderer._render_outline\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 346", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._render_fill": {"nodes": [{"id": "professional_renderer._render_fill", "label": "_render_fill", "title": "professional_renderer._render_fill\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 355", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._alpha_blend": {"nodes": [{"id": "professional_renderer._alpha_blend", "label": "_alpha_blend", "title": "professional_renderer._alpha_blend\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 361", "color": "#ff6b6b"}], "edges": []}, "professional_renderer._normalize_text_encoding": {"nodes": [{"id": "professional_renderer._render_shadow", "label": "_render_shadow", "title": "professional_renderer._render_shadow\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 300", "color": "#ffd700"}, {"id": "professional_renderer._alpha_blend", "label": "_alpha_blend", "title": "professional_renderer._alpha_blend\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 361", "color": "#ffd700"}, {"id": "professional_renderer._render_fill", "label": "_render_fill", "title": "professional_renderer._render_fill\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 355", "color": "#ffd700"}, {"id": "professional_renderer._normalize_text_encoding", "label": "_normalize_text_encoding", "title": "professional_renderer._normalize_text_encoding\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 368", "color": "#ff6b6b"}, {"id": "professional_renderer.render_word", "label": "render_word", "title": "professional_renderer.render_word\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 94", "color": "#ffd700"}, {"id": "professional_renderer._render_glow", "label": "_render_glow", "title": "professional_renderer._render_glow\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 321", "color": "#ffd700"}, {"id": "professional_renderer._get_style_config", "label": "_get_style_config", "title": "professional_renderer._get_style_config\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 215", "color": "#ffd700"}, {"id": "professional_renderer._render_outline", "label": "_render_outline", "title": "professional_renderer._render_outline\\nFile: src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py\\nLine: 346", "color": "#ffd700"}], "edges": [{"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._render_glow"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer.render_word"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._normalize_text_encoding"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._render_fill"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._get_style_config"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._render_outline"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._alpha_blend"}, {"from": "professional_renderer._normalize_text_encoding", "to": "professional_renderer._render_shadow"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - professional_renderer
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:82
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_alpha_blend" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._alpha_blend', '_alpha_blend')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_alpha_blend</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:361
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_get_style_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._get_style_config', '_get_style_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_get_style_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:215
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_normalize_text_encoding" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._normalize_text_encoding', '_normalize_text_encoding')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_normalize_text_encoding</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑8</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:368
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_render_fill" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._render_fill', '_render_fill')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_render_fill</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:355
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_render_glow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._render_glow', '_render_glow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_render_glow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:321
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_render_outline" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._render_outline', '_render_outline')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_render_outline</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:346
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_render_shadow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer._render_shadow', '_render_shadow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_render_shadow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:300
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_professional_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer.create_professional_config', 'create_professional_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_professional_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:63
+                </div>
+            </div>
+
+            <div class="function-item" data-name="render_lyric_line" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer.render_lyric_line', 'render_lyric_line')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>render_lyric_line</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:131
+                </div>
+            </div>
+
+            <div class="function-item" data-name="render_text_professional" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer.render_text_professional', 'render_text_professional')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>render_text_professional</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:207
+                </div>
+            </div>
+
+            <div class="function-item" data-name="render_word" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer.render_word', 'render_word')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>render_word</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:94
+                </div>
+            </div>
+
+            <div class="function-item" data-name="setup_from_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('professional_renderer.setup_from_config', 'setup_from_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>setup_from_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/text/professional_renderer.py:202
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

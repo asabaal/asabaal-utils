@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+    <head><title>test_orchestrator_integration Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.temp_workspace", "label": "temp_workspace", "shape": "dot", "title": "Function: test_orchestrator_integration.temp_workspace\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 28\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.sample_openspec", "label": "sample_openspec", "shape": "dot", "title": "Function: test_orchestrator_integration.sample_openspec\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 47\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_orchestrator_initialization", "label": "test_orchestrator_initialization", "shape": "dot", "title": "Function: test_orchestrator_integration.test_orchestrator_initialization\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 108\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_get_reports_dir", "label": "test_get_reports_dir", "shape": "dot", "title": "Function: test_orchestrator_integration.test_get_reports_dir\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 128\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_load_spec_file_path_from_metadata", "label": "test_load_spec_file_path_from_metadata", "shape": "dot", "title": "Function: test_orchestrator_integration.test_load_spec_file_path_from_metadata\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 145\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_run_command", "label": "test_run_command", "shape": "dot", "title": "Function: test_orchestrator_integration.test_run_command\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 179\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_run_mode", "label": "test_run_mode", "shape": "dot", "title": "Function: test_orchestrator_integration.test_run_mode\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 196\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage1_spec_to_scaffold", "label": "test_stage1_spec_to_scaffold", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage1_spec_to_scaffold\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 212\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage2_scaffold_to_requirements", "label": "test_stage2_scaffold_to_requirements", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage2_scaffold_to_requirements\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 256\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage2_handles_malformed_test_files", "label": "test_stage2_handles_malformed_test_files", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage2_handles_malformed_test_files\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 303\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage3_requirements_to_alignment", "label": "test_stage3_requirements_to_alignment", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage3_requirements_to_alignment\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 355\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage4_alignment_to_code_dry_run", "label": "test_stage4_alignment_to_code_dry_run", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage4_alignment_to_code_dry_run\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 420\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage4_alignment_to_code_full", "label": "test_stage4_alignment_to_code_full", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage4_alignment_to_code_full\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 444\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_calculate_match_score", "label": "test_calculate_match_score", "shape": "dot", "title": "Function: test_orchestrator_integration.test_calculate_match_score\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 497\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_full_pipeline_integration", "label": "test_full_pipeline_integration", "shape": "dot", "title": "Function: test_orchestrator_integration.test_full_pipeline_integration\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 523\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage1_plus_stage2_integration", "label": "test_stage1_plus_stage2_integration", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage1_plus_stage2_integration\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 571\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage2_plus_stage3_integration", "label": "test_stage2_plus_stage3_integration", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage2_plus_stage3_integration\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 626\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_stage3_plus_stage4_integration", "label": "test_stage3_plus_stage4_integration", "shape": "dot", "title": "Function: test_orchestrator_integration.test_stage3_plus_stage4_integration\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 695\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_error_handling_stage_failure", "label": "test_error_handling_stage_failure", "shape": "dot", "title": "Function: test_orchestrator_integration.test_error_handling_stage_failure\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 771\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_metadata_persistence_between_stages", "label": "test_metadata_persistence_between_stages", "shape": "dot", "title": "Function: test_orchestrator_integration.test_metadata_persistence_between_stages\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 804\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_orchestrator_integration.test_pipeline_with_missing_dependencies", "label": "test_pipeline_with_missing_dependencies", "shape": "dot", "title": "Function: test_orchestrator_integration.test_pipeline_with_missing_dependencies\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\nLine: 851\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"test_orchestrator_integration.temp_workspace": {"nodes": [{"id": "test_orchestrator_integration.temp_workspace", "label": "temp_workspace", "title": "test_orchestrator_integration.temp_workspace\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 28", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.sample_openspec": {"nodes": [{"id": "test_orchestrator_integration.sample_openspec", "label": "sample_openspec", "title": "test_orchestrator_integration.sample_openspec\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 47", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_orchestrator_initialization": {"nodes": [{"id": "test_orchestrator_integration.test_orchestrator_initialization", "label": "test_orchestrator_initialization", "title": "test_orchestrator_integration.test_orchestrator_initialization\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 108", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_get_reports_dir": {"nodes": [{"id": "test_orchestrator_integration.test_get_reports_dir", "label": "test_get_reports_dir", "title": "test_orchestrator_integration.test_get_reports_dir\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 128", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_load_spec_file_path_from_metadata": {"nodes": [{"id": "test_orchestrator_integration.test_load_spec_file_path_from_metadata", "label": "test_load_spec_file_path_from_metadata", "title": "test_orchestrator_integration.test_load_spec_file_path_from_metadata\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 145", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_run_command": {"nodes": [{"id": "test_orchestrator_integration.test_run_command", "label": "test_run_command", "title": "test_orchestrator_integration.test_run_command\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 179", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_run_mode": {"nodes": [{"id": "test_orchestrator_integration.test_run_mode", "label": "test_run_mode", "title": "test_orchestrator_integration.test_run_mode\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 196", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage1_spec_to_scaffold": {"nodes": [{"id": "test_orchestrator_integration.test_stage1_spec_to_scaffold", "label": "test_stage1_spec_to_scaffold", "title": "test_orchestrator_integration.test_stage1_spec_to_scaffold\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 212", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage2_scaffold_to_requirements": {"nodes": [{"id": "test_orchestrator_integration.test_stage2_scaffold_to_requirements", "label": "test_stage2_scaffold_to_requirements", "title": "test_orchestrator_integration.test_stage2_scaffold_to_requirements\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 256", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage2_handles_malformed_test_files": {"nodes": [{"id": "test_orchestrator_integration.test_stage2_handles_malformed_test_files", "label": "test_stage2_handles_malformed_test_files", "title": "test_orchestrator_integration.test_stage2_handles_malformed_test_files\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 303", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage3_requirements_to_alignment": {"nodes": [{"id": "test_orchestrator_integration.test_stage3_requirements_to_alignment", "label": "test_stage3_requirements_to_alignment", "title": "test_orchestrator_integration.test_stage3_requirements_to_alignment\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 355", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage4_alignment_to_code_dry_run": {"nodes": [{"id": "test_orchestrator_integration.test_stage4_alignment_to_code_dry_run", "label": "test_stage4_alignment_to_code_dry_run", "title": "test_orchestrator_integration.test_stage4_alignment_to_code_dry_run\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 420", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage4_alignment_to_code_full": {"nodes": [{"id": "test_orchestrator_integration.test_stage4_alignment_to_code_full", "label": "test_stage4_alignment_to_code_full", "title": "test_orchestrator_integration.test_stage4_alignment_to_code_full\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 444", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_calculate_match_score": {"nodes": [{"id": "test_orchestrator_integration.test_calculate_match_score", "label": "test_calculate_match_score", "title": "test_orchestrator_integration.test_calculate_match_score\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 497", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_full_pipeline_integration": {"nodes": [{"id": "test_orchestrator_integration.test_full_pipeline_integration", "label": "test_full_pipeline_integration", "title": "test_orchestrator_integration.test_full_pipeline_integration\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 523", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage1_plus_stage2_integration": {"nodes": [{"id": "test_orchestrator_integration.test_stage1_plus_stage2_integration", "label": "test_stage1_plus_stage2_integration", "title": "test_orchestrator_integration.test_stage1_plus_stage2_integration\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 571", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage2_plus_stage3_integration": {"nodes": [{"id": "test_orchestrator_integration.test_stage2_plus_stage3_integration", "label": "test_stage2_plus_stage3_integration", "title": "test_orchestrator_integration.test_stage2_plus_stage3_integration\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 626", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_stage3_plus_stage4_integration": {"nodes": [{"id": "test_orchestrator_integration.test_stage3_plus_stage4_integration", "label": "test_stage3_plus_stage4_integration", "title": "test_orchestrator_integration.test_stage3_plus_stage4_integration\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 695", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_error_handling_stage_failure": {"nodes": [{"id": "test_orchestrator_integration.test_error_handling_stage_failure", "label": "test_error_handling_stage_failure", "title": "test_orchestrator_integration.test_error_handling_stage_failure\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 771", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_metadata_persistence_between_stages": {"nodes": [{"id": "test_orchestrator_integration.test_metadata_persistence_between_stages", "label": "test_metadata_persistence_between_stages", "title": "test_orchestrator_integration.test_metadata_persistence_between_stages\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 804", "color": "#ff6b6b"}], "edges": []}, "test_orchestrator_integration.test_pipeline_with_missing_dependencies": {"nodes": [{"id": "test_orchestrator_integration.test_pipeline_with_missing_dependencies", "label": "test_pipeline_with_missing_dependencies", "title": "test_orchestrator_integration.test_pipeline_with_missing_dependencies\\nFile: src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py\\nLine: 851", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - test_orchestrator_integration
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="sample_openspec" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.sample_openspec', 'sample_openspec')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>sample_openspec</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:47
+                </div>
+            </div>
+
+            <div class="function-item" data-name="temp_workspace" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.temp_workspace', 'temp_workspace')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>temp_workspace</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:28
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_calculate_match_score" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_calculate_match_score', 'test_calculate_match_score')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_calculate_match_score</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:497
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_error_handling_stage_failure" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_error_handling_stage_failure', 'test_error_handling_stage_failure')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_error_handling_stage_failure</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:771
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_full_pipeline_integration" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_full_pipeline_integration', 'test_full_pipeline_integration')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_full_pipeline_integration</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:523
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_get_reports_dir" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_get_reports_dir', 'test_get_reports_dir')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_get_reports_dir</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:128
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_spec_file_path_from_metadata" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_load_spec_file_path_from_metadata', 'test_load_spec_file_path_from_metadata')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_spec_file_path_from_metadata</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:145
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_metadata_persistence_between_stages" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_metadata_persistence_between_stages', 'test_metadata_persistence_between_stages')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_metadata_persistence_between_stages</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:804
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_orchestrator_initialization" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_orchestrator_initialization', 'test_orchestrator_initialization')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_orchestrator_initialization</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:108
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_pipeline_with_missing_dependencies" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_pipeline_with_missing_dependencies', 'test_pipeline_with_missing_dependencies')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_pipeline_with_missing_dependencies</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:851
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_run_command" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_run_command', 'test_run_command')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_run_command</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:179
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_run_mode" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_run_mode', 'test_run_mode')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_run_mode</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:196
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage1_plus_stage2_integration" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage1_plus_stage2_integration', 'test_stage1_plus_stage2_integration')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage1_plus_stage2_integration</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:571
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage1_spec_to_scaffold" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage1_spec_to_scaffold', 'test_stage1_spec_to_scaffold')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage1_spec_to_scaffold</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:212
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage2_handles_malformed_test_files" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage2_handles_malformed_test_files', 'test_stage2_handles_malformed_test_files')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage2_handles_malformed_test_files</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:303
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage2_plus_stage3_integration" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage2_plus_stage3_integration', 'test_stage2_plus_stage3_integration')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage2_plus_stage3_integration</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:626
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage2_scaffold_to_requirements" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage2_scaffold_to_requirements', 'test_stage2_scaffold_to_requirements')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage2_scaffold_to_requirements</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:256
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage3_plus_stage4_integration" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage3_plus_stage4_integration', 'test_stage3_plus_stage4_integration')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage3_plus_stage4_integration</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:695
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage3_requirements_to_alignment" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage3_requirements_to_alignment', 'test_stage3_requirements_to_alignment')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage3_requirements_to_alignment</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:355
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage4_alignment_to_code_dry_run" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage4_alignment_to_code_dry_run', 'test_stage4_alignment_to_code_dry_run')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage4_alignment_to_code_dry_run</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:420
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_stage4_alignment_to_code_full" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_orchestrator_integration.test_stage4_alignment_to_code_full', 'test_stage4_alignment_to_code_full')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_stage4_alignment_to_code_full</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/integration/test_orchestrator_integration.py:444
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Create a simple vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 12 }
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' }
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 100,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666'
+            }
+        };
+        
+        new vis.Network(container, data, options);
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html>
+    <head><title>generator Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "generator.generate_from_spec", "label": "generate_from_spec", "shape": "dot", "title": "Function: generator.generate_from_spec\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 172\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: generator\nCalled From: 02_code_generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.__init__", "label": "__init__", "shape": "dot", "title": "Function: generator.__init__\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 26\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._sanitize_filename", "label": "_sanitize_filename", "shape": "dot", "title": "Function: generator._sanitize_filename\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 92\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._load_config", "label": "_load_config", "shape": "dot", "title": "Function: generator._load_config\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 198\nIn-degree: 2\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_source_code", "label": "_generate_source_code", "shape": "dot", "title": "Function: generator._generate_source_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 306\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_documentation", "label": "_generate_documentation", "shape": "dot", "title": "Function: generator._generate_documentation\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 368\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_tests", "label": "_generate_tests", "shape": "dot", "title": "Function: generator._generate_tests\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 398\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "shape": "dot", "title": "Function: generator._strip_markdown_code_blocks\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 493\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "shape": "dot", "title": "Function: generator._clean_documentation_markdown\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 591\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_ci_config", "label": "_generate_ci_config", "shape": "dot", "title": "Function: generator._generate_ci_config\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 668\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "shape": "dot", "title": "Function: generator._generate_github_workflow\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 689\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_validation_script", "label": "_generate_validation_script", "shape": "dot", "title": "Function: generator._generate_validation_script\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 710\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "shape": "dot", "title": "Function: generator._generate_requirements_file\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 737\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_unit_test", "label": "_generate_unit_test", "shape": "dot", "title": "Function: generator._generate_unit_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 755\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_integration_test", "label": "_generate_integration_test", "shape": "dot", "title": "Function: generator._generate_integration_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 815\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_unit_test_with_retry", "label": "_generate_unit_test_with_retry", "shape": "dot", "title": "Function: generator._generate_unit_test_with_retry\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 881\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._clean_generated_code", "label": "_clean_generated_code", "shape": "dot", "title": "Function: generator._clean_generated_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 921\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._validate_python_code", "label": "_validate_python_code", "shape": "dot", "title": "Function: generator._validate_python_code\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 989\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "shape": "dot", "title": "Function: generator._generate_fallback_test\nFile: src/asabaal_utils/agents/spec_coder/generator.py\nLine: 1041\nIn-degree: 1\nOut-degree: 27"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.create_video", "label": "create_video", "shape": "dot", "title": "Function: generator.create_video\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 51\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._merge_configs", "label": "_merge_configs", "shape": "dot", "title": "Function: generator._merge_configs\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 253\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._generate_frames", "label": "_generate_frames", "shape": "dot", "title": "Function: generator._generate_frames\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 265\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._apply_motion_effects", "label": "_apply_motion_effects", "shape": "dot", "title": "Function: generator._apply_motion_effects\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 471\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._get_y_position", "label": "_get_y_position", "shape": "dot", "title": "Function: generator._get_y_position\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 531\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator._filter_audio_features_by_time", "label": "_filter_audio_features_by_time", "shape": "dot", "title": "Function: generator._filter_audio_features_by_time\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 549\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "generator._filter_lyrics_by_time", "label": "_filter_lyrics_by_time", "shape": "dot", "title": "Function: generator._filter_lyrics_by_time\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 578\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generator.get_system_info", "label": "get_system_info", "shape": "dot", "title": "Function: generator.get_system_info\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\nLine: 615\nIn-degree: 0\nOut-degree: 29"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.parse_file", "label": "parse_file", "shape": "dot", "title": "Function: spec_parser.parse_file\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.validate_spec", "label": "validate_spec", "shape": "dot", "title": "Function: spec_parser.validate_spec\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "shape": "dot", "title": "Function: spec_parser.format_requirements_for_prompt\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "spec_parser.format_interfaces_for_prompt", "label": "format_interfaces_for_prompt", "shape": "dot", "title": "Function: spec_parser.format_interfaces_for_prompt\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "source_code_prompt.format", "label": "format", "shape": "dot", "title": "Function: source_code_prompt.format\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.generate_code", "label": "generate_code", "shape": "dot", "title": "Function: ollama_client.generate_code\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "documentation_prompt.format", "label": "format", "shape": "dot", "title": "Function: documentation_prompt.format\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.generate", "label": "generate", "shape": "dot", "title": "Function: ollama_client.generate\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.test_connection", "label": "test_connection", "shape": "dot", "title": "Function: ollama_client.test_connection\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "ollama_client.generate_tests", "label": "generate_tests", "shape": "dot", "title": "Function: ollama_client.generate_tests\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "config.get", "label": "get", "shape": "dot", "title": "Function: config.get\nIn-degree: 2\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "section_manager.log_section_transitions", "label": "log_section_transitions", "shape": "dot", "title": "Function: section_manager.log_section_transitions\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder.encode_video", "label": "encode_video", "shape": "dot", "title": "Function: encoder.encode_video\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "audio_analyzer.analyze_audio", "label": "analyze_audio", "shape": "dot", "title": "Function: audio_analyzer.analyze_audio\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "lyric_processor.parse_lyrics", "label": "parse_lyrics", "shape": "dot", "title": "Function: lyric_processor.parse_lyrics\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "lyric_processor.align_to_audio", "label": "align_to_audio", "shape": "dot", "title": "Function: lyric_processor.align_to_audio\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "section_manager.detect_sections_from_audio", "label": "detect_sections_from_audio", "shape": "dot", "title": "Function: section_manager.detect_sections_from_audio\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.load_background_clips_from_directory", "label": "load_background_clips_from_directory", "shape": "dot", "title": "Function: compositor.load_background_clips_from_directory\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "audio_features.get_features_at_time", "label": "get_features_at_time", "shape": "dot", "title": "Function: audio_features.get_features_at_time\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.composite_frame", "label": "composite_frame", "shape": "dot", "title": "Function: compositor.composite_frame\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder.get_encoding_info", "label": "get_encoding_info", "shape": "dot", "title": "Function: encoder.get_encoding_info\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "section_manager.load_structure_from_file", "label": "load_structure_from_file", "shape": "dot", "title": "Function: section_manager.load_structure_from_file\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.load_background_video", "label": "load_background_video", "shape": "dot", "title": "Function: compositor.load_background_video\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.get_background_frame", "label": "get_background_frame", "shape": "dot", "title": "Function: compositor.get_background_frame\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.detect_motion", "label": "detect_motion", "shape": "dot", "title": "Function: compositor.detect_motion\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.get_motion_features", "label": "get_motion_features", "shape": "dot", "title": "Function: compositor.get_motion_features\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.enhance_background_motion", "label": "enhance_background_motion", "shape": "dot", "title": "Function: compositor.enhance_background_motion\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "section_manager.get_text_effects_config", "label": "get_text_effects_config", "shape": "dot", "title": "Function: section_manager.get_text_effects_config\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "section_manager.get_text_style_modifications", "label": "get_text_style_modifications", "shape": "dot", "title": "Function: section_manager.get_text_style_modifications\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor.apply_audio_reactive_effects", "label": "apply_audio_reactive_effects", "shape": "dot", "title": "Function: compositor.apply_audio_reactive_effects\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effect_renderer.apply_effect", "label": "apply_effect", "shape": "dot", "title": "Function: motion_effect_renderer.apply_effect\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_text_renderer.setup_from_config", "label": "setup_from_config", "shape": "dot", "title": "Function: professional_text_renderer.setup_from_config\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "professional_text_renderer.render_lyric_line", "label": "render_lyric_line", "shape": "dot", "title": "Function: professional_text_renderer.render_lyric_line\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "text_renderer.render_lyric_line", "label": "render_lyric_line", "shape": "dot", "title": "Function: text_renderer.render_lyric_line\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._load_config", "to": "generator._load_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_fallback_test", "to": "generator._generate_fallback_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 spec_parser.parse_file", "to": "spec_parser.parse_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 spec_parser.validate_spec", "to": "spec_parser.validate_spec"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_source_code", "to": "generator._generate_source_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_documentation", "to": "generator._generate_documentation"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_tests", "to": "generator._generate_tests"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_ci_config", "to": "generator._generate_ci_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_validation_script", "to": "generator._generate_validation_script"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_requirements_file", "to": "generator._generate_requirements_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 spec_parser.format_requirements_for_prompt", "to": "spec_parser.format_requirements_for_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 spec_parser.format_interfaces_for_prompt", "to": "spec_parser.format_interfaces_for_prompt"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 source_code_prompt.format", "to": "source_code_prompt.format"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 ollama_client.generate_code", "to": "ollama_client.generate_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._strip_markdown_code_blocks", "to": "generator._strip_markdown_code_blocks"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._sanitize_filename", "to": "generator._sanitize_filename"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 documentation_prompt.format", "to": "documentation_prompt.format"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 ollama_client.generate", "to": "ollama_client.generate"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._clean_documentation_markdown", "to": "generator._clean_documentation_markdown"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_github_workflow", "to": "generator._generate_github_workflow"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 ollama_client.test_connection", "to": "ollama_client.test_connection"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._validate_python_code", "to": "generator._validate_python_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._clean_generated_code", "to": "generator._clean_generated_code"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_unit_test", "to": "generator._generate_unit_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 ollama_client.generate_tests", "to": "ollama_client.generate_tests"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 config.get", "to": "config.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator._generate_fallback_test", "title": "generator._generate_fallback_test \u2192 generator._generate_integration_test", "to": "generator._generate_integration_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 generator._load_config", "to": "generator._load_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 section_manager.log_section_transitions", "to": "section_manager.log_section_transitions"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 generator._generate_frames", "to": "generator._generate_frames"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 encoder.encode_video", "to": "encoder.encode_video"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 audio_analyzer.analyze_audio", "to": "audio_analyzer.analyze_audio"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 lyric_processor.parse_lyrics", "to": "lyric_processor.parse_lyrics"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 lyric_processor.align_to_audio", "to": "lyric_processor.align_to_audio"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 section_manager.detect_sections_from_audio", "to": "section_manager.detect_sections_from_audio"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.load_background_clips_from_directory", "to": "compositor.load_background_clips_from_directory"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 generator._merge_configs", "to": "generator._merge_configs"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 audio_features.get_features_at_time", "to": "audio_features.get_features_at_time"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.composite_frame", "to": "compositor.composite_frame"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 encoder.get_encoding_info", "to": "encoder.get_encoding_info"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 generator._filter_lyrics_by_time", "to": "generator._filter_lyrics_by_time"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 section_manager.load_structure_from_file", "to": "section_manager.load_structure_from_file"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.load_background_video", "to": "compositor.load_background_video"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 config.get", "to": "config.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.get_background_frame", "to": "compositor.get_background_frame"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.detect_motion", "to": "compositor.detect_motion"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.get_motion_features", "to": "compositor.get_motion_features"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.enhance_background_motion", "to": "compositor.enhance_background_motion"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 section_manager.get_text_effects_config", "to": "section_manager.get_text_effects_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 section_manager.get_text_style_modifications", "to": "section_manager.get_text_style_modifications"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 generator._apply_motion_effects", "to": "generator._apply_motion_effects"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 compositor.apply_audio_reactive_effects", "to": "compositor.apply_audio_reactive_effects"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 motion_effect_renderer.apply_effect", "to": "motion_effect_renderer.apply_effect"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 professional_text_renderer.setup_from_config", "to": "professional_text_renderer.setup_from_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 professional_text_renderer.render_lyric_line", "to": "professional_text_renderer.render_lyric_line"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "generator.get_system_info", "title": "generator.get_system_info \u2192 text_renderer.render_lyric_line", "to": "text_renderer.render_lyric_line"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"clip_features": "clip_features.html", "audio_clips": "audio_clips.html", "example_runner": "example_runner.html", "examples": "examples.html", "claude_client": "claude_client.html", "clips": "clips.html", "error_handlers": "error_handlers.html", "frame_extractor": "frame_extractor.html", "df": "df.html", "biblical_themes": "biblical_themes.html", "font_generator": "font_generator.html", "chunked_analyzer": "chunked_analyzer.html", "capcut_parser": "capcut_parser.html", "custom_stats": "custom_stats.html", "_critical_callbacks": "_critical_callbacks.html", "encoder": "encoder.html", "align_behaviors": "align_behaviors.html", "conftest": "conftest.html", "enforce_signature": "enforce_signature.html", "features": "features.html", "document_categorizer": "document_categorizer.html", "fitz": "fitz.html", "deployment_checklist": "deployment_checklist.html", "detect_unused_media": "detect_unused_media.html", "exception_pattern": "exception_pattern.html", "fitter": "fitter.html", "aligner": "aligner.html", "analyze_tests": "analyze_tests.html", "client": "client.html", "assertions": "assertions.html", "columns": "columns.html", "character_detector": "character_detector.html", "generator": "generator.html", "db_manager": "db_manager.html", "debug_dir": "debug_dir.html", "catalog_path": "catalog_path.html", "clip_preview_generator": "clip_preview_generator.html", "anthropic": "anthropic.html", "find_unused_media": "find_unused_media.html", "categories": "categories.html", "02_code_generator": "02_code_generator.html", "find_files": "find_files.html", "enhancement_categories": "enhancement_categories.html", "backend_manager": "backend_manager.html", "chunked_audio_analyzer": "chunked_audio_analyzer.html", "audio_features": "audio_features.html", "__init__": "__init__.html", "duplicate_detection": "duplicate_detection.html", "cache_dir": "cache_dir.html", "compositor": "compositor.html", "background_video": "background_video.html", "church_service_analyzer": "church_service_analyzer.html", "analyze_all_runs": "analyze_all_runs.html", "blended_layout_generator": "blended_layout_generator.html", "components": "components.html", "08_integration": "08_integration.html", "generated_dir": "generated_dir.html", "event_queue": "event_queue.html", "effect_library": "effect_library.html", "detailed_analysis_processor": "detailed_analysis_processor.html", "entries": "entries.html", "config": "config.html", "background_clips": "background_clips.html", "compare_behaviors": "compare_behaviors.html", "12_behavior_analysis": "12_behavior_analysis.html", "capcut-srt-integration": "capcut-srt-integration.html", "aggregate_behaviors": "aggregate_behaviors.html", "compiled_patterns": "compiled_patterns.html", "alerts": "alerts.html", "analyze_capcut": "analyze_capcut.html", "animations": "animations.html", "available_fonts": "available_fonts.html", "capcut_srt_integration": "capcut_srt_integration.html", "font_loader": "font_loader.html", "community_data": "community_data.html", "audio_classifier": "audio_classifier.html", "api_confirmation": "api_confirmation.html", "audio_analyzer": "audio_analyzer.html", "generate_prompts": "generate_prompts.html", "enhance_reports": "enhance_reports.html", "error_log": "error_log.html", "__name__": "__name__.html", "church_audio_classifier": "church_audio_classifier.html", "drift": "drift.html", "catalog": "catalog.html", "beats": "beats.html", "file_existence_utils": "file_existence_utils.html", "gap_processor": "gap_processor.html", "category_mapping": "category_mapping.html", "base": "base.html", "completions": "completions.html", "agent_inputs_dir": "agent_inputs_dir.html", "documentation_prompt": "documentation_prompt.html", "classify_failures": "classify_failures.html", "cli": "cli.html", "auto_layout": "auto_layout.html", "05_cli_interface": "05_cli_interface.html", "font_manager": "font_manager.html", "color_analyzer": "color_analyzer.html", "enforcer": "enforcer.html", "classifier": "classifier.html", "_monitor_thread": "_monitor_thread.html", "filler_processor": "filler_processor.html", "backend_config": "backend_config.html", "data_dir": "data_dir.html", "analyze_project_structure": "analyze_project_structure.html", "fonts": "fonts.html", "clip_extractor": "clip_extractor.html", "frame_pool": "frame_pool.html", "analyzer": "analyzer.html", "file_classifier": "file_classifier.html", "batch_processor": "batch_processor.html", "buffer_manager": "buffer_manager.html", "04_organizer": "04_organizer.html", "deleted_files_cache": "deleted_files_cache.html", "base_dir": "base_dir.html", "duplicate_groups": "duplicate_groups.html", "01_spec_parser": "01_spec_parser.html", "cluster_model": "cluster_model.html", "enhanced_text": "enhanced_text.html", "build_logic_catalog": "build_logic_catalog.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"generator.generate_from_spec": {"nodes": [{"id": "generator.generate_from_spec", "label": "generate_from_spec", "title": "generator.generate_from_spec\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 172", "color": "#ff6b6b"}], "edges": []}, "generator.__init__": {"nodes": [{"id": "generator.__init__", "label": "__init__", "title": "generator.__init__\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 26", "color": "#ff6b6b"}], "edges": []}, "generator._sanitize_filename": {"nodes": [{"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ff6b6b"}], "edges": []}, "generator._load_config": {"nodes": [{"id": "generator._load_config", "label": "_load_config", "title": "generator._load_config\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 198", "color": "#ff6b6b"}], "edges": []}, "generator._generate_source_code": {"nodes": [{"id": "generator._generate_source_code", "label": "_generate_source_code", "title": "generator._generate_source_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 306", "color": "#ff6b6b"}], "edges": []}, "generator._generate_documentation": {"nodes": [{"id": "generator._generate_documentation", "label": "_generate_documentation", "title": "generator._generate_documentation\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 368", "color": "#ff6b6b"}], "edges": []}, "generator._generate_tests": {"nodes": [{"id": "generator._generate_tests", "label": "_generate_tests", "title": "generator._generate_tests\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 398", "color": "#ff6b6b"}], "edges": []}, "generator._strip_markdown_code_blocks": {"nodes": [{"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ff6b6b"}], "edges": []}, "generator._clean_documentation_markdown": {"nodes": [{"id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "title": "generator._clean_documentation_markdown\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 591", "color": "#ff6b6b"}], "edges": []}, "generator._generate_ci_config": {"nodes": [{"id": "generator._generate_ci_config", "label": "_generate_ci_config", "title": "generator._generate_ci_config\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 668", "color": "#ff6b6b"}], "edges": []}, "generator._generate_github_workflow": {"nodes": [{"id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "title": "generator._generate_github_workflow\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 689", "color": "#ff6b6b"}], "edges": []}, "generator._generate_validation_script": {"nodes": [{"id": "generator._generate_validation_script", "label": "_generate_validation_script", "title": "generator._generate_validation_script\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 710", "color": "#ff6b6b"}], "edges": []}, "generator._generate_requirements_file": {"nodes": [{"id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "title": "generator._generate_requirements_file\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 737", "color": "#ff6b6b"}], "edges": []}, "generator._generate_unit_test": {"nodes": [{"id": "generator._generate_unit_test", "label": "_generate_unit_test", "title": "generator._generate_unit_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 755", "color": "#ff6b6b"}], "edges": []}, "generator._generate_integration_test": {"nodes": [{"id": "generator._generate_integration_test", "label": "_generate_integration_test", "title": "generator._generate_integration_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 815", "color": "#ff6b6b"}], "edges": []}, "generator._generate_unit_test_with_retry": {"nodes": [{"id": "generator._generate_unit_test_with_retry", "label": "_generate_unit_test_with_retry", "title": "generator._generate_unit_test_with_retry\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 881", "color": "#ff6b6b"}], "edges": []}, "generator._clean_generated_code": {"nodes": [{"id": "generator._clean_generated_code", "label": "_clean_generated_code", "title": "generator._clean_generated_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 921", "color": "#ff6b6b"}], "edges": []}, "generator._validate_python_code": {"nodes": [{"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ff6b6b"}], "edges": []}, "generator._generate_fallback_test": {"nodes": [{"id": "spec_parser.format_requirements_for_prompt", "label": "format_requirements_for_prompt", "title": "spec_parser.format_requirements_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "ollama_client.generate", "label": "generate", "title": "ollama_client.generate\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "ollama_client.test_connection", "label": "test_connection", "title": "ollama_client.test_connection\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_validation_script", "label": "_generate_validation_script", "title": "generator._generate_validation_script\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 710", "color": "#ffd700"}, {"id": "generator._generate_integration_test", "label": "_generate_integration_test", "title": "generator._generate_integration_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 815", "color": "#ffd700"}, {"id": "source_code_prompt.format", "label": "format", "title": "source_code_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._clean_generated_code", "label": "_clean_generated_code", "title": "generator._clean_generated_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 921", "color": "#ffd700"}, {"id": "generator._generate_ci_config", "label": "_generate_ci_config", "title": "generator._generate_ci_config\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 668", "color": "#ffd700"}, {"id": "spec_parser.format_interfaces_for_prompt", "label": "format_interfaces_for_prompt", "title": "spec_parser.format_interfaces_for_prompt\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "config.get", "label": "get", "title": "config.get\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "spec_parser.parse_file", "label": "parse_file", "title": "spec_parser.parse_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "spec_parser.validate_spec", "label": "validate_spec", "title": "spec_parser.validate_spec\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._clean_documentation_markdown", "label": "_clean_documentation_markdown", "title": "generator._clean_documentation_markdown\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 591", "color": "#ffd700"}, {"id": "generator._generate_github_workflow", "label": "_generate_github_workflow", "title": "generator._generate_github_workflow\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 689", "color": "#ffd700"}, {"id": "ollama_client.generate_code", "label": "generate_code", "title": "ollama_client.generate_code\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_requirements_file", "label": "_generate_requirements_file", "title": "generator._generate_requirements_file\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 737", "color": "#ffd700"}, {"id": "generator._generate_unit_test", "label": "_generate_unit_test", "title": "generator._generate_unit_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 755", "color": "#ffd700"}, {"id": "generator._validate_python_code", "label": "_validate_python_code", "title": "generator._validate_python_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 989", "color": "#ffd700"}, {"id": "generator._strip_markdown_code_blocks", "label": "_strip_markdown_code_blocks", "title": "generator._strip_markdown_code_blocks\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 493", "color": "#ffd700"}, {"id": "generator._generate_tests", "label": "_generate_tests", "title": "generator._generate_tests\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 398", "color": "#ffd700"}, {"id": "generator._sanitize_filename", "label": "_sanitize_filename", "title": "generator._sanitize_filename\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 92", "color": "#ffd700"}, {"id": "generator._generate_documentation", "label": "_generate_documentation", "title": "generator._generate_documentation\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 368", "color": "#ffd700"}, {"id": "ollama_client.generate_tests", "label": "generate_tests", "title": "ollama_client.generate_tests\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "documentation_prompt.format", "label": "format", "title": "documentation_prompt.format\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._load_config", "label": "_load_config", "title": "generator._load_config\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 198", "color": "#ffd700"}, {"id": "generator._generate_fallback_test", "label": "_generate_fallback_test", "title": "generator._generate_fallback_test\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 1041", "color": "#ff6b6b"}, {"id": "generator._generate_source_code", "label": "_generate_source_code", "title": "generator._generate_source_code\\nFile: src/asabaal_utils/agents/spec_coder/generator.py\\nLine: 306", "color": "#ffd700"}], "edges": [{"from": "generator._generate_fallback_test", "to": "generator._generate_tests"}, {"from": "generator._generate_fallback_test", "to": "generator._sanitize_filename"}, {"from": "generator._generate_fallback_test", "to": "generator._validate_python_code"}, {"from": "generator._generate_fallback_test", "to": "ollama_client.generate_tests"}, {"from": "generator._generate_fallback_test", "to": "spec_parser.parse_file"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_github_workflow"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_unit_test"}, {"from": "generator._generate_fallback_test", "to": "documentation_prompt.format"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_documentation"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_validation_script"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_integration_test"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_requirements_file"}, {"from": "generator._generate_fallback_test", "to": "spec_parser.validate_spec"}, {"from": "generator._generate_fallback_test", "to": "ollama_client.generate"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_source_code"}, {"from": "generator._generate_fallback_test", "to": "spec_parser.format_interfaces_for_prompt"}, {"from": "generator._generate_fallback_test", "to": "source_code_prompt.format"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_fallback_test"}, {"from": "generator._generate_fallback_test", "to": "generator._clean_generated_code"}, {"from": "generator._generate_fallback_test", "to": "ollama_client.generate_code"}, {"from": "generator._generate_fallback_test", "to": "ollama_client.test_connection"}, {"from": "generator._generate_fallback_test", "to": "generator._generate_ci_config"}, {"from": "generator._generate_fallback_test", "to": "generator._clean_documentation_markdown"}, {"from": "generator._generate_fallback_test", "to": "generator._load_config"}, {"from": "generator._generate_fallback_test", "to": "generator._strip_markdown_code_blocks"}, {"from": "generator._generate_fallback_test", "to": "config.get"}, {"from": "generator._generate_fallback_test", "to": "spec_parser.format_requirements_for_prompt"}]}, "generator.create_video": {"nodes": [{"id": "generator.create_video", "label": "create_video", "title": "generator.create_video\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 51", "color": "#ff6b6b"}], "edges": []}, "generator._merge_configs": {"nodes": [{"id": "generator._merge_configs", "label": "_merge_configs", "title": "generator._merge_configs\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 253", "color": "#ff6b6b"}], "edges": []}, "generator._generate_frames": {"nodes": [{"id": "generator._generate_frames", "label": "_generate_frames", "title": "generator._generate_frames\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 265", "color": "#ff6b6b"}], "edges": []}, "generator._apply_motion_effects": {"nodes": [{"id": "generator._apply_motion_effects", "label": "_apply_motion_effects", "title": "generator._apply_motion_effects\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 471", "color": "#ff6b6b"}], "edges": []}, "generator._get_y_position": {"nodes": [{"id": "generator._get_y_position", "label": "_get_y_position", "title": "generator._get_y_position\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 531", "color": "#ff6b6b"}], "edges": []}, "generator._filter_audio_features_by_time": {"nodes": [{"id": "generator._filter_audio_features_by_time", "label": "_filter_audio_features_by_time", "title": "generator._filter_audio_features_by_time\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 549", "color": "#ff6b6b"}], "edges": []}, "generator._filter_lyrics_by_time": {"nodes": [{"id": "generator._filter_lyrics_by_time", "label": "_filter_lyrics_by_time", "title": "generator._filter_lyrics_by_time\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 578", "color": "#ff6b6b"}], "edges": []}, "generator.get_system_info": {"nodes": [{"id": "motion_effect_renderer.apply_effect", "label": "apply_effect", "title": "motion_effect_renderer.apply_effect\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._filter_lyrics_by_time", "label": "_filter_lyrics_by_time", "title": "generator._filter_lyrics_by_time\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 578", "color": "#ffd700"}, {"id": "generator._merge_configs", "label": "_merge_configs", "title": "generator._merge_configs\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 253", "color": "#ffd700"}, {"id": "professional_text_renderer.setup_from_config", "label": "setup_from_config", "title": "professional_text_renderer.setup_from_config\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator.get_system_info", "label": "get_system_info", "title": "generator.get_system_info\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 615", "color": "#ff6b6b"}, {"id": "lyric_processor.align_to_audio", "label": "align_to_audio", "title": "lyric_processor.align_to_audio\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "section_manager.load_structure_from_file", "label": "load_structure_from_file", "title": "section_manager.load_structure_from_file\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.load_background_clips_from_directory", "label": "load_background_clips_from_directory", "title": "compositor.load_background_clips_from_directory\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "config.get", "label": "get", "title": "config.get\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "lyric_processor.parse_lyrics", "label": "parse_lyrics", "title": "lyric_processor.parse_lyrics\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.detect_motion", "label": "detect_motion", "title": "compositor.detect_motion\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "section_manager.get_text_style_modifications", "label": "get_text_style_modifications", "title": "section_manager.get_text_style_modifications\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.apply_audio_reactive_effects", "label": "apply_audio_reactive_effects", "title": "compositor.apply_audio_reactive_effects\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "section_manager.log_section_transitions", "label": "log_section_transitions", "title": "section_manager.log_section_transitions\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "professional_text_renderer.render_lyric_line", "label": "render_lyric_line", "title": "professional_text_renderer.render_lyric_line\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "audio_analyzer.analyze_audio", "label": "analyze_audio", "title": "audio_analyzer.analyze_audio\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.composite_frame", "label": "composite_frame", "title": "compositor.composite_frame\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._generate_frames", "label": "_generate_frames", "title": "generator._generate_frames\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 265", "color": "#ffd700"}, {"id": "compositor.load_background_video", "label": "load_background_video", "title": "compositor.load_background_video\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.get_background_frame", "label": "get_background_frame", "title": "compositor.get_background_frame\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "section_manager.detect_sections_from_audio", "label": "detect_sections_from_audio", "title": "section_manager.detect_sections_from_audio\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "section_manager.get_text_effects_config", "label": "get_text_effects_config", "title": "section_manager.get_text_effects_config\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "text_renderer.render_lyric_line", "label": "render_lyric_line", "title": "text_renderer.render_lyric_line\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "audio_features.get_features_at_time", "label": "get_features_at_time", "title": "audio_features.get_features_at_time\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "generator._apply_motion_effects", "label": "_apply_motion_effects", "title": "generator._apply_motion_effects\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 471", "color": "#ffd700"}, {"id": "generator._load_config", "label": "_load_config", "title": "generator._load_config\\nFile: src/asabaal_utils/video_processing/lyric_video/generator.py\\nLine: 198", "color": "#ffd700"}, {"id": "encoder.encode_video", "label": "encode_video", "title": "encoder.encode_video\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.enhance_background_motion", "label": "enhance_background_motion", "title": "compositor.enhance_background_motion\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.get_motion_features", "label": "get_motion_features", "title": "compositor.get_motion_features\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "encoder.get_encoding_info", "label": "get_encoding_info", "title": "encoder.get_encoding_info\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "generator.get_system_info", "to": "section_manager.detect_sections_from_audio"}, {"from": "generator.get_system_info", "to": "section_manager.log_section_transitions"}, {"from": "generator.get_system_info", "to": "generator._apply_motion_effects"}, {"from": "generator.get_system_info", "to": "section_manager.get_text_effects_config"}, {"from": "generator.get_system_info", "to": "professional_text_renderer.render_lyric_line"}, {"from": "generator.get_system_info", "to": "audio_features.get_features_at_time"}, {"from": "generator.get_system_info", "to": "compositor.load_background_clips_from_directory"}, {"from": "generator.get_system_info", "to": "compositor.composite_frame"}, {"from": "generator.get_system_info", "to": "generator._filter_lyrics_by_time"}, {"from": "generator.get_system_info", "to": "encoder.encode_video"}, {"from": "generator.get_system_info", "to": "section_manager.load_structure_from_file"}, {"from": "generator.get_system_info", "to": "audio_analyzer.analyze_audio"}, {"from": "generator.get_system_info", "to": "motion_effect_renderer.apply_effect"}, {"from": "generator.get_system_info", "to": "compositor.load_background_video"}, {"from": "generator.get_system_info", "to": "professional_text_renderer.setup_from_config"}, {"from": "generator.get_system_info", "to": "compositor.apply_audio_reactive_effects"}, {"from": "generator.get_system_info", "to": "compositor.get_background_frame"}, {"from": "generator.get_system_info", "to": "generator._generate_frames"}, {"from": "generator.get_system_info", "to": "section_manager.get_text_style_modifications"}, {"from": "generator.get_system_info", "to": "lyric_processor.parse_lyrics"}, {"from": "generator.get_system_info", "to": "compositor.detect_motion"}, {"from": "generator.get_system_info", "to": "encoder.get_encoding_info"}, {"from": "generator.get_system_info", "to": "compositor.get_motion_features"}, {"from": "generator.get_system_info", "to": "compositor.enhance_background_motion"}, {"from": "generator.get_system_info", "to": "generator._load_config"}, {"from": "generator.get_system_info", "to": "generator._merge_configs"}, {"from": "generator.get_system_info", "to": "config.get"}, {"from": "generator.get_system_info", "to": "lyric_processor.align_to_audio"}, {"from": "generator.get_system_info", "to": "text_renderer.render_lyric_line"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - generator
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:26
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_motion_effects" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._apply_motion_effects', '_apply_motion_effects')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_motion_effects</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:471
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_clean_documentation_markdown" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._clean_documentation_markdown', '_clean_documentation_markdown')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_clean_documentation_markdown</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:591
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_clean_generated_code" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._clean_generated_code', '_clean_generated_code')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_clean_generated_code</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:921
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_filter_audio_features_by_time" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._filter_audio_features_by_time', '_filter_audio_features_by_time')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_filter_audio_features_by_time</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:549
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_filter_lyrics_by_time" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._filter_lyrics_by_time', '_filter_lyrics_by_time')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_filter_lyrics_by_time</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:578
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_ci_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_ci_config', '_generate_ci_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_ci_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:668
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_documentation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_documentation', '_generate_documentation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_documentation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:368
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_fallback_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_fallback_test', '_generate_fallback_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_fallback_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑27</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:1041
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_frames" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_frames', '_generate_frames')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_frames</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:265
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_github_workflow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_github_workflow', '_generate_github_workflow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_github_workflow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:689
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_integration_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_integration_test', '_generate_integration_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_integration_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:815
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_requirements_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_requirements_file', '_generate_requirements_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_requirements_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:737
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_source_code" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_source_code', '_generate_source_code')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_source_code</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:306
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_tests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_tests', '_generate_tests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_tests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:398
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_unit_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_unit_test', '_generate_unit_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_unit_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:755
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_unit_test_with_retry" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_unit_test_with_retry', '_generate_unit_test_with_retry')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_unit_test_with_retry</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:881
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_generate_validation_script" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._generate_validation_script', '_generate_validation_script')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_generate_validation_script</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:710
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_get_y_position" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._get_y_position', '_get_y_position')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_get_y_position</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:531
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_load_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._load_config', '_load_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_load_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓2</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:198
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_merge_configs" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._merge_configs', '_merge_configs')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_merge_configs</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:253
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_sanitize_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._sanitize_filename', '_sanitize_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_sanitize_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:92
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_strip_markdown_code_blocks" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._strip_markdown_code_blocks', '_strip_markdown_code_blocks')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_strip_markdown_code_blocks</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:493
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_validate_python_code" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator._validate_python_code', '_validate_python_code')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_validate_python_code</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:989
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_video" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator.create_video', 'create_video')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_video</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:51
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_from_spec" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator.generate_from_spec', 'generate_from_spec')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_from_spec</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generator.py:172
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_system_info" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generator.get_system_info', 'get_system_info')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_system_info</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑29</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/generator.py:615
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

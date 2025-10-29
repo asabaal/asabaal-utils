@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html>
+    <head><title>08_integration Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.demo_pipeline", "label": "demo_pipeline", "shape": "dot", "title": "Function: 08_integration.demo_pipeline\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1746\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.spec_parsed_handler", "label": "spec_parsed_handler", "shape": "dot", "title": "Function: 08_integration.spec_parsed_handler\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1763\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.code_generated_handler", "label": "code_generated_handler", "shape": "dot", "title": "Function: 08_integration.code_generated_handler\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1766\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.run_demos", "label": "run_demos", "shape": "dot", "title": "Function: 08_integration.run_demos\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1799\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.__init__", "label": "__init__", "shape": "dot", "title": "Function: 08_integration.__init__\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1844\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.register_component", "label": "register_component", "shape": "dot", "title": "Function: 08_integration.register_component\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 135\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.test_component_interaction", "label": "test_component_interaction", "shape": "dot", "title": "Function: 08_integration.test_component_interaction\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 145\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration._simulate_component_call", "label": "_simulate_component_call", "shape": "dot", "title": "Function: 08_integration._simulate_component_call\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 176\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.run_integration_tests", "label": "run_integration_tests", "shape": "dot", "title": "Function: 08_integration.run_integration_tests\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 186\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.create_sample_spec", "label": "create_sample_spec", "shape": "dot", "title": "Function: 08_integration.create_sample_spec\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 268\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_spec_parsing", "label": "simulate_spec_parsing", "shape": "dot", "title": "Function: 08_integration.simulate_spec_parsing\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 332\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_code_generation", "label": "simulate_code_generation", "shape": "dot", "title": "Function: 08_integration.simulate_code_generation\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 350\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_test_generation", "label": "simulate_test_generation", "shape": "dot", "title": "Function: 08_integration.simulate_test_generation\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 384\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_test_execution", "label": "simulate_test_execution", "shape": "dot", "title": "Function: 08_integration.simulate_test_execution\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 427\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_code_organization", "label": "simulate_code_organization", "shape": "dot", "title": "Function: 08_integration.simulate_code_organization\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 448\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.run_complete_workflow", "label": "run_complete_workflow", "shape": "dot", "title": "Function: 08_integration.run_complete_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 479\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.log_step", "label": "log_step", "shape": "dot", "title": "Function: 08_integration.log_step\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 539\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_spec_parsing_error", "label": "simulate_spec_parsing_error", "shape": "dot", "title": "Function: 08_integration.simulate_spec_parsing_error\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 575\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_code_generation_errors", "label": "simulate_code_generation_errors", "shape": "dot", "title": "Function: 08_integration.simulate_code_generation_errors\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 610\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_test_errors", "label": "simulate_test_errors", "shape": "dot", "title": "Function: 08_integration.simulate_test_errors\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 645\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.simulate_organization_errors", "label": "simulate_organization_errors", "shape": "dot", "title": "Function: 08_integration.simulate_organization_errors\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 680\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.demonstrate_troubleshooting_workflow", "label": "demonstrate_troubleshooting_workflow", "shape": "dot", "title": "Function: 08_integration.demonstrate_troubleshooting_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 715\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.log_error", "label": "log_error", "shape": "dot", "title": "Function: 08_integration.log_error\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 805\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.collect_system_metrics", "label": "collect_system_metrics", "shape": "dot", "title": "Function: 08_integration.collect_system_metrics\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 863\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.check_thresholds", "label": "check_thresholds", "shape": "dot", "title": "Function: 08_integration.check_thresholds\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 884\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.analyze_trends", "label": "analyze_trends", "shape": "dot", "title": "Function: 08_integration.analyze_trends\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 900\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.optimize_ai_requests", "label": "optimize_ai_requests", "shape": "dot", "title": "Function: 08_integration.optimize_ai_requests\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 932\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.optimize_file_operations", "label": "optimize_file_operations", "shape": "dot", "title": "Function: 08_integration.optimize_file_operations\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 969\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.optimize_memory_usage", "label": "optimize_memory_usage", "shape": "dot", "title": "Function: 08_integration.optimize_memory_usage\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1000\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.benchmark_performance", "label": "benchmark_performance", "shape": "dot", "title": "Function: 08_integration.benchmark_performance\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1031\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.security_hardening", "label": "security_hardening", "shape": "dot", "title": "Function: 08_integration.security_hardening\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1126\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.scalability_strategies_guide", "label": "scalability_strategies_guide", "shape": "dot", "title": "Function: 08_integration.scalability_strategies_guide\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1186\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.monitoring_and_logging_setup", "label": "monitoring_and_logging_setup", "shape": "dot", "title": "Function: 08_integration.monitoring_and_logging_setup\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1239\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.deployment_checklist_generator", "label": "deployment_checklist_generator", "shape": "dot", "title": "Function: 08_integration.deployment_checklist_generator\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1285\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.create_deployment_script_template", "label": "create_deployment_script_template", "shape": "dot", "title": "Function: 08_integration.create_deployment_script_template\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1366\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.process", "label": "process", "shape": "dot", "title": "Function: 08_integration.process\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1725\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.validate", "label": "validate", "shape": "dot", "title": "Function: 08_integration.validate\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1729\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.add_stage", "label": "add_stage", "shape": "dot", "title": "Function: 08_integration.add_stage\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1507\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.add_middleware", "label": "add_middleware", "shape": "dot", "title": "Function: 08_integration.add_middleware\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1512\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.add_error_handler", "label": "add_error_handler", "shape": "dot", "title": "Function: 08_integration.add_error_handler\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1517\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.execute_async", "label": "execute_async", "shape": "dot", "title": "Function: 08_integration.execute_async\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1522\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.subscribe", "label": "subscribe", "shape": "dot", "title": "Function: 08_integration.subscribe\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1572\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.publish", "label": "publish", "shape": "dot", "title": "Function: 08_integration.publish\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1578\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.process_events", "label": "process_events", "shape": "dot", "title": "Function: 08_integration.process_events\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1588\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.stop", "label": "stop", "shape": "dot", "title": "Function: 08_integration.stop\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1613\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.register_workflow", "label": "register_workflow", "shape": "dot", "title": "Function: 08_integration.register_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1625\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration.execute_workflow", "label": "execute_workflow", "shape": "dot", "title": "Function: 08_integration.execute_workflow\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1629\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ff9999", "font": {"color": "#333333", "size": 12}, "id": "08_integration._execute_step", "label": "_execute_step", "shape": "dot", "title": "Function: 08_integration._execute_step\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1675\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.compile_module_summary", "label": "compile_module_summary", "shape": "dot", "title": "Function: 08_integration.compile_module_summary\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1855\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.compile_best_practices", "label": "compile_best_practices", "shape": "dot", "title": "Function: 08_integration.compile_best_practices\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 1932\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.compile_common_pitfalls", "label": "compile_common_pitfalls", "shape": "dot", "title": "Function: 08_integration.compile_common_pitfalls\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 2007\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.generate_integration_report", "label": "generate_integration_report", "shape": "dot", "title": "Function: 08_integration.generate_integration_report\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 2063\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "08_integration.create_learning_path", "label": "create_learning_path", "shape": "dot", "title": "Function: 08_integration.create_learning_path\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\nLine: 2093\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"08_integration.demo_pipeline": {"nodes": [{"id": "08_integration.demo_pipeline", "label": "demo_pipeline", "title": "08_integration.demo_pipeline\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1746", "color": "#ff6b6b"}], "edges": []}, "08_integration.spec_parsed_handler": {"nodes": [{"id": "08_integration.spec_parsed_handler", "label": "spec_parsed_handler", "title": "08_integration.spec_parsed_handler\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1763", "color": "#ff6b6b"}], "edges": []}, "08_integration.code_generated_handler": {"nodes": [{"id": "08_integration.code_generated_handler", "label": "code_generated_handler", "title": "08_integration.code_generated_handler\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1766", "color": "#ff6b6b"}], "edges": []}, "08_integration.run_demos": {"nodes": [{"id": "08_integration.run_demos", "label": "run_demos", "title": "08_integration.run_demos\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1799", "color": "#ff6b6b"}], "edges": []}, "08_integration.__init__": {"nodes": [{"id": "08_integration.__init__", "label": "__init__", "title": "08_integration.__init__\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1844", "color": "#ff6b6b"}], "edges": []}, "08_integration.register_component": {"nodes": [{"id": "08_integration.register_component", "label": "register_component", "title": "08_integration.register_component\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 135", "color": "#ff6b6b"}], "edges": []}, "08_integration.test_component_interaction": {"nodes": [{"id": "08_integration.test_component_interaction", "label": "test_component_interaction", "title": "08_integration.test_component_interaction\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 145", "color": "#ff6b6b"}], "edges": []}, "08_integration._simulate_component_call": {"nodes": [{"id": "08_integration._simulate_component_call", "label": "_simulate_component_call", "title": "08_integration._simulate_component_call\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 176", "color": "#ff6b6b"}], "edges": []}, "08_integration.run_integration_tests": {"nodes": [{"id": "08_integration.run_integration_tests", "label": "run_integration_tests", "title": "08_integration.run_integration_tests\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 186", "color": "#ff6b6b"}], "edges": []}, "08_integration.create_sample_spec": {"nodes": [{"id": "08_integration.create_sample_spec", "label": "create_sample_spec", "title": "08_integration.create_sample_spec\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 268", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_spec_parsing": {"nodes": [{"id": "08_integration.simulate_spec_parsing", "label": "simulate_spec_parsing", "title": "08_integration.simulate_spec_parsing\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 332", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_code_generation": {"nodes": [{"id": "08_integration.simulate_code_generation", "label": "simulate_code_generation", "title": "08_integration.simulate_code_generation\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 350", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_test_generation": {"nodes": [{"id": "08_integration.simulate_test_generation", "label": "simulate_test_generation", "title": "08_integration.simulate_test_generation\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 384", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_test_execution": {"nodes": [{"id": "08_integration.simulate_test_execution", "label": "simulate_test_execution", "title": "08_integration.simulate_test_execution\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 427", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_code_organization": {"nodes": [{"id": "08_integration.simulate_code_organization", "label": "simulate_code_organization", "title": "08_integration.simulate_code_organization\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 448", "color": "#ff6b6b"}], "edges": []}, "08_integration.run_complete_workflow": {"nodes": [{"id": "08_integration.run_complete_workflow", "label": "run_complete_workflow", "title": "08_integration.run_complete_workflow\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 479", "color": "#ff6b6b"}], "edges": []}, "08_integration.log_step": {"nodes": [{"id": "08_integration.log_step", "label": "log_step", "title": "08_integration.log_step\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 539", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_spec_parsing_error": {"nodes": [{"id": "08_integration.simulate_spec_parsing_error", "label": "simulate_spec_parsing_error", "title": "08_integration.simulate_spec_parsing_error\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 575", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_code_generation_errors": {"nodes": [{"id": "08_integration.simulate_code_generation_errors", "label": "simulate_code_generation_errors", "title": "08_integration.simulate_code_generation_errors\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 610", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_test_errors": {"nodes": [{"id": "08_integration.simulate_test_errors", "label": "simulate_test_errors", "title": "08_integration.simulate_test_errors\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 645", "color": "#ff6b6b"}], "edges": []}, "08_integration.simulate_organization_errors": {"nodes": [{"id": "08_integration.simulate_organization_errors", "label": "simulate_organization_errors", "title": "08_integration.simulate_organization_errors\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 680", "color": "#ff6b6b"}], "edges": []}, "08_integration.demonstrate_troubleshooting_workflow": {"nodes": [{"id": "08_integration.demonstrate_troubleshooting_workflow", "label": "demonstrate_troubleshooting_workflow", "title": "08_integration.demonstrate_troubleshooting_workflow\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 715", "color": "#ff6b6b"}], "edges": []}, "08_integration.log_error": {"nodes": [{"id": "08_integration.log_error", "label": "log_error", "title": "08_integration.log_error\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 805", "color": "#ff6b6b"}], "edges": []}, "08_integration.collect_system_metrics": {"nodes": [{"id": "08_integration.collect_system_metrics", "label": "collect_system_metrics", "title": "08_integration.collect_system_metrics\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 863", "color": "#ff6b6b"}], "edges": []}, "08_integration.check_thresholds": {"nodes": [{"id": "08_integration.check_thresholds", "label": "check_thresholds", "title": "08_integration.check_thresholds\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 884", "color": "#ff6b6b"}], "edges": []}, "08_integration.analyze_trends": {"nodes": [{"id": "08_integration.analyze_trends", "label": "analyze_trends", "title": "08_integration.analyze_trends\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 900", "color": "#ff6b6b"}], "edges": []}, "08_integration.optimize_ai_requests": {"nodes": [{"id": "08_integration.optimize_ai_requests", "label": "optimize_ai_requests", "title": "08_integration.optimize_ai_requests\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 932", "color": "#ff6b6b"}], "edges": []}, "08_integration.optimize_file_operations": {"nodes": [{"id": "08_integration.optimize_file_operations", "label": "optimize_file_operations", "title": "08_integration.optimize_file_operations\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 969", "color": "#ff6b6b"}], "edges": []}, "08_integration.optimize_memory_usage": {"nodes": [{"id": "08_integration.optimize_memory_usage", "label": "optimize_memory_usage", "title": "08_integration.optimize_memory_usage\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1000", "color": "#ff6b6b"}], "edges": []}, "08_integration.benchmark_performance": {"nodes": [{"id": "08_integration.benchmark_performance", "label": "benchmark_performance", "title": "08_integration.benchmark_performance\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1031", "color": "#ff6b6b"}], "edges": []}, "08_integration.security_hardening": {"nodes": [{"id": "08_integration.security_hardening", "label": "security_hardening", "title": "08_integration.security_hardening\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1126", "color": "#ff6b6b"}], "edges": []}, "08_integration.scalability_strategies_guide": {"nodes": [{"id": "08_integration.scalability_strategies_guide", "label": "scalability_strategies_guide", "title": "08_integration.scalability_strategies_guide\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1186", "color": "#ff6b6b"}], "edges": []}, "08_integration.monitoring_and_logging_setup": {"nodes": [{"id": "08_integration.monitoring_and_logging_setup", "label": "monitoring_and_logging_setup", "title": "08_integration.monitoring_and_logging_setup\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1239", "color": "#ff6b6b"}], "edges": []}, "08_integration.deployment_checklist_generator": {"nodes": [{"id": "08_integration.deployment_checklist_generator", "label": "deployment_checklist_generator", "title": "08_integration.deployment_checklist_generator\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1285", "color": "#ff6b6b"}], "edges": []}, "08_integration.create_deployment_script_template": {"nodes": [{"id": "08_integration.create_deployment_script_template", "label": "create_deployment_script_template", "title": "08_integration.create_deployment_script_template\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1366", "color": "#ff6b6b"}], "edges": []}, "08_integration.process": {"nodes": [{"id": "08_integration.process", "label": "process", "title": "08_integration.process\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1725", "color": "#ff6b6b"}], "edges": []}, "08_integration.validate": {"nodes": [{"id": "08_integration.validate", "label": "validate", "title": "08_integration.validate\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1729", "color": "#ff6b6b"}], "edges": []}, "08_integration.add_stage": {"nodes": [{"id": "08_integration.add_stage", "label": "add_stage", "title": "08_integration.add_stage\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1507", "color": "#ff6b6b"}], "edges": []}, "08_integration.add_middleware": {"nodes": [{"id": "08_integration.add_middleware", "label": "add_middleware", "title": "08_integration.add_middleware\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1512", "color": "#ff6b6b"}], "edges": []}, "08_integration.add_error_handler": {"nodes": [{"id": "08_integration.add_error_handler", "label": "add_error_handler", "title": "08_integration.add_error_handler\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1517", "color": "#ff6b6b"}], "edges": []}, "08_integration.execute_async": {"nodes": [{"id": "08_integration.execute_async", "label": "execute_async", "title": "08_integration.execute_async\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1522", "color": "#ff6b6b"}], "edges": []}, "08_integration.subscribe": {"nodes": [{"id": "08_integration.subscribe", "label": "subscribe", "title": "08_integration.subscribe\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1572", "color": "#ff6b6b"}], "edges": []}, "08_integration.publish": {"nodes": [{"id": "08_integration.publish", "label": "publish", "title": "08_integration.publish\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1578", "color": "#ff6b6b"}], "edges": []}, "08_integration.process_events": {"nodes": [{"id": "08_integration.process_events", "label": "process_events", "title": "08_integration.process_events\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1588", "color": "#ff6b6b"}], "edges": []}, "08_integration.stop": {"nodes": [{"id": "08_integration.stop", "label": "stop", "title": "08_integration.stop\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1613", "color": "#ff6b6b"}], "edges": []}, "08_integration.register_workflow": {"nodes": [{"id": "08_integration.register_workflow", "label": "register_workflow", "title": "08_integration.register_workflow\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1625", "color": "#ff6b6b"}], "edges": []}, "08_integration.execute_workflow": {"nodes": [{"id": "08_integration.execute_workflow", "label": "execute_workflow", "title": "08_integration.execute_workflow\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1629", "color": "#ff6b6b"}], "edges": []}, "08_integration._execute_step": {"nodes": [{"id": "08_integration._execute_step", "label": "_execute_step", "title": "08_integration._execute_step\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1675", "color": "#ff6b6b"}], "edges": []}, "08_integration.compile_module_summary": {"nodes": [{"id": "08_integration.compile_module_summary", "label": "compile_module_summary", "title": "08_integration.compile_module_summary\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1855", "color": "#ff6b6b"}], "edges": []}, "08_integration.compile_best_practices": {"nodes": [{"id": "08_integration.compile_best_practices", "label": "compile_best_practices", "title": "08_integration.compile_best_practices\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 1932", "color": "#ff6b6b"}], "edges": []}, "08_integration.compile_common_pitfalls": {"nodes": [{"id": "08_integration.compile_common_pitfalls", "label": "compile_common_pitfalls", "title": "08_integration.compile_common_pitfalls\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 2007", "color": "#ff6b6b"}], "edges": []}, "08_integration.generate_integration_report": {"nodes": [{"id": "08_integration.generate_integration_report", "label": "generate_integration_report", "title": "08_integration.generate_integration_report\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 2063", "color": "#ff6b6b"}], "edges": []}, "08_integration.create_learning_path": {"nodes": [{"id": "08_integration.create_learning_path", "label": "create_learning_path", "title": "08_integration.create_learning_path\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py\\nLine: 2093", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - 08_integration
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1844
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_execute_step" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration._execute_step', '_execute_step')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_execute_step</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1675
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_simulate_component_call" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration._simulate_component_call', '_simulate_component_call')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_simulate_component_call</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:176
+                </div>
+            </div>
+
+            <div class="function-item" data-name="add_error_handler" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.add_error_handler', 'add_error_handler')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>add_error_handler</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1517
+                </div>
+            </div>
+
+            <div class="function-item" data-name="add_middleware" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.add_middleware', 'add_middleware')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>add_middleware</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1512
+                </div>
+            </div>
+
+            <div class="function-item" data-name="add_stage" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.add_stage', 'add_stage')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>add_stage</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1507
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_trends" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.analyze_trends', 'analyze_trends')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_trends</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:900
+                </div>
+            </div>
+
+            <div class="function-item" data-name="benchmark_performance" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.benchmark_performance', 'benchmark_performance')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>benchmark_performance</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1031
+                </div>
+            </div>
+
+            <div class="function-item" data-name="check_thresholds" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.check_thresholds', 'check_thresholds')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>check_thresholds</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:884
+                </div>
+            </div>
+
+            <div class="function-item" data-name="code_generated_handler" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.code_generated_handler', 'code_generated_handler')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>code_generated_handler</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1766
+                </div>
+            </div>
+
+            <div class="function-item" data-name="collect_system_metrics" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.collect_system_metrics', 'collect_system_metrics')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>collect_system_metrics</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:863
+                </div>
+            </div>
+
+            <div class="function-item" data-name="compile_best_practices" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.compile_best_practices', 'compile_best_practices')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>compile_best_practices</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1932
+                </div>
+            </div>
+
+            <div class="function-item" data-name="compile_common_pitfalls" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.compile_common_pitfalls', 'compile_common_pitfalls')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>compile_common_pitfalls</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:2007
+                </div>
+            </div>
+
+            <div class="function-item" data-name="compile_module_summary" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.compile_module_summary', 'compile_module_summary')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>compile_module_summary</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1855
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_deployment_script_template" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.create_deployment_script_template', 'create_deployment_script_template')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_deployment_script_template</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1366
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_learning_path" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.create_learning_path', 'create_learning_path')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_learning_path</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:2093
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_sample_spec" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.create_sample_spec', 'create_sample_spec')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_sample_spec</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:268
+                </div>
+            </div>
+
+            <div class="function-item" data-name="demo_pipeline" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.demo_pipeline', 'demo_pipeline')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>demo_pipeline</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1746
+                </div>
+            </div>
+
+            <div class="function-item" data-name="demonstrate_troubleshooting_workflow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.demonstrate_troubleshooting_workflow', 'demonstrate_troubleshooting_workflow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>demonstrate_troubleshooting_workflow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:715
+                </div>
+            </div>
+
+            <div class="function-item" data-name="deployment_checklist_generator" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.deployment_checklist_generator', 'deployment_checklist_generator')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>deployment_checklist_generator</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1285
+                </div>
+            </div>
+
+            <div class="function-item" data-name="execute_async" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.execute_async', 'execute_async')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>execute_async</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1522
+                </div>
+            </div>
+
+            <div class="function-item" data-name="execute_workflow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.execute_workflow', 'execute_workflow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>execute_workflow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1629
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_integration_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.generate_integration_report', 'generate_integration_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_integration_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:2063
+                </div>
+            </div>
+
+            <div class="function-item" data-name="log_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.log_error', 'log_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>log_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:805
+                </div>
+            </div>
+
+            <div class="function-item" data-name="log_step" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.log_step', 'log_step')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>log_step</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:539
+                </div>
+            </div>
+
+            <div class="function-item" data-name="monitoring_and_logging_setup" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.monitoring_and_logging_setup', 'monitoring_and_logging_setup')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>monitoring_and_logging_setup</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1239
+                </div>
+            </div>
+
+            <div class="function-item" data-name="optimize_ai_requests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.optimize_ai_requests', 'optimize_ai_requests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>optimize_ai_requests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:932
+                </div>
+            </div>
+
+            <div class="function-item" data-name="optimize_file_operations" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.optimize_file_operations', 'optimize_file_operations')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>optimize_file_operations</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:969
+                </div>
+            </div>
+
+            <div class="function-item" data-name="optimize_memory_usage" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.optimize_memory_usage', 'optimize_memory_usage')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>optimize_memory_usage</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1000
+                </div>
+            </div>
+
+            <div class="function-item" data-name="process" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.process', 'process')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>process</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1725
+                </div>
+            </div>
+
+            <div class="function-item" data-name="process_events" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.process_events', 'process_events')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>process_events</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1588
+                </div>
+            </div>
+
+            <div class="function-item" data-name="publish" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.publish', 'publish')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>publish</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1578
+                </div>
+            </div>
+
+            <div class="function-item" data-name="register_component" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.register_component', 'register_component')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>register_component</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:135
+                </div>
+            </div>
+
+            <div class="function-item" data-name="register_workflow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.register_workflow', 'register_workflow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>register_workflow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1625
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_complete_workflow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.run_complete_workflow', 'run_complete_workflow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_complete_workflow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:479
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_demos" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.run_demos', 'run_demos')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_demos</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1799
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_integration_tests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.run_integration_tests', 'run_integration_tests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_integration_tests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:186
+                </div>
+            </div>
+
+            <div class="function-item" data-name="scalability_strategies_guide" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.scalability_strategies_guide', 'scalability_strategies_guide')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>scalability_strategies_guide</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1186
+                </div>
+            </div>
+
+            <div class="function-item" data-name="security_hardening" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.security_hardening', 'security_hardening')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>security_hardening</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1126
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_code_generation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_code_generation', 'simulate_code_generation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_code_generation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:350
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_code_generation_errors" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_code_generation_errors', 'simulate_code_generation_errors')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_code_generation_errors</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:610
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_code_organization" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_code_organization', 'simulate_code_organization')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_code_organization</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:448
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_organization_errors" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_organization_errors', 'simulate_organization_errors')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_organization_errors</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:680
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_spec_parsing" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_spec_parsing', 'simulate_spec_parsing')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_spec_parsing</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:332
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_spec_parsing_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_spec_parsing_error', 'simulate_spec_parsing_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_spec_parsing_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:575
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_test_errors" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_test_errors', 'simulate_test_errors')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_test_errors</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:645
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_test_execution" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_test_execution', 'simulate_test_execution')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_test_execution</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:427
+                </div>
+            </div>
+
+            <div class="function-item" data-name="simulate_test_generation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.simulate_test_generation', 'simulate_test_generation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>simulate_test_generation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:384
+                </div>
+            </div>
+
+            <div class="function-item" data-name="spec_parsed_handler" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.spec_parsed_handler', 'spec_parsed_handler')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>spec_parsed_handler</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">async</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1763
+                </div>
+            </div>
+
+            <div class="function-item" data-name="stop" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.stop', 'stop')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>stop</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1613
+                </div>
+            </div>
+
+            <div class="function-item" data-name="subscribe" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.subscribe', 'subscribe')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>subscribe</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1572
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_component_interaction" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.test_component_interaction', 'test_component_interaction')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_component_interaction</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:145
+                </div>
+            </div>
+
+            <div class="function-item" data-name="validate" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('08_integration.validate', 'validate')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>validate</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/08_integration.py:1729
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Create a simple vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 12 }
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' }
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 100,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666'
+            }
+        };
+        
+        new vis.Network(container, data, options);
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

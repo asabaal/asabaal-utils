@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+    <head><title>compositor Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "compositor.__init__", "label": "__init__", "shape": "dot", "title": "Function: compositor.__init__\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 65\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "compositor.setup_buffers", "label": "setup_buffers", "shape": "dot", "title": "Function: compositor.setup_buffers\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "compositor.get_frame_buffer", "label": "get_frame_buffer", "shape": "dot", "title": "Function: compositor.get_frame_buffer\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 46\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "compositor.return_frame_buffer", "label": "return_frame_buffer", "shape": "dot", "title": "Function: compositor.return_frame_buffer\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 54\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._setup_rendering_context", "label": "_setup_rendering_context", "shape": "dot", "title": "Function: compositor._setup_rendering_context\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 109\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.load_background_video", "label": "load_background_video", "shape": "dot", "title": "Function: compositor.load_background_video\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 126\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.load_background_clips_from_directory", "label": "load_background_clips_from_directory", "shape": "dot", "title": "Function: compositor.load_background_clips_from_directory\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 145\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.get_background_frame", "label": "get_background_frame", "shape": "dot", "title": "Function: compositor.get_background_frame\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 207\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._get_frame_from_clips", "label": "_get_frame_from_clips", "shape": "dot", "title": "Function: compositor._get_frame_from_clips\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 225\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._get_frame_from_single_video", "label": "_get_frame_from_single_video", "shape": "dot", "title": "Function: compositor._get_frame_from_single_video\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 267\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.composite_frame", "label": "composite_frame", "shape": "dot", "title": "Function: compositor.composite_frame\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 290\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._blend_layer", "label": "_blend_layer", "shape": "dot", "title": "Function: compositor._blend_layer\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 316\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.apply_audio_reactive_effects", "label": "apply_audio_reactive_effects", "shape": "dot", "title": "Function: compositor.apply_audio_reactive_effects\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 382\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._cpu_glow_effect", "label": "_cpu_glow_effect", "shape": "dot", "title": "Function: compositor._cpu_glow_effect\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 444\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._gpu_glow_effect", "label": "_gpu_glow_effect", "shape": "dot", "title": "Function: compositor._gpu_glow_effect\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 459\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_color_shift", "label": "_apply_color_shift", "shape": "dot", "title": "Function: compositor._apply_color_shift\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 489\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.detect_motion", "label": "detect_motion", "shape": "dot", "title": "Function: compositor.detect_motion\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 501\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.get_motion_features", "label": "get_motion_features", "shape": "dot", "title": "Function: compositor.get_motion_features\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 565\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "compositor.enhance_background_motion", "label": "enhance_background_motion", "shape": "dot", "title": "Function: compositor.enhance_background_motion\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 597\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: compositor\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_intense_energy_burst", "label": "_apply_intense_energy_burst", "shape": "dot", "title": "Function: compositor._apply_intense_energy_burst\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 645\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_chromatic_aberration", "label": "_apply_chromatic_aberration", "shape": "dot", "title": "Function: compositor._apply_chromatic_aberration\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 681\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_energy_color_explosion", "label": "_apply_energy_color_explosion", "shape": "dot", "title": "Function: compositor._apply_energy_color_explosion\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 707\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_energy_color_shift", "label": "_apply_energy_color_shift", "shape": "dot", "title": "Function: compositor._apply_energy_color_shift\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 730\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_beat_impact_combo", "label": "_apply_beat_impact_combo", "shape": "dot", "title": "Function: compositor._apply_beat_impact_combo\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 744\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_spectral_effects", "label": "_apply_spectral_effects", "shape": "dot", "title": "Function: compositor._apply_spectral_effects\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 767\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_frequency_wave_distortion", "label": "_apply_frequency_wave_distortion", "shape": "dot", "title": "Function: compositor._apply_frequency_wave_distortion\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 794\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "compositor._apply_motion_warp", "label": "_apply_motion_warp", "shape": "dot", "title": "Function: compositor._apply_motion_warp\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 815\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "compositor.release", "label": "release", "shape": "dot", "title": "Function: compositor.release\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\nLine: 844\nIn-degree: 0\nOut-degree: 31"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "frame_pool.empty", "label": "empty", "shape": "dot", "title": "Function: frame_pool.empty\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "frame_pool.get", "label": "get", "shape": "dot", "title": "Function: frame_pool.get\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hardware.detect_gpu", "label": "detect_gpu", "shape": "dot", "title": "Function: hardware.detect_gpu\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "buffer_manager.setup_buffers", "label": "setup_buffers", "shape": "dot", "title": "Function: buffer_manager.setup_buffers\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "background_video.get", "label": "get", "shape": "dot", "title": "Function: background_video.get\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "background_video.set", "label": "set", "shape": "dot", "title": "Function: background_video.set\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "background_video.read", "label": "read", "shape": "dot", "title": "Function: background_video.read\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "buffer_manager.get_frame_buffer", "label": "get_frame_buffer", "shape": "dot", "title": "Function: buffer_manager.get_frame_buffer\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "frame_pool.put", "label": "put", "shape": "dot", "title": "Function: frame_pool.put\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "frame_pool.full", "label": "full", "shape": "dot", "title": "Function: frame_pool.full\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "background_video.isOpened", "label": "isOpened", "shape": "dot", "title": "Function: background_video.isOpened\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "background_video.release", "label": "release", "shape": "dot", "title": "Function: background_video.release\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "background_clips.append", "label": "append", "shape": "dot", "title": "Function: background_clips.append\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_vectors.append", "label": "append", "shape": "dot", "title": "Function: motion_vectors.append\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_history.append", "label": "append", "shape": "dot", "title": "Function: motion_history.append\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_history.pop", "label": "pop", "shape": "dot", "title": "Function: motion_history.pop\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_vectors.pop", "label": "pop", "shape": "dot", "title": "Function: motion_vectors.pop\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 frame_pool.empty", "to": "frame_pool.empty"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 frame_pool.get", "to": "frame_pool.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 hardware.detect_gpu", "to": "hardware.detect_gpu"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 buffer_manager.setup_buffers", "to": "buffer_manager.setup_buffers"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._setup_rendering_context", "to": "compositor._setup_rendering_context"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 background_video.get", "to": "background_video.get"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 background_video.set", "to": "background_video.set"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 background_video.read", "to": "background_video.read"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 buffer_manager.get_frame_buffer", "to": "buffer_manager.get_frame_buffer"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 frame_pool.put", "to": "frame_pool.put"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 frame_pool.full", "to": "frame_pool.full"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 background_video.isOpened", "to": "background_video.isOpened"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._get_frame_from_clips", "to": "compositor._get_frame_from_clips"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._blend_layer", "to": "compositor._blend_layer"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_beat_impact_combo", "to": "compositor._apply_beat_impact_combo"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_spectral_effects", "to": "compositor._apply_spectral_effects"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_frequency_wave_distortion", "to": "compositor._apply_frequency_wave_distortion"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 background_video.release", "to": "background_video.release"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._get_frame_from_single_video", "to": "compositor._get_frame_from_single_video"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_intense_energy_burst", "to": "compositor._apply_intense_energy_burst"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_chromatic_aberration", "to": "compositor._apply_chromatic_aberration"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_energy_color_explosion", "to": "compositor._apply_energy_color_explosion"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_motion_warp", "to": "compositor._apply_motion_warp"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._cpu_glow_effect", "to": "compositor._cpu_glow_effect"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 background_clips.append", "to": "background_clips.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._apply_energy_color_shift", "to": "compositor._apply_energy_color_shift"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 motion_vectors.append", "to": "motion_vectors.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 motion_history.append", "to": "motion_history.append"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 compositor._gpu_glow_effect", "to": "compositor._gpu_glow_effect"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 motion_history.pop", "to": "motion_history.pop"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "compositor.release", "title": "compositor.release \u2192 motion_vectors.pop", "to": "motion_vectors.pop"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"clip_features": "clip_features.html", "audio_clips": "audio_clips.html", "claude_client": "claude_client.html", "clips": "clips.html", "biblical_themes": "biblical_themes.html", "chunked_analyzer": "chunked_analyzer.html", "capcut_parser": "capcut_parser.html", "_critical_callbacks": "_critical_callbacks.html", "align_behaviors": "align_behaviors.html", "aligner": "aligner.html", "analyze_tests": "analyze_tests.html", "client": "client.html", "assertions": "assertions.html", "columns": "columns.html", "character_detector": "character_detector.html", "catalog_path": "catalog_path.html", "clip_preview_generator": "clip_preview_generator.html", "anthropic": "anthropic.html", "categories": "categories.html", "02_code_generator": "02_code_generator.html", "backend_manager": "backend_manager.html", "chunked_audio_analyzer": "chunked_audio_analyzer.html", "audio_features": "audio_features.html", "__init__": "__init__.html", "cache_dir": "cache_dir.html", "compositor": "compositor.html", "background_video": "background_video.html", "church_service_analyzer": "church_service_analyzer.html", "analyze_all_runs": "analyze_all_runs.html", "blended_layout_generator": "blended_layout_generator.html", "components": "components.html", "08_integration": "08_integration.html", "background_clips": "background_clips.html", "compare_behaviors": "compare_behaviors.html", "12_behavior_analysis": "12_behavior_analysis.html", "capcut-srt-integration": "capcut-srt-integration.html", "aggregate_behaviors": "aggregate_behaviors.html", "compiled_patterns": "compiled_patterns.html", "alerts": "alerts.html", "analyze_capcut": "analyze_capcut.html", "animations": "animations.html", "available_fonts": "available_fonts.html", "capcut_srt_integration": "capcut_srt_integration.html", "community_data": "community_data.html", "audio_classifier": "audio_classifier.html", "api_confirmation": "api_confirmation.html", "audio_analyzer": "audio_analyzer.html", "__name__": "__name__.html", "church_audio_classifier": "church_audio_classifier.html", "catalog": "catalog.html", "beats": "beats.html", "category_mapping": "category_mapping.html", "base": "base.html", "completions": "completions.html", "agent_inputs_dir": "agent_inputs_dir.html", "classify_failures": "classify_failures.html", "cli": "cli.html", "auto_layout": "auto_layout.html", "05_cli_interface": "05_cli_interface.html", "color_analyzer": "color_analyzer.html", "classifier": "classifier.html", "_monitor_thread": "_monitor_thread.html", "backend_config": "backend_config.html", "analyze_project_structure": "analyze_project_structure.html", "clip_extractor": "clip_extractor.html", "analyzer": "analyzer.html", "batch_processor": "batch_processor.html", "buffer_manager": "buffer_manager.html", "04_organizer": "04_organizer.html", "base_dir": "base_dir.html", "01_spec_parser": "01_spec_parser.html", "cluster_model": "cluster_model.html", "build_logic_catalog": "build_logic_catalog.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"compositor.__init__": {"nodes": [{"id": "compositor.__init__", "label": "__init__", "title": "compositor.__init__\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 65", "color": "#ff6b6b"}], "edges": []}, "compositor.setup_buffers": {"nodes": [{"id": "compositor.setup_buffers", "label": "setup_buffers", "title": "compositor.setup_buffers\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 34", "color": "#ff6b6b"}], "edges": []}, "compositor.get_frame_buffer": {"nodes": [{"id": "compositor.get_frame_buffer", "label": "get_frame_buffer", "title": "compositor.get_frame_buffer\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 46", "color": "#ff6b6b"}], "edges": []}, "compositor.return_frame_buffer": {"nodes": [{"id": "compositor.return_frame_buffer", "label": "return_frame_buffer", "title": "compositor.return_frame_buffer\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 54", "color": "#ff6b6b"}], "edges": []}, "compositor._setup_rendering_context": {"nodes": [{"id": "compositor._setup_rendering_context", "label": "_setup_rendering_context", "title": "compositor._setup_rendering_context\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 109", "color": "#ff6b6b"}], "edges": []}, "compositor.load_background_video": {"nodes": [{"id": "compositor.load_background_video", "label": "load_background_video", "title": "compositor.load_background_video\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 126", "color": "#ff6b6b"}], "edges": []}, "compositor.load_background_clips_from_directory": {"nodes": [{"id": "compositor.load_background_clips_from_directory", "label": "load_background_clips_from_directory", "title": "compositor.load_background_clips_from_directory\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 145", "color": "#ff6b6b"}], "edges": []}, "compositor.get_background_frame": {"nodes": [{"id": "compositor.get_background_frame", "label": "get_background_frame", "title": "compositor.get_background_frame\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 207", "color": "#ff6b6b"}], "edges": []}, "compositor._get_frame_from_clips": {"nodes": [{"id": "compositor._get_frame_from_clips", "label": "_get_frame_from_clips", "title": "compositor._get_frame_from_clips\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 225", "color": "#ff6b6b"}], "edges": []}, "compositor._get_frame_from_single_video": {"nodes": [{"id": "compositor._get_frame_from_single_video", "label": "_get_frame_from_single_video", "title": "compositor._get_frame_from_single_video\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 267", "color": "#ff6b6b"}], "edges": []}, "compositor.composite_frame": {"nodes": [{"id": "compositor.composite_frame", "label": "composite_frame", "title": "compositor.composite_frame\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 290", "color": "#ff6b6b"}], "edges": []}, "compositor._blend_layer": {"nodes": [{"id": "compositor._blend_layer", "label": "_blend_layer", "title": "compositor._blend_layer\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 316", "color": "#ff6b6b"}], "edges": []}, "compositor.apply_audio_reactive_effects": {"nodes": [{"id": "compositor.apply_audio_reactive_effects", "label": "apply_audio_reactive_effects", "title": "compositor.apply_audio_reactive_effects\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 382", "color": "#ff6b6b"}], "edges": []}, "compositor._cpu_glow_effect": {"nodes": [{"id": "compositor._cpu_glow_effect", "label": "_cpu_glow_effect", "title": "compositor._cpu_glow_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 444", "color": "#ff6b6b"}], "edges": []}, "compositor._gpu_glow_effect": {"nodes": [{"id": "compositor._gpu_glow_effect", "label": "_gpu_glow_effect", "title": "compositor._gpu_glow_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 459", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_color_shift": {"nodes": [{"id": "compositor._apply_color_shift", "label": "_apply_color_shift", "title": "compositor._apply_color_shift\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 489", "color": "#ff6b6b"}], "edges": []}, "compositor.detect_motion": {"nodes": [{"id": "compositor.detect_motion", "label": "detect_motion", "title": "compositor.detect_motion\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 501", "color": "#ff6b6b"}], "edges": []}, "compositor.get_motion_features": {"nodes": [{"id": "compositor.get_motion_features", "label": "get_motion_features", "title": "compositor.get_motion_features\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 565", "color": "#ff6b6b"}], "edges": []}, "compositor.enhance_background_motion": {"nodes": [{"id": "compositor.enhance_background_motion", "label": "enhance_background_motion", "title": "compositor.enhance_background_motion\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 597", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_intense_energy_burst": {"nodes": [{"id": "compositor._apply_intense_energy_burst", "label": "_apply_intense_energy_burst", "title": "compositor._apply_intense_energy_burst\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 645", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_chromatic_aberration": {"nodes": [{"id": "compositor._apply_chromatic_aberration", "label": "_apply_chromatic_aberration", "title": "compositor._apply_chromatic_aberration\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 681", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_energy_color_explosion": {"nodes": [{"id": "compositor._apply_energy_color_explosion", "label": "_apply_energy_color_explosion", "title": "compositor._apply_energy_color_explosion\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 707", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_energy_color_shift": {"nodes": [{"id": "compositor._apply_energy_color_shift", "label": "_apply_energy_color_shift", "title": "compositor._apply_energy_color_shift\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 730", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_beat_impact_combo": {"nodes": [{"id": "compositor._apply_beat_impact_combo", "label": "_apply_beat_impact_combo", "title": "compositor._apply_beat_impact_combo\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 744", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_spectral_effects": {"nodes": [{"id": "compositor._apply_spectral_effects", "label": "_apply_spectral_effects", "title": "compositor._apply_spectral_effects\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 767", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_frequency_wave_distortion": {"nodes": [{"id": "compositor._apply_frequency_wave_distortion", "label": "_apply_frequency_wave_distortion", "title": "compositor._apply_frequency_wave_distortion\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 794", "color": "#ff6b6b"}], "edges": []}, "compositor._apply_motion_warp": {"nodes": [{"id": "compositor._apply_motion_warp", "label": "_apply_motion_warp", "title": "compositor._apply_motion_warp\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 815", "color": "#ff6b6b"}], "edges": []}, "compositor.release": {"nodes": [{"id": "background_video.read", "label": "read", "title": "background_video.read\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "motion_vectors.append", "label": "append", "title": "motion_vectors.append\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._apply_motion_warp", "label": "_apply_motion_warp", "title": "compositor._apply_motion_warp\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 815", "color": "#ffd700"}, {"id": "compositor._apply_energy_color_explosion", "label": "_apply_energy_color_explosion", "title": "compositor._apply_energy_color_explosion\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 707", "color": "#ffd700"}, {"id": "buffer_manager.get_frame_buffer", "label": "get_frame_buffer", "title": "buffer_manager.get_frame_buffer\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "hardware.detect_gpu", "label": "detect_gpu", "title": "hardware.detect_gpu\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "background_video.set", "label": "set", "title": "background_video.set\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor.release", "label": "release", "title": "compositor.release\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 844", "color": "#ff6b6b"}, {"id": "background_video.get", "label": "get", "title": "background_video.get\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "background_video.isOpened", "label": "isOpened", "title": "background_video.isOpened\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._apply_energy_color_shift", "label": "_apply_energy_color_shift", "title": "compositor._apply_energy_color_shift\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 730", "color": "#ffd700"}, {"id": "compositor._apply_chromatic_aberration", "label": "_apply_chromatic_aberration", "title": "compositor._apply_chromatic_aberration\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 681", "color": "#ffd700"}, {"id": "compositor._apply_frequency_wave_distortion", "label": "_apply_frequency_wave_distortion", "title": "compositor._apply_frequency_wave_distortion\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 794", "color": "#ffd700"}, {"id": "frame_pool.empty", "label": "empty", "title": "frame_pool.empty\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "motion_history.pop", "label": "pop", "title": "motion_history.pop\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "background_video.release", "label": "release", "title": "background_video.release\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._blend_layer", "label": "_blend_layer", "title": "compositor._blend_layer\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 316", "color": "#ffd700"}, {"id": "compositor._setup_rendering_context", "label": "_setup_rendering_context", "title": "compositor._setup_rendering_context\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 109", "color": "#ffd700"}, {"id": "compositor._apply_intense_energy_burst", "label": "_apply_intense_energy_burst", "title": "compositor._apply_intense_energy_burst\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 645", "color": "#ffd700"}, {"id": "motion_history.append", "label": "append", "title": "motion_history.append\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._gpu_glow_effect", "label": "_gpu_glow_effect", "title": "compositor._gpu_glow_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 459", "color": "#ffd700"}, {"id": "compositor._cpu_glow_effect", "label": "_cpu_glow_effect", "title": "compositor._cpu_glow_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 444", "color": "#ffd700"}, {"id": "frame_pool.get", "label": "get", "title": "frame_pool.get\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._get_frame_from_single_video", "label": "_get_frame_from_single_video", "title": "compositor._get_frame_from_single_video\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 267", "color": "#ffd700"}, {"id": "frame_pool.full", "label": "full", "title": "frame_pool.full\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "frame_pool.put", "label": "put", "title": "frame_pool.put\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "buffer_manager.setup_buffers", "label": "setup_buffers", "title": "buffer_manager.setup_buffers\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "background_clips.append", "label": "append", "title": "background_clips.append\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._get_frame_from_clips", "label": "_get_frame_from_clips", "title": "compositor._get_frame_from_clips\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 225", "color": "#ffd700"}, {"id": "motion_vectors.pop", "label": "pop", "title": "motion_vectors.pop\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "compositor._apply_spectral_effects", "label": "_apply_spectral_effects", "title": "compositor._apply_spectral_effects\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 767", "color": "#ffd700"}, {"id": "compositor._apply_beat_impact_combo", "label": "_apply_beat_impact_combo", "title": "compositor._apply_beat_impact_combo\\nFile: src/asabaal_utils/video_processing/lyric_video/compositor.py\\nLine: 744", "color": "#ffd700"}], "edges": [{"from": "compositor.release", "to": "compositor._apply_energy_color_shift"}, {"from": "compositor.release", "to": "frame_pool.empty"}, {"from": "compositor.release", "to": "buffer_manager.setup_buffers"}, {"from": "compositor.release", "to": "compositor._apply_beat_impact_combo"}, {"from": "compositor.release", "to": "background_video.set"}, {"from": "compositor.release", "to": "compositor._apply_motion_warp"}, {"from": "compositor.release", "to": "background_video.release"}, {"from": "compositor.release", "to": "compositor._get_frame_from_clips"}, {"from": "compositor.release", "to": "compositor._apply_intense_energy_burst"}, {"from": "compositor.release", "to": "frame_pool.get"}, {"from": "compositor.release", "to": "background_video.get"}, {"from": "compositor.release", "to": "compositor._cpu_glow_effect"}, {"from": "compositor.release", "to": "motion_history.pop"}, {"from": "compositor.release", "to": "compositor._gpu_glow_effect"}, {"from": "compositor.release", "to": "compositor._apply_energy_color_explosion"}, {"from": "compositor.release", "to": "buffer_manager.get_frame_buffer"}, {"from": "compositor.release", "to": "background_video.read"}, {"from": "compositor.release", "to": "compositor._apply_chromatic_aberration"}, {"from": "compositor.release", "to": "background_clips.append"}, {"from": "compositor.release", "to": "compositor._apply_spectral_effects"}, {"from": "compositor.release", "to": "compositor._get_frame_from_single_video"}, {"from": "compositor.release", "to": "compositor._blend_layer"}, {"from": "compositor.release", "to": "motion_history.append"}, {"from": "compositor.release", "to": "compositor._apply_frequency_wave_distortion"}, {"from": "compositor.release", "to": "motion_vectors.pop"}, {"from": "compositor.release", "to": "hardware.detect_gpu"}, {"from": "compositor.release", "to": "frame_pool.put"}, {"from": "compositor.release", "to": "background_video.isOpened"}, {"from": "compositor.release", "to": "frame_pool.full"}, {"from": "compositor.release", "to": "motion_vectors.append"}, {"from": "compositor.release", "to": "compositor._setup_rendering_context"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - compositor
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:65
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_beat_impact_combo" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_beat_impact_combo', '_apply_beat_impact_combo')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_beat_impact_combo</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:744
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_chromatic_aberration" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_chromatic_aberration', '_apply_chromatic_aberration')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_chromatic_aberration</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:681
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_color_shift" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_color_shift', '_apply_color_shift')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_color_shift</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:489
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_energy_color_explosion" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_energy_color_explosion', '_apply_energy_color_explosion')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_energy_color_explosion</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:707
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_energy_color_shift" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_energy_color_shift', '_apply_energy_color_shift')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_energy_color_shift</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:730
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_frequency_wave_distortion" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_frequency_wave_distortion', '_apply_frequency_wave_distortion')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_frequency_wave_distortion</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:794
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_intense_energy_burst" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_intense_energy_burst', '_apply_intense_energy_burst')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_intense_energy_burst</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:645
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_motion_warp" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_motion_warp', '_apply_motion_warp')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_motion_warp</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:815
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_spectral_effects" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._apply_spectral_effects', '_apply_spectral_effects')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_spectral_effects</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:767
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_blend_layer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._blend_layer', '_blend_layer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_blend_layer</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:316
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_cpu_glow_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._cpu_glow_effect', '_cpu_glow_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_cpu_glow_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:444
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_get_frame_from_clips" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._get_frame_from_clips', '_get_frame_from_clips')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_get_frame_from_clips</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:225
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_get_frame_from_single_video" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._get_frame_from_single_video', '_get_frame_from_single_video')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_get_frame_from_single_video</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:267
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_gpu_glow_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._gpu_glow_effect', '_gpu_glow_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_gpu_glow_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:459
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_setup_rendering_context" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor._setup_rendering_context', '_setup_rendering_context')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_setup_rendering_context</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:109
+                </div>
+            </div>
+
+            <div class="function-item" data-name="apply_audio_reactive_effects" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.apply_audio_reactive_effects', 'apply_audio_reactive_effects')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>apply_audio_reactive_effects</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:382
+                </div>
+            </div>
+
+            <div class="function-item" data-name="composite_frame" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.composite_frame', 'composite_frame')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>composite_frame</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:290
+                </div>
+            </div>
+
+            <div class="function-item" data-name="detect_motion" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.detect_motion', 'detect_motion')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>detect_motion</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:501
+                </div>
+            </div>
+
+            <div class="function-item" data-name="enhance_background_motion" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.enhance_background_motion', 'enhance_background_motion')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>enhance_background_motion</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:597
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_background_frame" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.get_background_frame', 'get_background_frame')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_background_frame</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:207
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_frame_buffer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.get_frame_buffer', 'get_frame_buffer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_frame_buffer</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:46
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_motion_features" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.get_motion_features', 'get_motion_features')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_motion_features</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:565
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_background_clips_from_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.load_background_clips_from_directory', 'load_background_clips_from_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_background_clips_from_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:145
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_background_video" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.load_background_video', 'load_background_video')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_background_video</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:126
+                </div>
+            </div>
+
+            <div class="function-item" data-name="release" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.release', 'release')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>release</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑31</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:844
+                </div>
+            </div>
+
+            <div class="function-item" data-name="return_frame_buffer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.return_frame_buffer', 'return_frame_buffer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>return_frame_buffer</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:54
+                </div>
+            </div>
+
+            <div class="function-item" data-name="setup_buffers" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('compositor.setup_buffers', 'setup_buffers')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>setup_buffers</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/compositor.py:34
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,4882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Function Flow - build_plan</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-size: 12px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        #network {
+            height: 70vh;
+            min-height: 500px;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 0 20px 20px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid #666;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dynamic Function Flow Visualization</h1>
+        <div class="subtitle">build_plan function from parser module • FlowScope Analysis</div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Layout:</label>
+            <select id="layoutSelect">
+                <option value="free">Free Form (Default)</option>
+                <option value="hierarchical">Hierarchical</option>
+                <option value="physics">Physics-based</option>
+                <option value="circular">Circular</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-primary" onclick="changeLayout()">Apply Layout</button>
+            <button class="btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+            <button class="btn-success" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Node Size:</label>
+            <select id="nodeSizeSelect">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-secondary" onclick="exportImage()">Export Image</button>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <h3 style="margin: 0; color: #333;">Function Information</h3>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">330</div>
+                <div class="stat-label">Control Flow Nodes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">332</div>
+                <div class="stat-label">Flow Edges</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">planner.py</div>
+                <div class="stat-label">Source File</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">parser</div>
+                <div class="stat-label">Module</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div id="network" class="loading">Loading function flow graph...</div>
+    </div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <span>Merge Point</span>
+        </div>
+    </div>
+    
+    <script>
+        // Function flow data for build_plan function
+        const functionFlowData = {
+        "function_name": "build_plan",
+        "module": "planner",
+        "file_path": "agents/dmt_coder/src/dmtcoder/stage1/planner.py",
+        "entry_point": {
+                "id": "node_0",
+                "type": "entry",
+                "label": "Enter build_plan",
+                "line": 0
+        },
+        "exit_point": {
+                "id": "node_1",
+                "type": "exit",
+                "label": "Exit build_plan",
+                "line": 0
+        },
+        "nodes": [
+                {
+                        "id": "node_2",
+                        "type": "statement",
+                        "label": "def build_plan(doc: Dict[str, Any]) -> Plan:\n    spec_name = doc.get('spec', 'unnamed')\n    version = doc.get('version', '0.0.0')\n    pkg = _norm_pkg(spec_name)\n    plan = Plan(spec_name=spec_name, version=version, items=[])\n    plan.items.append(PlanItem(kind='plan_file', path='build/plan.json'))\n    plan.items.append(PlanItem(kind='manifest_file', path='artifacts/manifest.json'))\n    for fn in doc.get('functions', []) or []:\n        f_id = fn.get('id', '')\n        f_name = fn.get('name', '')\n        plan.items.append(PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}))\n        plan.items.append(PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name}))\n        lessons = ((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []\n        for lesson in lessons:\n            lesson_name = lesson.get('name', 'lesson')\n            script = (lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'\n            plan.items.append(PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}))\n            plan.items.append(PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script}))\n            for exp in (lesson.get('demo') or {}).get('expects', []) or []:\n                if isinstance(exp, dict) and exp:\n                    out_path = list(exp.values())[0]\n                    plan.items.append(PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]}))\n        plan.items.append(PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name}))\n    return plan",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_3",
+                        "type": "statement",
+                        "label": "doc: Dict[str, Any]",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_4",
+                        "type": "statement",
+                        "label": "Dict[str, Any]",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_5",
+                        "type": "statement",
+                        "label": "Dict",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_6",
+                        "type": "statement",
+                        "label": "(str, Any)",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_7",
+                        "type": "statement",
+                        "label": "str",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_8",
+                        "type": "statement",
+                        "label": "Any",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_9",
+                        "type": "assignment",
+                        "label": "spec_name = doc.get('spec', 'unnamed')",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_10",
+                        "type": "statement",
+                        "label": "spec_name = doc.get('spec', 'unnamed')",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_11",
+                        "type": "statement",
+                        "label": "spec_name",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_12",
+                        "type": "statement",
+                        "label": "doc.get('spec', 'unnamed')",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_13",
+                        "type": "statement",
+                        "label": "doc.get",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_14",
+                        "type": "statement",
+                        "label": "doc",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_15",
+                        "type": "statement",
+                        "label": "'spec'",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_16",
+                        "type": "statement",
+                        "label": "'unnamed'",
+                        "line": 10,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_17",
+                        "type": "assignment",
+                        "label": "version = doc.get('version', '0.0.0')",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_18",
+                        "type": "statement",
+                        "label": "version = doc.get('version', '0.0.0')",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_19",
+                        "type": "statement",
+                        "label": "version",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_20",
+                        "type": "statement",
+                        "label": "doc.get('version', '0.0.0')",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_21",
+                        "type": "statement",
+                        "label": "doc.get",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_22",
+                        "type": "statement",
+                        "label": "doc",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_23",
+                        "type": "statement",
+                        "label": "'version'",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_24",
+                        "type": "statement",
+                        "label": "'0.0.0'",
+                        "line": 11,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_25",
+                        "type": "assignment",
+                        "label": "pkg = _norm_pkg(spec_name)",
+                        "line": 12,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_26",
+                        "type": "statement",
+                        "label": "pkg = _norm_pkg(spec_name)",
+                        "line": 12,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_27",
+                        "type": "statement",
+                        "label": "pkg",
+                        "line": 12,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_28",
+                        "type": "statement",
+                        "label": "_norm_pkg(spec_name)",
+                        "line": 12,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_29",
+                        "type": "statement",
+                        "label": "_norm_pkg",
+                        "line": 12,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_30",
+                        "type": "statement",
+                        "label": "spec_name",
+                        "line": 12,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_31",
+                        "type": "assignment",
+                        "label": "plan = Plan(spec_name=spec_name, version=version, items=[])",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_32",
+                        "type": "statement",
+                        "label": "plan = Plan(spec_name=spec_name, version=version, items=[])",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_33",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_34",
+                        "type": "statement",
+                        "label": "Plan(spec_name=spec_name, version=version, items=[])",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_35",
+                        "type": "statement",
+                        "label": "Plan",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_36",
+                        "type": "statement",
+                        "label": "spec_name=spec_name",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_37",
+                        "type": "statement",
+                        "label": "spec_name",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_38",
+                        "type": "statement",
+                        "label": "version=version",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_39",
+                        "type": "statement",
+                        "label": "version",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_40",
+                        "type": "statement",
+                        "label": "items=[]",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_41",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 13,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_42",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='plan_file', path='build/plan.json'))",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_43",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='plan_file', path='build/plan.json'))",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_44",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_45",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_46",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_47",
+                        "type": "statement",
+                        "label": "PlanItem(kind='plan_file', path='build/plan.json')",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_48",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_49",
+                        "type": "statement",
+                        "label": "kind='plan_file'",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_50",
+                        "type": "statement",
+                        "label": "'plan_file'",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_51",
+                        "type": "statement",
+                        "label": "path='build/plan.json'",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_52",
+                        "type": "statement",
+                        "label": "'build/plan.json'",
+                        "line": 15,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_53",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='manifest_file', path='artifacts/manifest.json'))",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_54",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='manifest_file', path='artifacts/manifest.json'))",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_55",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_56",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_57",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_58",
+                        "type": "statement",
+                        "label": "PlanItem(kind='manifest_file', path='artifacts/manifest.json')",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_59",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_60",
+                        "type": "statement",
+                        "label": "kind='manifest_file'",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_61",
+                        "type": "statement",
+                        "label": "'manifest_file'",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_62",
+                        "type": "statement",
+                        "label": "path='artifacts/manifest.json'",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_63",
+                        "type": "statement",
+                        "label": "'artifacts/manifest.json'",
+                        "line": 16,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_64",
+                        "type": "loop",
+                        "label": "for fn in doc.get('functions', []) or []",
+                        "line": 18,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_65",
+                        "type": "assignment",
+                        "label": "f_id = fn.get('id', '')",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_66",
+                        "type": "statement",
+                        "label": "f_id = fn.get('id', '')",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_67",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_68",
+                        "type": "statement",
+                        "label": "fn.get('id', '')",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_69",
+                        "type": "statement",
+                        "label": "fn.get",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_70",
+                        "type": "statement",
+                        "label": "fn",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_71",
+                        "type": "statement",
+                        "label": "'id'",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_72",
+                        "type": "statement",
+                        "label": "''",
+                        "line": 19,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_73",
+                        "type": "assignment",
+                        "label": "f_name = fn.get('name', '')",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_74",
+                        "type": "statement",
+                        "label": "f_name = fn.get('name', '')",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_75",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_76",
+                        "type": "statement",
+                        "label": "fn.get('name', '')",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_77",
+                        "type": "statement",
+                        "label": "fn.get",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_78",
+                        "type": "statement",
+                        "label": "fn",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_79",
+                        "type": "statement",
+                        "label": "'name'",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_80",
+                        "type": "statement",
+                        "label": "''",
+                        "line": 20,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_81",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}))",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_82",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}))",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_83",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_84",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_85",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_86",
+                        "type": "statement",
+                        "label": "PlanItem(kind='code_stub', path=f'scaffolds/src/{pkg}/{f_name}.py', function_id=f_id, function_name=f_name, template_id='code_stub', notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})})",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_87",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_88",
+                        "type": "statement",
+                        "label": "kind='code_stub'",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_89",
+                        "type": "statement",
+                        "label": "'code_stub'",
+                        "line": 21,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_90",
+                        "type": "statement",
+                        "label": "path=f'scaffolds/src/{pkg}/{f_name}.py'",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_91",
+                        "type": "statement",
+                        "label": "f'scaffolds/src/{pkg}/{f_name}.py'",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_92",
+                        "type": "statement",
+                        "label": "'scaffolds/src/'",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_93",
+                        "type": "statement",
+                        "label": "{pkg}",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_94",
+                        "type": "statement",
+                        "label": "pkg",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_95",
+                        "type": "statement",
+                        "label": "'/'",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_96",
+                        "type": "statement",
+                        "label": "{f_name}",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_97",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_98",
+                        "type": "statement",
+                        "label": "'.py'",
+                        "line": 22,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_99",
+                        "type": "statement",
+                        "label": "function_id=f_id",
+                        "line": 23,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_100",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 23,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_101",
+                        "type": "statement",
+                        "label": "function_name=f_name",
+                        "line": 23,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_102",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 23,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_103",
+                        "type": "statement",
+                        "label": "template_id='code_stub'",
+                        "line": 23,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_104",
+                        "type": "statement",
+                        "label": "'code_stub'",
+                        "line": 23,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_105",
+                        "type": "statement",
+                        "label": "notes={'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_106",
+                        "type": "statement",
+                        "label": "{'behavior': fn.get('behavior', []), 'io': fn.get('io', {})}",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_107",
+                        "type": "statement",
+                        "label": "'behavior'",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_108",
+                        "type": "statement",
+                        "label": "'io'",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_109",
+                        "type": "statement",
+                        "label": "fn.get('behavior', [])",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_110",
+                        "type": "statement",
+                        "label": "fn.get",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_111",
+                        "type": "statement",
+                        "label": "fn",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_112",
+                        "type": "statement",
+                        "label": "'behavior'",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_113",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_114",
+                        "type": "statement",
+                        "label": "fn.get('io', {})",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_115",
+                        "type": "statement",
+                        "label": "fn.get",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_116",
+                        "type": "statement",
+                        "label": "fn",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_117",
+                        "type": "statement",
+                        "label": "'io'",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_118",
+                        "type": "statement",
+                        "label": "{}",
+                        "line": 24,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_119",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name}))",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_120",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name}))",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_121",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_122",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_123",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_124",
+                        "type": "statement",
+                        "label": "PlanItem(kind='test_stub', path=f'scaffolds/tests/test_{f_name}.py', function_id=f_id, function_name=f_name, template_id='test_stub', notes={'validation': fn.get('validation', []), 'function': f_name})",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_125",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_126",
+                        "type": "statement",
+                        "label": "kind='test_stub'",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_127",
+                        "type": "statement",
+                        "label": "'test_stub'",
+                        "line": 25,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_128",
+                        "type": "statement",
+                        "label": "path=f'scaffolds/tests/test_{f_name}.py'",
+                        "line": 26,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_129",
+                        "type": "statement",
+                        "label": "f'scaffolds/tests/test_{f_name}.py'",
+                        "line": 26,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_130",
+                        "type": "statement",
+                        "label": "'scaffolds/tests/test_'",
+                        "line": 26,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_131",
+                        "type": "statement",
+                        "label": "{f_name}",
+                        "line": 26,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_132",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 26,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_133",
+                        "type": "statement",
+                        "label": "'.py'",
+                        "line": 26,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_134",
+                        "type": "statement",
+                        "label": "function_id=f_id",
+                        "line": 27,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_135",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 27,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_136",
+                        "type": "statement",
+                        "label": "function_name=f_name",
+                        "line": 27,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_137",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 27,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_138",
+                        "type": "statement",
+                        "label": "template_id='test_stub'",
+                        "line": 27,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_139",
+                        "type": "statement",
+                        "label": "'test_stub'",
+                        "line": 27,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_140",
+                        "type": "statement",
+                        "label": "notes={'validation': fn.get('validation', []), 'function': f_name}",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_141",
+                        "type": "statement",
+                        "label": "{'validation': fn.get('validation', []), 'function': f_name}",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_142",
+                        "type": "statement",
+                        "label": "'validation'",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_143",
+                        "type": "statement",
+                        "label": "'function'",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_144",
+                        "type": "statement",
+                        "label": "fn.get('validation', [])",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_145",
+                        "type": "statement",
+                        "label": "fn.get",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_146",
+                        "type": "statement",
+                        "label": "fn",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_147",
+                        "type": "statement",
+                        "label": "'validation'",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_148",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_149",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 28,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_150",
+                        "type": "assignment",
+                        "label": "lessons = ((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_151",
+                        "type": "statement",
+                        "label": "lessons = ((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_152",
+                        "type": "statement",
+                        "label": "lessons",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_153",
+                        "type": "statement",
+                        "label": "((fn.get('dmt') or {}).get('teach') or {}).get('lessons', []) or []",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_154",
+                        "type": "statement",
+                        "label": "((fn.get('dmt') or {}).get('teach') or {}).get('lessons', [])",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_155",
+                        "type": "statement",
+                        "label": "((fn.get('dmt') or {}).get('teach') or {}).get",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_156",
+                        "type": "statement",
+                        "label": "(fn.get('dmt') or {}).get('teach') or {}",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_157",
+                        "type": "statement",
+                        "label": "(fn.get('dmt') or {}).get('teach')",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_158",
+                        "type": "statement",
+                        "label": "(fn.get('dmt') or {}).get",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_159",
+                        "type": "statement",
+                        "label": "fn.get('dmt') or {}",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_160",
+                        "type": "statement",
+                        "label": "fn.get('dmt')",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_161",
+                        "type": "statement",
+                        "label": "fn.get",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_162",
+                        "type": "statement",
+                        "label": "fn",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_163",
+                        "type": "statement",
+                        "label": "'dmt'",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_164",
+                        "type": "statement",
+                        "label": "{}",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_165",
+                        "type": "statement",
+                        "label": "'teach'",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_166",
+                        "type": "statement",
+                        "label": "{}",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_167",
+                        "type": "statement",
+                        "label": "'lessons'",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_168",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_169",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 29,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_170",
+                        "type": "loop",
+                        "label": "for lesson in lessons",
+                        "line": 30,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_171",
+                        "type": "assignment",
+                        "label": "lesson_name = lesson.get('name', 'lesson')",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_172",
+                        "type": "statement",
+                        "label": "lesson_name = lesson.get('name', 'lesson')",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_173",
+                        "type": "statement",
+                        "label": "lesson_name",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_174",
+                        "type": "statement",
+                        "label": "lesson.get('name', 'lesson')",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_175",
+                        "type": "statement",
+                        "label": "lesson.get",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_176",
+                        "type": "statement",
+                        "label": "lesson",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_177",
+                        "type": "statement",
+                        "label": "'name'",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_178",
+                        "type": "statement",
+                        "label": "'lesson'",
+                        "line": 31,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_179",
+                        "type": "assignment",
+                        "label": "script = (lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_180",
+                        "type": "statement",
+                        "label": "script = (lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_181",
+                        "type": "statement",
+                        "label": "script",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_182",
+                        "type": "statement",
+                        "label": "(lesson.get('demo') or {}).get('script') or f'notebooks/{f_name}_taught.py'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_183",
+                        "type": "statement",
+                        "label": "(lesson.get('demo') or {}).get('script')",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_184",
+                        "type": "statement",
+                        "label": "(lesson.get('demo') or {}).get",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_185",
+                        "type": "statement",
+                        "label": "lesson.get('demo') or {}",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_186",
+                        "type": "statement",
+                        "label": "lesson.get('demo')",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_187",
+                        "type": "statement",
+                        "label": "lesson.get",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_188",
+                        "type": "statement",
+                        "label": "lesson",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_189",
+                        "type": "statement",
+                        "label": "'demo'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_190",
+                        "type": "statement",
+                        "label": "{}",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_191",
+                        "type": "statement",
+                        "label": "'script'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_192",
+                        "type": "statement",
+                        "label": "f'notebooks/{f_name}_taught.py'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_193",
+                        "type": "statement",
+                        "label": "'notebooks/'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_194",
+                        "type": "statement",
+                        "label": "{f_name}",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_195",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_196",
+                        "type": "statement",
+                        "label": "'_taught.py'",
+                        "line": 32,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_197",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}))",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_198",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}))",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_199",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_200",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_201",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_202",
+                        "type": "statement",
+                        "label": "PlanItem(kind='teach_stub', path=f'scaffolds/{script}', function_id=f_id, function_name=f_name, template_id='teach_stub', notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])})",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_203",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_204",
+                        "type": "statement",
+                        "label": "kind='teach_stub'",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_205",
+                        "type": "statement",
+                        "label": "'teach_stub'",
+                        "line": 33,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_206",
+                        "type": "statement",
+                        "label": "path=f'scaffolds/{script}'",
+                        "line": 34,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_207",
+                        "type": "statement",
+                        "label": "f'scaffolds/{script}'",
+                        "line": 34,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_208",
+                        "type": "statement",
+                        "label": "'scaffolds/'",
+                        "line": 34,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_209",
+                        "type": "statement",
+                        "label": "{script}",
+                        "line": 34,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_210",
+                        "type": "statement",
+                        "label": "script",
+                        "line": 34,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_211",
+                        "type": "statement",
+                        "label": "function_id=f_id",
+                        "line": 35,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_212",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 35,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_213",
+                        "type": "statement",
+                        "label": "function_name=f_name",
+                        "line": 35,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_214",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 35,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_215",
+                        "type": "statement",
+                        "label": "template_id='teach_stub'",
+                        "line": 35,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_216",
+                        "type": "statement",
+                        "label": "'teach_stub'",
+                        "line": 35,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_217",
+                        "type": "statement",
+                        "label": "notes={'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_218",
+                        "type": "statement",
+                        "label": "{'lesson_name': lesson_name, 'expects': (lesson.get('demo') or {}).get('expects', [])}",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_219",
+                        "type": "statement",
+                        "label": "'lesson_name'",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_220",
+                        "type": "statement",
+                        "label": "'expects'",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_221",
+                        "type": "statement",
+                        "label": "lesson_name",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_222",
+                        "type": "statement",
+                        "label": "(lesson.get('demo') or {}).get('expects', [])",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_223",
+                        "type": "statement",
+                        "label": "(lesson.get('demo') or {}).get",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_224",
+                        "type": "statement",
+                        "label": "lesson.get('demo') or {}",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_225",
+                        "type": "statement",
+                        "label": "lesson.get('demo')",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_226",
+                        "type": "statement",
+                        "label": "lesson.get",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_227",
+                        "type": "statement",
+                        "label": "lesson",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_228",
+                        "type": "statement",
+                        "label": "'demo'",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_229",
+                        "type": "statement",
+                        "label": "{}",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_230",
+                        "type": "statement",
+                        "label": "'expects'",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_231",
+                        "type": "statement",
+                        "label": "[]",
+                        "line": 36,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_232",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script}))",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_233",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script}))",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_234",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_235",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_236",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_237",
+                        "type": "statement",
+                        "label": "PlanItem(kind='validate_step', path=f'validate:teach:{f_name}:{lesson_name}', function_id=f_id, function_name=f_name, template_id=None, notes={'script': script})",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_238",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_239",
+                        "type": "statement",
+                        "label": "kind='validate_step'",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_240",
+                        "type": "statement",
+                        "label": "'validate_step'",
+                        "line": 37,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_241",
+                        "type": "statement",
+                        "label": "path=f'validate:teach:{f_name}:{lesson_name}'",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_242",
+                        "type": "statement",
+                        "label": "f'validate:teach:{f_name}:{lesson_name}'",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_243",
+                        "type": "statement",
+                        "label": "'validate:teach:'",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_244",
+                        "type": "statement",
+                        "label": "{f_name}",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_245",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_246",
+                        "type": "statement",
+                        "label": "':'",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_247",
+                        "type": "statement",
+                        "label": "{lesson_name}",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_248",
+                        "type": "statement",
+                        "label": "lesson_name",
+                        "line": 38,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_249",
+                        "type": "statement",
+                        "label": "function_id=f_id",
+                        "line": 39,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_250",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 39,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_251",
+                        "type": "statement",
+                        "label": "function_name=f_name",
+                        "line": 39,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_252",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 39,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_253",
+                        "type": "statement",
+                        "label": "template_id=None",
+                        "line": 39,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_254",
+                        "type": "statement",
+                        "label": "None",
+                        "line": 39,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_255",
+                        "type": "statement",
+                        "label": "notes={'script': script}",
+                        "line": 40,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_256",
+                        "type": "statement",
+                        "label": "{'script': script}",
+                        "line": 40,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_257",
+                        "type": "statement",
+                        "label": "'script'",
+                        "line": 40,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_258",
+                        "type": "statement",
+                        "label": "script",
+                        "line": 40,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_259",
+                        "type": "loop",
+                        "label": "for exp in (lesson.get('demo') or {}).get('expects', []) or []",
+                        "line": 41,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_260",
+                        "type": "conditional",
+                        "label": "if isinstance(exp, dict) and exp",
+                        "line": 42,
+                        "condition": "isinstance(exp, dict) and exp",
+                        "targets": []
+                },
+                {
+                        "id": "node_261",
+                        "type": "assignment",
+                        "label": "out_path = list(exp.values())[0]",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_262",
+                        "type": "statement",
+                        "label": "out_path = list(exp.values())[0]",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_263",
+                        "type": "statement",
+                        "label": "out_path",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_264",
+                        "type": "statement",
+                        "label": "list(exp.values())[0]",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_265",
+                        "type": "statement",
+                        "label": "list(exp.values())",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_266",
+                        "type": "statement",
+                        "label": "list",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_267",
+                        "type": "statement",
+                        "label": "exp.values()",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_268",
+                        "type": "statement",
+                        "label": "exp.values",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_269",
+                        "type": "statement",
+                        "label": "exp",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_270",
+                        "type": "statement",
+                        "label": "0",
+                        "line": 43,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_271",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]}))",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_272",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]}))",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_273",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_274",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_275",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_276",
+                        "type": "statement",
+                        "label": "PlanItem(kind='manifest_entry', path='artifacts/manifest.json', function_id=f_id, function_name=f_name, template_id=None, notes={'artifact': out_path, 'type': list(exp.keys())[0]})",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_277",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_278",
+                        "type": "statement",
+                        "label": "kind='manifest_entry'",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_279",
+                        "type": "statement",
+                        "label": "'manifest_entry'",
+                        "line": 44,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_280",
+                        "type": "statement",
+                        "label": "path='artifacts/manifest.json'",
+                        "line": 45,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_281",
+                        "type": "statement",
+                        "label": "'artifacts/manifest.json'",
+                        "line": 45,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_282",
+                        "type": "statement",
+                        "label": "function_id=f_id",
+                        "line": 46,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_283",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 46,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_284",
+                        "type": "statement",
+                        "label": "function_name=f_name",
+                        "line": 46,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_285",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 46,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_286",
+                        "type": "statement",
+                        "label": "template_id=None",
+                        "line": 46,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_287",
+                        "type": "statement",
+                        "label": "None",
+                        "line": 46,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_288",
+                        "type": "statement",
+                        "label": "notes={'artifact': out_path, 'type': list(exp.keys())[0]}",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_289",
+                        "type": "statement",
+                        "label": "{'artifact': out_path, 'type': list(exp.keys())[0]}",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_290",
+                        "type": "statement",
+                        "label": "'artifact'",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_291",
+                        "type": "statement",
+                        "label": "'type'",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_292",
+                        "type": "statement",
+                        "label": "out_path",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_293",
+                        "type": "statement",
+                        "label": "list(exp.keys())[0]",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_294",
+                        "type": "statement",
+                        "label": "list(exp.keys())",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_295",
+                        "type": "statement",
+                        "label": "list",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_296",
+                        "type": "statement",
+                        "label": "exp.keys()",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_297",
+                        "type": "statement",
+                        "label": "exp.keys",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_298",
+                        "type": "statement",
+                        "label": "exp",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_299",
+                        "type": "statement",
+                        "label": "0",
+                        "line": 47,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_300",
+                        "type": "loop_exit",
+                        "label": "exit for exp",
+                        "line": 41,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_301",
+                        "type": "loop_exit",
+                        "label": "exit for lesson",
+                        "line": 30,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_302",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name}))",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_303",
+                        "type": "statement",
+                        "label": "plan.items.append(PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name}))",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_304",
+                        "type": "statement",
+                        "label": "plan.items.append",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_305",
+                        "type": "statement",
+                        "label": "plan.items",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_306",
+                        "type": "statement",
+                        "label": "plan",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_307",
+                        "type": "statement",
+                        "label": "PlanItem(kind='doc_stub', path=f'scaffolds/docs/{f_name}.md', function_id=f_id, function_name=f_name, template_id='doc_stub', notes={'function': f_name})",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_308",
+                        "type": "statement",
+                        "label": "PlanItem",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_309",
+                        "type": "statement",
+                        "label": "kind='doc_stub'",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_310",
+                        "type": "statement",
+                        "label": "'doc_stub'",
+                        "line": 48,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_311",
+                        "type": "statement",
+                        "label": "path=f'scaffolds/docs/{f_name}.md'",
+                        "line": 49,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_312",
+                        "type": "statement",
+                        "label": "f'scaffolds/docs/{f_name}.md'",
+                        "line": 49,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_313",
+                        "type": "statement",
+                        "label": "'scaffolds/docs/'",
+                        "line": 49,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_314",
+                        "type": "statement",
+                        "label": "{f_name}",
+                        "line": 49,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_315",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 49,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_316",
+                        "type": "statement",
+                        "label": "'.md'",
+                        "line": 49,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_317",
+                        "type": "statement",
+                        "label": "function_id=f_id",
+                        "line": 50,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_318",
+                        "type": "statement",
+                        "label": "f_id",
+                        "line": 50,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_319",
+                        "type": "statement",
+                        "label": "function_name=f_name",
+                        "line": 50,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_320",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 50,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_321",
+                        "type": "statement",
+                        "label": "template_id='doc_stub'",
+                        "line": 50,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_322",
+                        "type": "statement",
+                        "label": "'doc_stub'",
+                        "line": 50,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_323",
+                        "type": "statement",
+                        "label": "notes={'function': f_name}",
+                        "line": 51,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_324",
+                        "type": "statement",
+                        "label": "{'function': f_name}",
+                        "line": 51,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_325",
+                        "type": "statement",
+                        "label": "'function'",
+                        "line": 51,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_326",
+                        "type": "statement",
+                        "label": "f_name",
+                        "line": 51,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_327",
+                        "type": "loop_exit",
+                        "label": "exit for fn",
+                        "line": 18,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_328",
+                        "type": "return",
+                        "label": "return plan",
+                        "line": 52,
+                        "condition": null,
+                        "targets": []
+                },
+                {
+                        "id": "node_329",
+                        "type": "statement",
+                        "label": "Plan",
+                        "line": 9,
+                        "condition": null,
+                        "targets": []
+                }
+        ],
+        "edges": [
+                {
+                        "from": "node_0",
+                        "to": "node_2",
+                        "label": null
+                },
+                {
+                        "from": "node_2",
+                        "to": "node_3",
+                        "label": null
+                },
+                {
+                        "from": "node_3",
+                        "to": "node_4",
+                        "label": null
+                },
+                {
+                        "from": "node_4",
+                        "to": "node_5",
+                        "label": null
+                },
+                {
+                        "from": "node_5",
+                        "to": "node_6",
+                        "label": null
+                },
+                {
+                        "from": "node_6",
+                        "to": "node_7",
+                        "label": null
+                },
+                {
+                        "from": "node_7",
+                        "to": "node_8",
+                        "label": null
+                },
+                {
+                        "from": "node_8",
+                        "to": "node_9",
+                        "label": null
+                },
+                {
+                        "from": "node_9",
+                        "to": "node_10",
+                        "label": null
+                },
+                {
+                        "from": "node_10",
+                        "to": "node_11",
+                        "label": null
+                },
+                {
+                        "from": "node_11",
+                        "to": "node_12",
+                        "label": null
+                },
+                {
+                        "from": "node_12",
+                        "to": "node_13",
+                        "label": null
+                },
+                {
+                        "from": "node_13",
+                        "to": "node_14",
+                        "label": null
+                },
+                {
+                        "from": "node_14",
+                        "to": "node_15",
+                        "label": null
+                },
+                {
+                        "from": "node_15",
+                        "to": "node_16",
+                        "label": null
+                },
+                {
+                        "from": "node_16",
+                        "to": "node_17",
+                        "label": null
+                },
+                {
+                        "from": "node_17",
+                        "to": "node_18",
+                        "label": null
+                },
+                {
+                        "from": "node_18",
+                        "to": "node_19",
+                        "label": null
+                },
+                {
+                        "from": "node_19",
+                        "to": "node_20",
+                        "label": null
+                },
+                {
+                        "from": "node_20",
+                        "to": "node_21",
+                        "label": null
+                },
+                {
+                        "from": "node_21",
+                        "to": "node_22",
+                        "label": null
+                },
+                {
+                        "from": "node_22",
+                        "to": "node_23",
+                        "label": null
+                },
+                {
+                        "from": "node_23",
+                        "to": "node_24",
+                        "label": null
+                },
+                {
+                        "from": "node_24",
+                        "to": "node_25",
+                        "label": null
+                },
+                {
+                        "from": "node_25",
+                        "to": "node_26",
+                        "label": null
+                },
+                {
+                        "from": "node_26",
+                        "to": "node_27",
+                        "label": null
+                },
+                {
+                        "from": "node_27",
+                        "to": "node_28",
+                        "label": null
+                },
+                {
+                        "from": "node_28",
+                        "to": "node_29",
+                        "label": null
+                },
+                {
+                        "from": "node_29",
+                        "to": "node_30",
+                        "label": null
+                },
+                {
+                        "from": "node_30",
+                        "to": "node_31",
+                        "label": null
+                },
+                {
+                        "from": "node_31",
+                        "to": "node_32",
+                        "label": null
+                },
+                {
+                        "from": "node_32",
+                        "to": "node_33",
+                        "label": null
+                },
+                {
+                        "from": "node_33",
+                        "to": "node_34",
+                        "label": null
+                },
+                {
+                        "from": "node_34",
+                        "to": "node_35",
+                        "label": null
+                },
+                {
+                        "from": "node_35",
+                        "to": "node_36",
+                        "label": null
+                },
+                {
+                        "from": "node_36",
+                        "to": "node_37",
+                        "label": null
+                },
+                {
+                        "from": "node_37",
+                        "to": "node_38",
+                        "label": null
+                },
+                {
+                        "from": "node_38",
+                        "to": "node_39",
+                        "label": null
+                },
+                {
+                        "from": "node_39",
+                        "to": "node_40",
+                        "label": null
+                },
+                {
+                        "from": "node_40",
+                        "to": "node_41",
+                        "label": null
+                },
+                {
+                        "from": "node_41",
+                        "to": "node_42",
+                        "label": null
+                },
+                {
+                        "from": "node_42",
+                        "to": "node_43",
+                        "label": null
+                },
+                {
+                        "from": "node_43",
+                        "to": "node_44",
+                        "label": null
+                },
+                {
+                        "from": "node_44",
+                        "to": "node_45",
+                        "label": null
+                },
+                {
+                        "from": "node_45",
+                        "to": "node_46",
+                        "label": null
+                },
+                {
+                        "from": "node_46",
+                        "to": "node_47",
+                        "label": null
+                },
+                {
+                        "from": "node_47",
+                        "to": "node_48",
+                        "label": null
+                },
+                {
+                        "from": "node_48",
+                        "to": "node_49",
+                        "label": null
+                },
+                {
+                        "from": "node_49",
+                        "to": "node_50",
+                        "label": null
+                },
+                {
+                        "from": "node_50",
+                        "to": "node_51",
+                        "label": null
+                },
+                {
+                        "from": "node_51",
+                        "to": "node_52",
+                        "label": null
+                },
+                {
+                        "from": "node_52",
+                        "to": "node_53",
+                        "label": null
+                },
+                {
+                        "from": "node_53",
+                        "to": "node_54",
+                        "label": null
+                },
+                {
+                        "from": "node_54",
+                        "to": "node_55",
+                        "label": null
+                },
+                {
+                        "from": "node_55",
+                        "to": "node_56",
+                        "label": null
+                },
+                {
+                        "from": "node_56",
+                        "to": "node_57",
+                        "label": null
+                },
+                {
+                        "from": "node_57",
+                        "to": "node_58",
+                        "label": null
+                },
+                {
+                        "from": "node_58",
+                        "to": "node_59",
+                        "label": null
+                },
+                {
+                        "from": "node_59",
+                        "to": "node_60",
+                        "label": null
+                },
+                {
+                        "from": "node_60",
+                        "to": "node_61",
+                        "label": null
+                },
+                {
+                        "from": "node_61",
+                        "to": "node_62",
+                        "label": null
+                },
+                {
+                        "from": "node_62",
+                        "to": "node_63",
+                        "label": null
+                },
+                {
+                        "from": "node_63",
+                        "to": "node_64",
+                        "label": null
+                },
+                {
+                        "from": "node_64",
+                        "to": "node_65",
+                        "label": null
+                },
+                {
+                        "from": "node_65",
+                        "to": "node_66",
+                        "label": null
+                },
+                {
+                        "from": "node_66",
+                        "to": "node_67",
+                        "label": null
+                },
+                {
+                        "from": "node_67",
+                        "to": "node_68",
+                        "label": null
+                },
+                {
+                        "from": "node_68",
+                        "to": "node_69",
+                        "label": null
+                },
+                {
+                        "from": "node_69",
+                        "to": "node_70",
+                        "label": null
+                },
+                {
+                        "from": "node_70",
+                        "to": "node_71",
+                        "label": null
+                },
+                {
+                        "from": "node_71",
+                        "to": "node_72",
+                        "label": null
+                },
+                {
+                        "from": "node_72",
+                        "to": "node_73",
+                        "label": null
+                },
+                {
+                        "from": "node_73",
+                        "to": "node_74",
+                        "label": null
+                },
+                {
+                        "from": "node_74",
+                        "to": "node_75",
+                        "label": null
+                },
+                {
+                        "from": "node_75",
+                        "to": "node_76",
+                        "label": null
+                },
+                {
+                        "from": "node_76",
+                        "to": "node_77",
+                        "label": null
+                },
+                {
+                        "from": "node_77",
+                        "to": "node_78",
+                        "label": null
+                },
+                {
+                        "from": "node_78",
+                        "to": "node_79",
+                        "label": null
+                },
+                {
+                        "from": "node_79",
+                        "to": "node_80",
+                        "label": null
+                },
+                {
+                        "from": "node_80",
+                        "to": "node_81",
+                        "label": null
+                },
+                {
+                        "from": "node_81",
+                        "to": "node_82",
+                        "label": null
+                },
+                {
+                        "from": "node_82",
+                        "to": "node_83",
+                        "label": null
+                },
+                {
+                        "from": "node_83",
+                        "to": "node_84",
+                        "label": null
+                },
+                {
+                        "from": "node_84",
+                        "to": "node_85",
+                        "label": null
+                },
+                {
+                        "from": "node_85",
+                        "to": "node_86",
+                        "label": null
+                },
+                {
+                        "from": "node_86",
+                        "to": "node_87",
+                        "label": null
+                },
+                {
+                        "from": "node_87",
+                        "to": "node_88",
+                        "label": null
+                },
+                {
+                        "from": "node_88",
+                        "to": "node_89",
+                        "label": null
+                },
+                {
+                        "from": "node_89",
+                        "to": "node_90",
+                        "label": null
+                },
+                {
+                        "from": "node_90",
+                        "to": "node_91",
+                        "label": null
+                },
+                {
+                        "from": "node_91",
+                        "to": "node_92",
+                        "label": null
+                },
+                {
+                        "from": "node_92",
+                        "to": "node_93",
+                        "label": null
+                },
+                {
+                        "from": "node_93",
+                        "to": "node_94",
+                        "label": null
+                },
+                {
+                        "from": "node_94",
+                        "to": "node_95",
+                        "label": null
+                },
+                {
+                        "from": "node_95",
+                        "to": "node_96",
+                        "label": null
+                },
+                {
+                        "from": "node_96",
+                        "to": "node_97",
+                        "label": null
+                },
+                {
+                        "from": "node_97",
+                        "to": "node_98",
+                        "label": null
+                },
+                {
+                        "from": "node_98",
+                        "to": "node_99",
+                        "label": null
+                },
+                {
+                        "from": "node_99",
+                        "to": "node_100",
+                        "label": null
+                },
+                {
+                        "from": "node_100",
+                        "to": "node_101",
+                        "label": null
+                },
+                {
+                        "from": "node_101",
+                        "to": "node_102",
+                        "label": null
+                },
+                {
+                        "from": "node_102",
+                        "to": "node_103",
+                        "label": null
+                },
+                {
+                        "from": "node_103",
+                        "to": "node_104",
+                        "label": null
+                },
+                {
+                        "from": "node_104",
+                        "to": "node_105",
+                        "label": null
+                },
+                {
+                        "from": "node_105",
+                        "to": "node_106",
+                        "label": null
+                },
+                {
+                        "from": "node_106",
+                        "to": "node_107",
+                        "label": null
+                },
+                {
+                        "from": "node_107",
+                        "to": "node_108",
+                        "label": null
+                },
+                {
+                        "from": "node_108",
+                        "to": "node_109",
+                        "label": null
+                },
+                {
+                        "from": "node_109",
+                        "to": "node_110",
+                        "label": null
+                },
+                {
+                        "from": "node_110",
+                        "to": "node_111",
+                        "label": null
+                },
+                {
+                        "from": "node_111",
+                        "to": "node_112",
+                        "label": null
+                },
+                {
+                        "from": "node_112",
+                        "to": "node_113",
+                        "label": null
+                },
+                {
+                        "from": "node_113",
+                        "to": "node_114",
+                        "label": null
+                },
+                {
+                        "from": "node_114",
+                        "to": "node_115",
+                        "label": null
+                },
+                {
+                        "from": "node_115",
+                        "to": "node_116",
+                        "label": null
+                },
+                {
+                        "from": "node_116",
+                        "to": "node_117",
+                        "label": null
+                },
+                {
+                        "from": "node_117",
+                        "to": "node_118",
+                        "label": null
+                },
+                {
+                        "from": "node_118",
+                        "to": "node_119",
+                        "label": null
+                },
+                {
+                        "from": "node_119",
+                        "to": "node_120",
+                        "label": null
+                },
+                {
+                        "from": "node_120",
+                        "to": "node_121",
+                        "label": null
+                },
+                {
+                        "from": "node_121",
+                        "to": "node_122",
+                        "label": null
+                },
+                {
+                        "from": "node_122",
+                        "to": "node_123",
+                        "label": null
+                },
+                {
+                        "from": "node_123",
+                        "to": "node_124",
+                        "label": null
+                },
+                {
+                        "from": "node_124",
+                        "to": "node_125",
+                        "label": null
+                },
+                {
+                        "from": "node_125",
+                        "to": "node_126",
+                        "label": null
+                },
+                {
+                        "from": "node_126",
+                        "to": "node_127",
+                        "label": null
+                },
+                {
+                        "from": "node_127",
+                        "to": "node_128",
+                        "label": null
+                },
+                {
+                        "from": "node_128",
+                        "to": "node_129",
+                        "label": null
+                },
+                {
+                        "from": "node_129",
+                        "to": "node_130",
+                        "label": null
+                },
+                {
+                        "from": "node_130",
+                        "to": "node_131",
+                        "label": null
+                },
+                {
+                        "from": "node_131",
+                        "to": "node_132",
+                        "label": null
+                },
+                {
+                        "from": "node_132",
+                        "to": "node_133",
+                        "label": null
+                },
+                {
+                        "from": "node_133",
+                        "to": "node_134",
+                        "label": null
+                },
+                {
+                        "from": "node_134",
+                        "to": "node_135",
+                        "label": null
+                },
+                {
+                        "from": "node_135",
+                        "to": "node_136",
+                        "label": null
+                },
+                {
+                        "from": "node_136",
+                        "to": "node_137",
+                        "label": null
+                },
+                {
+                        "from": "node_137",
+                        "to": "node_138",
+                        "label": null
+                },
+                {
+                        "from": "node_138",
+                        "to": "node_139",
+                        "label": null
+                },
+                {
+                        "from": "node_139",
+                        "to": "node_140",
+                        "label": null
+                },
+                {
+                        "from": "node_140",
+                        "to": "node_141",
+                        "label": null
+                },
+                {
+                        "from": "node_141",
+                        "to": "node_142",
+                        "label": null
+                },
+                {
+                        "from": "node_142",
+                        "to": "node_143",
+                        "label": null
+                },
+                {
+                        "from": "node_143",
+                        "to": "node_144",
+                        "label": null
+                },
+                {
+                        "from": "node_144",
+                        "to": "node_145",
+                        "label": null
+                },
+                {
+                        "from": "node_145",
+                        "to": "node_146",
+                        "label": null
+                },
+                {
+                        "from": "node_146",
+                        "to": "node_147",
+                        "label": null
+                },
+                {
+                        "from": "node_147",
+                        "to": "node_148",
+                        "label": null
+                },
+                {
+                        "from": "node_148",
+                        "to": "node_149",
+                        "label": null
+                },
+                {
+                        "from": "node_149",
+                        "to": "node_150",
+                        "label": null
+                },
+                {
+                        "from": "node_150",
+                        "to": "node_151",
+                        "label": null
+                },
+                {
+                        "from": "node_151",
+                        "to": "node_152",
+                        "label": null
+                },
+                {
+                        "from": "node_152",
+                        "to": "node_153",
+                        "label": null
+                },
+                {
+                        "from": "node_153",
+                        "to": "node_154",
+                        "label": null
+                },
+                {
+                        "from": "node_154",
+                        "to": "node_155",
+                        "label": null
+                },
+                {
+                        "from": "node_155",
+                        "to": "node_156",
+                        "label": null
+                },
+                {
+                        "from": "node_156",
+                        "to": "node_157",
+                        "label": null
+                },
+                {
+                        "from": "node_157",
+                        "to": "node_158",
+                        "label": null
+                },
+                {
+                        "from": "node_158",
+                        "to": "node_159",
+                        "label": null
+                },
+                {
+                        "from": "node_159",
+                        "to": "node_160",
+                        "label": null
+                },
+                {
+                        "from": "node_160",
+                        "to": "node_161",
+                        "label": null
+                },
+                {
+                        "from": "node_161",
+                        "to": "node_162",
+                        "label": null
+                },
+                {
+                        "from": "node_162",
+                        "to": "node_163",
+                        "label": null
+                },
+                {
+                        "from": "node_163",
+                        "to": "node_164",
+                        "label": null
+                },
+                {
+                        "from": "node_164",
+                        "to": "node_165",
+                        "label": null
+                },
+                {
+                        "from": "node_165",
+                        "to": "node_166",
+                        "label": null
+                },
+                {
+                        "from": "node_166",
+                        "to": "node_167",
+                        "label": null
+                },
+                {
+                        "from": "node_167",
+                        "to": "node_168",
+                        "label": null
+                },
+                {
+                        "from": "node_168",
+                        "to": "node_169",
+                        "label": null
+                },
+                {
+                        "from": "node_169",
+                        "to": "node_170",
+                        "label": null
+                },
+                {
+                        "from": "node_170",
+                        "to": "node_171",
+                        "label": null
+                },
+                {
+                        "from": "node_171",
+                        "to": "node_172",
+                        "label": null
+                },
+                {
+                        "from": "node_172",
+                        "to": "node_173",
+                        "label": null
+                },
+                {
+                        "from": "node_173",
+                        "to": "node_174",
+                        "label": null
+                },
+                {
+                        "from": "node_174",
+                        "to": "node_175",
+                        "label": null
+                },
+                {
+                        "from": "node_175",
+                        "to": "node_176",
+                        "label": null
+                },
+                {
+                        "from": "node_176",
+                        "to": "node_177",
+                        "label": null
+                },
+                {
+                        "from": "node_177",
+                        "to": "node_178",
+                        "label": null
+                },
+                {
+                        "from": "node_178",
+                        "to": "node_179",
+                        "label": null
+                },
+                {
+                        "from": "node_179",
+                        "to": "node_180",
+                        "label": null
+                },
+                {
+                        "from": "node_180",
+                        "to": "node_181",
+                        "label": null
+                },
+                {
+                        "from": "node_181",
+                        "to": "node_182",
+                        "label": null
+                },
+                {
+                        "from": "node_182",
+                        "to": "node_183",
+                        "label": null
+                },
+                {
+                        "from": "node_183",
+                        "to": "node_184",
+                        "label": null
+                },
+                {
+                        "from": "node_184",
+                        "to": "node_185",
+                        "label": null
+                },
+                {
+                        "from": "node_185",
+                        "to": "node_186",
+                        "label": null
+                },
+                {
+                        "from": "node_186",
+                        "to": "node_187",
+                        "label": null
+                },
+                {
+                        "from": "node_187",
+                        "to": "node_188",
+                        "label": null
+                },
+                {
+                        "from": "node_188",
+                        "to": "node_189",
+                        "label": null
+                },
+                {
+                        "from": "node_189",
+                        "to": "node_190",
+                        "label": null
+                },
+                {
+                        "from": "node_190",
+                        "to": "node_191",
+                        "label": null
+                },
+                {
+                        "from": "node_191",
+                        "to": "node_192",
+                        "label": null
+                },
+                {
+                        "from": "node_192",
+                        "to": "node_193",
+                        "label": null
+                },
+                {
+                        "from": "node_193",
+                        "to": "node_194",
+                        "label": null
+                },
+                {
+                        "from": "node_194",
+                        "to": "node_195",
+                        "label": null
+                },
+                {
+                        "from": "node_195",
+                        "to": "node_196",
+                        "label": null
+                },
+                {
+                        "from": "node_196",
+                        "to": "node_197",
+                        "label": null
+                },
+                {
+                        "from": "node_197",
+                        "to": "node_198",
+                        "label": null
+                },
+                {
+                        "from": "node_198",
+                        "to": "node_199",
+                        "label": null
+                },
+                {
+                        "from": "node_199",
+                        "to": "node_200",
+                        "label": null
+                },
+                {
+                        "from": "node_200",
+                        "to": "node_201",
+                        "label": null
+                },
+                {
+                        "from": "node_201",
+                        "to": "node_202",
+                        "label": null
+                },
+                {
+                        "from": "node_202",
+                        "to": "node_203",
+                        "label": null
+                },
+                {
+                        "from": "node_203",
+                        "to": "node_204",
+                        "label": null
+                },
+                {
+                        "from": "node_204",
+                        "to": "node_205",
+                        "label": null
+                },
+                {
+                        "from": "node_205",
+                        "to": "node_206",
+                        "label": null
+                },
+                {
+                        "from": "node_206",
+                        "to": "node_207",
+                        "label": null
+                },
+                {
+                        "from": "node_207",
+                        "to": "node_208",
+                        "label": null
+                },
+                {
+                        "from": "node_208",
+                        "to": "node_209",
+                        "label": null
+                },
+                {
+                        "from": "node_209",
+                        "to": "node_210",
+                        "label": null
+                },
+                {
+                        "from": "node_210",
+                        "to": "node_211",
+                        "label": null
+                },
+                {
+                        "from": "node_211",
+                        "to": "node_212",
+                        "label": null
+                },
+                {
+                        "from": "node_212",
+                        "to": "node_213",
+                        "label": null
+                },
+                {
+                        "from": "node_213",
+                        "to": "node_214",
+                        "label": null
+                },
+                {
+                        "from": "node_214",
+                        "to": "node_215",
+                        "label": null
+                },
+                {
+                        "from": "node_215",
+                        "to": "node_216",
+                        "label": null
+                },
+                {
+                        "from": "node_216",
+                        "to": "node_217",
+                        "label": null
+                },
+                {
+                        "from": "node_217",
+                        "to": "node_218",
+                        "label": null
+                },
+                {
+                        "from": "node_218",
+                        "to": "node_219",
+                        "label": null
+                },
+                {
+                        "from": "node_219",
+                        "to": "node_220",
+                        "label": null
+                },
+                {
+                        "from": "node_220",
+                        "to": "node_221",
+                        "label": null
+                },
+                {
+                        "from": "node_221",
+                        "to": "node_222",
+                        "label": null
+                },
+                {
+                        "from": "node_222",
+                        "to": "node_223",
+                        "label": null
+                },
+                {
+                        "from": "node_223",
+                        "to": "node_224",
+                        "label": null
+                },
+                {
+                        "from": "node_224",
+                        "to": "node_225",
+                        "label": null
+                },
+                {
+                        "from": "node_225",
+                        "to": "node_226",
+                        "label": null
+                },
+                {
+                        "from": "node_226",
+                        "to": "node_227",
+                        "label": null
+                },
+                {
+                        "from": "node_227",
+                        "to": "node_228",
+                        "label": null
+                },
+                {
+                        "from": "node_228",
+                        "to": "node_229",
+                        "label": null
+                },
+                {
+                        "from": "node_229",
+                        "to": "node_230",
+                        "label": null
+                },
+                {
+                        "from": "node_230",
+                        "to": "node_231",
+                        "label": null
+                },
+                {
+                        "from": "node_231",
+                        "to": "node_232",
+                        "label": null
+                },
+                {
+                        "from": "node_232",
+                        "to": "node_233",
+                        "label": null
+                },
+                {
+                        "from": "node_233",
+                        "to": "node_234",
+                        "label": null
+                },
+                {
+                        "from": "node_234",
+                        "to": "node_235",
+                        "label": null
+                },
+                {
+                        "from": "node_235",
+                        "to": "node_236",
+                        "label": null
+                },
+                {
+                        "from": "node_236",
+                        "to": "node_237",
+                        "label": null
+                },
+                {
+                        "from": "node_237",
+                        "to": "node_238",
+                        "label": null
+                },
+                {
+                        "from": "node_238",
+                        "to": "node_239",
+                        "label": null
+                },
+                {
+                        "from": "node_239",
+                        "to": "node_240",
+                        "label": null
+                },
+                {
+                        "from": "node_240",
+                        "to": "node_241",
+                        "label": null
+                },
+                {
+                        "from": "node_241",
+                        "to": "node_242",
+                        "label": null
+                },
+                {
+                        "from": "node_242",
+                        "to": "node_243",
+                        "label": null
+                },
+                {
+                        "from": "node_243",
+                        "to": "node_244",
+                        "label": null
+                },
+                {
+                        "from": "node_244",
+                        "to": "node_245",
+                        "label": null
+                },
+                {
+                        "from": "node_245",
+                        "to": "node_246",
+                        "label": null
+                },
+                {
+                        "from": "node_246",
+                        "to": "node_247",
+                        "label": null
+                },
+                {
+                        "from": "node_247",
+                        "to": "node_248",
+                        "label": null
+                },
+                {
+                        "from": "node_248",
+                        "to": "node_249",
+                        "label": null
+                },
+                {
+                        "from": "node_249",
+                        "to": "node_250",
+                        "label": null
+                },
+                {
+                        "from": "node_250",
+                        "to": "node_251",
+                        "label": null
+                },
+                {
+                        "from": "node_251",
+                        "to": "node_252",
+                        "label": null
+                },
+                {
+                        "from": "node_252",
+                        "to": "node_253",
+                        "label": null
+                },
+                {
+                        "from": "node_253",
+                        "to": "node_254",
+                        "label": null
+                },
+                {
+                        "from": "node_254",
+                        "to": "node_255",
+                        "label": null
+                },
+                {
+                        "from": "node_255",
+                        "to": "node_256",
+                        "label": null
+                },
+                {
+                        "from": "node_256",
+                        "to": "node_257",
+                        "label": null
+                },
+                {
+                        "from": "node_257",
+                        "to": "node_258",
+                        "label": null
+                },
+                {
+                        "from": "node_258",
+                        "to": "node_259",
+                        "label": null
+                },
+                {
+                        "from": "node_259",
+                        "to": "node_260",
+                        "label": null
+                },
+                {
+                        "from": "node_260",
+                        "to": "node_261",
+                        "label": null
+                },
+                {
+                        "from": "node_261",
+                        "to": "node_262",
+                        "label": null
+                },
+                {
+                        "from": "node_262",
+                        "to": "node_263",
+                        "label": null
+                },
+                {
+                        "from": "node_263",
+                        "to": "node_264",
+                        "label": null
+                },
+                {
+                        "from": "node_264",
+                        "to": "node_265",
+                        "label": null
+                },
+                {
+                        "from": "node_265",
+                        "to": "node_266",
+                        "label": null
+                },
+                {
+                        "from": "node_266",
+                        "to": "node_267",
+                        "label": null
+                },
+                {
+                        "from": "node_267",
+                        "to": "node_268",
+                        "label": null
+                },
+                {
+                        "from": "node_268",
+                        "to": "node_269",
+                        "label": null
+                },
+                {
+                        "from": "node_269",
+                        "to": "node_270",
+                        "label": null
+                },
+                {
+                        "from": "node_270",
+                        "to": "node_271",
+                        "label": null
+                },
+                {
+                        "from": "node_271",
+                        "to": "node_272",
+                        "label": null
+                },
+                {
+                        "from": "node_272",
+                        "to": "node_273",
+                        "label": null
+                },
+                {
+                        "from": "node_273",
+                        "to": "node_274",
+                        "label": null
+                },
+                {
+                        "from": "node_274",
+                        "to": "node_275",
+                        "label": null
+                },
+                {
+                        "from": "node_275",
+                        "to": "node_276",
+                        "label": null
+                },
+                {
+                        "from": "node_276",
+                        "to": "node_277",
+                        "label": null
+                },
+                {
+                        "from": "node_277",
+                        "to": "node_278",
+                        "label": null
+                },
+                {
+                        "from": "node_278",
+                        "to": "node_279",
+                        "label": null
+                },
+                {
+                        "from": "node_279",
+                        "to": "node_280",
+                        "label": null
+                },
+                {
+                        "from": "node_280",
+                        "to": "node_281",
+                        "label": null
+                },
+                {
+                        "from": "node_281",
+                        "to": "node_282",
+                        "label": null
+                },
+                {
+                        "from": "node_282",
+                        "to": "node_283",
+                        "label": null
+                },
+                {
+                        "from": "node_283",
+                        "to": "node_284",
+                        "label": null
+                },
+                {
+                        "from": "node_284",
+                        "to": "node_285",
+                        "label": null
+                },
+                {
+                        "from": "node_285",
+                        "to": "node_286",
+                        "label": null
+                },
+                {
+                        "from": "node_286",
+                        "to": "node_287",
+                        "label": null
+                },
+                {
+                        "from": "node_287",
+                        "to": "node_288",
+                        "label": null
+                },
+                {
+                        "from": "node_288",
+                        "to": "node_289",
+                        "label": null
+                },
+                {
+                        "from": "node_289",
+                        "to": "node_290",
+                        "label": null
+                },
+                {
+                        "from": "node_290",
+                        "to": "node_291",
+                        "label": null
+                },
+                {
+                        "from": "node_291",
+                        "to": "node_292",
+                        "label": null
+                },
+                {
+                        "from": "node_292",
+                        "to": "node_293",
+                        "label": null
+                },
+                {
+                        "from": "node_293",
+                        "to": "node_294",
+                        "label": null
+                },
+                {
+                        "from": "node_294",
+                        "to": "node_295",
+                        "label": null
+                },
+                {
+                        "from": "node_295",
+                        "to": "node_296",
+                        "label": null
+                },
+                {
+                        "from": "node_296",
+                        "to": "node_297",
+                        "label": null
+                },
+                {
+                        "from": "node_297",
+                        "to": "node_298",
+                        "label": null
+                },
+                {
+                        "from": "node_298",
+                        "to": "node_299",
+                        "label": null
+                },
+                {
+                        "from": "node_299",
+                        "to": "node_259",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_259",
+                        "to": "node_300",
+                        "label": "break/complete"
+                },
+                {
+                        "from": "node_300",
+                        "to": "node_170",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_170",
+                        "to": "node_301",
+                        "label": "break/complete"
+                },
+                {
+                        "from": "node_301",
+                        "to": "node_302",
+                        "label": null
+                },
+                {
+                        "from": "node_302",
+                        "to": "node_303",
+                        "label": null
+                },
+                {
+                        "from": "node_303",
+                        "to": "node_304",
+                        "label": null
+                },
+                {
+                        "from": "node_304",
+                        "to": "node_305",
+                        "label": null
+                },
+                {
+                        "from": "node_305",
+                        "to": "node_306",
+                        "label": null
+                },
+                {
+                        "from": "node_306",
+                        "to": "node_307",
+                        "label": null
+                },
+                {
+                        "from": "node_307",
+                        "to": "node_308",
+                        "label": null
+                },
+                {
+                        "from": "node_308",
+                        "to": "node_309",
+                        "label": null
+                },
+                {
+                        "from": "node_309",
+                        "to": "node_310",
+                        "label": null
+                },
+                {
+                        "from": "node_310",
+                        "to": "node_311",
+                        "label": null
+                },
+                {
+                        "from": "node_311",
+                        "to": "node_312",
+                        "label": null
+                },
+                {
+                        "from": "node_312",
+                        "to": "node_313",
+                        "label": null
+                },
+                {
+                        "from": "node_313",
+                        "to": "node_314",
+                        "label": null
+                },
+                {
+                        "from": "node_314",
+                        "to": "node_315",
+                        "label": null
+                },
+                {
+                        "from": "node_315",
+                        "to": "node_316",
+                        "label": null
+                },
+                {
+                        "from": "node_316",
+                        "to": "node_317",
+                        "label": null
+                },
+                {
+                        "from": "node_317",
+                        "to": "node_318",
+                        "label": null
+                },
+                {
+                        "from": "node_318",
+                        "to": "node_319",
+                        "label": null
+                },
+                {
+                        "from": "node_319",
+                        "to": "node_320",
+                        "label": null
+                },
+                {
+                        "from": "node_320",
+                        "to": "node_321",
+                        "label": null
+                },
+                {
+                        "from": "node_321",
+                        "to": "node_322",
+                        "label": null
+                },
+                {
+                        "from": "node_322",
+                        "to": "node_323",
+                        "label": null
+                },
+                {
+                        "from": "node_323",
+                        "to": "node_324",
+                        "label": null
+                },
+                {
+                        "from": "node_324",
+                        "to": "node_325",
+                        "label": null
+                },
+                {
+                        "from": "node_325",
+                        "to": "node_326",
+                        "label": null
+                },
+                {
+                        "from": "node_326",
+                        "to": "node_64",
+                        "label": "continue"
+                },
+                {
+                        "from": "node_64",
+                        "to": "node_327",
+                        "label": "break/complete"
+                },
+                {
+                        "from": "node_327",
+                        "to": "node_328",
+                        "label": null
+                },
+                {
+                        "from": "node_328",
+                        "to": "node_1",
+                        "label": null
+                },
+                {
+                        "from": "node_329",
+                        "to": "node_1",
+                        "label": null
+                }
+        ]
+};
+        
+        let network = null;
+        let physicsEnabled = false;
+        
+        // Color mapping for node types
+        const colorMap = {
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'return': '#90ee90',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3'
+        };
+        
+        // Shape mapping for node types
+        const shapeMap = {
+            'entry': 'ellipse',
+            'exit': 'ellipse',
+            'conditional': 'diamond',
+            'loop': 'diamond',
+            'merge': 'circle'
+        };
+        
+        function initializeNetwork() {
+            const container = document.getElementById('network');
+            
+            // Create nodes
+            const nodes = new vis.DataSet([
+                {
+                    id: functionFlowData.entry_point.id,
+                    label: functionFlowData.entry_point.label,
+                    title: `${functionFlowData.entry_point.label}\nType: ${functionFlowData.entry_point.type}\nLine: ${functionFlowData.entry_point.line}`,
+                    color: colorMap[functionFlowData.entry_point.type],
+                    shape: shapeMap[functionFlowData.entry_point.type] || 'box',
+                    font: {size: 16, bold: true, color: '#333'},
+                    borderWidth: 3,
+                    borderColor: '#28a745'
+                },
+                {
+                    id: functionFlowData.exit_point.id,
+                    label: functionFlowData.exit_point.label,
+                    title: `${functionFlowData.exit_point.label}\nType: ${functionFlowData.exit_point.type}\nLine: ${functionFlowData.exit_point.line}`,
+                    color: colorMap[functionFlowData.exit_point.type],
+                    shape: shapeMap[functionFlowData.exit_point.type] || 'box',
+                    font: {size: 16, bold: true, color: '#333'},
+                    borderWidth: 3,
+                    borderColor: '#dc3545'
+                }
+            ]);
+            
+            // Add control flow nodes
+            functionFlowData.nodes.forEach(node => {
+                if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+                    const color = colorMap[node.type] || '#97c2fc';
+                    const shape = shapeMap[node.type] || 'box';
+                    
+                    let label = node.label;
+                    if (label.length > 50) {
+                        label = label.substring(0, 47) + '...';
+                    }
+                    
+                    nodes.add({
+                        id: node.id,
+                        label: label,
+                        title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                        color: color,
+                        shape: shape,
+                        font: {size: 12, color: '#333'},
+                        borderWidth: 1,
+                        borderColor: '#666666'
+                    });
+                }
+            });
+            
+            // Create edges
+            const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
+                from: edge.from,
+                to: edge.to,
+                label: edge.label || '',
+                arrows: 'to',
+                color: {color: '#666666', highlight: '#007bff'},
+                width: 2,
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.2
+                }
+            })));
+            
+            // Create network
+            const data = { nodes: nodes, edges: edges };
+            
+            const options = {
+                layout: {
+                    randomSeed: 42,
+                    improvedLayout: true
+                },
+                physics: {
+                    enabled: false
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    zoomView: true,
+                    dragView: true,
+                    navigationButtons: true,
+                    keyboard: true
+                },
+                nodes: {
+                    borderWidth: 1,
+                    borderColor: '#666666',
+                    font: {color: '#333'},
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 5,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    },
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 3,
+                        x: 1,
+                        y: 1
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+            
+            // Fit network after stabilization
+            network.once('stabilized', function() {
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuad'
+                    }
+                });
+            });
+            
+            // Add click event for node details
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    console.log('Clicked node:', node);
+                }
+            });
+        }
+        
+        function changeLayout() {
+            const layoutType = document.getElementById('layoutSelect').value;
+            const nodeSize = document.getElementById('nodeSizeSelect').value;
+            
+            let nodeSizeValue = 20;
+            if (nodeSize === 'small') nodeSizeValue = 15;
+            else if (nodeSize === 'large') nodeSizeValue = 30;
+            
+            const options = {
+                layout: {
+                    randomSeed: 42,
+                    improvedLayout: true
+                },
+                physics: { enabled: physicsEnabled },
+                nodes: { size: nodeSizeValue }
+            };
+            
+            if (layoutType === 'hierarchical') {
+                options.layout = {
+                    hierarchical: {
+                        direction: 'UD',
+                        sortMethod: 'directed',
+                        levelSeparation: 150,
+                        nodeSpacing: 200
+                    }
+                };
+                options.physics = { enabled: false };
+            } else if (layoutType === 'physics') {
+                options.physics = {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                };
+            } else if (layoutType === 'circular') {
+                options.physics = { enabled: false };
+                
+                // Manually arrange nodes in a circle
+                const nodeIds = network.body.data.nodes.getIds();
+                const radius = 300;
+                const center = { x: 0, y: 0 };
+                
+                nodeIds.forEach((id, index) => {
+                    const angle = (2 * Math.PI * index) / nodeIds.length;
+                    const x = center.x + radius * Math.cos(angle);
+                    const y = center.y + radius * Math.sin(angle);
+                    network.moveNode(id, x, y);
+                });
+            }
+            
+            network.setOptions(options);
+        }
+        
+        function resetZoom() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        }
+        
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled,
+                    stabilization: { iterations: physicsEnabled ? 100 : 0 }
+                }
+            });
+        }
+        
+        function exportImage() {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get network canvas
+            const networkCanvas = network.canvas.frame.canvas;
+            
+            // Set canvas size
+            canvas.width = networkCanvas.width;
+            canvas.height = networkCanvas.height;
+            
+            // Draw network canvas to our canvas
+            ctx.drawImage(networkCanvas, 0, 0);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'build_plan_function_flow.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Initialize network when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNetwork();
+        });
+    </script>
+</body>
+</html>

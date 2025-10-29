@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html>
+    <head><title>test_export_audio Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.mock_audio_export", "label": "mock_audio_export", "shape": "dot", "title": "Function: test_export_audio.mock_audio_export\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 7\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_basic", "label": "test_export_audio_basic", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_basic\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 11\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_formats", "label": "test_export_audio_formats", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_formats\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 19\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_invalid_format", "label": "test_export_audio_invalid_format", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_invalid_format\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 28\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_empty_pattern", "label": "test_export_audio_empty_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_empty_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 33\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_none_pattern", "label": "test_export_audio_none_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_none_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 38\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_invalid_filename", "label": "test_export_audio_invalid_filename", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_invalid_filename\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 43\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_non_string_pattern", "label": "test_export_audio_non_string_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_non_string_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 48\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_non_string_filename", "label": "test_export_audio_non_string_filename", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_non_string_filename\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 53\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_special_chars_filename", "label": "test_export_audio_special_chars_filename", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_special_chars_filename\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 58\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_unicode_filename", "label": "test_export_audio_unicode_filename", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_unicode_filename\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 63\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_path_traversal", "label": "test_export_audio_path_traversal", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_path_traversal\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 68\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_long_filename", "label": "test_export_audio_long_filename", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_long_filename\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 73\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_directory_path", "label": "test_export_audio_directory_path", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_directory_path\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 79\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_multiple_dots", "label": "test_export_audio_multiple_dots", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_multiple_dots\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 84\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_no_extension", "label": "test_export_audio_no_extension", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_no_extension\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 89\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_failure", "label": "test_export_audio_failure", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_failure\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 94\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_numpy_array", "label": "test_export_audio_numpy_array", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_numpy_array\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 99\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_list_pattern", "label": "test_export_audio_list_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_list_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 105\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_tuple_pattern", "label": "test_export_audio_tuple_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_tuple_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 111\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_empty_list_pattern", "label": "test_export_audio_empty_list_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_empty_list_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 117\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_empty_numpy_pattern", "label": "test_export_audio_empty_numpy_pattern", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_empty_numpy_pattern\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 123\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_with_none", "label": "test_export_audio_pattern_with_none", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_with_none\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 129\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_with_nan", "label": "test_export_audio_pattern_with_nan", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_with_nan\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 135\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_with_infinity", "label": "test_export_audio_pattern_with_infinity", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_with_infinity\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 141\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_with_negative", "label": "test_export_audio_pattern_with_negative", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_with_negative\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 147\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_with_zero", "label": "test_export_audio_pattern_with_zero", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_with_zero\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 153\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_mixed_positive_negative", "label": "test_export_audio_pattern_mixed_positive_negative", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_mixed_positive_negative\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 159\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_large_values", "label": "test_export_audio_pattern_large_values", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_large_values\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 165\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_small_values", "label": "test_export_audio_pattern_small_values", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_small_values\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 171\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_decimal_values", "label": "test_export_audio_pattern_decimal_values", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_decimal_values\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 177\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_boolean_values", "label": "test_export_audio_pattern_boolean_values", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_boolean_values\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 183\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_string_values", "label": "test_export_audio_pattern_string_values", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_string_values\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 189\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_mixed_types", "label": "test_export_audio_pattern_mixed_types", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_mixed_types\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 195\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_complex_numbers", "label": "test_export_audio_pattern_complex_numbers", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_complex_numbers\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 201\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_export_audio.test_export_audio_pattern_datetime_objects", "label": "test_export_audio_pattern_datetime_objects", "shape": "dot", "title": "Function: test_export_audio.test_export_audio_pattern_datetime_objects\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\nLine: 207\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"test_export_audio.mock_audio_export": {"nodes": [{"id": "test_export_audio.mock_audio_export", "label": "mock_audio_export", "title": "test_export_audio.mock_audio_export\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 7", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_basic": {"nodes": [{"id": "test_export_audio.test_export_audio_basic", "label": "test_export_audio_basic", "title": "test_export_audio.test_export_audio_basic\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 11", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_formats": {"nodes": [{"id": "test_export_audio.test_export_audio_formats", "label": "test_export_audio_formats", "title": "test_export_audio.test_export_audio_formats\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 19", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_invalid_format": {"nodes": [{"id": "test_export_audio.test_export_audio_invalid_format", "label": "test_export_audio_invalid_format", "title": "test_export_audio.test_export_audio_invalid_format\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 28", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_empty_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_empty_pattern", "label": "test_export_audio_empty_pattern", "title": "test_export_audio.test_export_audio_empty_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 33", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_none_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_none_pattern", "label": "test_export_audio_none_pattern", "title": "test_export_audio.test_export_audio_none_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 38", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_invalid_filename": {"nodes": [{"id": "test_export_audio.test_export_audio_invalid_filename", "label": "test_export_audio_invalid_filename", "title": "test_export_audio.test_export_audio_invalid_filename\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 43", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_non_string_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_non_string_pattern", "label": "test_export_audio_non_string_pattern", "title": "test_export_audio.test_export_audio_non_string_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 48", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_non_string_filename": {"nodes": [{"id": "test_export_audio.test_export_audio_non_string_filename", "label": "test_export_audio_non_string_filename", "title": "test_export_audio.test_export_audio_non_string_filename\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 53", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_special_chars_filename": {"nodes": [{"id": "test_export_audio.test_export_audio_special_chars_filename", "label": "test_export_audio_special_chars_filename", "title": "test_export_audio.test_export_audio_special_chars_filename\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 58", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_unicode_filename": {"nodes": [{"id": "test_export_audio.test_export_audio_unicode_filename", "label": "test_export_audio_unicode_filename", "title": "test_export_audio.test_export_audio_unicode_filename\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 63", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_path_traversal": {"nodes": [{"id": "test_export_audio.test_export_audio_path_traversal", "label": "test_export_audio_path_traversal", "title": "test_export_audio.test_export_audio_path_traversal\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 68", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_long_filename": {"nodes": [{"id": "test_export_audio.test_export_audio_long_filename", "label": "test_export_audio_long_filename", "title": "test_export_audio.test_export_audio_long_filename\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 73", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_directory_path": {"nodes": [{"id": "test_export_audio.test_export_audio_directory_path", "label": "test_export_audio_directory_path", "title": "test_export_audio.test_export_audio_directory_path\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 79", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_multiple_dots": {"nodes": [{"id": "test_export_audio.test_export_audio_multiple_dots", "label": "test_export_audio_multiple_dots", "title": "test_export_audio.test_export_audio_multiple_dots\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 84", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_no_extension": {"nodes": [{"id": "test_export_audio.test_export_audio_no_extension", "label": "test_export_audio_no_extension", "title": "test_export_audio.test_export_audio_no_extension\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 89", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_failure": {"nodes": [{"id": "test_export_audio.test_export_audio_failure", "label": "test_export_audio_failure", "title": "test_export_audio.test_export_audio_failure\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 94", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_numpy_array": {"nodes": [{"id": "test_export_audio.test_export_audio_numpy_array", "label": "test_export_audio_numpy_array", "title": "test_export_audio.test_export_audio_numpy_array\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 99", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_list_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_list_pattern", "label": "test_export_audio_list_pattern", "title": "test_export_audio.test_export_audio_list_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 105", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_tuple_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_tuple_pattern", "label": "test_export_audio_tuple_pattern", "title": "test_export_audio.test_export_audio_tuple_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 111", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_empty_list_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_empty_list_pattern", "label": "test_export_audio_empty_list_pattern", "title": "test_export_audio.test_export_audio_empty_list_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 117", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_empty_numpy_pattern": {"nodes": [{"id": "test_export_audio.test_export_audio_empty_numpy_pattern", "label": "test_export_audio_empty_numpy_pattern", "title": "test_export_audio.test_export_audio_empty_numpy_pattern\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 123", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_with_none": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_with_none", "label": "test_export_audio_pattern_with_none", "title": "test_export_audio.test_export_audio_pattern_with_none\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 129", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_with_nan": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_with_nan", "label": "test_export_audio_pattern_with_nan", "title": "test_export_audio.test_export_audio_pattern_with_nan\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 135", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_with_infinity": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_with_infinity", "label": "test_export_audio_pattern_with_infinity", "title": "test_export_audio.test_export_audio_pattern_with_infinity\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 141", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_with_negative": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_with_negative", "label": "test_export_audio_pattern_with_negative", "title": "test_export_audio.test_export_audio_pattern_with_negative\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 147", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_with_zero": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_with_zero", "label": "test_export_audio_pattern_with_zero", "title": "test_export_audio.test_export_audio_pattern_with_zero\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 153", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_mixed_positive_negative": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_mixed_positive_negative", "label": "test_export_audio_pattern_mixed_positive_negative", "title": "test_export_audio.test_export_audio_pattern_mixed_positive_negative\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 159", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_large_values": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_large_values", "label": "test_export_audio_pattern_large_values", "title": "test_export_audio.test_export_audio_pattern_large_values\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 165", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_small_values": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_small_values", "label": "test_export_audio_pattern_small_values", "title": "test_export_audio.test_export_audio_pattern_small_values\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 171", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_decimal_values": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_decimal_values", "label": "test_export_audio_pattern_decimal_values", "title": "test_export_audio.test_export_audio_pattern_decimal_values\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 177", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_boolean_values": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_boolean_values", "label": "test_export_audio_pattern_boolean_values", "title": "test_export_audio.test_export_audio_pattern_boolean_values\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 183", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_string_values": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_string_values", "label": "test_export_audio_pattern_string_values", "title": "test_export_audio.test_export_audio_pattern_string_values\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 189", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_mixed_types": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_mixed_types", "label": "test_export_audio_pattern_mixed_types", "title": "test_export_audio.test_export_audio_pattern_mixed_types\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 195", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_complex_numbers": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_complex_numbers", "label": "test_export_audio_pattern_complex_numbers", "title": "test_export_audio.test_export_audio_pattern_complex_numbers\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 201", "color": "#ff6b6b"}], "edges": []}, "test_export_audio.test_export_audio_pattern_datetime_objects": {"nodes": [{"id": "test_export_audio.test_export_audio_pattern_datetime_objects", "label": "test_export_audio_pattern_datetime_objects", "title": "test_export_audio.test_export_audio_pattern_datetime_objects\\nFile: src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py\\nLine: 207", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - test_export_audio
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="mock_audio_export" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.mock_audio_export', 'mock_audio_export')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>mock_audio_export</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:7
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_basic" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_basic', 'test_export_audio_basic')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_basic</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:11
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_directory_path" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_directory_path', 'test_export_audio_directory_path')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_directory_path</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:79
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_empty_list_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_empty_list_pattern', 'test_export_audio_empty_list_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_empty_list_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:117
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_empty_numpy_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_empty_numpy_pattern', 'test_export_audio_empty_numpy_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_empty_numpy_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:123
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_empty_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_empty_pattern', 'test_export_audio_empty_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_empty_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:33
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_failure" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_failure', 'test_export_audio_failure')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_failure</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:94
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_formats" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_formats', 'test_export_audio_formats')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_formats</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:19
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_invalid_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_invalid_filename', 'test_export_audio_invalid_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_invalid_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:43
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_invalid_format" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_invalid_format', 'test_export_audio_invalid_format')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_invalid_format</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:28
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_list_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_list_pattern', 'test_export_audio_list_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_list_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:105
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_long_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_long_filename', 'test_export_audio_long_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_long_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:73
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_multiple_dots" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_multiple_dots', 'test_export_audio_multiple_dots')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_multiple_dots</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:84
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_no_extension" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_no_extension', 'test_export_audio_no_extension')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_no_extension</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:89
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_non_string_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_non_string_filename', 'test_export_audio_non_string_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_non_string_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:53
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_non_string_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_non_string_pattern', 'test_export_audio_non_string_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_non_string_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:48
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_none_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_none_pattern', 'test_export_audio_none_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_none_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:38
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_numpy_array" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_numpy_array', 'test_export_audio_numpy_array')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_numpy_array</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:99
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_path_traversal" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_path_traversal', 'test_export_audio_path_traversal')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_path_traversal</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:68
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_boolean_values" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_boolean_values', 'test_export_audio_pattern_boolean_values')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_boolean_values</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:183
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_complex_numbers" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_complex_numbers', 'test_export_audio_pattern_complex_numbers')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_complex_numbers</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:201
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_datetime_objects" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_datetime_objects', 'test_export_audio_pattern_datetime_objects')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_datetime_objects</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:207
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_decimal_values" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_decimal_values', 'test_export_audio_pattern_decimal_values')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_decimal_values</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:177
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_large_values" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_large_values', 'test_export_audio_pattern_large_values')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_large_values</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:165
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_mixed_positive_negative" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_mixed_positive_negative', 'test_export_audio_pattern_mixed_positive_negative')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_mixed_positive_negative</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:159
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_mixed_types" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_mixed_types', 'test_export_audio_pattern_mixed_types')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_mixed_types</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:195
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_small_values" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_small_values', 'test_export_audio_pattern_small_values')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_small_values</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:171
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_string_values" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_string_values', 'test_export_audio_pattern_string_values')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_string_values</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:189
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_with_infinity" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_with_infinity', 'test_export_audio_pattern_with_infinity')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_with_infinity</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:141
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_with_nan" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_with_nan', 'test_export_audio_pattern_with_nan')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_with_nan</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:135
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_with_negative" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_with_negative', 'test_export_audio_pattern_with_negative')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_with_negative</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:147
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_with_none" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_with_none', 'test_export_audio_pattern_with_none')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_with_none</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:129
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_pattern_with_zero" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_pattern_with_zero', 'test_export_audio_pattern_with_zero')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_pattern_with_zero</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:153
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_special_chars_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_special_chars_filename', 'test_export_audio_special_chars_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_special_chars_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:58
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_tuple_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_tuple_pattern', 'test_export_audio_tuple_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_tuple_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:111
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_export_audio_unicode_filename" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_export_audio.test_export_audio_unicode_filename', 'test_export_audio_unicode_filename')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_export_audio_unicode_filename</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/notebooks/module_specific/output_demo/tests/test_export_audio.py:63
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

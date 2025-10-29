@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dmtcoder-stage1"
+version = "0.1.0"
+description = "DMT Coder Stage 1: parse, validate, plan, (optional) generate"
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

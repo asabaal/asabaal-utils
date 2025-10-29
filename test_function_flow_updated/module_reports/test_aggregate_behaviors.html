@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+    <head><title>test_aggregate_behaviors Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_module_import", "label": "test_module_import", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_module_import\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 19\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_empty_directory", "label": "test_load_empty_directory", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_empty_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_valid_reports", "label": "test_load_valid_reports", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_valid_reports\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 47\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_mixed_files", "label": "test_load_mixed_files", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_mixed_files\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 77\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_load_invalid_json", "label": "test_load_invalid_json", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_load_invalid_json\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 101\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_basic_test_names", "label": "test_basic_test_names", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_basic_test_names\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 123\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_suffix_test_names", "label": "test_suffix_test_names", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_suffix_test_names\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 136\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_edge_cases", "label": "test_edge_cases", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_edge_cases\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 147\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_common_patterns", "label": "test_common_patterns", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_common_patterns\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 163\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_extract_requirement_coverage", "label": "test_extract_requirement_coverage", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_extract_requirement_coverage\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 184\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_extract_additional_tests", "label": "test_extract_additional_tests", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_extract_additional_tests\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 217\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_extract_mixed_report", "label": "test_extract_mixed_report", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_extract_mixed_report\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 245\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_single_list", "label": "test_merge_single_list", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_single_list\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 290\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_multiple_lists", "label": "test_merge_multiple_lists", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_multiple_lists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 313\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_different_functions", "label": "test_merge_different_functions", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_different_functions\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 348\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_with_validation_rules", "label": "test_merge_with_validation_rules", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_with_validation_rules\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 382\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_merge_average_alignment_score", "label": "test_merge_average_alignment_score", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_merge_average_alignment_score\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 408\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_save_behaviors", "label": "test_save_behaviors", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_save_behaviors\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 444\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_aggregate_behaviors.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_aggregate_behaviors.test_main_function_exists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\nLine: 486\nIn-degree: 0\nOut-degree: 5"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.extract_behaviors_from_report", "label": "extract_behaviors_from_report", "shape": "dot", "title": "Function: aggregate_behaviors.extract_behaviors_from_report\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.merge_behaviors", "label": "merge_behaviors", "shape": "dot", "title": "Function: aggregate_behaviors.merge_behaviors\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.load_alignment_reports", "label": "load_alignment_reports", "shape": "dot", "title": "Function: aggregate_behaviors.load_alignment_reports\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.extract_function_name_from_test", "label": "extract_function_name_from_test", "shape": "dot", "title": "Function: aggregate_behaviors.extract_function_name_from_test\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "aggregate_behaviors.save_aggregated_behaviors", "label": "save_aggregated_behaviors", "shape": "dot", "title": "Function: aggregate_behaviors.save_aggregated_behaviors\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.extract_behaviors_from_report", "to": "aggregate_behaviors.extract_behaviors_from_report"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.merge_behaviors", "to": "aggregate_behaviors.merge_behaviors"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.load_alignment_reports", "to": "aggregate_behaviors.load_alignment_reports"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.extract_function_name_from_test", "to": "aggregate_behaviors.extract_function_name_from_test"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "test_aggregate_behaviors.test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists \u2192 aggregate_behaviors.save_aggregated_behaviors", "to": "aggregate_behaviors.save_aggregated_behaviors"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"test_aggregate_behaviors.test_module_import": {"nodes": [{"id": "test_aggregate_behaviors.test_module_import", "label": "test_module_import", "title": "test_aggregate_behaviors.test_module_import\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 19", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_load_empty_directory": {"nodes": [{"id": "test_aggregate_behaviors.test_load_empty_directory", "label": "test_load_empty_directory", "title": "test_aggregate_behaviors.test_load_empty_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 34", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_load_valid_reports": {"nodes": [{"id": "test_aggregate_behaviors.test_load_valid_reports", "label": "test_load_valid_reports", "title": "test_aggregate_behaviors.test_load_valid_reports\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 47", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_load_mixed_files": {"nodes": [{"id": "test_aggregate_behaviors.test_load_mixed_files", "label": "test_load_mixed_files", "title": "test_aggregate_behaviors.test_load_mixed_files\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 77", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_load_invalid_json": {"nodes": [{"id": "test_aggregate_behaviors.test_load_invalid_json", "label": "test_load_invalid_json", "title": "test_aggregate_behaviors.test_load_invalid_json\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 101", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_basic_test_names": {"nodes": [{"id": "test_aggregate_behaviors.test_basic_test_names", "label": "test_basic_test_names", "title": "test_aggregate_behaviors.test_basic_test_names\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 123", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_suffix_test_names": {"nodes": [{"id": "test_aggregate_behaviors.test_suffix_test_names", "label": "test_suffix_test_names", "title": "test_aggregate_behaviors.test_suffix_test_names\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 136", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_edge_cases": {"nodes": [{"id": "test_aggregate_behaviors.test_edge_cases", "label": "test_edge_cases", "title": "test_aggregate_behaviors.test_edge_cases\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 147", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_common_patterns": {"nodes": [{"id": "test_aggregate_behaviors.test_common_patterns", "label": "test_common_patterns", "title": "test_aggregate_behaviors.test_common_patterns\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 163", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_extract_requirement_coverage": {"nodes": [{"id": "test_aggregate_behaviors.test_extract_requirement_coverage", "label": "test_extract_requirement_coverage", "title": "test_aggregate_behaviors.test_extract_requirement_coverage\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 184", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_extract_additional_tests": {"nodes": [{"id": "test_aggregate_behaviors.test_extract_additional_tests", "label": "test_extract_additional_tests", "title": "test_aggregate_behaviors.test_extract_additional_tests\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 217", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_extract_mixed_report": {"nodes": [{"id": "test_aggregate_behaviors.test_extract_mixed_report", "label": "test_extract_mixed_report", "title": "test_aggregate_behaviors.test_extract_mixed_report\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 245", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_merge_single_list": {"nodes": [{"id": "test_aggregate_behaviors.test_merge_single_list", "label": "test_merge_single_list", "title": "test_aggregate_behaviors.test_merge_single_list\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 290", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_merge_multiple_lists": {"nodes": [{"id": "test_aggregate_behaviors.test_merge_multiple_lists", "label": "test_merge_multiple_lists", "title": "test_aggregate_behaviors.test_merge_multiple_lists\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 313", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_merge_different_functions": {"nodes": [{"id": "test_aggregate_behaviors.test_merge_different_functions", "label": "test_merge_different_functions", "title": "test_aggregate_behaviors.test_merge_different_functions\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 348", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_merge_with_validation_rules": {"nodes": [{"id": "test_aggregate_behaviors.test_merge_with_validation_rules", "label": "test_merge_with_validation_rules", "title": "test_aggregate_behaviors.test_merge_with_validation_rules\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 382", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_merge_average_alignment_score": {"nodes": [{"id": "test_aggregate_behaviors.test_merge_average_alignment_score", "label": "test_merge_average_alignment_score", "title": "test_aggregate_behaviors.test_merge_average_alignment_score\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 408", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_save_behaviors": {"nodes": [{"id": "test_aggregate_behaviors.test_save_behaviors", "label": "test_save_behaviors", "title": "test_aggregate_behaviors.test_save_behaviors\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 444", "color": "#ff6b6b"}], "edges": []}, "test_aggregate_behaviors.test_main_function_exists": {"nodes": [{"id": "aggregate_behaviors.extract_behaviors_from_report", "label": "extract_behaviors_from_report", "title": "aggregate_behaviors.extract_behaviors_from_report\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "aggregate_behaviors.save_aggregated_behaviors", "label": "save_aggregated_behaviors", "title": "aggregate_behaviors.save_aggregated_behaviors\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "aggregate_behaviors.merge_behaviors", "label": "merge_behaviors", "title": "aggregate_behaviors.merge_behaviors\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "aggregate_behaviors.extract_function_name_from_test", "label": "extract_function_name_from_test", "title": "aggregate_behaviors.extract_function_name_from_test\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "aggregate_behaviors.load_alignment_reports", "label": "load_alignment_reports", "title": "aggregate_behaviors.load_alignment_reports\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "test_aggregate_behaviors.test_main_function_exists", "label": "test_main_function_exists", "title": "test_aggregate_behaviors.test_main_function_exists\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py\\nLine: 486", "color": "#ff6b6b"}], "edges": [{"from": "test_aggregate_behaviors.test_main_function_exists", "to": "aggregate_behaviors.extract_function_name_from_test"}, {"from": "test_aggregate_behaviors.test_main_function_exists", "to": "aggregate_behaviors.save_aggregated_behaviors"}, {"from": "test_aggregate_behaviors.test_main_function_exists", "to": "aggregate_behaviors.extract_behaviors_from_report"}, {"from": "test_aggregate_behaviors.test_main_function_exists", "to": "aggregate_behaviors.load_alignment_reports"}, {"from": "test_aggregate_behaviors.test_main_function_exists", "to": "aggregate_behaviors.merge_behaviors"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - test_aggregate_behaviors
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="test_basic_test_names" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_basic_test_names', 'test_basic_test_names')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_basic_test_names</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:123
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_common_patterns" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_common_patterns', 'test_common_patterns')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_common_patterns</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:163
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_edge_cases" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_edge_cases', 'test_edge_cases')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_edge_cases</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:147
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_extract_additional_tests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_extract_additional_tests', 'test_extract_additional_tests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_extract_additional_tests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:217
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_extract_mixed_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_extract_mixed_report', 'test_extract_mixed_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_extract_mixed_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:245
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_extract_requirement_coverage" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_extract_requirement_coverage', 'test_extract_requirement_coverage')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_extract_requirement_coverage</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:184
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_empty_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_load_empty_directory', 'test_load_empty_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_empty_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:34
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_invalid_json" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_load_invalid_json', 'test_load_invalid_json')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_invalid_json</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:101
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_mixed_files" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_load_mixed_files', 'test_load_mixed_files')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_mixed_files</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:77
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_valid_reports" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_load_valid_reports', 'test_load_valid_reports')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_valid_reports</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:47
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_main_function_exists" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_main_function_exists', 'test_main_function_exists')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_main_function_exists</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑5</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:486
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_merge_average_alignment_score" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_merge_average_alignment_score', 'test_merge_average_alignment_score')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_merge_average_alignment_score</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:408
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_merge_different_functions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_merge_different_functions', 'test_merge_different_functions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_merge_different_functions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:348
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_merge_multiple_lists" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_merge_multiple_lists', 'test_merge_multiple_lists')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_merge_multiple_lists</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:313
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_merge_single_list" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_merge_single_list', 'test_merge_single_list')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_merge_single_list</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:290
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_merge_with_validation_rules" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_merge_with_validation_rules', 'test_merge_with_validation_rules')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_merge_with_validation_rules</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:382
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_module_import" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_module_import', 'test_module_import')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_module_import</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:19
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_save_behaviors" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_save_behaviors', 'test_save_behaviors')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_save_behaviors</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:444
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_suffix_test_names" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_aggregate_behaviors.test_suffix_test_names', 'test_suffix_test_names')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_suffix_test_names</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_aggregate_behaviors.py:136
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

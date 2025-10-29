@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html>
+    <head><title>test_classify_failures Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.temp_dir", "label": "temp_dir", "shape": "dot", "title": "Function: test_classify_failures.temp_dir\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 27\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.classifier", "label": "classifier", "shape": "dot", "title": "Function: test_classify_failures.classifier\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 34\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.sample_test_results", "label": "sample_test_results", "shape": "dot", "title": "Function: test_classify_failures.sample_test_results\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 39\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_init_default", "label": "test_init_default", "shape": "dot", "title": "Function: test_classify_failures.test_init_default\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 74\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_init_custom_directory", "label": "test_init_custom_directory", "shape": "dot", "title": "Function: test_classify_failures.test_init_custom_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 79\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_load_test_results_latest_file", "label": "test_load_test_results_latest_file", "shape": "dot", "title": "Function: test_classify_failures.test_load_test_results_latest_file\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 84\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_load_test_results_fallback_to_pattern", "label": "test_load_test_results_fallback_to_pattern", "shape": "dot", "title": "Function: test_classify_failures.test_load_test_results_fallback_to_pattern\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 93\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_load_test_results_no_files", "label": "test_load_test_results_no_files", "shape": "dot", "title": "Function: test_classify_failures.test_load_test_results_no_files\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 102\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_load_test_results_multiple_files_chooses_latest", "label": "test_load_test_results_multiple_files_chooses_latest", "shape": "dot", "title": "Function: test_classify_failures.test_load_test_results_multiple_files_chooses_latest\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 107\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_import_error_collection", "label": "test_classify_failure_import_error_collection", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_import_error_collection\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 123\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_signature_mismatch_missing_args", "label": "test_classify_failure_signature_mismatch_missing_args", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_signature_mismatch_missing_args\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 133\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_signature_mismatch_takes_args", "label": "test_classify_failure_signature_mismatch_takes_args", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_signature_mismatch_takes_args\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 142\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_signature_mismatch_unexpected_keyword", "label": "test_classify_failure_signature_mismatch_unexpected_keyword", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_signature_mismatch_unexpected_keyword\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 151\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_smoke_test_basic_execution", "label": "test_classify_failure_smoke_test_basic_execution", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_smoke_test_basic_execution\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 160\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_smoke_test_with_signature_issue", "label": "test_classify_failure_smoke_test_with_signature_issue", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_smoke_test_with_signature_issue\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 169\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_import_error_module_not_found", "label": "test_classify_failure_import_error_module_not_found", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_import_error_module_not_found\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 178\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_syntax_error", "label": "test_classify_failure_syntax_error", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_syntax_error\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 187\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_indentation_error", "label": "test_classify_failure_indentation_error", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_indentation_error\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 196\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_name_error_execution", "label": "test_classify_failure_name_error_execution", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_name_error_execution\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 205\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_value_error", "label": "test_classify_failure_value_error", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_value_error\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 214\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_type_error", "label": "test_classify_failure_type_error", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_type_error\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 223\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_assertion_error", "label": "test_classify_failure_assertion_error", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_assertion_error\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 232\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_assert_statement", "label": "test_classify_failure_assert_statement", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_assert_statement\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 241\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_failure_default_logic_mismatch", "label": "test_classify_failure_default_logic_mismatch", "shape": "dot", "title": "Function: test_classify_failures.test_classify_failure_default_logic_mismatch\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 250\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_all_failures_mixed_results", "label": "test_classify_all_failures_mixed_results", "shape": "dot", "title": "Function: test_classify_failures.test_classify_all_failures_mixed_results\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 259\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_classify_all_failures_no_failures", "label": "test_classify_all_failures_no_failures", "shape": "dot", "title": "Function: test_classify_failures.test_classify_all_failures_no_failures\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 284\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_save_classification_report", "label": "test_save_classification_report", "shape": "dot", "title": "Function: test_classify_failures.test_save_classification_report\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 306\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_save_classification_report_creates_latest", "label": "test_save_classification_report_creates_latest", "shape": "dot", "title": "Function: test_classify_failures.test_save_classification_report_creates_latest\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 351\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_main_function_success", "label": "test_main_function_success", "shape": "dot", "title": "Function: test_classify_failures.test_main_function_success\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 381\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_main_function_no_failures", "label": "test_main_function_no_failures", "shape": "dot", "title": "Function: test_classify_failures.test_main_function_no_failures\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 418\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_main_function_exception", "label": "test_main_function_exception", "shape": "dot", "title": "Function: test_classify_failures.test_main_function_exception\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 436\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.test_main_function_exists", "label": "test_main_function_exists", "shape": "dot", "title": "Function: test_classify_failures.test_main_function_exists\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 446\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_classify_failures.path_side_effect", "label": "path_side_effect", "shape": "dot", "title": "Function: test_classify_failures.path_side_effect\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\nLine: 362\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"test_classify_failures.temp_dir": {"nodes": [{"id": "test_classify_failures.temp_dir", "label": "temp_dir", "title": "test_classify_failures.temp_dir\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 27", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.classifier": {"nodes": [{"id": "test_classify_failures.classifier", "label": "classifier", "title": "test_classify_failures.classifier\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 34", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.sample_test_results": {"nodes": [{"id": "test_classify_failures.sample_test_results", "label": "sample_test_results", "title": "test_classify_failures.sample_test_results\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 39", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_init_default": {"nodes": [{"id": "test_classify_failures.test_init_default", "label": "test_init_default", "title": "test_classify_failures.test_init_default\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 74", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_init_custom_directory": {"nodes": [{"id": "test_classify_failures.test_init_custom_directory", "label": "test_init_custom_directory", "title": "test_classify_failures.test_init_custom_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 79", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_load_test_results_latest_file": {"nodes": [{"id": "test_classify_failures.test_load_test_results_latest_file", "label": "test_load_test_results_latest_file", "title": "test_classify_failures.test_load_test_results_latest_file\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 84", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_load_test_results_fallback_to_pattern": {"nodes": [{"id": "test_classify_failures.test_load_test_results_fallback_to_pattern", "label": "test_load_test_results_fallback_to_pattern", "title": "test_classify_failures.test_load_test_results_fallback_to_pattern\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 93", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_load_test_results_no_files": {"nodes": [{"id": "test_classify_failures.test_load_test_results_no_files", "label": "test_load_test_results_no_files", "title": "test_classify_failures.test_load_test_results_no_files\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 102", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_load_test_results_multiple_files_chooses_latest": {"nodes": [{"id": "test_classify_failures.test_load_test_results_multiple_files_chooses_latest", "label": "test_load_test_results_multiple_files_chooses_latest", "title": "test_classify_failures.test_load_test_results_multiple_files_chooses_latest\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 107", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_import_error_collection": {"nodes": [{"id": "test_classify_failures.test_classify_failure_import_error_collection", "label": "test_classify_failure_import_error_collection", "title": "test_classify_failures.test_classify_failure_import_error_collection\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 123", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_signature_mismatch_missing_args": {"nodes": [{"id": "test_classify_failures.test_classify_failure_signature_mismatch_missing_args", "label": "test_classify_failure_signature_mismatch_missing_args", "title": "test_classify_failures.test_classify_failure_signature_mismatch_missing_args\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 133", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_signature_mismatch_takes_args": {"nodes": [{"id": "test_classify_failures.test_classify_failure_signature_mismatch_takes_args", "label": "test_classify_failure_signature_mismatch_takes_args", "title": "test_classify_failures.test_classify_failure_signature_mismatch_takes_args\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 142", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_signature_mismatch_unexpected_keyword": {"nodes": [{"id": "test_classify_failures.test_classify_failure_signature_mismatch_unexpected_keyword", "label": "test_classify_failure_signature_mismatch_unexpected_keyword", "title": "test_classify_failures.test_classify_failure_signature_mismatch_unexpected_keyword\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 151", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_smoke_test_basic_execution": {"nodes": [{"id": "test_classify_failures.test_classify_failure_smoke_test_basic_execution", "label": "test_classify_failure_smoke_test_basic_execution", "title": "test_classify_failures.test_classify_failure_smoke_test_basic_execution\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 160", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_smoke_test_with_signature_issue": {"nodes": [{"id": "test_classify_failures.test_classify_failure_smoke_test_with_signature_issue", "label": "test_classify_failure_smoke_test_with_signature_issue", "title": "test_classify_failures.test_classify_failure_smoke_test_with_signature_issue\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 169", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_import_error_module_not_found": {"nodes": [{"id": "test_classify_failures.test_classify_failure_import_error_module_not_found", "label": "test_classify_failure_import_error_module_not_found", "title": "test_classify_failures.test_classify_failure_import_error_module_not_found\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 178", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_syntax_error": {"nodes": [{"id": "test_classify_failures.test_classify_failure_syntax_error", "label": "test_classify_failure_syntax_error", "title": "test_classify_failures.test_classify_failure_syntax_error\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 187", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_indentation_error": {"nodes": [{"id": "test_classify_failures.test_classify_failure_indentation_error", "label": "test_classify_failure_indentation_error", "title": "test_classify_failures.test_classify_failure_indentation_error\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 196", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_name_error_execution": {"nodes": [{"id": "test_classify_failures.test_classify_failure_name_error_execution", "label": "test_classify_failure_name_error_execution", "title": "test_classify_failures.test_classify_failure_name_error_execution\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 205", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_value_error": {"nodes": [{"id": "test_classify_failures.test_classify_failure_value_error", "label": "test_classify_failure_value_error", "title": "test_classify_failures.test_classify_failure_value_error\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 214", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_type_error": {"nodes": [{"id": "test_classify_failures.test_classify_failure_type_error", "label": "test_classify_failure_type_error", "title": "test_classify_failures.test_classify_failure_type_error\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 223", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_assertion_error": {"nodes": [{"id": "test_classify_failures.test_classify_failure_assertion_error", "label": "test_classify_failure_assertion_error", "title": "test_classify_failures.test_classify_failure_assertion_error\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 232", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_assert_statement": {"nodes": [{"id": "test_classify_failures.test_classify_failure_assert_statement", "label": "test_classify_failure_assert_statement", "title": "test_classify_failures.test_classify_failure_assert_statement\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 241", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_failure_default_logic_mismatch": {"nodes": [{"id": "test_classify_failures.test_classify_failure_default_logic_mismatch", "label": "test_classify_failure_default_logic_mismatch", "title": "test_classify_failures.test_classify_failure_default_logic_mismatch\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 250", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_all_failures_mixed_results": {"nodes": [{"id": "test_classify_failures.test_classify_all_failures_mixed_results", "label": "test_classify_all_failures_mixed_results", "title": "test_classify_failures.test_classify_all_failures_mixed_results\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 259", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_classify_all_failures_no_failures": {"nodes": [{"id": "test_classify_failures.test_classify_all_failures_no_failures", "label": "test_classify_all_failures_no_failures", "title": "test_classify_failures.test_classify_all_failures_no_failures\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 284", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_save_classification_report": {"nodes": [{"id": "test_classify_failures.test_save_classification_report", "label": "test_save_classification_report", "title": "test_classify_failures.test_save_classification_report\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 306", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_save_classification_report_creates_latest": {"nodes": [{"id": "test_classify_failures.test_save_classification_report_creates_latest", "label": "test_save_classification_report_creates_latest", "title": "test_classify_failures.test_save_classification_report_creates_latest\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 351", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_main_function_success": {"nodes": [{"id": "test_classify_failures.test_main_function_success", "label": "test_main_function_success", "title": "test_classify_failures.test_main_function_success\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 381", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_main_function_no_failures": {"nodes": [{"id": "test_classify_failures.test_main_function_no_failures", "label": "test_main_function_no_failures", "title": "test_classify_failures.test_main_function_no_failures\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 418", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_main_function_exception": {"nodes": [{"id": "test_classify_failures.test_main_function_exception", "label": "test_main_function_exception", "title": "test_classify_failures.test_main_function_exception\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 436", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.test_main_function_exists": {"nodes": [{"id": "test_classify_failures.test_main_function_exists", "label": "test_main_function_exists", "title": "test_classify_failures.test_main_function_exists\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 446", "color": "#ff6b6b"}], "edges": []}, "test_classify_failures.path_side_effect": {"nodes": [{"id": "test_classify_failures.path_side_effect", "label": "path_side_effect", "title": "test_classify_failures.path_side_effect\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py\\nLine: 362", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - test_classify_failures
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="classifier" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.classifier', 'classifier')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>classifier</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:34
+                </div>
+            </div>
+
+            <div class="function-item" data-name="path_side_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.path_side_effect', 'path_side_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>path_side_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:362
+                </div>
+            </div>
+
+            <div class="function-item" data-name="sample_test_results" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.sample_test_results', 'sample_test_results')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>sample_test_results</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:39
+                </div>
+            </div>
+
+            <div class="function-item" data-name="temp_dir" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.temp_dir', 'temp_dir')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>temp_dir</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:27
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_all_failures_mixed_results" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_all_failures_mixed_results', 'test_classify_all_failures_mixed_results')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_all_failures_mixed_results</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:259
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_all_failures_no_failures" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_all_failures_no_failures', 'test_classify_all_failures_no_failures')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_all_failures_no_failures</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:284
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_assert_statement" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_assert_statement', 'test_classify_failure_assert_statement')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_assert_statement</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:241
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_assertion_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_assertion_error', 'test_classify_failure_assertion_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_assertion_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:232
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_default_logic_mismatch" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_default_logic_mismatch', 'test_classify_failure_default_logic_mismatch')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_default_logic_mismatch</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:250
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_import_error_collection" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_import_error_collection', 'test_classify_failure_import_error_collection')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_import_error_collection</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:123
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_import_error_module_not_found" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_import_error_module_not_found', 'test_classify_failure_import_error_module_not_found')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_import_error_module_not_found</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:178
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_indentation_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_indentation_error', 'test_classify_failure_indentation_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_indentation_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:196
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_name_error_execution" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_name_error_execution', 'test_classify_failure_name_error_execution')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_name_error_execution</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:205
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_signature_mismatch_missing_args" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_signature_mismatch_missing_args', 'test_classify_failure_signature_mismatch_missing_args')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_signature_mismatch_missing_args</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:133
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_signature_mismatch_takes_args" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_signature_mismatch_takes_args', 'test_classify_failure_signature_mismatch_takes_args')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_signature_mismatch_takes_args</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:142
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_signature_mismatch_unexpected_keyword" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_signature_mismatch_unexpected_keyword', 'test_classify_failure_signature_mismatch_unexpected_keyword')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_signature_mismatch_unexpected_keyword</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:151
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_smoke_test_basic_execution" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_smoke_test_basic_execution', 'test_classify_failure_smoke_test_basic_execution')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_smoke_test_basic_execution</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:160
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_smoke_test_with_signature_issue" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_smoke_test_with_signature_issue', 'test_classify_failure_smoke_test_with_signature_issue')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_smoke_test_with_signature_issue</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:169
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_syntax_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_syntax_error', 'test_classify_failure_syntax_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_syntax_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:187
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_type_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_type_error', 'test_classify_failure_type_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_type_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:223
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_classify_failure_value_error" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_classify_failure_value_error', 'test_classify_failure_value_error')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_classify_failure_value_error</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:214
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_init_custom_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_init_custom_directory', 'test_init_custom_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_init_custom_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:79
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_init_default" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_init_default', 'test_init_default')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_init_default</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:74
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_test_results_fallback_to_pattern" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_load_test_results_fallback_to_pattern', 'test_load_test_results_fallback_to_pattern')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_test_results_fallback_to_pattern</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:93
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_test_results_latest_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_load_test_results_latest_file', 'test_load_test_results_latest_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_test_results_latest_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:84
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_test_results_multiple_files_chooses_latest" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_load_test_results_multiple_files_chooses_latest', 'test_load_test_results_multiple_files_chooses_latest')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_test_results_multiple_files_chooses_latest</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:107
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_test_results_no_files" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_load_test_results_no_files', 'test_load_test_results_no_files')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_test_results_no_files</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:102
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_main_function_exception" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_main_function_exception', 'test_main_function_exception')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_main_function_exception</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:436
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_main_function_exists" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_main_function_exists', 'test_main_function_exists')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_main_function_exists</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:446
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_main_function_no_failures" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_main_function_no_failures', 'test_main_function_no_failures')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_main_function_no_failures</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:418
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_main_function_success" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_main_function_success', 'test_main_function_success')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_main_function_success</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:381
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_save_classification_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_save_classification_report', 'test_save_classification_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_save_classification_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:306
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_save_classification_report_creates_latest" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_classify_failures.test_save_classification_report_creates_latest', 'test_save_classification_report_creates_latest')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_save_classification_report_creates_latest</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_classify_failures.py:351
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Create a simple vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 12 }
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' }
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 100,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666'
+            }
+        };
+        
+        new vis.Network(container, data, options);
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

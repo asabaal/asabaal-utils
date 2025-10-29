@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Function Flow: calculator</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        #network {
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Function Flow Analysis</h1>
+            <h2>calculator</h2>
+        </div>
+        
+        <div class="info">
+            <strong>Module:</strong> math_ops<br>
+            <strong>File:</strong> flowscope/examples/example_v2/math_ops.py<br>
+            <strong>Control Flow Nodes:</strong> 4<br>
+            <strong>Edges:</strong> 5
+        </div>
+        
+        <div id="network"></div>
+        
+        <div class="legend">
+            <strong>Node Types:</strong><br>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90ee90;"></span>
+                Entry/Exit Points
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffd700;"></span>
+                Assignment
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffa500;"></span>
+                Conditional
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ff9999;"></span>
+                Loop
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90ee90;"></span>
+                Return
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #dda0dd;"></span>
+                Try/Except
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Create nodes
+        var nodes = [
+            {
+                id: 'node_0',
+                label: 'Enter calculator',
+                color: '#90ee90',
+                shape: 'ellipse',
+                font: {size: 14, bold: true}
+            },
+            {
+                id: 'node_1',
+                label: 'Exit calculator',
+                color: '#ff6b6b',
+                shape: 'ellipse',
+                font: {size: 14, bold: true}
+            },
+            {
+                id: 'node_2',
+                label: 'def calculator(a, b):\\n   ...',
+                title: 'def calculator(a, b):\\n   ...\\nLine: 10\\nType: statement',
+                color: '#97c2fc',
+                shape: 'box',
+                font: {"size": 12}
+            },
+            {
+                id: 'node_3',
+                label: 'a',
+                title: 'a\\nLine: 10\\nType: statement',
+                color: '#97c2fc',
+                shape: 'box',
+                font: {"size": 12}
+            },
+            {
+                id: 'node_4',
+                label: 'b',
+                title: 'b\\nLine: 10\\nType: statement',
+                color: '#97c2fc',
+                shape: 'box',
+                font: {"size": 12}
+            },
+            {
+                id: 'node_5',
+                label: 'return multiply(a, b)',
+                title: 'return multiply(a, b)\\nLine: 11\\nType: return',
+                color: '#90ee90',
+                shape: 'box',
+                font: {"size": 12}
+            }
+        ]);
+        
+        // Create edges
+        var edges = [
+            {
+                from: 'node_0',
+                to: 'node_2',
+                label: '',
+                arrows: 'to',
+                color: {"color": "#666666"},
+                font: {"size": 10, "align": "middle"}
+            },
+            {
+                from: 'node_2',
+                to: 'node_3',
+                label: '',
+                arrows: 'to',
+                color: {"color": "#666666"},
+                font: {"size": 10, "align": "middle"}
+            },
+            {
+                from: 'node_3',
+                to: 'node_4',
+                label: '',
+                arrows: 'to',
+                color: {"color": "#666666"},
+                font: {"size": 10, "align": "middle"}
+            },
+            {
+                from: 'node_4',
+                to: 'node_5',
+                label: '',
+                arrows: 'to',
+                color: {"color": "#666666"},
+                font: {"size": 10, "align": "middle"}
+            },
+            {
+                from: 'node_5',
+                to: 'node_1',
+                label: '',
+                arrows: 'to',
+                color: {"color": "#666666"},
+                font: {"size": 10, "align": "middle"}
+            }
+        ]);
+        
+        // Create network
+        var container = document.getElementById('network');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        
+        var options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 100,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200
+            },
+            nodes: {
+                borderWidth: 2,
+                borderColor: '#333333'
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier',
+                    roundness: 0.4
+                }
+            }
+        };
+        
+        var network = new vis.Network(container, data, options);
+    </script>
+</body>
+</html>

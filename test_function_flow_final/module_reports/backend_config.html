@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+    <head><title>backend_config Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.create_backend_manager", "label": "create_backend_manager", "shape": "dot", "title": "Function: backend_config.create_backend_manager\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 237\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.list_available_backends", "label": "list_available_backends", "shape": "dot", "title": "Function: backend_config.list_available_backends\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 257\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.__init__", "label": "__init__", "shape": "dot", "title": "Function: backend_config.__init__\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 31\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "backend_config._auto_detect_config", "label": "_auto_detect_config", "shape": "dot", "title": "Function: backend_config._auto_detect_config\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 41\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "backend_config._initialize_client", "label": "_initialize_client", "shape": "dot", "title": "Function: backend_config._initialize_client\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 106\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "backend_config.is_available", "label": "is_available", "shape": "dot", "title": "Function: backend_config.is_available\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 136\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.get_backend_info", "label": "get_backend_info", "shape": "dot", "title": "Function: backend_config.get_backend_info\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 140\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.call_agent", "label": "call_agent", "shape": "dot", "title": "Function: backend_config.call_agent\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 151\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.ask", "label": "ask", "shape": "dot", "title": "Function: backend_config.ask\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 166\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.ask_json", "label": "ask_json", "shape": "dot", "title": "Function: backend_config.ask_json\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 182\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "backend_config.switch_backend", "label": "switch_backend", "shape": "dot", "title": "Function: backend_config.switch_backend\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\nLine: 198\nIn-degree: 0\nOut-degree: 6"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "client.call_agent", "label": "call_agent", "shape": "dot", "title": "Function: client.call_agent\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "client.ask", "label": "ask", "shape": "dot", "title": "Function: client.ask\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "client.ask_json", "label": "ask_json", "shape": "dot", "title": "Function: client.ask_json\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "backend_config.switch_backend", "title": "backend_config.switch_backend \u2192 backend_config._initialize_client", "to": "backend_config._initialize_client"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "backend_config.switch_backend", "title": "backend_config.switch_backend \u2192 client.call_agent", "to": "client.call_agent"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "backend_config.switch_backend", "title": "backend_config.switch_backend \u2192 client.ask", "to": "client.ask"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "backend_config.switch_backend", "title": "backend_config.switch_backend \u2192 client.ask_json", "to": "client.ask_json"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "backend_config.switch_backend", "title": "backend_config.switch_backend \u2192 backend_config._auto_detect_config", "to": "backend_config._auto_detect_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "backend_config.switch_backend", "title": "backend_config.switch_backend \u2192 backend_config.is_available", "to": "backend_config.is_available"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"backend_config.create_backend_manager": {"nodes": [{"id": "backend_config.create_backend_manager", "label": "create_backend_manager", "title": "backend_config.create_backend_manager\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 237", "color": "#ff6b6b"}], "edges": []}, "backend_config.list_available_backends": {"nodes": [{"id": "backend_config.list_available_backends", "label": "list_available_backends", "title": "backend_config.list_available_backends\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 257", "color": "#ff6b6b"}], "edges": []}, "backend_config.__init__": {"nodes": [{"id": "backend_config.__init__", "label": "__init__", "title": "backend_config.__init__\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 31", "color": "#ff6b6b"}], "edges": []}, "backend_config._auto_detect_config": {"nodes": [{"id": "backend_config._auto_detect_config", "label": "_auto_detect_config", "title": "backend_config._auto_detect_config\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 41", "color": "#ff6b6b"}], "edges": []}, "backend_config._initialize_client": {"nodes": [{"id": "backend_config._initialize_client", "label": "_initialize_client", "title": "backend_config._initialize_client\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 106", "color": "#ff6b6b"}], "edges": []}, "backend_config.is_available": {"nodes": [{"id": "backend_config.is_available", "label": "is_available", "title": "backend_config.is_available\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 136", "color": "#ff6b6b"}], "edges": []}, "backend_config.get_backend_info": {"nodes": [{"id": "backend_config.get_backend_info", "label": "get_backend_info", "title": "backend_config.get_backend_info\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 140", "color": "#ff6b6b"}], "edges": []}, "backend_config.call_agent": {"nodes": [{"id": "backend_config.call_agent", "label": "call_agent", "title": "backend_config.call_agent\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 151", "color": "#ff6b6b"}], "edges": []}, "backend_config.ask": {"nodes": [{"id": "backend_config.ask", "label": "ask", "title": "backend_config.ask\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 166", "color": "#ff6b6b"}], "edges": []}, "backend_config.ask_json": {"nodes": [{"id": "backend_config.ask_json", "label": "ask_json", "title": "backend_config.ask_json\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 182", "color": "#ff6b6b"}], "edges": []}, "backend_config.switch_backend": {"nodes": [{"id": "backend_config._initialize_client", "label": "_initialize_client", "title": "backend_config._initialize_client\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 106", "color": "#ffd700"}, {"id": "backend_config.is_available", "label": "is_available", "title": "backend_config.is_available\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 136", "color": "#ffd700"}, {"id": "client.ask_json", "label": "ask_json", "title": "client.ask_json\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "client.call_agent", "label": "call_agent", "title": "client.call_agent\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "backend_config._auto_detect_config", "label": "_auto_detect_config", "title": "backend_config._auto_detect_config\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 41", "color": "#ffd700"}, {"id": "backend_config.switch_backend", "label": "switch_backend", "title": "backend_config.switch_backend\\nFile: src/asabaal_utils/shared/agentic_toolkit/backend_config.py\\nLine: 198", "color": "#ff6b6b"}, {"id": "client.ask", "label": "ask", "title": "client.ask\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "backend_config.switch_backend", "to": "client.ask"}, {"from": "backend_config.switch_backend", "to": "client.ask_json"}, {"from": "backend_config.switch_backend", "to": "client.call_agent"}, {"from": "backend_config.switch_backend", "to": "backend_config.is_available"}, {"from": "backend_config.switch_backend", "to": "backend_config._initialize_client"}, {"from": "backend_config.switch_backend", "to": "backend_config._auto_detect_config"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - backend_config
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:31
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_auto_detect_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config._auto_detect_config', '_auto_detect_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_auto_detect_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:41
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_initialize_client" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config._initialize_client', '_initialize_client')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_initialize_client</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:106
+                </div>
+            </div>
+
+            <div class="function-item" data-name="ask" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.ask', 'ask')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>ask</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:166
+                </div>
+            </div>
+
+            <div class="function-item" data-name="ask_json" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.ask_json', 'ask_json')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>ask_json</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:182
+                </div>
+            </div>
+
+            <div class="function-item" data-name="call_agent" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.call_agent', 'call_agent')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>call_agent</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:151
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_backend_manager" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.create_backend_manager', 'create_backend_manager')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_backend_manager</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:237
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_backend_info" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.get_backend_info', 'get_backend_info')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_backend_info</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:140
+                </div>
+            </div>
+
+            <div class="function-item" data-name="is_available" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.is_available', 'is_available')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>is_available</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:136
+                </div>
+            </div>
+
+            <div class="function-item" data-name="list_available_backends" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.list_available_backends', 'list_available_backends')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>list_available_backends</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:257
+                </div>
+            </div>
+
+            <div class="function-item" data-name="switch_backend" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('backend_config.switch_backend', 'switch_backend')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>switch_backend</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑6</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/shared/agentic_toolkit/backend_config.py:198
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

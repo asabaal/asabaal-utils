@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+    <head><title>stage6_filtering_combination Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.main", "label": "main", "shape": "dot", "title": "Function: stage6_filtering_combination.main\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 742\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.__init__", "label": "__init__", "shape": "dot", "title": "Function: stage6_filtering_combination.__init__\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 40\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.load_analysis_context", "label": "load_analysis_context", "shape": "dot", "title": "Function: stage6_filtering_combination.load_analysis_context\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 56\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.load_validated_issues", "label": "load_validated_issues", "shape": "dot", "title": "Function: stage6_filtering_combination.load_validated_issues\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 71\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.calculate_overall_assessment", "label": "calculate_overall_assessment", "shape": "dot", "title": "Function: stage6_filtering_combination.calculate_overall_assessment\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 115\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.format_quality_issues", "label": "format_quality_issues", "shape": "dot", "title": "Function: stage6_filtering_combination.format_quality_issues\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 183\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._categorize_issue", "label": "_categorize_issue", "shape": "dot", "title": "Function: stage6_filtering_combination._categorize_issue\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 215\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._calculate_severity", "label": "_calculate_severity", "shape": "dot", "title": "Function: stage6_filtering_combination._calculate_severity\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 228\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._estimate_effort", "label": "_estimate_effort", "shape": "dot", "title": "Function: stage6_filtering_combination._estimate_effort\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 242\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.generate_recommendations", "label": "generate_recommendations", "shape": "dot", "title": "Function: stage6_filtering_combination.generate_recommendations\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 258\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._calculate_total_effort", "label": "_calculate_total_effort", "shape": "dot", "title": "Function: stage6_filtering_combination._calculate_total_effort\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 308\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.create_technical_metrics", "label": "create_technical_metrics", "shape": "dot", "title": "Function: stage6_filtering_combination.create_technical_metrics\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 333\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.create_merge_readiness_summary", "label": "create_merge_readiness_summary", "shape": "dot", "title": "Function: stage6_filtering_combination.create_merge_readiness_summary\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 365\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._get_merge_recommendation", "label": "_get_merge_recommendation", "shape": "dot", "title": "Function: stage6_filtering_combination._get_merge_recommendation\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 419\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.test_result_combination", "label": "test_result_combination", "shape": "dot", "title": "Function: stage6_filtering_combination.test_result_combination\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 430\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.create_final_report", "label": "create_final_report", "shape": "dot", "title": "Function: stage6_filtering_combination.create_final_report\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 473\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.save_final_outputs", "label": "save_final_outputs", "shape": "dot", "title": "Function: stage6_filtering_combination.save_final_outputs\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 508\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._create_human_readable_report", "label": "_create_human_readable_report", "shape": "dot", "title": "Function: stage6_filtering_combination._create_human_readable_report\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 547\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination._create_markdown_report", "label": "_create_markdown_report", "shape": "dot", "title": "Function: stage6_filtering_combination._create_markdown_report\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 601\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "stage6_filtering_combination.run_full_stage6_test", "label": "run_full_stage6_test", "shape": "dot", "title": "Function: stage6_filtering_combination.run_full_stage6_test\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\nLine: 685\nIn-degree: 0\nOut-degree: 17"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._calculate_total_effort", "to": "stage6_filtering_combination._calculate_total_effort"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.load_analysis_context", "to": "stage6_filtering_combination.load_analysis_context"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.load_validated_issues", "to": "stage6_filtering_combination.load_validated_issues"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.calculate_overall_assessment", "to": "stage6_filtering_combination.calculate_overall_assessment"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.format_quality_issues", "to": "stage6_filtering_combination.format_quality_issues"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.generate_recommendations", "to": "stage6_filtering_combination.generate_recommendations"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.create_technical_metrics", "to": "stage6_filtering_combination.create_technical_metrics"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.create_merge_readiness_summary", "to": "stage6_filtering_combination.create_merge_readiness_summary"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._create_human_readable_report", "to": "stage6_filtering_combination._create_human_readable_report"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._create_markdown_report", "to": "stage6_filtering_combination._create_markdown_report"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._get_merge_recommendation", "to": "stage6_filtering_combination._get_merge_recommendation"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.test_result_combination", "to": "stage6_filtering_combination.test_result_combination"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.create_final_report", "to": "stage6_filtering_combination.create_final_report"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination.save_final_outputs", "to": "stage6_filtering_combination.save_final_outputs"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._categorize_issue", "to": "stage6_filtering_combination._categorize_issue"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._calculate_severity", "to": "stage6_filtering_combination._calculate_severity"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "stage6_filtering_combination.run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test \u2192 stage6_filtering_combination._estimate_effort", "to": "stage6_filtering_combination._estimate_effort"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"stage6_filtering_combination.main": {"nodes": [{"id": "stage6_filtering_combination.main", "label": "main", "title": "stage6_filtering_combination.main\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 742", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.__init__": {"nodes": [{"id": "stage6_filtering_combination.__init__", "label": "__init__", "title": "stage6_filtering_combination.__init__\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 40", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.load_analysis_context": {"nodes": [{"id": "stage6_filtering_combination.load_analysis_context", "label": "load_analysis_context", "title": "stage6_filtering_combination.load_analysis_context\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 56", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.load_validated_issues": {"nodes": [{"id": "stage6_filtering_combination.load_validated_issues", "label": "load_validated_issues", "title": "stage6_filtering_combination.load_validated_issues\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 71", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.calculate_overall_assessment": {"nodes": [{"id": "stage6_filtering_combination.calculate_overall_assessment", "label": "calculate_overall_assessment", "title": "stage6_filtering_combination.calculate_overall_assessment\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 115", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.format_quality_issues": {"nodes": [{"id": "stage6_filtering_combination.format_quality_issues", "label": "format_quality_issues", "title": "stage6_filtering_combination.format_quality_issues\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 183", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._categorize_issue": {"nodes": [{"id": "stage6_filtering_combination._categorize_issue", "label": "_categorize_issue", "title": "stage6_filtering_combination._categorize_issue\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 215", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._calculate_severity": {"nodes": [{"id": "stage6_filtering_combination._calculate_severity", "label": "_calculate_severity", "title": "stage6_filtering_combination._calculate_severity\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 228", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._estimate_effort": {"nodes": [{"id": "stage6_filtering_combination._estimate_effort", "label": "_estimate_effort", "title": "stage6_filtering_combination._estimate_effort\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 242", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.generate_recommendations": {"nodes": [{"id": "stage6_filtering_combination.generate_recommendations", "label": "generate_recommendations", "title": "stage6_filtering_combination.generate_recommendations\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 258", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._calculate_total_effort": {"nodes": [{"id": "stage6_filtering_combination._calculate_total_effort", "label": "_calculate_total_effort", "title": "stage6_filtering_combination._calculate_total_effort\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 308", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.create_technical_metrics": {"nodes": [{"id": "stage6_filtering_combination.create_technical_metrics", "label": "create_technical_metrics", "title": "stage6_filtering_combination.create_technical_metrics\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 333", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.create_merge_readiness_summary": {"nodes": [{"id": "stage6_filtering_combination.create_merge_readiness_summary", "label": "create_merge_readiness_summary", "title": "stage6_filtering_combination.create_merge_readiness_summary\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 365", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._get_merge_recommendation": {"nodes": [{"id": "stage6_filtering_combination._get_merge_recommendation", "label": "_get_merge_recommendation", "title": "stage6_filtering_combination._get_merge_recommendation\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 419", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.test_result_combination": {"nodes": [{"id": "stage6_filtering_combination.test_result_combination", "label": "test_result_combination", "title": "stage6_filtering_combination.test_result_combination\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 430", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.create_final_report": {"nodes": [{"id": "stage6_filtering_combination.create_final_report", "label": "create_final_report", "title": "stage6_filtering_combination.create_final_report\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 473", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.save_final_outputs": {"nodes": [{"id": "stage6_filtering_combination.save_final_outputs", "label": "save_final_outputs", "title": "stage6_filtering_combination.save_final_outputs\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 508", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._create_human_readable_report": {"nodes": [{"id": "stage6_filtering_combination._create_human_readable_report", "label": "_create_human_readable_report", "title": "stage6_filtering_combination._create_human_readable_report\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 547", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination._create_markdown_report": {"nodes": [{"id": "stage6_filtering_combination._create_markdown_report", "label": "_create_markdown_report", "title": "stage6_filtering_combination._create_markdown_report\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 601", "color": "#ff6b6b"}], "edges": []}, "stage6_filtering_combination.run_full_stage6_test": {"nodes": [{"id": "stage6_filtering_combination.format_quality_issues", "label": "format_quality_issues", "title": "stage6_filtering_combination.format_quality_issues\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 183", "color": "#ffd700"}, {"id": "stage6_filtering_combination.load_validated_issues", "label": "load_validated_issues", "title": "stage6_filtering_combination.load_validated_issues\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 71", "color": "#ffd700"}, {"id": "stage6_filtering_combination.generate_recommendations", "label": "generate_recommendations", "title": "stage6_filtering_combination.generate_recommendations\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 258", "color": "#ffd700"}, {"id": "stage6_filtering_combination._get_merge_recommendation", "label": "_get_merge_recommendation", "title": "stage6_filtering_combination._get_merge_recommendation\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 419", "color": "#ffd700"}, {"id": "stage6_filtering_combination._calculate_total_effort", "label": "_calculate_total_effort", "title": "stage6_filtering_combination._calculate_total_effort\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 308", "color": "#ffd700"}, {"id": "stage6_filtering_combination.create_merge_readiness_summary", "label": "create_merge_readiness_summary", "title": "stage6_filtering_combination.create_merge_readiness_summary\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 365", "color": "#ffd700"}, {"id": "stage6_filtering_combination._categorize_issue", "label": "_categorize_issue", "title": "stage6_filtering_combination._categorize_issue\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 215", "color": "#ffd700"}, {"id": "stage6_filtering_combination._estimate_effort", "label": "_estimate_effort", "title": "stage6_filtering_combination._estimate_effort\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 242", "color": "#ffd700"}, {"id": "stage6_filtering_combination.load_analysis_context", "label": "load_analysis_context", "title": "stage6_filtering_combination.load_analysis_context\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 56", "color": "#ffd700"}, {"id": "stage6_filtering_combination.calculate_overall_assessment", "label": "calculate_overall_assessment", "title": "stage6_filtering_combination.calculate_overall_assessment\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 115", "color": "#ffd700"}, {"id": "stage6_filtering_combination._create_markdown_report", "label": "_create_markdown_report", "title": "stage6_filtering_combination._create_markdown_report\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 601", "color": "#ffd700"}, {"id": "stage6_filtering_combination.create_final_report", "label": "create_final_report", "title": "stage6_filtering_combination.create_final_report\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 473", "color": "#ffd700"}, {"id": "stage6_filtering_combination._calculate_severity", "label": "_calculate_severity", "title": "stage6_filtering_combination._calculate_severity\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 228", "color": "#ffd700"}, {"id": "stage6_filtering_combination._create_human_readable_report", "label": "_create_human_readable_report", "title": "stage6_filtering_combination._create_human_readable_report\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 547", "color": "#ffd700"}, {"id": "stage6_filtering_combination.run_full_stage6_test", "label": "run_full_stage6_test", "title": "stage6_filtering_combination.run_full_stage6_test\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 685", "color": "#ff6b6b"}, {"id": "stage6_filtering_combination.save_final_outputs", "label": "save_final_outputs", "title": "stage6_filtering_combination.save_final_outputs\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 508", "color": "#ffd700"}, {"id": "stage6_filtering_combination.test_result_combination", "label": "test_result_combination", "title": "stage6_filtering_combination.test_result_combination\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 430", "color": "#ffd700"}, {"id": "stage6_filtering_combination.create_technical_metrics", "label": "create_technical_metrics", "title": "stage6_filtering_combination.create_technical_metrics\\nFile: src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py\\nLine: 333", "color": "#ffd700"}], "edges": [{"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.create_final_report"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.load_analysis_context"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._calculate_severity"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._estimate_effort"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.format_quality_issues"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.save_final_outputs"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.create_merge_readiness_summary"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._create_human_readable_report"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._create_markdown_report"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.test_result_combination"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.load_validated_issues"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.generate_recommendations"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.calculate_overall_assessment"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._calculate_total_effort"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._categorize_issue"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination.create_technical_metrics"}, {"from": "stage6_filtering_combination.run_full_stage6_test", "to": "stage6_filtering_combination._get_merge_recommendation"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - stage6_filtering_combination
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:40
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_severity" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._calculate_severity', '_calculate_severity')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_severity</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:228
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_total_effort" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._calculate_total_effort', '_calculate_total_effort')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_total_effort</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:308
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_categorize_issue" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._categorize_issue', '_categorize_issue')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_categorize_issue</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:215
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_create_human_readable_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._create_human_readable_report', '_create_human_readable_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_create_human_readable_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:547
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_create_markdown_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._create_markdown_report', '_create_markdown_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_create_markdown_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:601
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_estimate_effort" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._estimate_effort', '_estimate_effort')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_estimate_effort</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:242
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_get_merge_recommendation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination._get_merge_recommendation', '_get_merge_recommendation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_get_merge_recommendation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:419
+                </div>
+            </div>
+
+            <div class="function-item" data-name="calculate_overall_assessment" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.calculate_overall_assessment', 'calculate_overall_assessment')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>calculate_overall_assessment</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:115
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_final_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.create_final_report', 'create_final_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_final_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:473
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_merge_readiness_summary" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.create_merge_readiness_summary', 'create_merge_readiness_summary')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_merge_readiness_summary</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:365
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_technical_metrics" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.create_technical_metrics', 'create_technical_metrics')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_technical_metrics</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:333
+                </div>
+            </div>
+
+            <div class="function-item" data-name="format_quality_issues" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.format_quality_issues', 'format_quality_issues')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>format_quality_issues</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:183
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_recommendations" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.generate_recommendations', 'generate_recommendations')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_recommendations</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:258
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_analysis_context" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.load_analysis_context', 'load_analysis_context')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_analysis_context</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:56
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_validated_issues" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.load_validated_issues', 'load_validated_issues')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_validated_issues</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:71
+                </div>
+            </div>
+
+            <div class="function-item" data-name="main" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.main', 'main')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>main</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:742
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_full_stage6_test" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.run_full_stage6_test', 'run_full_stage6_test')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_full_stage6_test</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑17</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:685
+                </div>
+            </div>
+
+            <div class="function-item" data-name="save_final_outputs" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.save_final_outputs', 'save_final_outputs')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>save_final_outputs</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:508
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_result_combination" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('stage6_filtering_combination.test_result_combination', 'test_result_combination')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_result_combination</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/stages/stage6_filtering_combination.py:430
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

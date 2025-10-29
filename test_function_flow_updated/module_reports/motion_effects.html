@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html>
+    <head><title>motion_effects Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.create_effect", "label": "create_effect", "shape": "dot", "title": "Function: motion_effects.create_effect\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 619\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.__post_init__", "label": "__post_init__", "shape": "dot", "title": "Function: motion_effects.__post_init__\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 96\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.ease_in", "label": "ease_in", "shape": "dot", "title": "Function: motion_effects.ease_in\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 105\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.ease_out", "label": "ease_out", "shape": "dot", "title": "Function: motion_effects.ease_out\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 110\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.ease_in_out", "label": "ease_in_out", "shape": "dot", "title": "Function: motion_effects.ease_in_out\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 115\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.bounce", "label": "bounce", "shape": "dot", "title": "Function: motion_effects.bounce\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 122\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.elastic", "label": "elastic", "shape": "dot", "title": "Function: motion_effects.elastic\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 140\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.apply_easing", "label": "apply_easing", "shape": "dot", "title": "Function: motion_effects.apply_easing\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 149\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.get_effect_value", "label": "get_effect_value", "shape": "dot", "title": "Function: motion_effects.get_effect_value\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 167\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.__init__", "label": "__init__", "shape": "dot", "title": "Function: motion_effects.__init__\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 217\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "motion_effects.apply_effect", "label": "apply_effect", "shape": "dot", "title": "Function: motion_effects.apply_effect\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 221\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_specific_effect", "label": "_apply_specific_effect", "shape": "dot", "title": "Function: motion_effects._apply_specific_effect\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 241\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_zoom", "label": "_apply_zoom", "shape": "dot", "title": "Function: motion_effects._apply_zoom\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 338\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_pan", "label": "_apply_pan", "shape": "dot", "title": "Function: motion_effects._apply_pan\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 349\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_rotation", "label": "_apply_rotation", "shape": "dot", "title": "Function: motion_effects._apply_rotation\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 359\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_opacity", "label": "_apply_opacity", "shape": "dot", "title": "Function: motion_effects._apply_opacity\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 370\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_motion_blur", "label": "_apply_motion_blur", "shape": "dot", "title": "Function: motion_effects._apply_motion_blur\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 382\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_wave", "label": "_apply_wave", "shape": "dot", "title": "Function: motion_effects._apply_wave\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 406\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_color_shift", "label": "_apply_color_shift", "shape": "dot", "title": "Function: motion_effects._apply_color_shift\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 428\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_brightness", "label": "_apply_brightness", "shape": "dot", "title": "Function: motion_effects._apply_brightness\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 440\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_digital_glitch", "label": "_apply_digital_glitch", "shape": "dot", "title": "Function: motion_effects._apply_digital_glitch\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 444\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_neon_glow", "label": "_apply_neon_glow", "shape": "dot", "title": "Function: motion_effects._apply_neon_glow\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 469\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_energy_burst", "label": "_apply_energy_burst", "shape": "dot", "title": "Function: motion_effects._apply_energy_burst\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 495\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_liquid_warp", "label": "_apply_liquid_warp", "shape": "dot", "title": "Function: motion_effects._apply_liquid_warp\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 518\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_shatter_effect", "label": "_apply_shatter_effect", "shape": "dot", "title": "Function: motion_effects._apply_shatter_effect\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 538\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_portal_swirl", "label": "_apply_portal_swirl", "shape": "dot", "title": "Function: motion_effects._apply_portal_swirl\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 554\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_hologram_flicker", "label": "_apply_hologram_flicker", "shape": "dot", "title": "Function: motion_effects._apply_hologram_flicker\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 582\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "motion_effects._apply_kaleidoscope", "label": "_apply_kaleidoscope", "shape": "dot", "title": "Function: motion_effects._apply_kaleidoscope\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\nLine: 598\nIn-degree: 1\nOut-degree: 17"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_specific_effect", "to": "motion_effects._apply_specific_effect"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_zoom", "to": "motion_effects._apply_zoom"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_pan", "to": "motion_effects._apply_pan"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_rotation", "to": "motion_effects._apply_rotation"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_opacity", "to": "motion_effects._apply_opacity"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_motion_blur", "to": "motion_effects._apply_motion_blur"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_wave", "to": "motion_effects._apply_wave"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_color_shift", "to": "motion_effects._apply_color_shift"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_brightness", "to": "motion_effects._apply_brightness"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_digital_glitch", "to": "motion_effects._apply_digital_glitch"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_shatter_effect", "to": "motion_effects._apply_shatter_effect"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_liquid_warp", "to": "motion_effects._apply_liquid_warp"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_portal_swirl", "to": "motion_effects._apply_portal_swirl"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_neon_glow", "to": "motion_effects._apply_neon_glow"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_hologram_flicker", "to": "motion_effects._apply_hologram_flicker"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_energy_burst", "to": "motion_effects._apply_energy_burst"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "motion_effects._apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope \u2192 motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_kaleidoscope"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"motion_effects.create_effect": {"nodes": [{"id": "motion_effects.create_effect", "label": "create_effect", "title": "motion_effects.create_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 619", "color": "#ff6b6b"}], "edges": []}, "motion_effects.__post_init__": {"nodes": [{"id": "motion_effects.__post_init__", "label": "__post_init__", "title": "motion_effects.__post_init__\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 96", "color": "#ff6b6b"}], "edges": []}, "motion_effects.ease_in": {"nodes": [{"id": "motion_effects.ease_in", "label": "ease_in", "title": "motion_effects.ease_in\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 105", "color": "#ff6b6b"}], "edges": []}, "motion_effects.ease_out": {"nodes": [{"id": "motion_effects.ease_out", "label": "ease_out", "title": "motion_effects.ease_out\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 110", "color": "#ff6b6b"}], "edges": []}, "motion_effects.ease_in_out": {"nodes": [{"id": "motion_effects.ease_in_out", "label": "ease_in_out", "title": "motion_effects.ease_in_out\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 115", "color": "#ff6b6b"}], "edges": []}, "motion_effects.bounce": {"nodes": [{"id": "motion_effects.bounce", "label": "bounce", "title": "motion_effects.bounce\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 122", "color": "#ff6b6b"}], "edges": []}, "motion_effects.elastic": {"nodes": [{"id": "motion_effects.elastic", "label": "elastic", "title": "motion_effects.elastic\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 140", "color": "#ff6b6b"}], "edges": []}, "motion_effects.apply_easing": {"nodes": [{"id": "motion_effects.apply_easing", "label": "apply_easing", "title": "motion_effects.apply_easing\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 149", "color": "#ff6b6b"}], "edges": []}, "motion_effects.get_effect_value": {"nodes": [{"id": "motion_effects.get_effect_value", "label": "get_effect_value", "title": "motion_effects.get_effect_value\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 167", "color": "#ff6b6b"}], "edges": []}, "motion_effects.__init__": {"nodes": [{"id": "motion_effects.__init__", "label": "__init__", "title": "motion_effects.__init__\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 217", "color": "#ff6b6b"}], "edges": []}, "motion_effects.apply_effect": {"nodes": [{"id": "motion_effects.apply_effect", "label": "apply_effect", "title": "motion_effects.apply_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 221", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_specific_effect": {"nodes": [{"id": "motion_effects._apply_specific_effect", "label": "_apply_specific_effect", "title": "motion_effects._apply_specific_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 241", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_zoom": {"nodes": [{"id": "motion_effects._apply_zoom", "label": "_apply_zoom", "title": "motion_effects._apply_zoom\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 338", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_pan": {"nodes": [{"id": "motion_effects._apply_pan", "label": "_apply_pan", "title": "motion_effects._apply_pan\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 349", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_rotation": {"nodes": [{"id": "motion_effects._apply_rotation", "label": "_apply_rotation", "title": "motion_effects._apply_rotation\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 359", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_opacity": {"nodes": [{"id": "motion_effects._apply_opacity", "label": "_apply_opacity", "title": "motion_effects._apply_opacity\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 370", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_motion_blur": {"nodes": [{"id": "motion_effects._apply_motion_blur", "label": "_apply_motion_blur", "title": "motion_effects._apply_motion_blur\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 382", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_wave": {"nodes": [{"id": "motion_effects._apply_wave", "label": "_apply_wave", "title": "motion_effects._apply_wave\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 406", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_color_shift": {"nodes": [{"id": "motion_effects._apply_color_shift", "label": "_apply_color_shift", "title": "motion_effects._apply_color_shift\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 428", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_brightness": {"nodes": [{"id": "motion_effects._apply_brightness", "label": "_apply_brightness", "title": "motion_effects._apply_brightness\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 440", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_digital_glitch": {"nodes": [{"id": "motion_effects._apply_digital_glitch", "label": "_apply_digital_glitch", "title": "motion_effects._apply_digital_glitch\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 444", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_neon_glow": {"nodes": [{"id": "motion_effects._apply_neon_glow", "label": "_apply_neon_glow", "title": "motion_effects._apply_neon_glow\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 469", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_energy_burst": {"nodes": [{"id": "motion_effects._apply_energy_burst", "label": "_apply_energy_burst", "title": "motion_effects._apply_energy_burst\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 495", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_liquid_warp": {"nodes": [{"id": "motion_effects._apply_liquid_warp", "label": "_apply_liquid_warp", "title": "motion_effects._apply_liquid_warp\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 518", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_shatter_effect": {"nodes": [{"id": "motion_effects._apply_shatter_effect", "label": "_apply_shatter_effect", "title": "motion_effects._apply_shatter_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 538", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_portal_swirl": {"nodes": [{"id": "motion_effects._apply_portal_swirl", "label": "_apply_portal_swirl", "title": "motion_effects._apply_portal_swirl\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 554", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_hologram_flicker": {"nodes": [{"id": "motion_effects._apply_hologram_flicker", "label": "_apply_hologram_flicker", "title": "motion_effects._apply_hologram_flicker\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 582", "color": "#ff6b6b"}], "edges": []}, "motion_effects._apply_kaleidoscope": {"nodes": [{"id": "motion_effects._apply_rotation", "label": "_apply_rotation", "title": "motion_effects._apply_rotation\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 359", "color": "#ffd700"}, {"id": "motion_effects._apply_pan", "label": "_apply_pan", "title": "motion_effects._apply_pan\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 349", "color": "#ffd700"}, {"id": "motion_effects._apply_kaleidoscope", "label": "_apply_kaleidoscope", "title": "motion_effects._apply_kaleidoscope\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 598", "color": "#ff6b6b"}, {"id": "motion_effects._apply_specific_effect", "label": "_apply_specific_effect", "title": "motion_effects._apply_specific_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 241", "color": "#ffd700"}, {"id": "motion_effects._apply_wave", "label": "_apply_wave", "title": "motion_effects._apply_wave\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 406", "color": "#ffd700"}, {"id": "motion_effects._apply_brightness", "label": "_apply_brightness", "title": "motion_effects._apply_brightness\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 440", "color": "#ffd700"}, {"id": "motion_effects._apply_hologram_flicker", "label": "_apply_hologram_flicker", "title": "motion_effects._apply_hologram_flicker\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 582", "color": "#ffd700"}, {"id": "motion_effects._apply_energy_burst", "label": "_apply_energy_burst", "title": "motion_effects._apply_energy_burst\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 495", "color": "#ffd700"}, {"id": "motion_effects._apply_shatter_effect", "label": "_apply_shatter_effect", "title": "motion_effects._apply_shatter_effect\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 538", "color": "#ffd700"}, {"id": "motion_effects._apply_liquid_warp", "label": "_apply_liquid_warp", "title": "motion_effects._apply_liquid_warp\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 518", "color": "#ffd700"}, {"id": "motion_effects._apply_digital_glitch", "label": "_apply_digital_glitch", "title": "motion_effects._apply_digital_glitch\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 444", "color": "#ffd700"}, {"id": "motion_effects._apply_motion_blur", "label": "_apply_motion_blur", "title": "motion_effects._apply_motion_blur\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 382", "color": "#ffd700"}, {"id": "motion_effects._apply_portal_swirl", "label": "_apply_portal_swirl", "title": "motion_effects._apply_portal_swirl\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 554", "color": "#ffd700"}, {"id": "motion_effects._apply_zoom", "label": "_apply_zoom", "title": "motion_effects._apply_zoom\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 338", "color": "#ffd700"}, {"id": "motion_effects._apply_color_shift", "label": "_apply_color_shift", "title": "motion_effects._apply_color_shift\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 428", "color": "#ffd700"}, {"id": "motion_effects._apply_neon_glow", "label": "_apply_neon_glow", "title": "motion_effects._apply_neon_glow\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 469", "color": "#ffd700"}, {"id": "motion_effects._apply_opacity", "label": "_apply_opacity", "title": "motion_effects._apply_opacity\\nFile: src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py\\nLine: 370", "color": "#ffd700"}], "edges": [{"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_rotation"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_wave"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_color_shift"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_motion_blur"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_brightness"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_shatter_effect"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_pan"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_opacity"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_neon_glow"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_kaleidoscope"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_digital_glitch"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_liquid_warp"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_zoom"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_energy_burst"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_specific_effect"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_hologram_flicker"}, {"from": "motion_effects._apply_kaleidoscope", "to": "motion_effects._apply_portal_swirl"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - motion_effects
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:217
+                </div>
+            </div>
+
+            <div class="function-item" data-name="__post_init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.__post_init__', '__post_init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__post_init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:96
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_brightness" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_brightness', '_apply_brightness')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_brightness</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:440
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_color_shift" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_color_shift', '_apply_color_shift')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_color_shift</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:428
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_digital_glitch" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_digital_glitch', '_apply_digital_glitch')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_digital_glitch</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:444
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_energy_burst" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_energy_burst', '_apply_energy_burst')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_energy_burst</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:495
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_hologram_flicker" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_hologram_flicker', '_apply_hologram_flicker')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_hologram_flicker</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:582
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_kaleidoscope" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_kaleidoscope', '_apply_kaleidoscope')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_kaleidoscope</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑17</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:598
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_liquid_warp" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_liquid_warp', '_apply_liquid_warp')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_liquid_warp</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:518
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_motion_blur" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_motion_blur', '_apply_motion_blur')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_motion_blur</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:382
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_neon_glow" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_neon_glow', '_apply_neon_glow')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_neon_glow</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:469
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_opacity" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_opacity', '_apply_opacity')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_opacity</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:370
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_pan" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_pan', '_apply_pan')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_pan</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:349
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_portal_swirl" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_portal_swirl', '_apply_portal_swirl')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_portal_swirl</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:554
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_rotation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_rotation', '_apply_rotation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_rotation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:359
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_shatter_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_shatter_effect', '_apply_shatter_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_shatter_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:538
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_specific_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_specific_effect', '_apply_specific_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_specific_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:241
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_wave" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_wave', '_apply_wave')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_wave</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:406
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_zoom" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects._apply_zoom', '_apply_zoom')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_zoom</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:338
+                </div>
+            </div>
+
+            <div class="function-item" data-name="apply_easing" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.apply_easing', 'apply_easing')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>apply_easing</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:149
+                </div>
+            </div>
+
+            <div class="function-item" data-name="apply_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.apply_effect', 'apply_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>apply_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:221
+                </div>
+            </div>
+
+            <div class="function-item" data-name="bounce" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.bounce', 'bounce')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>bounce</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:122
+                </div>
+            </div>
+
+            <div class="function-item" data-name="create_effect" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.create_effect', 'create_effect')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>create_effect</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:619
+                </div>
+            </div>
+
+            <div class="function-item" data-name="ease_in" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.ease_in', 'ease_in')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>ease_in</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:105
+                </div>
+            </div>
+
+            <div class="function-item" data-name="ease_in_out" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.ease_in_out', 'ease_in_out')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>ease_in_out</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:115
+                </div>
+            </div>
+
+            <div class="function-item" data-name="ease_out" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.ease_out', 'ease_out')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>ease_out</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:110
+                </div>
+            </div>
+
+            <div class="function-item" data-name="elastic" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.elastic', 'elastic')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>elastic</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:140
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_effect_value" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('motion_effects.get_effect_value', 'get_effect_value')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_effect_value</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/effects/motion_effects.py:167
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

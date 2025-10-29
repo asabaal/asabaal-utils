@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html>
+    <head><title>transcript_processors Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.enhance_transcript", "label": "enhance_transcript", "shape": "dot", "title": "Function: transcript_processors.enhance_transcript\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1876\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.extract_enhanced_clips", "label": "extract_enhanced_clips", "shape": "dot", "title": "Function: transcript_processors.extract_enhanced_clips\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1905\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.__init__", "label": "__init__", "shape": "dot", "title": "Function: transcript_processors.__init__\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1644\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._compile_patterns", "label": "_compile_patterns", "shape": "dot", "title": "Function: transcript_processors._compile_patterns\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1205\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.process", "label": "process", "shape": "dot", "title": "Function: transcript_processors.process\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1662\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._normalize_text", "label": "_normalize_text", "shape": "dot", "title": "Function: transcript_processors._normalize_text\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1282\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._restore_line_breaks", "label": "_restore_line_breaks", "shape": "dot", "title": "Function: transcript_processors._restore_line_breaks\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 386\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._map_position_to_original", "label": "_map_position_to_original", "shape": "dot", "title": "Function: transcript_processors._map_position_to_original\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 392\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._process_text", "label": "_process_text", "shape": "dot", "title": "Function: transcript_processors._process_text\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 401\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._create_enhancement_info", "label": "_create_enhancement_info", "shape": "dot", "title": "Function: transcript_processors._create_enhancement_info\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 436\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_fillers", "label": "_identify_fillers", "shape": "dot", "title": "Function: transcript_processors._identify_fillers\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 233\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._apply_context_rules", "label": "_apply_context_rules", "shape": "dot", "title": "Function: transcript_processors._apply_context_rules\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 255\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.find_filler_words", "label": "find_filler_words", "shape": "dot", "title": "Function: transcript_processors.find_filler_words\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 278\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._find_token_position", "label": "_find_token_position", "shape": "dot", "title": "Function: transcript_processors._find_token_position\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 490\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_repetitions", "label": "_identify_repetitions", "shape": "dot", "title": "Function: transcript_processors._identify_repetitions\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 519\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._is_low_information_phrase", "label": "_is_low_information_phrase", "shape": "dot", "title": "Function: transcript_processors._is_low_information_phrase\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 598\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._group_positions", "label": "_group_positions", "shape": "dot", "title": "Function: transcript_processors._group_positions\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 604\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._remove_overlapping_repetitions", "label": "_remove_overlapping_repetitions", "shape": "dot", "title": "Function: transcript_processors._remove_overlapping_repetitions\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 638\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._apply_strategy", "label": "_apply_strategy", "shape": "dot", "title": "Function: transcript_processors._apply_strategy\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 686\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._apply_first_instance_strategy", "label": "_apply_first_instance_strategy", "shape": "dot", "title": "Function: transcript_processors._apply_first_instance_strategy\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 715\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._apply_cleanest_instance_strategy", "label": "_apply_cleanest_instance_strategy", "shape": "dot", "title": "Function: transcript_processors._apply_cleanest_instance_strategy\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 729\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._calculate_cleanliness_score", "label": "_calculate_cleanliness_score", "shape": "dot", "title": "Function: transcript_processors._calculate_cleanliness_score\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 749\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._apply_combine_strategy", "label": "_apply_combine_strategy", "shape": "dot", "title": "Function: transcript_processors._apply_combine_strategy\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 776\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.find_repetitions", "label": "find_repetitions", "shape": "dot", "title": "Function: transcript_processors.find_repetitions\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 807\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._initialize_nlp", "label": "_initialize_nlp", "shape": "dot", "title": "Function: transcript_processors._initialize_nlp\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 861\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_boundaries", "label": "_identify_boundaries", "shape": "dot", "title": "Function: transcript_processors._identify_boundaries\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 949\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_boundaries_spacy", "label": "_identify_boundaries_spacy", "shape": "dot", "title": "Function: transcript_processors._identify_boundaries_spacy\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 961\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._calculate_sentence_confidence", "label": "_calculate_sentence_confidence", "shape": "dot", "title": "Function: transcript_processors._calculate_sentence_confidence\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 978\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_boundaries_rules", "label": "_identify_boundaries_rules", "shape": "dot", "title": "Function: transcript_processors._identify_boundaries_rules\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 993\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._calculate_boundary_confidence", "label": "_calculate_boundary_confidence", "shape": "dot", "title": "Function: transcript_processors._calculate_boundary_confidence\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1029\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._mark_boundaries", "label": "_mark_boundaries", "shape": "dot", "title": "Function: transcript_processors._mark_boundaries\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1080\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._optimize_clip_boundaries", "label": "_optimize_clip_boundaries", "shape": "dot", "title": "Function: transcript_processors._optimize_clip_boundaries\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1104\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_semantic_units", "label": "_identify_semantic_units", "shape": "dot", "title": "Function: transcript_processors._identify_semantic_units\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1290\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_list_patterns", "label": "_identify_list_patterns", "shape": "dot", "title": "Function: transcript_processors._identify_list_patterns\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1322\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_question_answer_pairs", "label": "_identify_question_answer_pairs", "shape": "dot", "title": "Function: transcript_processors._identify_question_answer_pairs\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1367\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._identify_explanation_sequences", "label": "_identify_explanation_sequences", "shape": "dot", "title": "Function: transcript_processors._identify_explanation_sequences\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1408\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._detect_topic_changes", "label": "_detect_topic_changes", "shape": "dot", "title": "Function: transcript_processors._detect_topic_changes\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1445\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._merge_overlapping_units", "label": "_merge_overlapping_units", "shape": "dot", "title": "Function: transcript_processors._merge_overlapping_units\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1461\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._enforce_max_length", "label": "_enforce_max_length", "shape": "dot", "title": "Function: transcript_processors._enforce_max_length\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1489\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._adjust_boundaries", "label": "_adjust_boundaries", "shape": "dot", "title": "Function: transcript_processors._adjust_boundaries\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1542\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._mark_semantic_units", "label": "_mark_semantic_units", "shape": "dot", "title": "Function: transcript_processors._mark_semantic_units\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1583\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._mark_adjusted_boundaries", "label": "_mark_adjusted_boundaries", "shape": "dot", "title": "Function: transcript_processors._mark_adjusted_boundaries\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1608\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.analyze_enhancements", "label": "analyze_enhancements", "shape": "dot", "title": "Function: transcript_processors.analyze_enhancements\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1721\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.generate_report", "label": "generate_report", "shape": "dot", "title": "Function: transcript_processors.generate_report\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1752\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._count_filler_words", "label": "_count_filler_words", "shape": "dot", "title": "Function: transcript_processors._count_filler_words\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1822\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._estimate_repetitions_handled", "label": "_estimate_repetitions_handled", "shape": "dot", "title": "Function: transcript_processors._estimate_repetitions_handled\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1830\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors._calculate_readability_improvement", "label": "_calculate_readability_improvement", "shape": "dot", "title": "Function: transcript_processors._calculate_readability_improvement\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1844\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.avg_sentence_length", "label": "avg_sentence_length", "shape": "dot", "title": "Function: transcript_processors.avg_sentence_length\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1849\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.avg_word_length", "label": "avg_word_length", "shape": "dot", "title": "Function: transcript_processors.avg_word_length\nFile: src/asabaal_utils/video_processing/transcript_processors.py\nLine: 1854\nIn-degree: 0\nOut-degree: 42"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "transcript_processors.nlp", "label": "nlp", "shape": "dot", "title": "Function: transcript_processors.nlp\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._compile_patterns", "to": "transcript_processors._compile_patterns"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_fillers", "to": "transcript_processors._identify_fillers"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._normalize_text", "to": "transcript_processors._normalize_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._process_text", "to": "transcript_processors._process_text"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_repetitions", "to": "transcript_processors._identify_repetitions"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._apply_strategy", "to": "transcript_processors._apply_strategy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._remove_overlapping_repetitions", "to": "transcript_processors._remove_overlapping_repetitions"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._initialize_nlp", "to": "transcript_processors._initialize_nlp"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors.nlp", "to": "transcript_processors.nlp"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._merge_overlapping_units", "to": "transcript_processors._merge_overlapping_units"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._enforce_max_length", "to": "transcript_processors._enforce_max_length"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._restore_line_breaks", "to": "transcript_processors._restore_line_breaks"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._create_enhancement_info", "to": "transcript_processors._create_enhancement_info"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._map_position_to_original", "to": "transcript_processors._map_position_to_original"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._calculate_cleanliness_score", "to": "transcript_processors._calculate_cleanliness_score"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_boundaries", "to": "transcript_processors._identify_boundaries"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._mark_boundaries", "to": "transcript_processors._mark_boundaries"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_boundaries_spacy", "to": "transcript_processors._identify_boundaries_spacy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_boundaries_rules", "to": "transcript_processors._identify_boundaries_rules"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._calculate_sentence_confidence", "to": "transcript_processors._calculate_sentence_confidence"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_semantic_units", "to": "transcript_processors._identify_semantic_units"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_list_patterns", "to": "transcript_processors._identify_list_patterns"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_question_answer_pairs", "to": "transcript_processors._identify_question_answer_pairs"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._identify_explanation_sequences", "to": "transcript_processors._identify_explanation_sequences"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._detect_topic_changes", "to": "transcript_processors._detect_topic_changes"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors.generate_report", "to": "transcript_processors.generate_report"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._estimate_repetitions_handled", "to": "transcript_processors._estimate_repetitions_handled"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._count_filler_words", "to": "transcript_processors._count_filler_words"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._is_low_information_phrase", "to": "transcript_processors._is_low_information_phrase"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._apply_first_instance_strategy", "to": "transcript_processors._apply_first_instance_strategy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._calculate_boundary_confidence", "to": "transcript_processors._calculate_boundary_confidence"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._adjust_boundaries", "to": "transcript_processors._adjust_boundaries"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._mark_adjusted_boundaries", "to": "transcript_processors._mark_adjusted_boundaries"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._mark_semantic_units", "to": "transcript_processors._mark_semantic_units"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._calculate_readability_improvement", "to": "transcript_processors._calculate_readability_improvement"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors.analyze_enhancements", "to": "transcript_processors.analyze_enhancements"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._apply_context_rules", "to": "transcript_processors._apply_context_rules"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._find_token_position", "to": "transcript_processors._find_token_position"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._group_positions", "to": "transcript_processors._group_positions"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._apply_cleanest_instance_strategy", "to": "transcript_processors._apply_cleanest_instance_strategy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._apply_combine_strategy", "to": "transcript_processors._apply_combine_strategy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "transcript_processors.avg_word_length", "title": "transcript_processors.avg_word_length \u2192 transcript_processors._optimize_clip_boundaries", "to": "transcript_processors._optimize_clip_boundaries"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"transcript_processors.enhance_transcript": {"nodes": [{"id": "transcript_processors.enhance_transcript", "label": "enhance_transcript", "title": "transcript_processors.enhance_transcript\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1876", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.extract_enhanced_clips": {"nodes": [{"id": "transcript_processors.extract_enhanced_clips", "label": "extract_enhanced_clips", "title": "transcript_processors.extract_enhanced_clips\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1905", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.__init__": {"nodes": [{"id": "transcript_processors.__init__", "label": "__init__", "title": "transcript_processors.__init__\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1644", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._compile_patterns": {"nodes": [{"id": "transcript_processors._compile_patterns", "label": "_compile_patterns", "title": "transcript_processors._compile_patterns\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1205", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.process": {"nodes": [{"id": "transcript_processors.process", "label": "process", "title": "transcript_processors.process\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1662", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._normalize_text": {"nodes": [{"id": "transcript_processors._normalize_text", "label": "_normalize_text", "title": "transcript_processors._normalize_text\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1282", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._restore_line_breaks": {"nodes": [{"id": "transcript_processors._restore_line_breaks", "label": "_restore_line_breaks", "title": "transcript_processors._restore_line_breaks\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 386", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._map_position_to_original": {"nodes": [{"id": "transcript_processors._map_position_to_original", "label": "_map_position_to_original", "title": "transcript_processors._map_position_to_original\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 392", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._process_text": {"nodes": [{"id": "transcript_processors._process_text", "label": "_process_text", "title": "transcript_processors._process_text\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 401", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._create_enhancement_info": {"nodes": [{"id": "transcript_processors._create_enhancement_info", "label": "_create_enhancement_info", "title": "transcript_processors._create_enhancement_info\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 436", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_fillers": {"nodes": [{"id": "transcript_processors._identify_fillers", "label": "_identify_fillers", "title": "transcript_processors._identify_fillers\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 233", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._apply_context_rules": {"nodes": [{"id": "transcript_processors._apply_context_rules", "label": "_apply_context_rules", "title": "transcript_processors._apply_context_rules\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 255", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.find_filler_words": {"nodes": [{"id": "transcript_processors.find_filler_words", "label": "find_filler_words", "title": "transcript_processors.find_filler_words\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 278", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._find_token_position": {"nodes": [{"id": "transcript_processors._find_token_position", "label": "_find_token_position", "title": "transcript_processors._find_token_position\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 490", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_repetitions": {"nodes": [{"id": "transcript_processors._identify_repetitions", "label": "_identify_repetitions", "title": "transcript_processors._identify_repetitions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 519", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._is_low_information_phrase": {"nodes": [{"id": "transcript_processors._is_low_information_phrase", "label": "_is_low_information_phrase", "title": "transcript_processors._is_low_information_phrase\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 598", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._group_positions": {"nodes": [{"id": "transcript_processors._group_positions", "label": "_group_positions", "title": "transcript_processors._group_positions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 604", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._remove_overlapping_repetitions": {"nodes": [{"id": "transcript_processors._remove_overlapping_repetitions", "label": "_remove_overlapping_repetitions", "title": "transcript_processors._remove_overlapping_repetitions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 638", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._apply_strategy": {"nodes": [{"id": "transcript_processors._apply_strategy", "label": "_apply_strategy", "title": "transcript_processors._apply_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 686", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._apply_first_instance_strategy": {"nodes": [{"id": "transcript_processors._apply_first_instance_strategy", "label": "_apply_first_instance_strategy", "title": "transcript_processors._apply_first_instance_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 715", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._apply_cleanest_instance_strategy": {"nodes": [{"id": "transcript_processors._apply_cleanest_instance_strategy", "label": "_apply_cleanest_instance_strategy", "title": "transcript_processors._apply_cleanest_instance_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 729", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._calculate_cleanliness_score": {"nodes": [{"id": "transcript_processors._calculate_cleanliness_score", "label": "_calculate_cleanliness_score", "title": "transcript_processors._calculate_cleanliness_score\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 749", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._apply_combine_strategy": {"nodes": [{"id": "transcript_processors._apply_combine_strategy", "label": "_apply_combine_strategy", "title": "transcript_processors._apply_combine_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 776", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.find_repetitions": {"nodes": [{"id": "transcript_processors.find_repetitions", "label": "find_repetitions", "title": "transcript_processors.find_repetitions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 807", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._initialize_nlp": {"nodes": [{"id": "transcript_processors._initialize_nlp", "label": "_initialize_nlp", "title": "transcript_processors._initialize_nlp\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 861", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_boundaries": {"nodes": [{"id": "transcript_processors._identify_boundaries", "label": "_identify_boundaries", "title": "transcript_processors._identify_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 949", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_boundaries_spacy": {"nodes": [{"id": "transcript_processors._identify_boundaries_spacy", "label": "_identify_boundaries_spacy", "title": "transcript_processors._identify_boundaries_spacy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 961", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._calculate_sentence_confidence": {"nodes": [{"id": "transcript_processors._calculate_sentence_confidence", "label": "_calculate_sentence_confidence", "title": "transcript_processors._calculate_sentence_confidence\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 978", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_boundaries_rules": {"nodes": [{"id": "transcript_processors._identify_boundaries_rules", "label": "_identify_boundaries_rules", "title": "transcript_processors._identify_boundaries_rules\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 993", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._calculate_boundary_confidence": {"nodes": [{"id": "transcript_processors._calculate_boundary_confidence", "label": "_calculate_boundary_confidence", "title": "transcript_processors._calculate_boundary_confidence\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1029", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._mark_boundaries": {"nodes": [{"id": "transcript_processors._mark_boundaries", "label": "_mark_boundaries", "title": "transcript_processors._mark_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1080", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._optimize_clip_boundaries": {"nodes": [{"id": "transcript_processors._optimize_clip_boundaries", "label": "_optimize_clip_boundaries", "title": "transcript_processors._optimize_clip_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1104", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_semantic_units": {"nodes": [{"id": "transcript_processors._identify_semantic_units", "label": "_identify_semantic_units", "title": "transcript_processors._identify_semantic_units\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1290", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_list_patterns": {"nodes": [{"id": "transcript_processors._identify_list_patterns", "label": "_identify_list_patterns", "title": "transcript_processors._identify_list_patterns\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1322", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_question_answer_pairs": {"nodes": [{"id": "transcript_processors._identify_question_answer_pairs", "label": "_identify_question_answer_pairs", "title": "transcript_processors._identify_question_answer_pairs\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1367", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._identify_explanation_sequences": {"nodes": [{"id": "transcript_processors._identify_explanation_sequences", "label": "_identify_explanation_sequences", "title": "transcript_processors._identify_explanation_sequences\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1408", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._detect_topic_changes": {"nodes": [{"id": "transcript_processors._detect_topic_changes", "label": "_detect_topic_changes", "title": "transcript_processors._detect_topic_changes\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1445", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._merge_overlapping_units": {"nodes": [{"id": "transcript_processors._merge_overlapping_units", "label": "_merge_overlapping_units", "title": "transcript_processors._merge_overlapping_units\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1461", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._enforce_max_length": {"nodes": [{"id": "transcript_processors._enforce_max_length", "label": "_enforce_max_length", "title": "transcript_processors._enforce_max_length\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1489", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._adjust_boundaries": {"nodes": [{"id": "transcript_processors._adjust_boundaries", "label": "_adjust_boundaries", "title": "transcript_processors._adjust_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1542", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._mark_semantic_units": {"nodes": [{"id": "transcript_processors._mark_semantic_units", "label": "_mark_semantic_units", "title": "transcript_processors._mark_semantic_units\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1583", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._mark_adjusted_boundaries": {"nodes": [{"id": "transcript_processors._mark_adjusted_boundaries", "label": "_mark_adjusted_boundaries", "title": "transcript_processors._mark_adjusted_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1608", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.analyze_enhancements": {"nodes": [{"id": "transcript_processors.analyze_enhancements", "label": "analyze_enhancements", "title": "transcript_processors.analyze_enhancements\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1721", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.generate_report": {"nodes": [{"id": "transcript_processors.generate_report", "label": "generate_report", "title": "transcript_processors.generate_report\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1752", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._count_filler_words": {"nodes": [{"id": "transcript_processors._count_filler_words", "label": "_count_filler_words", "title": "transcript_processors._count_filler_words\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1822", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._estimate_repetitions_handled": {"nodes": [{"id": "transcript_processors._estimate_repetitions_handled", "label": "_estimate_repetitions_handled", "title": "transcript_processors._estimate_repetitions_handled\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1830", "color": "#ff6b6b"}], "edges": []}, "transcript_processors._calculate_readability_improvement": {"nodes": [{"id": "transcript_processors._calculate_readability_improvement", "label": "_calculate_readability_improvement", "title": "transcript_processors._calculate_readability_improvement\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1844", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.avg_sentence_length": {"nodes": [{"id": "transcript_processors.avg_sentence_length", "label": "avg_sentence_length", "title": "transcript_processors.avg_sentence_length\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1849", "color": "#ff6b6b"}], "edges": []}, "transcript_processors.avg_word_length": {"nodes": [{"id": "transcript_processors._remove_overlapping_repetitions", "label": "_remove_overlapping_repetitions", "title": "transcript_processors._remove_overlapping_repetitions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 638", "color": "#ffd700"}, {"id": "transcript_processors._initialize_nlp", "label": "_initialize_nlp", "title": "transcript_processors._initialize_nlp\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 861", "color": "#ffd700"}, {"id": "transcript_processors._apply_first_instance_strategy", "label": "_apply_first_instance_strategy", "title": "transcript_processors._apply_first_instance_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 715", "color": "#ffd700"}, {"id": "transcript_processors._estimate_repetitions_handled", "label": "_estimate_repetitions_handled", "title": "transcript_processors._estimate_repetitions_handled\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1830", "color": "#ffd700"}, {"id": "transcript_processors._apply_combine_strategy", "label": "_apply_combine_strategy", "title": "transcript_processors._apply_combine_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 776", "color": "#ffd700"}, {"id": "transcript_processors._is_low_information_phrase", "label": "_is_low_information_phrase", "title": "transcript_processors._is_low_information_phrase\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 598", "color": "#ffd700"}, {"id": "transcript_processors._identify_repetitions", "label": "_identify_repetitions", "title": "transcript_processors._identify_repetitions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 519", "color": "#ffd700"}, {"id": "transcript_processors._merge_overlapping_units", "label": "_merge_overlapping_units", "title": "transcript_processors._merge_overlapping_units\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1461", "color": "#ffd700"}, {"id": "transcript_processors._compile_patterns", "label": "_compile_patterns", "title": "transcript_processors._compile_patterns\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1205", "color": "#ffd700"}, {"id": "transcript_processors.avg_word_length", "label": "avg_word_length", "title": "transcript_processors.avg_word_length\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1854", "color": "#ff6b6b"}, {"id": "transcript_processors._process_text", "label": "_process_text", "title": "transcript_processors._process_text\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 401", "color": "#ffd700"}, {"id": "transcript_processors._enforce_max_length", "label": "_enforce_max_length", "title": "transcript_processors._enforce_max_length\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1489", "color": "#ffd700"}, {"id": "transcript_processors._map_position_to_original", "label": "_map_position_to_original", "title": "transcript_processors._map_position_to_original\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 392", "color": "#ffd700"}, {"id": "transcript_processors._identify_boundaries_spacy", "label": "_identify_boundaries_spacy", "title": "transcript_processors._identify_boundaries_spacy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 961", "color": "#ffd700"}, {"id": "transcript_processors._calculate_readability_improvement", "label": "_calculate_readability_improvement", "title": "transcript_processors._calculate_readability_improvement\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1844", "color": "#ffd700"}, {"id": "transcript_processors._find_token_position", "label": "_find_token_position", "title": "transcript_processors._find_token_position\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 490", "color": "#ffd700"}, {"id": "transcript_processors._restore_line_breaks", "label": "_restore_line_breaks", "title": "transcript_processors._restore_line_breaks\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 386", "color": "#ffd700"}, {"id": "transcript_processors._calculate_sentence_confidence", "label": "_calculate_sentence_confidence", "title": "transcript_processors._calculate_sentence_confidence\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 978", "color": "#ffd700"}, {"id": "transcript_processors._count_filler_words", "label": "_count_filler_words", "title": "transcript_processors._count_filler_words\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1822", "color": "#ffd700"}, {"id": "transcript_processors._create_enhancement_info", "label": "_create_enhancement_info", "title": "transcript_processors._create_enhancement_info\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 436", "color": "#ffd700"}, {"id": "transcript_processors._calculate_boundary_confidence", "label": "_calculate_boundary_confidence", "title": "transcript_processors._calculate_boundary_confidence\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1029", "color": "#ffd700"}, {"id": "transcript_processors._identify_semantic_units", "label": "_identify_semantic_units", "title": "transcript_processors._identify_semantic_units\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1290", "color": "#ffd700"}, {"id": "transcript_processors._mark_boundaries", "label": "_mark_boundaries", "title": "transcript_processors._mark_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1080", "color": "#ffd700"}, {"id": "transcript_processors._apply_strategy", "label": "_apply_strategy", "title": "transcript_processors._apply_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 686", "color": "#ffd700"}, {"id": "transcript_processors._apply_cleanest_instance_strategy", "label": "_apply_cleanest_instance_strategy", "title": "transcript_processors._apply_cleanest_instance_strategy\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 729", "color": "#ffd700"}, {"id": "transcript_processors._identify_question_answer_pairs", "label": "_identify_question_answer_pairs", "title": "transcript_processors._identify_question_answer_pairs\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1367", "color": "#ffd700"}, {"id": "transcript_processors._mark_semantic_units", "label": "_mark_semantic_units", "title": "transcript_processors._mark_semantic_units\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1583", "color": "#ffd700"}, {"id": "transcript_processors._identify_fillers", "label": "_identify_fillers", "title": "transcript_processors._identify_fillers\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 233", "color": "#ffd700"}, {"id": "transcript_processors._optimize_clip_boundaries", "label": "_optimize_clip_boundaries", "title": "transcript_processors._optimize_clip_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1104", "color": "#ffd700"}, {"id": "transcript_processors._identify_boundaries_rules", "label": "_identify_boundaries_rules", "title": "transcript_processors._identify_boundaries_rules\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 993", "color": "#ffd700"}, {"id": "transcript_processors._adjust_boundaries", "label": "_adjust_boundaries", "title": "transcript_processors._adjust_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1542", "color": "#ffd700"}, {"id": "transcript_processors._calculate_cleanliness_score", "label": "_calculate_cleanliness_score", "title": "transcript_processors._calculate_cleanliness_score\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 749", "color": "#ffd700"}, {"id": "transcript_processors._identify_boundaries", "label": "_identify_boundaries", "title": "transcript_processors._identify_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 949", "color": "#ffd700"}, {"id": "transcript_processors._normalize_text", "label": "_normalize_text", "title": "transcript_processors._normalize_text\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1282", "color": "#ffd700"}, {"id": "transcript_processors._mark_adjusted_boundaries", "label": "_mark_adjusted_boundaries", "title": "transcript_processors._mark_adjusted_boundaries\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1608", "color": "#ffd700"}, {"id": "transcript_processors._group_positions", "label": "_group_positions", "title": "transcript_processors._group_positions\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 604", "color": "#ffd700"}, {"id": "transcript_processors._identify_list_patterns", "label": "_identify_list_patterns", "title": "transcript_processors._identify_list_patterns\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1322", "color": "#ffd700"}, {"id": "transcript_processors._identify_explanation_sequences", "label": "_identify_explanation_sequences", "title": "transcript_processors._identify_explanation_sequences\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1408", "color": "#ffd700"}, {"id": "transcript_processors.generate_report", "label": "generate_report", "title": "transcript_processors.generate_report\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1752", "color": "#ffd700"}, {"id": "transcript_processors.analyze_enhancements", "label": "analyze_enhancements", "title": "transcript_processors.analyze_enhancements\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1721", "color": "#ffd700"}, {"id": "transcript_processors._detect_topic_changes", "label": "_detect_topic_changes", "title": "transcript_processors._detect_topic_changes\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 1445", "color": "#ffd700"}, {"id": "transcript_processors._apply_context_rules", "label": "_apply_context_rules", "title": "transcript_processors._apply_context_rules\\nFile: src/asabaal_utils/video_processing/transcript_processors.py\\nLine: 255", "color": "#ffd700"}, {"id": "transcript_processors.nlp", "label": "nlp", "title": "transcript_processors.nlp\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "transcript_processors.avg_word_length", "to": "transcript_processors._detect_topic_changes"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors.generate_report"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._is_low_information_phrase"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._mark_adjusted_boundaries"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_repetitions"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._apply_first_instance_strategy"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._enforce_max_length"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_semantic_units"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._process_text"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._find_token_position"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._remove_overlapping_repetitions"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_boundaries"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_explanation_sequences"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors.analyze_enhancements"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._apply_combine_strategy"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._calculate_cleanliness_score"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_fillers"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors.nlp"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._restore_line_breaks"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._merge_overlapping_units"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_boundaries_spacy"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._create_enhancement_info"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._mark_boundaries"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._initialize_nlp"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._group_positions"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._apply_cleanest_instance_strategy"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._mark_semantic_units"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_question_answer_pairs"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._calculate_boundary_confidence"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._adjust_boundaries"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._calculate_sentence_confidence"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_list_patterns"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._optimize_clip_boundaries"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._identify_boundaries_rules"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._map_position_to_original"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._count_filler_words"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._normalize_text"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._apply_context_rules"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._compile_patterns"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._apply_strategy"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._estimate_repetitions_handled"}, {"from": "transcript_processors.avg_word_length", "to": "transcript_processors._calculate_readability_improvement"}]}, "transcript_processors.nlp": {"nodes": [{"id": "transcript_processors.nlp", "label": "nlp", "title": "transcript_processors.nlp\\nFile: Unknown\\nLine: Unknown", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - transcript_processors
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1644
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_adjust_boundaries" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._adjust_boundaries', '_adjust_boundaries')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_adjust_boundaries</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1542
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_cleanest_instance_strategy" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._apply_cleanest_instance_strategy', '_apply_cleanest_instance_strategy')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_cleanest_instance_strategy</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:729
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_combine_strategy" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._apply_combine_strategy', '_apply_combine_strategy')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_combine_strategy</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:776
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_context_rules" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._apply_context_rules', '_apply_context_rules')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_context_rules</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:255
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_first_instance_strategy" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._apply_first_instance_strategy', '_apply_first_instance_strategy')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_first_instance_strategy</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:715
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_apply_strategy" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._apply_strategy', '_apply_strategy')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_apply_strategy</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:686
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_boundary_confidence" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._calculate_boundary_confidence', '_calculate_boundary_confidence')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_boundary_confidence</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1029
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_cleanliness_score" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._calculate_cleanliness_score', '_calculate_cleanliness_score')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_cleanliness_score</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:749
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_readability_improvement" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._calculate_readability_improvement', '_calculate_readability_improvement')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_readability_improvement</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1844
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_sentence_confidence" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._calculate_sentence_confidence', '_calculate_sentence_confidence')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_sentence_confidence</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:978
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_compile_patterns" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._compile_patterns', '_compile_patterns')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_compile_patterns</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1205
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_count_filler_words" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._count_filler_words', '_count_filler_words')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_count_filler_words</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1822
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_create_enhancement_info" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._create_enhancement_info', '_create_enhancement_info')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_create_enhancement_info</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:436
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_detect_topic_changes" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._detect_topic_changes', '_detect_topic_changes')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_detect_topic_changes</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1445
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_enforce_max_length" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._enforce_max_length', '_enforce_max_length')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_enforce_max_length</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1489
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_estimate_repetitions_handled" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._estimate_repetitions_handled', '_estimate_repetitions_handled')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_estimate_repetitions_handled</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1830
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_find_token_position" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._find_token_position', '_find_token_position')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_find_token_position</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:490
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_group_positions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._group_positions', '_group_positions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_group_positions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:604
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_boundaries" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_boundaries', '_identify_boundaries')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_boundaries</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:949
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_boundaries_rules" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_boundaries_rules', '_identify_boundaries_rules')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_boundaries_rules</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:993
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_boundaries_spacy" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_boundaries_spacy', '_identify_boundaries_spacy')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_boundaries_spacy</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:961
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_explanation_sequences" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_explanation_sequences', '_identify_explanation_sequences')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_explanation_sequences</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1408
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_fillers" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_fillers', '_identify_fillers')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_fillers</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:233
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_list_patterns" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_list_patterns', '_identify_list_patterns')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_list_patterns</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1322
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_question_answer_pairs" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_question_answer_pairs', '_identify_question_answer_pairs')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_question_answer_pairs</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1367
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_repetitions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_repetitions', '_identify_repetitions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_repetitions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:519
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_identify_semantic_units" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._identify_semantic_units', '_identify_semantic_units')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_identify_semantic_units</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1290
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_initialize_nlp" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._initialize_nlp', '_initialize_nlp')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_initialize_nlp</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:861
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_is_low_information_phrase" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._is_low_information_phrase', '_is_low_information_phrase')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_is_low_information_phrase</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:598
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_map_position_to_original" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._map_position_to_original', '_map_position_to_original')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_map_position_to_original</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:392
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_mark_adjusted_boundaries" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._mark_adjusted_boundaries', '_mark_adjusted_boundaries')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_mark_adjusted_boundaries</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1608
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_mark_boundaries" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._mark_boundaries', '_mark_boundaries')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_mark_boundaries</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1080
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_mark_semantic_units" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._mark_semantic_units', '_mark_semantic_units')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_mark_semantic_units</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1583
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_merge_overlapping_units" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._merge_overlapping_units', '_merge_overlapping_units')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_merge_overlapping_units</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1461
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_normalize_text" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._normalize_text', '_normalize_text')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_normalize_text</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1282
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_optimize_clip_boundaries" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._optimize_clip_boundaries', '_optimize_clip_boundaries')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_optimize_clip_boundaries</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1104
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_process_text" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._process_text', '_process_text')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_process_text</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:401
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_remove_overlapping_repetitions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._remove_overlapping_repetitions', '_remove_overlapping_repetitions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_remove_overlapping_repetitions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:638
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_restore_line_breaks" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors._restore_line_breaks', '_restore_line_breaks')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_restore_line_breaks</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:386
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_enhancements" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.analyze_enhancements', 'analyze_enhancements')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_enhancements</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1721
+                </div>
+            </div>
+
+            <div class="function-item" data-name="avg_sentence_length" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.avg_sentence_length', 'avg_sentence_length')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>avg_sentence_length</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1849
+                </div>
+            </div>
+
+            <div class="function-item" data-name="avg_word_length" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.avg_word_length', 'avg_word_length')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>avg_word_length</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑42</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1854
+                </div>
+            </div>
+
+            <div class="function-item" data-name="enhance_transcript" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.enhance_transcript', 'enhance_transcript')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>enhance_transcript</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1876
+                </div>
+            </div>
+
+            <div class="function-item" data-name="extract_enhanced_clips" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.extract_enhanced_clips', 'extract_enhanced_clips')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>extract_enhanced_clips</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1905
+                </div>
+            </div>
+
+            <div class="function-item" data-name="find_filler_words" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.find_filler_words', 'find_filler_words')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>find_filler_words</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:278
+                </div>
+            </div>
+
+            <div class="function-item" data-name="find_repetitions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.find_repetitions', 'find_repetitions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>find_repetitions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:807
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_report" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.generate_report', 'generate_report')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_report</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1752
+                </div>
+            </div>
+
+            <div class="function-item" data-name="nlp" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.nlp', 'nlp')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>nlp</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    :
+                </div>
+            </div>
+
+            <div class="function-item" data-name="process" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('transcript_processors.process', 'process')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>process</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/transcript_processors.py:1662
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

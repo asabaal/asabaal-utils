@@ -1,0 +1,226 @@
+spec: ColorGen
+version: 0.1.0
+author: Asabaal Ventures
+description: >
+  The ColorGen module converts numerical and waveform data into visual color representations.
+  It demonstrates Done-Means-Taught (DMT) principles through reproducible, self-teaching
+  code that spans audio, numeric, and image domains.
+
+functions:
+
+  - id: CGN-001
+    name: wave_to_color
+    signature: "wave_to_color(waveform: np.ndarray, colormap: str = \"viridis\") -> np.ndarray"
+    description: >
+      Map a 1-D audio or numeric waveform to a color image (height × width × 3).
+      Each amplitude value is converted to an RGB triple via the selected Matplotlib colormap.
+    io:
+      inputs:
+        - name: waveform
+          type: np.ndarray
+          description: One-dimensional numeric array representing amplitude or signal strength.
+          constraints:
+            - must be non-empty
+            - values normalized or automatically scaled to [-1, 1]
+        - name: colormap
+          type: str
+          description: Name of a valid Matplotlib colormap.
+      output:
+        type: np.ndarray
+        description: Float32 array of shape (height, width, 3) with values in [0, 1].
+    behavior:
+      - step: Convert waveform amplitude values to color indices.
+      - step: Tile or reshape waveform to produce a small 2-D image.
+      - step: Return normalized RGB array.
+    validation:
+      - type: exception
+        rule: Raise ValueError if waveform is empty or non-numeric.
+      - type: exception
+        rule: Raise ValueError if colormap name is invalid.
+    dmt:
+      teach:
+        lessons:
+          - name: waveform_to_image_demo
+            goal: Visualize a waveform and its colorized representation.
+            demo:
+              script: notebooks/wave_to_color_taught.py
+              expects:
+                - plot: artifacts/plots/wave_to_color.png
+        evidence:
+          metrics:
+            - name: lesson_duration
+              target: <= 2.0
+            - name: artifact_exists
+              target: true
+
+  - id: CGN-002
+    name: generate_color_palette
+    signature: "generate_color_palette(freq: float, duration: float, steps: int = 10) -> np.ndarray"
+    description: >
+      Produce a procedural color palette based on audio parameters such as frequency and duration.
+    io:
+      inputs:
+        - name: freq
+          type: float
+          description: Frequency in Hz; determines hue center.
+          constraints: [must be > 0]
+        - name: duration
+          type: float
+          description: Duration in seconds; affects brightness and saturation spread.
+          constraints: [must be > 0]
+        - name: steps
+          type: int
+          description: Number of colors in the palette.
+          constraints: [must be >= 2]
+      output:
+        type: np.ndarray
+        description: Array (shape = (steps, 3)) of RGB values in [0, 1].
+    behavior:
+      - step: Map frequency → base hue using modulo on the visible spectrum.
+      - step: Vary saturation/brightness proportionally to duration.
+      - step: Interpolate hues across steps.
+    validation:
+      - type: exception
+        rule: Raise ValueError on invalid numeric ranges.
+    dmt:
+      teach:
+        lessons:
+          - name: palette_generation_demo
+            goal: Show color palette generation for musical frequencies.
+            demo:
+              script: notebooks/generate_color_palette_taught.py
+              expects:
+                - plot: artifacts/plots/color_palette.png
+        evidence:
+          metrics:
+            - name: lesson_duration
+              target: <= 1.0
+
+  - id: CGN-003
+    name: save_waveform_image
+    signature: "save_waveform_image(waveform: np.ndarray, filename: str, colormap: str = \"viridis\") -> None"
+    description: >
+      Render a waveform as a colorized image and save it as a PNG file.
+    io:
+      inputs:
+        - name: waveform
+          type: np.ndarray
+          description: Audio or numeric waveform data.
+        - name: filename
+          type: str
+          description: Path to output PNG file.
+        - name: colormap
+          type: str
+          description: Optional Matplotlib colormap.
+      output:
+        type: None
+        description: No return value; creates a PNG file on disk.
+    behavior:
+      - step: Call wave_to_color to generate RGB array.
+      - step: Save as PNG using Matplotlib or Pillow.
+      - step: Ensure directory exists before write.
+    validation:
+      - type: exception
+        rule: Raise OSError if file cannot be written.
+    dmt:
+      teach:
+        lessons:
+          - name: save_image_demo
+            goal: Demonstrate saving a waveform image to disk.
+            demo:
+              script: notebooks/save_waveform_image_taught.py
+              expects:
+                - file: artifacts/images/example_waveform.png
+        evidence:
+          metrics:
+            - name: file_write_success
+              target: true
+
+  - id: CGN-004
+    name: normalize_image
+    signature: "normalize_image(img: np.ndarray) -> np.ndarray"
+    description: >
+      Normalize any numeric image array so all pixel values lie in [0, 1].
+    io:
+      inputs:
+        - name: img
+          type: np.ndarray
+          description: Image array of any shape and numeric dtype.
+      output:
+        type: np.ndarray
+        description: Normalized float32 array in [0, 1].
+    behavior:
+      - step: Compute min and max of input.
+      - step: If max == min, return zeros array.
+      - step: Otherwise, apply (x − min)/(max − min).
+    validation:
+      - type: exception
+        rule: Raise TypeError if input is not numpy array.
+    dmt:
+      teach:
+        lessons:
+          - name: normalization_demo
+            goal: Show before/after normalization on sample image.
+            demo:
+              script: notebooks/normalize_image_taught.py
+              expects:
+                - plot: artifacts/plots/normalize_demo.png
+        evidence:
+          metrics:
+            - name: lesson_duration
+              target: <= 1.0
+
+  - id: CGN-005
+    name: mix_images
+    signature: "mix_images(img1: np.ndarray, img2: np.ndarray, alpha: float = 0.5) -> np.ndarray"
+    description: >
+      Blend two images of equal shape with a given alpha ratio and normalize the result.
+    io:
+      inputs:
+        - name: img1
+          type: np.ndarray
+          description: First RGB image in [0, 1].
+        - name: img2
+          type: np.ndarray
+          description: Second RGB image in [0, 1].
+        - name: alpha
+          type: float
+          description: Blend ratio (0 = only img1, 1 = only img2).
+          constraints: [0 ≤ alpha ≤ 1]
+      output:
+        type: np.ndarray
+        description: Blended image in [0, 1].
+    behavior:
+      - step: Verify matching shapes.
+      - step: Compute (1 − alpha) × img1 + alpha × img2.
+      - step: Normalize result to [0, 1].
+    validation:
+      - type: exception
+        rule: Raise ValueError if shapes mismatch or alpha out of range.
+    dmt:
+      teach:
+        lessons:
+          - name: mix_demo
+            goal: Demonstrate blending two images interactively.
+            demo:
+              script: notebooks/mix_images_taught.py
+              expects:
+                - plot: artifacts/plots/mix_demo.png
+        evidence:
+          metrics:
+            - name: lesson_duration
+              target: <= 2.0
+
+metadata:
+  teaching:
+    examples:
+      - "Visualize a 440 Hz waveform as color image."
+      - "Generate color palette for musical frequencies."
+      - "Blend two palettes into a gradient teaching example."
+  testing:
+    coverage_goal: 1.0
+  infrastructure:
+    requires: [numpy, matplotlib, pillow]
+    make_targets: [install, test, teach, docs, docker]
+    container_base: python:3.12-slim
+

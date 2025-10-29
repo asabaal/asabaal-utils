@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+    <head><title>encoder Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "encoder.__init__", "label": "__init__", "shape": "dot", "title": "Function: encoder.__init__\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 20\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "encoder.encode_video", "label": "encode_video", "shape": "dot", "title": "Function: encoder.encode_video\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 32\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: encoder\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder._encode_frames_to_video", "label": "_encode_frames_to_video", "shape": "dot", "title": "Function: encoder._encode_frames_to_video\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 74\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder._encode_with_opencv", "label": "_encode_with_opencv", "shape": "dot", "title": "Function: encoder._encode_with_opencv\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 85\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder._encode_with_ffmpeg_hw", "label": "_encode_with_ffmpeg_hw", "shape": "dot", "title": "Function: encoder._encode_with_ffmpeg_hw\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 158\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder._combine_video_audio", "label": "_combine_video_audio", "shape": "dot", "title": "Function: encoder._combine_video_audio\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 246\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "encoder._get_encoder_params", "label": "_get_encoder_params", "shape": "dot", "title": "Function: encoder._get_encoder_params\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 286\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "encoder.get_encoding_info", "label": "get_encoding_info", "shape": "dot", "title": "Function: encoder.get_encoding_info\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\nLine: 305\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: encoder\nCalled From: generator\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 8"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hardware.recommend_encoding_settings", "label": "recommend_encoding_settings", "shape": "dot", "title": "Function: hardware.recommend_encoding_settings\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hardware.detect_gpu", "label": "detect_gpu", "shape": "dot", "title": "Function: hardware.detect_gpu\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "hardware.get_available_encoders", "label": "get_available_encoders", "shape": "dot", "title": "Function: hardware.get_available_encoders\nIn-degree: 1\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 hardware.recommend_encoding_settings", "to": "hardware.recommend_encoding_settings"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 encoder._get_encoder_params", "to": "encoder._get_encoder_params"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 hardware.detect_gpu", "to": "hardware.detect_gpu"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 hardware.get_available_encoders", "to": "hardware.get_available_encoders"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 encoder._combine_video_audio", "to": "encoder._combine_video_audio"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 encoder._encode_with_ffmpeg_hw", "to": "encoder._encode_with_ffmpeg_hw"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 encoder._encode_with_opencv", "to": "encoder._encode_with_opencv"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "encoder.get_encoding_info", "title": "encoder.get_encoding_info \u2192 encoder._encode_frames_to_video", "to": "encoder._encode_frames_to_video"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"clip_features": "clip_features.html", "audio_clips": "audio_clips.html", "claude_client": "claude_client.html", "clips": "clips.html", "df": "df.html", "biblical_themes": "biblical_themes.html", "chunked_analyzer": "chunked_analyzer.html", "capcut_parser": "capcut_parser.html", "custom_stats": "custom_stats.html", "_critical_callbacks": "_critical_callbacks.html", "encoder": "encoder.html", "align_behaviors": "align_behaviors.html", "conftest": "conftest.html", "document_categorizer": "document_categorizer.html", "deployment_checklist": "deployment_checklist.html", "detect_unused_media": "detect_unused_media.html", "aligner": "aligner.html", "analyze_tests": "analyze_tests.html", "client": "client.html", "assertions": "assertions.html", "columns": "columns.html", "character_detector": "character_detector.html", "db_manager": "db_manager.html", "debug_dir": "debug_dir.html", "catalog_path": "catalog_path.html", "clip_preview_generator": "clip_preview_generator.html", "anthropic": "anthropic.html", "categories": "categories.html", "02_code_generator": "02_code_generator.html", "backend_manager": "backend_manager.html", "chunked_audio_analyzer": "chunked_audio_analyzer.html", "audio_features": "audio_features.html", "__init__": "__init__.html", "duplicate_detection": "duplicate_detection.html", "cache_dir": "cache_dir.html", "compositor": "compositor.html", "background_video": "background_video.html", "church_service_analyzer": "church_service_analyzer.html", "analyze_all_runs": "analyze_all_runs.html", "blended_layout_generator": "blended_layout_generator.html", "components": "components.html", "08_integration": "08_integration.html", "effect_library": "effect_library.html", "detailed_analysis_processor": "detailed_analysis_processor.html", "config": "config.html", "background_clips": "background_clips.html", "compare_behaviors": "compare_behaviors.html", "12_behavior_analysis": "12_behavior_analysis.html", "capcut-srt-integration": "capcut-srt-integration.html", "aggregate_behaviors": "aggregate_behaviors.html", "compiled_patterns": "compiled_patterns.html", "alerts": "alerts.html", "analyze_capcut": "analyze_capcut.html", "animations": "animations.html", "available_fonts": "available_fonts.html", "capcut_srt_integration": "capcut_srt_integration.html", "community_data": "community_data.html", "audio_classifier": "audio_classifier.html", "api_confirmation": "api_confirmation.html", "audio_analyzer": "audio_analyzer.html", "__name__": "__name__.html", "church_audio_classifier": "church_audio_classifier.html", "drift": "drift.html", "catalog": "catalog.html", "beats": "beats.html", "category_mapping": "category_mapping.html", "base": "base.html", "completions": "completions.html", "agent_inputs_dir": "agent_inputs_dir.html", "documentation_prompt": "documentation_prompt.html", "classify_failures": "classify_failures.html", "cli": "cli.html", "auto_layout": "auto_layout.html", "05_cli_interface": "05_cli_interface.html", "color_analyzer": "color_analyzer.html", "classifier": "classifier.html", "_monitor_thread": "_monitor_thread.html", "backend_config": "backend_config.html", "data_dir": "data_dir.html", "analyze_project_structure": "analyze_project_structure.html", "clip_extractor": "clip_extractor.html", "analyzer": "analyzer.html", "batch_processor": "batch_processor.html", "buffer_manager": "buffer_manager.html", "04_organizer": "04_organizer.html", "deleted_files_cache": "deleted_files_cache.html", "base_dir": "base_dir.html", "duplicate_groups": "duplicate_groups.html", "01_spec_parser": "01_spec_parser.html", "cluster_model": "cluster_model.html", "build_logic_catalog": "build_logic_catalog.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"encoder.__init__": {"nodes": [{"id": "encoder.__init__", "label": "__init__", "title": "encoder.__init__\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 20", "color": "#ff6b6b"}], "edges": []}, "encoder.encode_video": {"nodes": [{"id": "encoder.encode_video", "label": "encode_video", "title": "encoder.encode_video\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 32", "color": "#ff6b6b"}], "edges": []}, "encoder._encode_frames_to_video": {"nodes": [{"id": "encoder._encode_frames_to_video", "label": "_encode_frames_to_video", "title": "encoder._encode_frames_to_video\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 74", "color": "#ff6b6b"}], "edges": []}, "encoder._encode_with_opencv": {"nodes": [{"id": "encoder._encode_with_opencv", "label": "_encode_with_opencv", "title": "encoder._encode_with_opencv\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 85", "color": "#ff6b6b"}], "edges": []}, "encoder._encode_with_ffmpeg_hw": {"nodes": [{"id": "encoder._encode_with_ffmpeg_hw", "label": "_encode_with_ffmpeg_hw", "title": "encoder._encode_with_ffmpeg_hw\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 158", "color": "#ff6b6b"}], "edges": []}, "encoder._combine_video_audio": {"nodes": [{"id": "encoder._combine_video_audio", "label": "_combine_video_audio", "title": "encoder._combine_video_audio\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 246", "color": "#ff6b6b"}], "edges": []}, "encoder._get_encoder_params": {"nodes": [{"id": "encoder._get_encoder_params", "label": "_get_encoder_params", "title": "encoder._get_encoder_params\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 286", "color": "#ff6b6b"}], "edges": []}, "encoder.get_encoding_info": {"nodes": [{"id": "encoder._combine_video_audio", "label": "_combine_video_audio", "title": "encoder._combine_video_audio\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 246", "color": "#ffd700"}, {"id": "encoder._encode_with_ffmpeg_hw", "label": "_encode_with_ffmpeg_hw", "title": "encoder._encode_with_ffmpeg_hw\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 158", "color": "#ffd700"}, {"id": "encoder._encode_with_opencv", "label": "_encode_with_opencv", "title": "encoder._encode_with_opencv\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 85", "color": "#ffd700"}, {"id": "encoder._get_encoder_params", "label": "_get_encoder_params", "title": "encoder._get_encoder_params\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 286", "color": "#ffd700"}, {"id": "encoder._encode_frames_to_video", "label": "_encode_frames_to_video", "title": "encoder._encode_frames_to_video\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 74", "color": "#ffd700"}, {"id": "hardware.detect_gpu", "label": "detect_gpu", "title": "hardware.detect_gpu\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "hardware.get_available_encoders", "label": "get_available_encoders", "title": "hardware.get_available_encoders\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}, {"id": "encoder.get_encoding_info", "label": "get_encoding_info", "title": "encoder.get_encoding_info\\nFile: src/asabaal_utils/video_processing/lyric_video/encoder.py\\nLine: 305", "color": "#ff6b6b"}, {"id": "hardware.recommend_encoding_settings", "label": "recommend_encoding_settings", "title": "hardware.recommend_encoding_settings\\nFile: Unknown\\nLine: Unknown", "color": "#ffd700"}], "edges": [{"from": "encoder.get_encoding_info", "to": "encoder._encode_frames_to_video"}, {"from": "encoder.get_encoding_info", "to": "encoder._combine_video_audio"}, {"from": "encoder.get_encoding_info", "to": "hardware.detect_gpu"}, {"from": "encoder.get_encoding_info", "to": "hardware.recommend_encoding_settings"}, {"from": "encoder.get_encoding_info", "to": "encoder._get_encoder_params"}, {"from": "encoder.get_encoding_info", "to": "encoder._encode_with_ffmpeg_hw"}, {"from": "encoder.get_encoding_info", "to": "encoder._encode_with_opencv"}, {"from": "encoder.get_encoding_info", "to": "hardware.get_available_encoders"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - encoder
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:20
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_combine_video_audio" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder._combine_video_audio', '_combine_video_audio')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_combine_video_audio</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:246
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_encode_frames_to_video" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder._encode_frames_to_video', '_encode_frames_to_video')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_encode_frames_to_video</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:74
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_encode_with_ffmpeg_hw" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder._encode_with_ffmpeg_hw', '_encode_with_ffmpeg_hw')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_encode_with_ffmpeg_hw</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:158
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_encode_with_opencv" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder._encode_with_opencv', '_encode_with_opencv')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_encode_with_opencv</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:85
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_get_encoder_params" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder._get_encoder_params', '_get_encoder_params')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_get_encoder_params</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:286
+                </div>
+            </div>
+
+            <div class="function-item" data-name="encode_video" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder.encode_video', 'encode_video')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>encode_video</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:32
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_encoding_info" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('encoder.get_encoding_info', 'get_encoding_info')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_encoding_info</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑8</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/encoder.py:305
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

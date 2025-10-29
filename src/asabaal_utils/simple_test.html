@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <div id="network" style="height: 400px;"></div>
+    
+    <script type="text/javascript">
+        var nodes = [
+            {id: 'node_0', label: 'Enter main', color: '#90ee90', shape: 'ellipse', font: {size: 14, bold: true}},
+            {id: 'node_1', label: 'Exit main', color: '#ff6b6b', shape: 'ellipse', font: {size: 14, bold: true}},
+            {id: 'node_2', label: "test", title: "test\\nLine: 1\\nType: statement", color: '#97c2fc', shape: 'box', font: {size: 12}}
+        ];
+        
+        var edges = [
+            {from: 'node_0', to: 'node_2', label: "", arrows: 'to', color: {color: "#666666"}, font: {size: 10, align: "middle"}},
+            {from: 'node_2', to: 'node_1', label: "", arrows: 'to', color: {color: "#666666"}, font: {size: 10, align: "middle"}}
+        ];
+        
+        var container = document.getElementById('network');
+        var data = {nodes: nodes, edges: edges};
+        var options = {layout: {hierarchical: {direction: 'UD'}}, physics: {enabled: false}};
+        var network = new vis.Network(container, data, options);
+    </script>
+</body>
+</html>

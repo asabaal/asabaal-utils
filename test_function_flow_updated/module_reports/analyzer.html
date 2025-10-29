@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html>
+    <head><title>analyzer Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "analyzer.load_from_file", "label": "load_from_file", "shape": "dot", "title": "Function: analyzer.load_from_file\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: analyzer\nCalled From: cli\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "analyzer.analyze_audio", "label": "analyze_audio", "shape": "dot", "title": "Function: analyzer.analyze_audio\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 65\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: analyzer\nCalled From: cli\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "analyzer.save_to_file", "label": "save_to_file", "shape": "dot", "title": "Function: analyzer.save_to_file\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: analyzer\nCalled From: cli\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "analyzer.analyze_timeline", "label": "analyze_timeline", "shape": "dot", "title": "Function: analyzer.analyze_timeline\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: analyzer\nCalled From: cli\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.__init__", "label": "__init__", "shape": "dot", "title": "Function: analyzer.__init__\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 18\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.setup_local_environment", "label": "setup_local_environment", "shape": "dot", "title": "Function: analyzer.setup_local_environment\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 53\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer._load_config", "label": "_load_config", "shape": "dot", "title": "Function: analyzer._load_config\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 69\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage1_context_prep", "label": "run_stage1_context_prep", "shape": "dot", "title": "Function: analyzer.run_stage1_context_prep\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 94\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage2_agent_prompts", "label": "run_stage2_agent_prompts", "shape": "dot", "title": "Function: analyzer.run_stage2_agent_prompts\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 116\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage3_agent_communication", "label": "run_stage3_agent_communication", "shape": "dot", "title": "Function: analyzer.run_stage3_agent_communication\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 141\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage4_response_parsing", "label": "run_stage4_response_parsing", "shape": "dot", "title": "Function: analyzer.run_stage4_response_parsing\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 163\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage5_issue_extraction", "label": "run_stage5_issue_extraction", "shape": "dot", "title": "Function: analyzer.run_stage5_issue_extraction\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 185\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage6_filtering_combination", "label": "run_stage6_filtering_combination", "shape": "dot", "title": "Function: analyzer.run_stage6_filtering_combination\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 207\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage7_detailed_analysis", "label": "run_stage7_detailed_analysis", "shape": "dot", "title": "Function: analyzer.run_stage7_detailed_analysis\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 229\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage8_file_assessment", "label": "run_stage8_file_assessment", "shape": "dot", "title": "Function: analyzer.run_stage8_file_assessment\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 263\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage9_html_generation", "label": "run_stage9_html_generation", "shape": "dot", "title": "Function: analyzer.run_stage9_html_generation\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 283\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.run_stage10_feedback_update", "label": "run_stage10_feedback_update", "shape": "dot", "title": "Function: analyzer.run_stage10_feedback_update\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 307\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "analyzer.analyze_pr", "label": "analyze_pr", "shape": "dot", "title": "Function: analyzer.analyze_pr\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 345\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: analyzer\nCalled From: cli\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "analyzer.update_analysis_with_feedback", "label": "update_analysis_with_feedback", "shape": "dot", "title": "Function: analyzer.update_analysis_with_feedback\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\nLine: 445\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: analyzer\nCalled From: cli\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 5"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer.load_audio", "label": "load_audio", "shape": "dot", "title": "Function: analyzer.load_audio\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 31\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.get_beat_times", "label": "get_beat_times", "shape": "dot", "title": "Function: analyzer.get_beat_times\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 110\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "analyzer.get_frequency_bands", "label": "get_frequency_bands", "shape": "dot", "title": "Function: analyzer.get_frequency_bands\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 116\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer._detect_beats", "label": "_detect_beats", "shape": "dot", "title": "Function: analyzer._detect_beats\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 164\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer._detect_onsets", "label": "_detect_onsets", "shape": "dot", "title": "Function: analyzer._detect_onsets\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 190\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer._calculate_rms_energy", "label": "_calculate_rms_energy", "shape": "dot", "title": "Function: analyzer._calculate_rms_energy\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 216\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#ffd700", "font": {"color": "#333333", "size": 12}, "id": "analyzer._calculate_spectral_centroids", "label": "_calculate_spectral_centroids", "shape": "dot", "title": "Function: analyzer._calculate_spectral_centroids\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 231\nIn-degree: 1\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#97c2fc", "font": {"color": "#333333", "size": 12}, "id": "analyzer._calculate_zero_crossing_rate", "label": "_calculate_zero_crossing_rate", "shape": "dot", "title": "Function: analyzer._calculate_zero_crossing_rate\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\nLine: 245\nIn-degree: 1\nOut-degree: 6"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer.update_analysis_with_feedback", "title": "analyzer.update_analysis_with_feedback \u2192 analyzer._load_config", "to": "analyzer._load_config"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer.update_analysis_with_feedback", "title": "analyzer.update_analysis_with_feedback \u2192 analyzer.setup_local_environment", "to": "analyzer.setup_local_environment"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer.update_analysis_with_feedback", "title": "analyzer.update_analysis_with_feedback \u2192 analyzer.run_stage9_html_generation", "to": "analyzer.run_stage9_html_generation"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer.update_analysis_with_feedback", "title": "analyzer.update_analysis_with_feedback \u2192 analyzer.run_stage1_context_prep", "to": "analyzer.run_stage1_context_prep"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer.update_analysis_with_feedback", "title": "analyzer.update_analysis_with_feedback \u2192 analyzer.run_stage10_feedback_update", "to": "analyzer.run_stage10_feedback_update"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer._calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate \u2192 analyzer._detect_beats", "to": "analyzer._detect_beats"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer._calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate \u2192 analyzer._detect_onsets", "to": "analyzer._detect_onsets"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer._calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate \u2192 analyzer._calculate_rms_energy", "to": "analyzer._calculate_rms_energy"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer._calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate \u2192 analyzer._calculate_spectral_centroids", "to": "analyzer._calculate_spectral_centroids"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer._calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate \u2192 analyzer._calculate_zero_crossing_rate", "to": "analyzer._calculate_zero_crossing_rate"}, {"arrows": "to", "color": {"color": "#666666", "highlight": "#ff0000"}, "from": "analyzer._calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate \u2192 analyzer.load_audio", "to": "analyzer.load_audio"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"align_behaviors": "align_behaviors.html", "analyze_tests": "analyze_tests.html", "02_code_generator": "02_code_generator.html", "__init__": "__init__.html", "analyze_all_runs": "analyze_all_runs.html", "08_integration": "08_integration.html", "12_behavior_analysis": "12_behavior_analysis.html", "aggregate_behaviors": "aggregate_behaviors.html", "analyze_capcut": "analyze_capcut.html", "05_cli_interface": "05_cli_interface.html", "analyze_project_structure": "analyze_project_structure.html", "analyzer": "analyzer.html", "04_organizer": "04_organizer.html", "01_spec_parser": "01_spec_parser.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"analyzer.load_from_file": {"nodes": [{"id": "analyzer.load_from_file", "label": "load_from_file", "title": "analyzer.load_from_file\\nFile: Unknown\\nLine: Unknown", "color": "#ff6b6b"}], "edges": []}, "analyzer.analyze_audio": {"nodes": [{"id": "analyzer.analyze_audio", "label": "analyze_audio", "title": "analyzer.analyze_audio\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 65", "color": "#ff6b6b"}], "edges": []}, "analyzer.save_to_file": {"nodes": [{"id": "analyzer.save_to_file", "label": "save_to_file", "title": "analyzer.save_to_file\\nFile: Unknown\\nLine: Unknown", "color": "#ff6b6b"}], "edges": []}, "analyzer.analyze_timeline": {"nodes": [{"id": "analyzer.analyze_timeline", "label": "analyze_timeline", "title": "analyzer.analyze_timeline\\nFile: Unknown\\nLine: Unknown", "color": "#ff6b6b"}], "edges": []}, "analyzer.__init__": {"nodes": [{"id": "analyzer.__init__", "label": "__init__", "title": "analyzer.__init__\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 18", "color": "#ff6b6b"}], "edges": []}, "analyzer.setup_local_environment": {"nodes": [{"id": "analyzer.setup_local_environment", "label": "setup_local_environment", "title": "analyzer.setup_local_environment\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 53", "color": "#ff6b6b"}], "edges": []}, "analyzer._load_config": {"nodes": [{"id": "analyzer._load_config", "label": "_load_config", "title": "analyzer._load_config\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 69", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage1_context_prep": {"nodes": [{"id": "analyzer.run_stage1_context_prep", "label": "run_stage1_context_prep", "title": "analyzer.run_stage1_context_prep\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 94", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage2_agent_prompts": {"nodes": [{"id": "analyzer.run_stage2_agent_prompts", "label": "run_stage2_agent_prompts", "title": "analyzer.run_stage2_agent_prompts\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 116", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage3_agent_communication": {"nodes": [{"id": "analyzer.run_stage3_agent_communication", "label": "run_stage3_agent_communication", "title": "analyzer.run_stage3_agent_communication\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 141", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage4_response_parsing": {"nodes": [{"id": "analyzer.run_stage4_response_parsing", "label": "run_stage4_response_parsing", "title": "analyzer.run_stage4_response_parsing\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 163", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage5_issue_extraction": {"nodes": [{"id": "analyzer.run_stage5_issue_extraction", "label": "run_stage5_issue_extraction", "title": "analyzer.run_stage5_issue_extraction\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 185", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage6_filtering_combination": {"nodes": [{"id": "analyzer.run_stage6_filtering_combination", "label": "run_stage6_filtering_combination", "title": "analyzer.run_stage6_filtering_combination\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 207", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage7_detailed_analysis": {"nodes": [{"id": "analyzer.run_stage7_detailed_analysis", "label": "run_stage7_detailed_analysis", "title": "analyzer.run_stage7_detailed_analysis\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 229", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage8_file_assessment": {"nodes": [{"id": "analyzer.run_stage8_file_assessment", "label": "run_stage8_file_assessment", "title": "analyzer.run_stage8_file_assessment\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 263", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage9_html_generation": {"nodes": [{"id": "analyzer.run_stage9_html_generation", "label": "run_stage9_html_generation", "title": "analyzer.run_stage9_html_generation\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 283", "color": "#ff6b6b"}], "edges": []}, "analyzer.run_stage10_feedback_update": {"nodes": [{"id": "analyzer.run_stage10_feedback_update", "label": "run_stage10_feedback_update", "title": "analyzer.run_stage10_feedback_update\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 307", "color": "#ff6b6b"}], "edges": []}, "analyzer.analyze_pr": {"nodes": [{"id": "analyzer.analyze_pr", "label": "analyze_pr", "title": "analyzer.analyze_pr\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 345", "color": "#ff6b6b"}], "edges": []}, "analyzer.update_analysis_with_feedback": {"nodes": [{"id": "analyzer.run_stage1_context_prep", "label": "run_stage1_context_prep", "title": "analyzer.run_stage1_context_prep\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 94", "color": "#ffd700"}, {"id": "analyzer.setup_local_environment", "label": "setup_local_environment", "title": "analyzer.setup_local_environment\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 53", "color": "#ffd700"}, {"id": "analyzer._load_config", "label": "_load_config", "title": "analyzer._load_config\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 69", "color": "#ffd700"}, {"id": "analyzer.run_stage9_html_generation", "label": "run_stage9_html_generation", "title": "analyzer.run_stage9_html_generation\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 283", "color": "#ffd700"}, {"id": "analyzer.run_stage10_feedback_update", "label": "run_stage10_feedback_update", "title": "analyzer.run_stage10_feedback_update\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 307", "color": "#ffd700"}, {"id": "analyzer.update_analysis_with_feedback", "label": "update_analysis_with_feedback", "title": "analyzer.update_analysis_with_feedback\\nFile: src/asabaal_utils/agents/pr_analyzer/src/analyzer.py\\nLine: 445", "color": "#ff6b6b"}], "edges": [{"from": "analyzer.update_analysis_with_feedback", "to": "analyzer.run_stage1_context_prep"}, {"from": "analyzer.update_analysis_with_feedback", "to": "analyzer.run_stage9_html_generation"}, {"from": "analyzer.update_analysis_with_feedback", "to": "analyzer.run_stage10_feedback_update"}, {"from": "analyzer.update_analysis_with_feedback", "to": "analyzer.setup_local_environment"}, {"from": "analyzer.update_analysis_with_feedback", "to": "analyzer._load_config"}]}, "analyzer.load_audio": {"nodes": [{"id": "analyzer.load_audio", "label": "load_audio", "title": "analyzer.load_audio\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 31", "color": "#ff6b6b"}], "edges": []}, "analyzer.get_beat_times": {"nodes": [{"id": "analyzer.get_beat_times", "label": "get_beat_times", "title": "analyzer.get_beat_times\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 110", "color": "#ff6b6b"}], "edges": []}, "analyzer.get_frequency_bands": {"nodes": [{"id": "analyzer.get_frequency_bands", "label": "get_frequency_bands", "title": "analyzer.get_frequency_bands\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 116", "color": "#ff6b6b"}], "edges": []}, "analyzer._detect_beats": {"nodes": [{"id": "analyzer._detect_beats", "label": "_detect_beats", "title": "analyzer._detect_beats\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 164", "color": "#ff6b6b"}], "edges": []}, "analyzer._detect_onsets": {"nodes": [{"id": "analyzer._detect_onsets", "label": "_detect_onsets", "title": "analyzer._detect_onsets\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 190", "color": "#ff6b6b"}], "edges": []}, "analyzer._calculate_rms_energy": {"nodes": [{"id": "analyzer._calculate_rms_energy", "label": "_calculate_rms_energy", "title": "analyzer._calculate_rms_energy\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 216", "color": "#ff6b6b"}], "edges": []}, "analyzer._calculate_spectral_centroids": {"nodes": [{"id": "analyzer._calculate_spectral_centroids", "label": "_calculate_spectral_centroids", "title": "analyzer._calculate_spectral_centroids\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 231", "color": "#ff6b6b"}], "edges": []}, "analyzer._calculate_zero_crossing_rate": {"nodes": [{"id": "analyzer._calculate_spectral_centroids", "label": "_calculate_spectral_centroids", "title": "analyzer._calculate_spectral_centroids\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 231", "color": "#ffd700"}, {"id": "analyzer._detect_onsets", "label": "_detect_onsets", "title": "analyzer._detect_onsets\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 190", "color": "#ffd700"}, {"id": "analyzer._detect_beats", "label": "_detect_beats", "title": "analyzer._detect_beats\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 164", "color": "#ffd700"}, {"id": "analyzer._calculate_zero_crossing_rate", "label": "_calculate_zero_crossing_rate", "title": "analyzer._calculate_zero_crossing_rate\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 245", "color": "#ff6b6b"}, {"id": "analyzer.load_audio", "label": "load_audio", "title": "analyzer.load_audio\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 31", "color": "#ffd700"}, {"id": "analyzer._calculate_rms_energy", "label": "_calculate_rms_energy", "title": "analyzer._calculate_rms_energy\\nFile: src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py\\nLine: 216", "color": "#ffd700"}], "edges": [{"from": "analyzer._calculate_zero_crossing_rate", "to": "analyzer._calculate_spectral_centroids"}, {"from": "analyzer._calculate_zero_crossing_rate", "to": "analyzer._detect_beats"}, {"from": "analyzer._calculate_zero_crossing_rate", "to": "analyzer.load_audio"}, {"from": "analyzer._calculate_zero_crossing_rate", "to": "analyzer._calculate_rms_energy"}, {"from": "analyzer._calculate_zero_crossing_rate", "to": "analyzer._calculate_zero_crossing_rate"}, {"from": "analyzer._calculate_zero_crossing_rate", "to": "analyzer._detect_onsets"}]}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - analyzer
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="__init__" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.__init__', '__init__')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>__init__</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:18
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_rms_energy" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer._calculate_rms_energy', '_calculate_rms_energy')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_rms_energy</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:216
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_spectral_centroids" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer._calculate_spectral_centroids', '_calculate_spectral_centroids')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_spectral_centroids</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:231
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_calculate_zero_crossing_rate" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer._calculate_zero_crossing_rate', '_calculate_zero_crossing_rate')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_calculate_zero_crossing_rate</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">regular</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑6</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:245
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_detect_beats" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer._detect_beats', '_detect_beats')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_detect_beats</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:164
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_detect_onsets" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer._detect_onsets', '_detect_onsets')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_detect_onsets</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:190
+                </div>
+            </div>
+
+            <div class="function-item" data-name="_load_config" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer._load_config', '_load_config')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>_load_config</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:69
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_audio" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.analyze_audio', 'analyze_audio')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_audio</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:65
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_pr" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.analyze_pr', 'analyze_pr')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_pr</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:345
+                </div>
+            </div>
+
+            <div class="function-item" data-name="analyze_timeline" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.analyze_timeline', 'analyze_timeline')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>analyze_timeline</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    :
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_beat_times" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.get_beat_times', 'get_beat_times')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_beat_times</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:110
+                </div>
+            </div>
+
+            <div class="function-item" data-name="get_frequency_bands" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.get_frequency_bands', 'get_frequency_bands')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>get_frequency_bands</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:116
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_audio" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.load_audio', 'load_audio')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_audio</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/video_processing/lyric_video/audio/analyzer.py:31
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_from_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.load_from_file', 'load_from_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_from_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    :
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage10_feedback_update" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage10_feedback_update', 'run_stage10_feedback_update')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage10_feedback_update</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:307
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage1_context_prep" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage1_context_prep', 'run_stage1_context_prep')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage1_context_prep</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:94
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage2_agent_prompts" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage2_agent_prompts', 'run_stage2_agent_prompts')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage2_agent_prompts</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:116
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage3_agent_communication" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage3_agent_communication', 'run_stage3_agent_communication')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage3_agent_communication</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:141
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage4_response_parsing" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage4_response_parsing', 'run_stage4_response_parsing')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage4_response_parsing</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:163
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage5_issue_extraction" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage5_issue_extraction', 'run_stage5_issue_extraction')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage5_issue_extraction</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:185
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage6_filtering_combination" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage6_filtering_combination', 'run_stage6_filtering_combination')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage6_filtering_combination</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:207
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage7_detailed_analysis" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage7_detailed_analysis', 'run_stage7_detailed_analysis')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage7_detailed_analysis</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:229
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage8_file_assessment" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage8_file_assessment', 'run_stage8_file_assessment')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage8_file_assessment</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:263
+                </div>
+            </div>
+
+            <div class="function-item" data-name="run_stage9_html_generation" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.run_stage9_html_generation', 'run_stage9_html_generation')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>run_stage9_html_generation</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:283
+                </div>
+            </div>
+
+            <div class="function-item" data-name="save_to_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.save_to_file', 'save_to_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>save_to_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    :
+                </div>
+            </div>
+
+            <div class="function-item" data-name="setup_local_environment" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.setup_local_environment', 'setup_local_environment')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>setup_local_environment</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">leaf</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓1</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:53
+                </div>
+            </div>
+
+            <div class="function-item" data-name="update_analysis_with_feedback" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('analyzer.update_analysis_with_feedback', 'update_analysis_with_feedback')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>update_analysis_with_feedback</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑5</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/pr_analyzer/src/analyzer.py:445
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

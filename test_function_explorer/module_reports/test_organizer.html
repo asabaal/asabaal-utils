@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html>
+    <head><title>test_organizer Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.temp_dir", "label": "temp_dir", "shape": "dot", "title": "Function: test_organizer.temp_dir\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 20\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.organizer", "label": "organizer", "shape": "dot", "title": "Function: test_organizer.organizer\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 27\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_init_default_directory", "label": "test_init_default_directory", "shape": "dot", "title": "Function: test_organizer.test_init_default_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 31\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_init_custom_directory", "label": "test_init_custom_directory", "shape": "dot", "title": "Function: test_organizer.test_init_custom_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 39\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_category_mapping", "label": "test_category_mapping", "shape": "dot", "title": "Function: test_organizer.test_category_mapping\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 48\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_ensure_dir_new_directory", "label": "test_ensure_dir_new_directory", "shape": "dot", "title": "Function: test_organizer.test_ensure_dir_new_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 57\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_ensure_dir_existing_directory", "label": "test_ensure_dir_existing_directory", "shape": "dot", "title": "Function: test_organizer.test_ensure_dir_existing_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 70\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_ensure_dir_existing_without_init", "label": "test_ensure_dir_existing_without_init", "shape": "dot", "title": "Function: test_organizer.test_ensure_dir_existing_without_init\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 82\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_categorize_file_core", "label": "test_categorize_file_core", "shape": "dot", "title": "Function: test_organizer.test_categorize_file_core\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 93\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_categorize_file_export", "label": "test_categorize_file_export", "shape": "dot", "title": "Function: test_organizer.test_categorize_file_export\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 101\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_categorize_file_generate", "label": "test_categorize_file_generate", "shape": "dot", "title": "Function: test_organizer.test_categorize_file_generate\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 109\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_categorize_file_utils", "label": "test_categorize_file_utils", "shape": "dot", "title": "Function: test_organizer.test_categorize_file_utils\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 117\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_categorize_file_unknown", "label": "test_categorize_file_unknown", "shape": "dot", "title": "Function: test_organizer.test_categorize_file_unknown\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 125\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_load_integration_summary_success", "label": "test_load_integration_summary_success", "shape": "dot", "title": "Function: test_organizer.test_load_integration_summary_success\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 133\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_load_integration_summary_not_found", "label": "test_load_integration_summary_not_found", "shape": "dot", "title": "Function: test_organizer.test_load_integration_summary_not_found\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 155\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_extract_successful_functions", "label": "test_extract_successful_functions", "shape": "dot", "title": "Function: test_organizer.test_extract_successful_functions\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 160\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_copy_file_to_src", "label": "test_copy_file_to_src", "shape": "dot", "title": "Function: test_organizer.test_copy_file_to_src\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 180\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_copy_file_to_src_create_directory", "label": "test_copy_file_to_src_create_directory", "shape": "dot", "title": "Function: test_organizer.test_copy_file_to_src_create_directory\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 199\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_copy_file_to_src_source_not_found", "label": "test_copy_file_to_src_source_not_found", "shape": "dot", "title": "Function: test_organizer.test_copy_file_to_src_source_not_found\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 215\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_copy_test_to_tests", "label": "test_copy_test_to_tests", "shape": "dot", "title": "Function: test_organizer.test_copy_test_to_tests\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 224\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_organize_successful_functions", "label": "test_organize_successful_functions", "shape": "dot", "title": "Function: test_organizer.test_organize_successful_functions\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 242\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_create_module_init_files", "label": "test_create_module_init_files", "shape": "dot", "title": "Function: test_organizer.test_create_module_init_files\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 271\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_create_main_init_file", "label": "test_create_main_init_file", "shape": "dot", "title": "Function: test_organizer.test_create_main_init_file\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 295\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_save_organization_log", "label": "test_save_organization_log", "shape": "dot", "title": "Function: test_organizer.test_save_organization_log\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 314\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_run_no_successful_functions", "label": "test_run_no_successful_functions", "shape": "dot", "title": "Function: test_organizer.test_run_no_successful_functions\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 335\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "test_organizer.test_run_with_successful_functions", "label": "test_run_with_successful_functions", "shape": "dot", "title": "Function: test_organizer.test_run_with_successful_functions\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\nLine: 359\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+window.functionFlowData = {"test_organizer.temp_dir": {"nodes": [{"id": "test_organizer.temp_dir", "label": "temp_dir", "title": "test_organizer.temp_dir\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 20", "color": "#ff6b6b"}], "edges": []}, "test_organizer.organizer": {"nodes": [{"id": "test_organizer.organizer", "label": "organizer", "title": "test_organizer.organizer\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 27", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_init_default_directory": {"nodes": [{"id": "test_organizer.test_init_default_directory", "label": "test_init_default_directory", "title": "test_organizer.test_init_default_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 31", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_init_custom_directory": {"nodes": [{"id": "test_organizer.test_init_custom_directory", "label": "test_init_custom_directory", "title": "test_organizer.test_init_custom_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 39", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_category_mapping": {"nodes": [{"id": "test_organizer.test_category_mapping", "label": "test_category_mapping", "title": "test_organizer.test_category_mapping\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 48", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_ensure_dir_new_directory": {"nodes": [{"id": "test_organizer.test_ensure_dir_new_directory", "label": "test_ensure_dir_new_directory", "title": "test_organizer.test_ensure_dir_new_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 57", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_ensure_dir_existing_directory": {"nodes": [{"id": "test_organizer.test_ensure_dir_existing_directory", "label": "test_ensure_dir_existing_directory", "title": "test_organizer.test_ensure_dir_existing_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 70", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_ensure_dir_existing_without_init": {"nodes": [{"id": "test_organizer.test_ensure_dir_existing_without_init", "label": "test_ensure_dir_existing_without_init", "title": "test_organizer.test_ensure_dir_existing_without_init\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 82", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_categorize_file_core": {"nodes": [{"id": "test_organizer.test_categorize_file_core", "label": "test_categorize_file_core", "title": "test_organizer.test_categorize_file_core\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 93", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_categorize_file_export": {"nodes": [{"id": "test_organizer.test_categorize_file_export", "label": "test_categorize_file_export", "title": "test_organizer.test_categorize_file_export\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 101", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_categorize_file_generate": {"nodes": [{"id": "test_organizer.test_categorize_file_generate", "label": "test_categorize_file_generate", "title": "test_organizer.test_categorize_file_generate\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 109", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_categorize_file_utils": {"nodes": [{"id": "test_organizer.test_categorize_file_utils", "label": "test_categorize_file_utils", "title": "test_organizer.test_categorize_file_utils\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 117", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_categorize_file_unknown": {"nodes": [{"id": "test_organizer.test_categorize_file_unknown", "label": "test_categorize_file_unknown", "title": "test_organizer.test_categorize_file_unknown\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 125", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_load_integration_summary_success": {"nodes": [{"id": "test_organizer.test_load_integration_summary_success", "label": "test_load_integration_summary_success", "title": "test_organizer.test_load_integration_summary_success\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 133", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_load_integration_summary_not_found": {"nodes": [{"id": "test_organizer.test_load_integration_summary_not_found", "label": "test_load_integration_summary_not_found", "title": "test_organizer.test_load_integration_summary_not_found\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 155", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_extract_successful_functions": {"nodes": [{"id": "test_organizer.test_extract_successful_functions", "label": "test_extract_successful_functions", "title": "test_organizer.test_extract_successful_functions\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 160", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_copy_file_to_src": {"nodes": [{"id": "test_organizer.test_copy_file_to_src", "label": "test_copy_file_to_src", "title": "test_organizer.test_copy_file_to_src\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 180", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_copy_file_to_src_create_directory": {"nodes": [{"id": "test_organizer.test_copy_file_to_src_create_directory", "label": "test_copy_file_to_src_create_directory", "title": "test_organizer.test_copy_file_to_src_create_directory\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 199", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_copy_file_to_src_source_not_found": {"nodes": [{"id": "test_organizer.test_copy_file_to_src_source_not_found", "label": "test_copy_file_to_src_source_not_found", "title": "test_organizer.test_copy_file_to_src_source_not_found\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 215", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_copy_test_to_tests": {"nodes": [{"id": "test_organizer.test_copy_test_to_tests", "label": "test_copy_test_to_tests", "title": "test_organizer.test_copy_test_to_tests\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 224", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_organize_successful_functions": {"nodes": [{"id": "test_organizer.test_organize_successful_functions", "label": "test_organize_successful_functions", "title": "test_organizer.test_organize_successful_functions\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 242", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_create_module_init_files": {"nodes": [{"id": "test_organizer.test_create_module_init_files", "label": "test_create_module_init_files", "title": "test_organizer.test_create_module_init_files\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 271", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_create_main_init_file": {"nodes": [{"id": "test_organizer.test_create_main_init_file", "label": "test_create_main_init_file", "title": "test_organizer.test_create_main_init_file\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 295", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_save_organization_log": {"nodes": [{"id": "test_organizer.test_save_organization_log", "label": "test_save_organization_log", "title": "test_organizer.test_save_organization_log\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 314", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_run_no_successful_functions": {"nodes": [{"id": "test_organizer.test_run_no_successful_functions", "label": "test_run_no_successful_functions", "title": "test_organizer.test_run_no_successful_functions\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 335", "color": "#ff6b6b"}], "edges": []}, "test_organizer.test_run_with_successful_functions": {"nodes": [{"id": "test_organizer.test_run_with_successful_functions", "label": "test_run_with_successful_functions", "title": "test_organizer.test_run_with_successful_functions\\nFile: src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py\\nLine: 359", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - test_organizer
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="organizer" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.organizer', 'organizer')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>organizer</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:27
+                </div>
+            </div>
+
+            <div class="function-item" data-name="temp_dir" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.temp_dir', 'temp_dir')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>temp_dir</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:20
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_categorize_file_core" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_categorize_file_core', 'test_categorize_file_core')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_categorize_file_core</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:93
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_categorize_file_export" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_categorize_file_export', 'test_categorize_file_export')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_categorize_file_export</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:101
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_categorize_file_generate" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_categorize_file_generate', 'test_categorize_file_generate')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_categorize_file_generate</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:109
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_categorize_file_unknown" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_categorize_file_unknown', 'test_categorize_file_unknown')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_categorize_file_unknown</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:125
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_categorize_file_utils" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_categorize_file_utils', 'test_categorize_file_utils')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_categorize_file_utils</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:117
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_category_mapping" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_category_mapping', 'test_category_mapping')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_category_mapping</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:48
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_copy_file_to_src" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_copy_file_to_src', 'test_copy_file_to_src')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_copy_file_to_src</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:180
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_copy_file_to_src_create_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_copy_file_to_src_create_directory', 'test_copy_file_to_src_create_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_copy_file_to_src_create_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:199
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_copy_file_to_src_source_not_found" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_copy_file_to_src_source_not_found', 'test_copy_file_to_src_source_not_found')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_copy_file_to_src_source_not_found</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:215
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_copy_test_to_tests" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_copy_test_to_tests', 'test_copy_test_to_tests')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_copy_test_to_tests</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:224
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_create_main_init_file" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_create_main_init_file', 'test_create_main_init_file')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_create_main_init_file</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:295
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_create_module_init_files" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_create_module_init_files', 'test_create_module_init_files')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_create_module_init_files</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:271
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_ensure_dir_existing_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_ensure_dir_existing_directory', 'test_ensure_dir_existing_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_ensure_dir_existing_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:70
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_ensure_dir_existing_without_init" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_ensure_dir_existing_without_init', 'test_ensure_dir_existing_without_init')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_ensure_dir_existing_without_init</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:82
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_ensure_dir_new_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_ensure_dir_new_directory', 'test_ensure_dir_new_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_ensure_dir_new_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:57
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_extract_successful_functions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_extract_successful_functions', 'test_extract_successful_functions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_extract_successful_functions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:160
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_init_custom_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_init_custom_directory', 'test_init_custom_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_init_custom_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:39
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_init_default_directory" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_init_default_directory', 'test_init_default_directory')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_init_default_directory</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:31
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_integration_summary_not_found" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_load_integration_summary_not_found', 'test_load_integration_summary_not_found')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_integration_summary_not_found</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:155
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_load_integration_summary_success" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_load_integration_summary_success', 'test_load_integration_summary_success')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_load_integration_summary_success</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:133
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_organize_successful_functions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_organize_successful_functions', 'test_organize_successful_functions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_organize_successful_functions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:242
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_run_no_successful_functions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_run_no_successful_functions', 'test_run_no_successful_functions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_run_no_successful_functions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:335
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_run_with_successful_functions" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_run_with_successful_functions', 'test_run_with_successful_functions')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_run_with_successful_functions</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:359
+                </div>
+            </div>
+
+            <div class="function-item" data-name="test_save_organization_log" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('test_organizer.test_save_organization_log', 'test_save_organization_log')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>test_save_organization_log</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/tests/unit/test_organizer.py:314
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Create a simple vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 12 }
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' }
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 100,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666'
+            }
+        };
+        
+        new vis.Network(container, data, options);
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>

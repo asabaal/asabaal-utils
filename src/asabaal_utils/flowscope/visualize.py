@@ -136,6 +136,11 @@ def create_pyvis_graph(graph: nx.DiGraph,
     if any(attrs.get("cross_module") for _, attrs in graph.nodes(data=True)) and module_reports_dir:
         _add_click_handlers_to_html(output_path, graph, module_reports_dir)
     
+    # Add function flow data injection if function flows exist
+    if module_reports_dir and (module_reports_dir / "function_flows").exists():
+        function_flows_dir = module_reports_dir / "function_flows"
+        _add_function_flow_data_to_html(output_path, function_flows_dir)
+    
     # Add Function Explorer to ALL reports
     if module_name:
         _add_function_explorer_to_html(output_path, graph, module_name)
@@ -383,7 +388,7 @@ def create_drift_visualization(old_graph: nx.DiGraph,
 
 
 def _add_click_handlers_to_html(html_path: Path, graph: nx.DiGraph, module_reports_dir: Path) -> None:
-    """Add custom JavaScript click handlers for cross-module nodes.
+    """Add custom JavaScript click handlers for cross-module nodes and function flow viewing.
     
     Args:
         html_path: Path to the HTML file to modify
@@ -430,8 +435,250 @@ def _add_click_handlers_to_html(html_path: Path, graph: nx.DiGraph, module_repor
             # Create JavaScript for click handlers
             js_code = f"""
 <script>
-// Add click handlers for cross-module nodes
+// Add click handlers for cross-module nodes and function flow viewing
 const moduleMapping = {json.dumps(module_mapping)};
+
+function openFunctionFlow(functionName, moduleName) {{
+    // Create or show function flow modal
+    let modal = document.getElementById('function-flow-modal');
+    if (!modal) {{
+        modal = document.createElement('div');
+        modal.id = 'function-flow-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+        `;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '×';
+        closeBtn.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        `;
+        closeBtn.onclick = () => modal.style.display = 'none';
+        
+        const title = document.createElement('h2');
+        title.id = 'function-flow-title';
+        title.style.marginTop = '0';
+        
+        const content = document.createElement('div');
+        content.id = 'function-flow-content';
+        
+        modalContent.appendChild(closeBtn);
+        modalContent.appendChild(title);
+        modalContent.appendChild(content);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Close on background click
+        modal.onclick = (e) => {{
+            if (e.target === modal) {{
+                modal.style.display = 'none';
+            }}
+        }};
+    }}
+    
+    // Update modal content
+    document.getElementById('function-flow-title').textContent = `Function Flow: ${{functionName}}`;
+    document.getElementById('function-flow-content').innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 18px; margin-bottom: 10px;">Loading function flow analysis...</div>
+            <div style="color: #666;">Parsing control flow for ${{functionName}}</div>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+    
+    // Load function flow data
+    loadFunctionFlowData(functionName, moduleName);
+}}
+
+function loadFunctionFlowData(functionName, moduleName) {{
+    // Try to load function flow data from JSON file
+    const flowDataPath = `function_flows/${{moduleName.replace(/\\./g, '_')}}.json`;
+    
+    fetch(flowDataPath)
+        .then(response => {{
+            if (!response.ok) {{
+                throw new Error('Function flow data not found');
+            }}
+            return response.json();
+        }})
+        .then(data => {{
+            const functionFlow = data.function_flows[functionName];
+            if (functionFlow) {{
+                renderFunctionFlow(functionFlow);
+            }} else {{
+                showFunctionFlowError(`Function ${{functionName}} not found in flow analysis`);
+            }}
+        }})
+        .catch(error => {{
+            console.error('Error loading function flow:', error);
+            showFunctionFlowError(`Unable to load function flow for ${{functionName}}. The function may not have been analyzed yet.`);
+        }});
+}}
+
+function renderFunctionFlow(functionFlow) {{
+    const content = document.getElementById('function-flow-content');
+    
+    // Create nodes and edges for vis.js
+    const nodes = new vis.DataSet([
+        {{
+            id: functionFlow.entry_point.id,
+            label: functionFlow.entry_point.label,
+            color: '#90ee90',
+            shape: 'ellipse',
+            font: {{size: 14, bold: true}}
+        }},
+        {{
+            id: functionFlow.exit_point.id,
+            label: functionFlow.exit_point.label,
+            color: '#ff6b6b',
+            shape: 'ellipse',
+            font: {{size: 14, bold: true}}
+        }}
+    ]);
+    
+    // Add control flow nodes
+    functionFlow.nodes.forEach(node => {{
+        let color = '#97c2fc'; // Default blue
+        let shape = 'box';
+        
+        switch (node.type) {{
+            case 'assignment':
+                color = '#ffd700'; // Gold
+                break;
+            case 'conditional':
+                color = '#ffa500'; // Orange
+                shape = 'diamond';
+                break;
+            case 'loop':
+                color = '#ff9999'; // Light red
+                shape = 'diamond';
+                break;
+            case 'return':
+                color = '#90ee90'; // Light green
+                break;
+            case 'try':
+                color = '#dda0dd'; // Plum
+                break;
+            case 'except':
+                color = '#f0e68c'; // Khaki
+                break;
+            case 'merge':
+                color = '#d3d3d3'; // Light gray
+                shape = 'circle';
+                break;
+        }}
+        
+        nodes.add({{
+            id: node.id,
+            label: node.label.length > 30 ? node.label.substring(0, 27) + '...' : node.label,
+            title: `${{node.label}}\\nLine: ${{node.line}}\\nType: ${{node.type}}`,
+            color: color,
+            shape: shape,
+            font: {{size: 12}}
+        }});
+    }});
+    
+    // Create edges
+    const edges = new vis.DataSet(functionFlow.edges.map(edge => ({{
+        from: edge.from,
+        to: edge.to,
+        label: edge.label || '',
+        arrows: 'to',
+        color: {{color: '#666666'}},
+        font: {{size: 10, align: 'middle'}}
+    }})));
+    
+    // Create container
+    const container = document.createElement('div');
+    container.style.cssText = `
+        height: 500px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin: 10px 0;
+    `;
+    
+    // Clear content and add container
+    content.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            <strong>Module:</strong> ${{functionFlow.module}}<br>
+            <strong>File:</strong> ${{functionFlow.file_path}}<br>
+            <strong>Control Flow Nodes:</strong> ${{functionFlow.nodes.length}}
+        </div>
+    `;
+    content.appendChild(container);
+    
+    // Create network
+    const networkData = {{ nodes: nodes, edges: edges }};
+    const networkOptions = {{
+        layout: {{
+            hierarchical: {{
+                direction: 'UD',
+                sortMethod: 'directed',
+                levelSeparation: 100,
+                nodeSpacing: 100
+            }}
+        }},
+        physics: {{
+            enabled: false
+        }},
+        interaction: {{
+            hover: true,
+            tooltipDelay: 200
+        }},
+        nodes: {{
+            borderWidth: 2,
+            borderColor: '#333333'
+        }},
+        edges: {{
+            smooth: {{
+                type: 'cubicBezier',
+                roundness: 0.4
+            }}
+        }}
+    }};
+    
+    const network = new vis.Network(container, networkData, networkOptions);
+}}
+
+function showFunctionFlowError(message) {{
+    const content = document.getElementById('function-flow-content');
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <div style="font-size: 18px; margin-bottom: 10px;">⚠️ Function Flow Not Available</div>
+            <div style="margin-bottom: 20px;">${{message}}</div>
+            <div style="font-size: 14px; color: #999;">
+                To enable function flow analysis, run FlowScope with the --analyze-functions flag.
+            </div>
+        </div>
+    `;
+}}
 
 function addClickHandlers() {{
     console.log('addClickHandlers called, network:', typeof network);
@@ -451,12 +698,24 @@ function addClickHandlers() {{
             const clickedNode = network.body.data.nodes.get(clickedNodeId);
             console.log('Clicked node:', clickedNode);
             
-            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {{
-                const targetModule = clickedNode.title.match(/Target Module: ([\\w_]+)/);
-                console.log('Target module match:', targetModule);
-                if (targetModule && moduleMapping[targetModule[1]]) {{
-                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
-                    window.location.href = moduleMapping[targetModule[1]];
+            if (clickedNode && clickedNode.title) {{
+                // Handle cross-module function clicks
+                if (clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {{
+                    const targetModule = clickedNode.title.match(/Target Module: ([\\w_]+)/);
+                    console.log('Target module match:', targetModule);
+                    if (targetModule && moduleMapping[targetModule[1]]) {{
+                        console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                        window.location.href = moduleMapping[targetModule[1]];
+                    }}
+                }}
+                // Handle function flow clicks for all nodes
+                else if (clickedNode.title.includes('Function:')) {{
+                    const functionName = clickedNode.title.match(/Function: ([\\w\\.]+)/);
+                    const moduleMatch = clickedNode.title.match(/Module: ([\\w\\.]+)/);
+                    if (functionName && functionName[1]) {{
+                        console.log('Opening function flow for:', functionName[1]);
+                        openFunctionFlow(functionName[1], moduleMatch ? moduleMatch[1] : '');
+                    }}
                 }}
             }}
         }}
@@ -480,6 +739,147 @@ setTimeout(addClickHandlers, 2000);
     
     except Exception as e:
         print(f"Warning: Could not add click handlers to {html_path}: {e}")
+
+
+def _add_function_flow_data_to_html(html_path: Path, function_flows_dir: Path) -> None:
+    """Add function flow data to HTML for dynamic loading.
+    
+    Args:
+        html_path: Path to the HTML file to modify
+        function_flows_dir: Directory containing function flow JSON files
+    """
+    try:
+        # Load all function flow data
+        function_flow_data = {}
+        
+        for json_file in function_flows_dir.glob("*.json"):
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    module_name = data.get('module', json_file.stem)
+                    
+                    # Add all function flows from this module
+                    for func_name, flow_data in data.get('function_flows', {}).items():
+                        full_name = f"{module_name}.{func_name}"
+                        
+                        # Transform the data to vis.js format
+                        transformed_data = _transform_function_flow_data(flow_data)
+                        function_flow_data[full_name] = transformed_data
+                        
+            except Exception as e:
+                print(f"Warning: Could not load function flow data from {json_file}: {e}")
+        
+        if function_flow_data:
+            with open(html_path, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            
+            # Inject function flow data
+            data_script = f"""
+<script>
+window.functionFlowData = {json.dumps(function_flow_data)};
+</script>
+"""
+            
+            # Insert before closing </body> tag
+            if '</body>' in html_content:
+                html_content = html_content.replace('</body>', data_script + '</body>')
+            else:
+                html_content += data_script
+            
+            # Write back to file
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+                
+            print(f"✓ Added function flow data for {len(function_flow_data)} functions")
+    
+    except Exception as e:
+        print(f"Warning: Could not add function flow data to {html_path}: {e}")
+
+
+def _transform_function_flow_data(flow_data: dict) -> dict:
+    """Transform function flow data to vis.js format.
+    
+    Args:
+        flow_data: Raw function flow data from JSON
+        
+    Returns:
+        Transformed data with nodes and edges arrays for vis.js
+    """
+    # Start with entry and exit points
+    nodes = []
+    edges = []
+    
+    # Add entry point
+    if 'entry_point' in flow_data:
+        entry = flow_data['entry_point']
+        nodes.append({
+            'id': entry['id'],
+            'label': entry['label'],
+            'title': f"{entry['label']}" + "\\nType: " + str(entry['type']),
+            'color': '#90ee90',  # Light green
+            'shape': 'ellipse'
+        })
+    
+    # Add exit point
+    if 'exit_point' in flow_data:
+        exit = flow_data['exit_point']
+        nodes.append({
+            'id': exit['id'],
+            'label': exit['label'],
+            'title': f"{exit['label']}" + "\\nType: " + str(exit['type']),
+            'color': '#ff6b6b',  # Light red
+            'shape': 'ellipse'
+        })
+    
+    # Add control flow nodes
+    color_map = {
+        'statement': '#97c2fc',  # Blue
+        'assignment': '#ffd700',  # Gold
+        'conditional': '#ffa500',  # Orange
+        'loop': '#ff9999',  # Light red
+        'return': '#90ee90',  # Light green
+        'try': '#dda0dd',  # Plum
+        'except': '#f0e68c',  # Khaki
+        'merge': '#d3d3d3',  # Light gray
+    }
+    
+    shape_map = {
+        'conditional': 'diamond',
+        'loop': 'diamond',
+        'merge': 'circle',
+    }
+    
+    for node in flow_data.get('nodes', []):
+        color = color_map.get(node.get('type', 'statement'), '#97c2fc')
+        shape = shape_map.get(node.get('type', 'statement'), 'box')
+        
+        label = str(node.get('label', ''))
+        if len(label) > 30:
+            label = label[:27] + '...'
+        
+        title = f"{label}" + "\\nLine: " + str(node.get('line', '?')) + "\\nType: " + str(node.get('type', 'statement'))
+        
+        nodes.append({
+            'id': node['id'],
+            'label': label,
+            'title': title,
+            'color': color,
+            'shape': shape
+        })
+    
+    # Add edges
+    for edge in flow_data.get('edges', []):
+        edges.append({
+            'from': edge['from'],
+            'to': edge['to'],
+            'label': edge.get('label', '') or '',
+            'arrows': 'to'
+        })
+    
+    return {
+        'nodes': nodes,
+        'edges': edges
+    }
 
 
 def export_graph_data(graph: nx.DiGraph, 
@@ -560,6 +960,13 @@ def _fix_html_output(html_path: Path, title: str) -> None:
         # Fix title if needed
         if '<title>' not in html_content:
             html_content = html_content.replace('<head>', f'<head><title>{title}</title>')
+        
+        # Add vis.js for function flow visualization
+        if 'vis-network' not in html_content:
+            vis_js_script = '''
+<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+'''
+            html_content = html_content.replace('</head>', vis_js_script + '</head>')
         
         # Remove local script references that cause CORS issues
         html_content = html_content.replace(
@@ -926,7 +1333,7 @@ def create_function_flow_data(graph: nx.DiGraph, function_name: str) -> dict:
         node_data = {
             "id": node,
             "label": node_name,
-            "title": f"{node}\\nFile: {attrs.get('file', 'Unknown')}\\nLine: {attrs.get('line', 'Unknown')}",
+            "title": f"{node}" + "\\nFile: " + str(attrs.get('file', 'Unknown')) + "\\nLine: " + str(attrs.get('line', 'Unknown')),
             "color": color
         }
         
@@ -1054,10 +1461,12 @@ def _add_function_explorer_to_html(html_path: Path, graph: nx.DiGraph, module_na
             if node.startswith(module_name + "."):
                 function_flow_data[node] = create_function_flow_data(graph, node)
         
-        # Add JavaScript data injection
+        # Add JavaScript data injection (only if not already present with control flow data)
         data_script = f'''
 <script>
-window.functionFlowData = {json.dumps(function_flow_data)};
+if (!window.functionFlowData || !window.functionFlowData['math_ops.add'] || !window.functionFlowData['math_ops.add'].nodes || window.functionFlowData['math_ops.add'].nodes.length < 3) {{
+    window.functionFlowData = {json.dumps(function_flow_data)};
+}}
 </script>
 '''
         
@@ -1207,7 +1616,7 @@ let currentNetwork = null;
                 nodes.append({
                     "id": node,
                     "label": node_name,
-                    "title": f"{node}\\nFile: {attrs.get('file', 'Unknown')}\\nLine: {attrs.get('line', 'Unknown')}\\nModule: {module_name}",
+                    "title": f"{node}" + "\\nFile: " + str(attrs.get('file', 'Unknown')) + "\\nLine: " + str(attrs.get('line', 'Unknown')) + "\\nModule: " + str(module_name),
                     "color": color,
                     "shape": "box",
                     "font": {"size": 12, "color": "#333333"}
@@ -1597,10 +2006,12 @@ def _add_global_function_explorer_to_html(html_path: Path, graph: nx.DiGraph) ->
             if "." in node:
                 function_flow_data[node] = create_function_flow_data(graph, node)
         
-        # Add JavaScript data injection
+        # Add JavaScript data injection (only if not already present with control flow data)
         data_script = f'''
 <script>
-window.functionFlowData = {json.dumps(function_flow_data)};
+if (!window.functionFlowData || !window.functionFlowData['math_ops.add'] || !window.functionFlowData['math_ops.add'].nodes || window.functionFlowData['math_ops.add'].nodes.length < 3) {{
+    window.functionFlowData = {json.dumps(function_flow_data)};
+}}
 </script>
 '''
         

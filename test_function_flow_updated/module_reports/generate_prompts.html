@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+    <head><title>generate_prompts Module - Function Call Graph</title>
+        <meta charset="utf-8">
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;">
+    <h4 style="margin: 0 0 10px 0; color: #333;">Color Legend</h4>
+    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff6b6b; border: 1px solid #666;"></span> Cross-Module Function (calls other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffa500; border: 1px solid #666;"></span> Called From Other Module (used by other modules)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9999; border: 1px solid #666;"></span> Async Function</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666;"></span> Entry Point (no incoming calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #ffd700; border: 1px solid #666;"></span> Leaf Function (no outgoing calls)</div>
+        <div><span style="display: inline-block; width: 12px; height: 12px; background: #97c2fc; border: 1px solid #666;"></span> Regular Function</div>
+    </div>
+</div>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.load_functional_catalog", "label": "load_functional_catalog", "shape": "dot", "title": "Function: generate_prompts.load_functional_catalog\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 12\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: generate_prompts\nCalled From: test_generate_prompts\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_function_prompt", "label": "generate_function_prompt", "shape": "dot", "title": "Function: generate_prompts.generate_function_prompt\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 17\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: generate_prompts\nCalled From: test_generate_prompts\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_metadata_summary", "label": "generate_metadata_summary", "shape": "dot", "title": "Function: generate_prompts.generate_metadata_summary\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 119\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.save_prompt", "label": "save_prompt", "shape": "dot", "title": "Function: generate_prompts.save_prompt\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 159\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.save_metadata_summary", "label": "save_metadata_summary", "shape": "dot", "title": "Function: generate_prompts.save_metadata_summary\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 166\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_prompts_index", "label": "generate_prompts_index", "shape": "dot", "title": "Function: generate_prompts.generate_prompts_index\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 173\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#666666", "borderWidth": 1, "color": "#90ee90", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.main", "label": "main", "shape": "dot", "title": "Function: generate_prompts.main\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\nLine: 210\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.save_prompts_to_json", "label": "save_prompts_to_json", "shape": "dot", "title": "Function: generate_prompts.save_prompts_to_json\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: generate_prompts\nCalled From: test_generate_prompts\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}, {"borderColor": "#ff0000", "borderWidth": 3, "color": "#ff6b6b", "font": {"color": "#333333", "size": 12}, "id": "generate_prompts.generate_all_prompts", "label": "generate_all_prompts", "shape": "dot", "title": "Function: generate_prompts.generate_all_prompts\n\ud83d\udd17 CROSS-MODULE FUNCTION\nTarget Module: generate_prompts\nCalled From: test_generate_prompts\n\ud83d\udca1 Click to open module report\n\ud83d\udcde CALLED FROM OTHER MODULE\nThis function is used by other modules\nIn-degree: 0\nOut-degree: 0"}]);
+                  edges = new vis.DataSet([]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 100}}, "interaction": {"hover": true, "tooltipDelay": 200}, "layout": {"improvedLayout": false}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+// Add click handlers for cross-module nodes
+const moduleMapping = {"example_runner": "example_runner.html", "examples": "examples.html", "claude_client": "claude_client.html", "frame_extractor": "frame_extractor.html", "biblical_themes": "biblical_themes.html", "font_generator": "font_generator.html", "encoder": "encoder.html", "align_behaviors": "align_behaviors.html", "conftest": "conftest.html", "enforce_signature": "enforce_signature.html", "features": "features.html", "document_categorizer": "document_categorizer.html", "detect_unused_media": "detect_unused_media.html", "analyze_tests": "analyze_tests.html", "character_detector": "character_detector.html", "clip_preview_generator": "clip_preview_generator.html", "anthropic": "anthropic.html", "find_unused_media": "find_unused_media.html", "02_code_generator": "02_code_generator.html", "find_files": "find_files.html", "chunked_audio_analyzer": "chunked_audio_analyzer.html", "__init__": "__init__.html", "duplicate_detection": "duplicate_detection.html", "compositor": "compositor.html", "church_service_analyzer": "church_service_analyzer.html", "analyze_all_runs": "analyze_all_runs.html", "blended_layout_generator": "blended_layout_generator.html", "08_integration": "08_integration.html", "effect_library": "effect_library.html", "detailed_analysis_processor": "detailed_analysis_processor.html", "compare_behaviors": "compare_behaviors.html", "12_behavior_analysis": "12_behavior_analysis.html", "capcut-srt-integration": "capcut-srt-integration.html", "aggregate_behaviors": "aggregate_behaviors.html", "analyze_capcut": "analyze_capcut.html", "animations": "animations.html", "capcut_srt_integration": "capcut_srt_integration.html", "font_loader": "font_loader.html", "api_confirmation": "api_confirmation.html", "generate_prompts": "generate_prompts.html", "enhance_reports": "enhance_reports.html", "church_audio_classifier": "church_audio_classifier.html", "drift": "drift.html", "file_existence_utils": "file_existence_utils.html", "gap_processor": "gap_processor.html", "base": "base.html", "classify_failures": "classify_failures.html", "cli": "cli.html", "auto_layout": "auto_layout.html", "05_cli_interface": "05_cli_interface.html", "color_analyzer": "color_analyzer.html", "backend_config": "backend_config.html", "analyze_project_structure": "analyze_project_structure.html", "fonts": "fonts.html", "clip_extractor": "clip_extractor.html", "analyzer": "analyzer.html", "file_classifier": "file_classifier.html", "batch_processor": "batch_processor.html", "04_organizer": "04_organizer.html", "01_spec_parser": "01_spec_parser.html", "build_logic_catalog": "build_logic_catalog.html"};
+
+function addClickHandlers() {
+    console.log('addClickHandlers called, network:', typeof network);
+    
+    // Wait for network to be fully initialized
+    if (typeof network === 'undefined') {
+        console.log('Network not ready, retrying...');
+        setTimeout(addClickHandlers, 1000);
+        return;
+    }
+    
+    console.log('Adding click listener...');
+    network.on("click", function(params) {
+        console.log('Click detected:', params);
+        if (params.nodes.length > 0) {
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = network.body.data.nodes.get(clickedNodeId);
+            console.log('Clicked node:', clickedNode);
+            
+            if (clickedNode && clickedNode.title && clickedNode.title.includes('🔗 CROSS-MODULE FUNCTION')) {
+                const targetModule = clickedNode.title.match(/Target Module: ([\w_]+)/);
+                console.log('Target module match:', targetModule);
+                if (targetModule && moduleMapping[targetModule[1]]) {
+                    console.log('Opening module report:', moduleMapping[targetModule[1]]);
+                    window.location.href = moduleMapping[targetModule[1]];
+                }
+            }
+        }
+    });
+}
+
+// Wait for network to be ready
+setTimeout(addClickHandlers, 2000);
+</script>
+
+<script>
+window.functionFlowData = {"generate_prompts.load_functional_catalog": {"nodes": [{"id": "generate_prompts.load_functional_catalog", "label": "load_functional_catalog", "title": "generate_prompts.load_functional_catalog\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 12", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.generate_function_prompt": {"nodes": [{"id": "generate_prompts.generate_function_prompt", "label": "generate_function_prompt", "title": "generate_prompts.generate_function_prompt\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 17", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.generate_metadata_summary": {"nodes": [{"id": "generate_prompts.generate_metadata_summary", "label": "generate_metadata_summary", "title": "generate_prompts.generate_metadata_summary\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 119", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.save_prompt": {"nodes": [{"id": "generate_prompts.save_prompt", "label": "save_prompt", "title": "generate_prompts.save_prompt\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 159", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.save_metadata_summary": {"nodes": [{"id": "generate_prompts.save_metadata_summary", "label": "save_metadata_summary", "title": "generate_prompts.save_metadata_summary\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 166", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.generate_prompts_index": {"nodes": [{"id": "generate_prompts.generate_prompts_index", "label": "generate_prompts_index", "title": "generate_prompts.generate_prompts_index\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 173", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.main": {"nodes": [{"id": "generate_prompts.main", "label": "main", "title": "generate_prompts.main\\nFile: src/asabaal_utils/agents/spec_coder/generate_prompts.py\\nLine: 210", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.save_prompts_to_json": {"nodes": [{"id": "generate_prompts.save_prompts_to_json", "label": "save_prompts_to_json", "title": "generate_prompts.save_prompts_to_json\\nFile: Unknown\\nLine: Unknown", "color": "#ff6b6b"}], "edges": []}, "generate_prompts.generate_all_prompts": {"nodes": [{"id": "generate_prompts.generate_all_prompts", "label": "generate_all_prompts", "title": "generate_prompts.generate_all_prompts\\nFile: Unknown\\nLine: Unknown", "color": "#ff6b6b"}], "edges": []}};
+</script>
+
+    <div id="function-explorer" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Function Explorer - generate_prompts
+        </h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="function-search" placeholder="Search functions..." 
+                   style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button onclick="filterFunctions()" style="padding: 8px 15px; margin-left: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+            <button onclick="clearSearch()" style="padding: 8px 15px; margin-left: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+        </div>
+        <div id="function-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; background: white;">
+
+            <div class="function-item" data-name="generate_all_prompts" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.generate_all_prompts', 'generate_all_prompts')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_all_prompts</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    :
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_function_prompt" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.generate_function_prompt', 'generate_function_prompt')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_function_prompt</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:17
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_metadata_summary" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.generate_metadata_summary', 'generate_metadata_summary')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_metadata_summary</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:119
+                </div>
+            </div>
+
+            <div class="function-item" data-name="generate_prompts_index" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.generate_prompts_index', 'generate_prompts_index')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>generate_prompts_index</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:173
+                </div>
+            </div>
+
+            <div class="function-item" data-name="load_functional_catalog" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.load_functional_catalog', 'load_functional_catalog')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>load_functional_catalog</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:12
+                </div>
+            </div>
+
+            <div class="function-item" data-name="main" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.main', 'main')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>main</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:210
+                </div>
+            </div>
+
+            <div class="function-item" data-name="save_metadata_summary" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.save_metadata_summary', 'save_metadata_summary')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>save_metadata_summary</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:166
+                </div>
+            </div>
+
+            <div class="function-item" data-name="save_prompt" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.save_prompt', 'save_prompt')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>save_prompt</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    src/asabaal_utils/agents/spec_coder/generate_prompts.py:159
+                </div>
+            </div>
+
+            <div class="function-item" data-name="save_prompts_to_json" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                 onmouseover="this.style.backgroundColor='#f0f0f0'" 
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="showFunctionFlow('generate_prompts.save_prompts_to_json', 'save_prompts_to_json')">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #90ee90; border: 1px solid #666; margin-right: 8px; border-radius: 2px;"></span>
+                        <strong>save_prompts_to_json</strong>
+                        <span style="margin-left: 10px; color: #666; font-size: 12px;">entry</span>
+                    </div>
+                    <div style="color: #666; font-size: 12px;">
+                        <span title="Incoming calls">↓0</span> | 
+                        <span title="Outgoing calls">↑0</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                    :
+                </div>
+            </div>
+
+        </div>
+        <div id="function-flow-container" style="margin-top: 20px; display: none;">
+            <h4 style="color: #333; margin-bottom: 10px;">Function Flow Graph</h4>
+            <div id="function-flow-graph" style="border: 1px solid #ccc; height: 400px; background: white;"></div>
+            <button onclick="closeFunctionFlow()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Flow Graph</button>
+        </div>
+    </div>
+    
+    <script>
+    function filterFunctions() {
+        const searchTerm = document.getElementById('function-search').value.toLowerCase();
+        const functionItems = document.querySelectorAll('.function-item');
+        
+        functionItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function clearSearch() {
+        document.getElementById('function-search').value = '';
+        const functionItems = document.querySelectorAll('.function-item');
+        functionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+    }
+    
+    function showFunctionFlow(fullFunctionName, functionName) {
+        const container = document.getElementById('function-flow-container');
+        const graphDiv = document.getElementById('function-flow-graph');
+        
+        container.style.display = 'block';
+        graphDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading flow graph for ' + functionName + '...</p>';
+        
+        // Create flow graph for this specific function
+        createFunctionFlowGraph(fullFunctionName, functionName);
+        
+        // Scroll to the flow graph
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeFunctionFlow() {
+        document.getElementById('function-flow-container').style.display = 'none';
+    }
+    
+    function createFunctionFlowGraph(fullFunctionName, functionName) {
+        // This will be populated with the actual flow graph data
+        const graphData = getFunctionFlowData(fullFunctionName);
+        renderFunctionFlowGraph(graphData, functionName);
+    }
+    
+    function getFunctionFlowData(fullFunctionName) {
+        // Extract function flow data from the main graph
+        // This is a placeholder - actual data will be injected by Python
+        return window.functionFlowData && window.functionFlowData[fullFunctionName] 
+            ? window.functionFlowData[fullFunctionName] 
+            : { nodes: [], edges: [] };
+    }
+    
+    function renderFunctionFlowGraph(graphData, functionName) {
+        const container = document.getElementById('function-flow-graph');
+        
+        // Clear container and add function name header
+        container.innerHTML = `<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Function Flow: ${functionName}</h3>`;
+        
+        // Create network container
+        const networkContainer = document.createElement('div');
+        networkContainer.style.height = '400px';
+        networkContainer.style.border = '1px solid #ddd';
+        networkContainer.style.borderRadius = '4px';
+        container.appendChild(networkContainer);
+        
+        // Create a vis.js network for the function flow
+        const nodes = new vis.DataSet(graphData.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            title: node.title,
+            color: node.color,
+            shape: 'box',
+            font: { size: 14, bold: node.id === functionName },
+            borderWidth: node.id === functionName ? 3 : 1,
+            borderColor: node.id === functionName ? '#ff6b6b' : '#666666'
+        })));
+        
+        const edges = new vis.DataSet(graphData.edges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            arrows: 'to',
+            color: { color: '#666666' },
+            width: 2
+        })));
+        
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: false
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true,
+                dragView: true
+            },
+            nodes: {
+                borderWidth: 1,
+                borderColor: '#666666',
+                font: { color: '#333' }
+            },
+            edges: {
+                smooth: {
+                    type: 'cubicBezier'
+                }
+            }
+        };
+        
+        const network = new vis.Network(networkContainer, data, options);
+        
+        // Fit network to show all nodes after stabilization
+        network.once('stabilized', function() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+    }
+    
+    // Add search on Enter key
+    document.getElementById('function-search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filterFunctions();
+        }
+    });
+    </script>
+</body>
+</html>
