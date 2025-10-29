@@ -153,11 +153,99 @@ def generate_dynamic_function_flow(
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }}
+        
+        .graph-header {{
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }}
+        
+        .graph-title {{
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }}
+        
+        .graph-metadata {{
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }}
+        
+        .metadata-item {{
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }}
+        
+        .metadata-label {{
+            font-weight: 500;
+        }}
+        
+        .metadata-value {{
+            color: #007bff;
+            font-weight: 600;
+        }}
+        
+        .toggle-button {{
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }}
+        
+        .toggle-button:hover {{
+            background: #0056b3;
+        }}
+        
+        .toggle-button.collapsed {{
+            background: #6c757d;
+        }}
+        
+        .resize-handle {{
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            height: 10px;
+            cursor: ns-resize;
+            position: relative;
+            flex-shrink: 0;
+        }}
+        
+        .resize-handle::before {{
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 2px;
+            background: #6c757d;
+            border-radius: 1px;
+        }}
+        
+        .resize-handle:hover {{
+            background: #dee2e6;
         }}
         
         #network {{
-            height: 70vh;
-            min-height: 500px;
+            height: 60vh;
+            min-height: 400px;
+            flex: 1;
+            position: relative;
         }}
         
         .info-panel {{
@@ -310,6 +398,25 @@ def generate_dynamic_function_flow(
     </div>
     
     <div class="graph-container">
+        <div class="graph-header">
+            <h2 class="graph-title" id="graph-title">{func_name} Function Flow</h2>
+            <div class="graph-metadata" id="graph-metadata">
+                <div class="metadata-item">
+                    <span class="metadata-label">Module:</span>
+                    <span class="metadata-value">{mod_name}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Nodes:</span>
+                    <span class="metadata-value" id="node-count">{node_count}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Edges:</span>
+                    <span class="metadata-value" id="edge-count">{edge_count}</span>
+                </div>
+                <button class="toggle-button" id="toggle-metadata" onclick="toggleMetadata()">Hide Info</button>
+            </div>
+        </div>
+        <div class="resize-handle" id="resize-handle"></div>
         <div id="network" class="loading">Loading function flow graph...</div>
     </div>
     
@@ -496,6 +603,9 @@ def generate_dynamic_function_flow(
             
             network = new vis.Network(container, data, options);
             
+            // Make network globally accessible
+            window.network = network;
+            
             // Fit network after stabilization
             network.once('stabilized', function() {{
                 network.fit({{
@@ -586,6 +696,30 @@ def generate_dynamic_function_flow(
             }});
         }}
         
+        function toggleMetadata() {{
+            const metadata = document.getElementById('graph-metadata');
+            const button = document.getElementById('toggle-metadata');
+            const network = document.getElementById('network');
+            
+            if (metadata.style.display === 'none') {{
+                metadata.style.display = 'flex';
+                button.textContent = 'Hide Info';
+                button.classList.remove('collapsed');
+                network.style.height = '60vh';
+            }} else {{
+                metadata.style.display = 'none';
+                button.textContent = 'Show Info';
+                button.classList.add('collapsed');
+                network.style.height = '75vh';
+            }}
+            
+            // Trigger network resize
+            if (window.network) {{
+                window.network.redraw();
+                window.network.fit();
+            }}
+        }}
+        
         function exportImage() {{
             // Create a canvas element
             const canvas = document.createElement('canvas');
@@ -614,9 +748,92 @@ def generate_dynamic_function_flow(
             }});
         }}
         
+        function makeResizable() {{
+            const resizeHandle = document.getElementById('resize-handle');
+            const networkContainer = document.getElementById('network');
+            const graphContainer = document.querySelector('.graph-container');
+            let isResizing = false;
+            let startY = 0;
+            let startHeight = 0;
+            
+            resizeHandle.addEventListener('mousedown', (e) => {{
+                isResizing = true;
+                startY = e.clientY;
+                startHeight = networkContainer.offsetHeight;
+                document.body.style.cursor = 'ns-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            }});
+            
+            document.addEventListener('mousemove', (e) => {{
+                if (!isResizing) return;
+                
+                const deltaY = e.clientY - startY;
+                const newHeight = Math.max(200, startHeight + deltaY); // Minimum 200px height
+                const containerHeight = graphContainer.offsetHeight;
+                const headerHeight = graphContainer.querySelector('.graph-header').offsetHeight;
+                const handleHeight = resizeHandle.offsetHeight;
+                const availableHeight = containerHeight - headerHeight - handleHeight;
+                
+                if (newHeight <= availableHeight) {{
+                    networkContainer.style.height = newHeight + 'px';
+                    if (window.network) {{
+                        window.network.redraw();
+                    }}
+                }}
+            }});
+            
+            document.addEventListener('mouseup', () => {{
+                if (isResizing) {{
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    if (window.network) {{
+                        window.network.fit();
+                    }}
+                }}
+            }});
+            
+            // Touch support for mobile
+            resizeHandle.addEventListener('touchstart', (e) => {{
+                isResizing = true;
+                startY = e.touches[0].clientY;
+                startHeight = networkContainer.offsetHeight;
+                e.preventDefault();
+            }});
+            
+            document.addEventListener('touchmove', (e) => {{
+                if (!isResizing) return;
+                
+                const deltaY = e.touches[0].clientY - startY;
+                const newHeight = Math.max(200, startHeight + deltaY);
+                const containerHeight = graphContainer.offsetHeight;
+                const headerHeight = graphContainer.querySelector('.graph-header').offsetHeight;
+                const handleHeight = resizeHandle.offsetHeight;
+                const availableHeight = containerHeight - headerHeight - handleHeight;
+                
+                if (newHeight <= availableHeight) {{
+                    networkContainer.style.height = newHeight + 'px';
+                    if (window.network) {{
+                        window.network.redraw();
+                    }}
+                }}
+            }});
+            
+            document.addEventListener('touchend', () => {{
+                if (isResizing) {{
+                    isResizing = false;
+                    if (window.network) {{
+                        window.network.fit();
+                    }}
+                }}
+            }});
+        }}
+        
         // Initialize network when page loads
         document.addEventListener('DOMContentLoaded', function() {{
             initializeNetwork();
+            makeResizable();
         }});
     </script>
 </body>
