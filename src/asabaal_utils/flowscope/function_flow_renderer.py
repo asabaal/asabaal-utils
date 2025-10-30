@@ -55,7 +55,7 @@ class FunctionFlowRenderer:
         # Add source code to flow data if available
         if hasattr(flow_data, 'source_code'):
             flow_data['source_code'] = flow_data.source_code
-        elif 'source_code' not in flow_data:
+        elif 'source_code' not in flow_data and flow_data.get('file_path'):
             # Try to read source code from file
             try:
                 import ast
@@ -88,7 +88,7 @@ class FunctionFlowRenderer:
         
         rendered_files = []
         for function_name, function_flow in module_flows.items():
-            output_file = self.render_function_flow(function_flow)
+            output_file = self.render_function_flow(function_flow, function_name)
             rendered_files.append(output_file)
         
         # Create index file listing all functions
@@ -126,13 +126,24 @@ class FunctionFlowRenderer:
         function_list = []
         for function_name, function_flow in module_flows.items():
             safe_name = function_name.replace('.', '_').replace('<', '_').replace('>', '_')
+            # Handle both old format (object with attributes) and new format (dict)
+            if hasattr(function_flow, 'file_path'):
+                file_path = function_flow.file_path
+                nodes = function_flow.nodes
+                edges = function_flow.edges
+            else:
+                # New format from JSON
+                file_path = function_flow.get('file_path', 'Unknown')
+                nodes = function_flow.get('nodes', [])
+                edges = function_flow.get('edges', [])
+            
             function_list.append(f"""
             <div class="function-item">
                 <h3><a href="{safe_name}_flow.html" target="_blank">{function_name}</a></h3>
                 <p>
-                    <strong>File:</strong> {function_flow.file_path}<br>
-                    <strong>Nodes:</strong> {len(function_flow.nodes)}<br>
-                    <strong>Edges:</strong> {len(function_flow.edges)}
+                    <strong>File:</strong> {file_path}<br>
+                    <strong>Nodes:</strong> {len(nodes)}<br>
+                    <strong>Edges:</strong> {len(edges)}
                 </p>
             </div>
             """)

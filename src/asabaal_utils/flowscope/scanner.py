@@ -211,7 +211,7 @@ def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: 
     """
     # Import new function flow builder
     try:
-        from function_flow_builder import generate_function_flow
+        from .function_flow_builder import generate_function_flow
     except ImportError:
         print("Warning: Function flow builder not available. Skipping function flow analysis.")
         return
@@ -264,6 +264,34 @@ def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: 
         
         except Exception as e:
             print(f"  Error analyzing {file}: {e}")
+    
+    # Generate HTML visualizations from JSON files
+    try:
+        from .function_flow_renderer import FunctionFlowRenderer
+        print("Generating HTML visualizations...")
+        renderer = FunctionFlowRenderer(function_flows_dir)
+        
+        # Process all JSON files and convert to HTML
+        for json_file in function_flows_dir.glob("*.json"):
+            try:
+                import json
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    module_data = json.load(f)
+                
+                module_name = module_data['module']
+                function_flows = module_data['function_flows']
+                
+                # Render all function flows for this module
+                renderer.render_module_function_flows(function_flows, module_name)
+                print(f"    Generated HTML for {module_name}")
+            except Exception as e:
+                print(f"    Error rendering {json_file.name}: {e}")
+        
+        print("HTML visualizations generated.")
+    except ImportError:
+        print("Warning: Function flow renderer not available. Only JSON files generated.")
+    except Exception as e:
+        print(f"Error generating HTML visualizations: {e}")
     
     print(f"Function flow analysis complete. Results saved to {function_flows_dir}")
 
