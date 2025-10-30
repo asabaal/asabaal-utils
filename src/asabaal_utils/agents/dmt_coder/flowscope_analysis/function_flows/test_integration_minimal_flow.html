@@ -1,353 +1,989 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Function Flow: test_integration_minimal</title>
-    <style type="text/css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Function Flow - test_integration_minimal</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
-        }
-        .info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .flow-image {
-            text-align: center;
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            background: #fafafa;
-        }
-        .flow-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-        .legend {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 4px;
-        }
-        .legend-item {
-            display: inline-block;
-            margin-right: 20px;
-            margin-bottom: 5px;
-        }
-        .legend-color {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-        .metadata {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-        .metadata h3 {
-            margin-top: 0;
-            color: #495057;
-        }
-        .node-list {
-            list-style: none;
             padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-        .node-item {
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-size: 12px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .graph-container {
+            margin: 20px;
             background: white;
-            margin: 5px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+        }
+        
+        .graph-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .graph-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .graph-metadata {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .metadata-label {
+            font-weight: 500;
+        }
+        
+        .metadata-value {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+
+
+        #network {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin: 0 20px 20px 20px;
+            height: calc(100vh - 200px);
+        }
+        
+        .source-panel {
+            flex: 0 0 30%;
+            min-width: 350px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .source-panel h3 {
+            margin: 0;
+            color: #333;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+        
+        .source-panel #source-code {
+            flex: 1;
+            background: #fff;
+            padding: 15px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            border: none;
+            margin: 0;
+        }
+        
+        .graph-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .graph-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .graph-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .graph-metadata {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .metadata-label {
+            font-weight: 500;
+        }
+        
+        .metadata-value {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 0 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
             padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
             border-radius: 3px;
-            border-left: 4px solid #007bff;
+            margin-right: 8px;
+            border: 1px solid #666;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            max-width: 300px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Function Flow Analysis</h1>
-            <h2>test_integration_minimal</h2>
+    <div class="header">
+        <h1>Dynamic Function Flow Visualization</h1>
+        <div class="subtitle">test_integration_minimal function from flowscope.examples.structure_examples module • FlowScope Analysis</div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <button class="btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+            <button class="btn-success" onclick="togglePhysics()">Toggle Physics</button>
         </div>
         
-        <div class="info">
-            <strong>Module:</strong> test_stage1_integration<br>
-            <strong>File:</strong> agents/dmt_coder/tests/test_stage1_integration.py<br>
-            <strong>Control Flow Nodes:</strong> 25<br>
-            <strong>Edges:</strong> 26
+        <div class="control-group">
+            <label>Node Size:</label>
+            <select id="nodeSizeSelect" onchange="changeNodeSize()">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
         </div>
         
-        <div class="flow-image">
-            <h3>Control Flow Visualization</h3>
-            <img src="test_integration_minimal_flow.png" alt="Function Flow Diagram" />
+        <div class="control-group">
+            <button class="btn-secondary" onclick="exportImage()">Export Image</button>
         </div>
-        
-        <div class="legend">
-            <strong>Node Types:</strong><br>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #90ee90;"></span>
-                Entry/Exit Points
+    </div>
+    
+    <div class="info-panel">
+        <h3 style="margin: 0; color: #333;">Function Information</h3>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Control Flow Nodes</div>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #ffd700;"></span>
-                Assignment
+            <div class="stat-item">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Flow Edges</div>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #ffa500;"></span>
-                Conditional
+            <div class="stat-item">
+                <div class="stat-value">Unknown</div>
+                <div class="stat-label">Source File</div>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #ff9999;"></span>
-                Loop
-            </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #90ee90;"></span>
-                Return
-            </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #dda0dd;"></span>
-                Try/Except
-            </div>
-        </div>
-        
-        <div class="metadata">
-            <h3>Flow Sequence</h3>
-            <ol class="node-list">
-                <li>node_0 → node_2</li>
-<li>node_2 → node_3</li>
-<li>node_3 → node_4</li>
-<li>node_4 → node_5</li>
-<li>node_5 → node_6</li>
-<li>node_6 → node_7</li>
-<li>node_7 → node_8</li>
-<li>node_8 → node_9</li>
-<li>node_9 → node_10</li>
-<li>node_10 → node_11</li>
-<li>node_11 → node_12</li>
-<li>node_12 → node_13</li>
-<li>node_13 → node_14</li>
-<li>node_14 → node_15</li>
-<li>node_15 → node_16</li>
-<li>node_16 → node_17</li>
-<li>node_17 → node_18</li>
-<li>node_18 → node_19</li>
-<li>node_19 → node_20</li>
-<li>node_20 → node_21</li>
-<li>node_21 → node_22</li>
-<li>node_22 → node_23</li>
-<li>node_23 → node_24</li>
-<li>node_24 → node_25</li>
-<li>node_25 → node_26</li>
-<li>node_26 → node_1</li>
-            </ol>
-        </div>
-        
-        <div class="metadata">
-            <h3>Node Details</h3>
-            <div class="node-list">
-                
-                <div class="node-item">
-                    <strong>node_2:</strong> statement<br>
-                    <small>def test_integration_minimal(tmp_path):
-    spec_path = tmp_path / 'spec.yaml'
-    spec_path.write_text('spec: X\nversion: 0.1.0\ndescription: d\nfunctions: []\n')
-    rep = StageOneRunner.check(str(spec_path))
-    assert rep.passed</small><br>
-                    <small>Line 2</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_3:</strong> statement<br>
-                    <small>tmp_path</small><br>
-                    <small>Line 2</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_4:</strong> assignment<br>
-                    <small>spec_path = tmp_path / 'spec.yaml'</small><br>
-                    <small>Line 3</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_5:</strong> statement<br>
-                    <small>spec_path = tmp_path / 'spec.yaml'</small><br>
-                    <small>Line 3</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_6:</strong> statement<br>
-                    <small>spec_path</small><br>
-                    <small>Line 3</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_7:</strong> statement<br>
-                    <small>tmp_path / 'spec.yaml'</small><br>
-                    <small>Line 3</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_8:</strong> statement<br>
-                    <small>tmp_path</small><br>
-                    <small>Line 3</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_9:</strong> statement<br>
-                    <small>'spec.yaml'</small><br>
-                    <small>Line 3</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_10:</strong> statement<br>
-                    <small>spec_path.write_text('spec: X\nversion: 0.1.0\ndescription: d\nfunctions: []\n')</small><br>
-                    <small>Line 4</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_11:</strong> statement<br>
-                    <small>spec_path.write_text('spec: X\nversion: 0.1.0\ndescription: d\nfunctions: []\n')</small><br>
-                    <small>Line 4</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_12:</strong> statement<br>
-                    <small>spec_path.write_text</small><br>
-                    <small>Line 4</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_13:</strong> statement<br>
-                    <small>spec_path</small><br>
-                    <small>Line 4</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_14:</strong> statement<br>
-                    <small>'spec: X\nversion: 0.1.0\ndescription: d\nfunctions: []\n'</small><br>
-                    <small>Line 4</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_15:</strong> assignment<br>
-                    <small>rep = StageOneRunner.check(str(spec_path))</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_16:</strong> statement<br>
-                    <small>rep = StageOneRunner.check(str(spec_path))</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_17:</strong> statement<br>
-                    <small>rep</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_18:</strong> statement<br>
-                    <small>StageOneRunner.check(str(spec_path))</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_19:</strong> statement<br>
-                    <small>StageOneRunner.check</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_20:</strong> statement<br>
-                    <small>StageOneRunner</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_21:</strong> statement<br>
-                    <small>str(spec_path)</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_22:</strong> statement<br>
-                    <small>str</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_23:</strong> statement<br>
-                    <small>spec_path</small><br>
-                    <small>Line 5</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_24:</strong> statement<br>
-                    <small>assert rep.passed</small><br>
-                    <small>Line 6</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_25:</strong> statement<br>
-                    <small>rep.passed</small><br>
-                    <small>Line 6</small>
-                </div>
-            
-
-                <div class="node-item">
-                    <strong>node_26:</strong> statement<br>
-                    <small>rep</small><br>
-                    <small>Line 6</small>
-                </div>
-            
+            <div class="stat-item">
+                <div class="stat-value">flowscope.examples.structure_examples</div>
+                <div class="stat-label">Module</div>
             </div>
         </div>
     </div>
+    
+    <div class="main-content">
+        <div class="source-panel">
+            <h3>Source Code</h3>
+            <div id="source-code">
+                def test_integration_minimal(tmp_path):
+    spec_path = (tmp_path / 'spec.yaml')
+    spec_path.write_text('spec: X\nversion: 0.1.0\ndescription: d\nfunctions: []\n')
+    rep = StageOneRunner.check(str(spec_path))
+    assert rep.passed
+            </div>
+        </div>
+        
+        <div class="graph-container">
+        <div class="graph-header">
+            <h2 class="graph-title" id="graph-title">test_integration_minimal Function Flow</h2>
+            <div class="graph-metadata" id="graph-metadata">
+                <div class="metadata-item">
+                    <span class="metadata-label">Module:</span>
+                    <span class="metadata-value">flowscope.examples.structure_examples</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Nodes:</span>
+                    <span class="metadata-value" id="node-count">8</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Edges:</span>
+                    <span class="metadata-value" id="edge-count">5</span>
+                </div>
+
+            </div>
+        </div>
+        <div id="network" class="loading">Loading function flow graph...</div>
+    </div>
+    </div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <span>Merge Point</span>
+        </div>
+    </div>
+    
+    <script>
+        // Function flow data for test_integration_minimal function
+        const functionFlowData = {
+        "function": "test_integration_minimal",
+        "type": "function_flow",
+        "nodes": [
+                {
+                        "id": "n_d04a64",
+                        "type": "entry",
+                        "label": "Enter test_integration_minimal",
+                        "line": 2,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 0,
+                        "x": 0,
+                        "y": 0
+                },
+                {
+                        "id": "n_9386b6",
+                        "type": "exit",
+                        "label": "Exit test_integration_minimal",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "x": 0,
+                        "y": 600
+                },
+                {
+                        "id": "n_7f93df",
+                        "type": "assignment",
+                        "label": "spec_path = (tmp_path / 'spec.yaml')",
+                        "line": 3,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 1,
+                        "x": 0,
+                        "y": 120
+                },
+                {
+                        "id": "n_f4e678",
+                        "type": "statement",
+                        "label": "spec_path.write_text('spec: X\\nversion: 0.1.0\\ndescription: d\\nfunctions: []\\n')",
+                        "line": 4,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "x": 0,
+                        "y": 240
+                },
+                {
+                        "id": "n_509a34",
+                        "type": "assignment",
+                        "label": "rep = StageOneRunner.check(str(spec_path))",
+                        "line": 5,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "x": 0,
+                        "y": 360
+                },
+                {
+                        "id": "n_62c675",
+                        "type": "statement",
+                        "label": "assert rep.passed",
+                        "line": 6,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "x": 0,
+                        "y": 480
+                }
+        ],
+        "edges": [
+                {
+                        "from": "n_d04a64",
+                        "to": "n_7f93df",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        },
+                        "control_points": []
+                },
+                {
+                        "from": "n_7f93df",
+                        "to": "n_f4e678",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        },
+                        "control_points": []
+                },
+                {
+                        "from": "n_f4e678",
+                        "to": "n_509a34",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        },
+                        "control_points": []
+                },
+                {
+                        "from": "n_509a34",
+                        "to": "n_62c675",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        },
+                        "control_points": []
+                },
+                {
+                        "from": "n_62c675",
+                        "to": "n_9386b6",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "orthogonal",
+                                "dashed": true
+                        },
+                        "control_points": [
+                                {
+                                        "x": 280,
+                                        "y": 480
+                                },
+                                {
+                                        "x": 280,
+                                        "y": 530
+                                }
+                        ]
+                }
+        ],
+        "source_code": "def test_integration_minimal(tmp_path):\n    spec_path = (tmp_path / 'spec.yaml')\n    spec_path.write_text('spec: X\\nversion: 0.1.0\\ndescription: d\\nfunctions: []\\n')\n    rep = StageOneRunner.check(str(spec_path))\n    assert rep.passed",
+        "layout": {
+                "vertical_gap": 120,
+                "horizontal_gap": 170,
+                "node_heights": 60,
+                "node_widths": {
+                        "entry": 140,
+                        "exit": 140,
+                        "return": 160,
+                        "conditional": 180,
+                        "loop": 200,
+                        "merge": 150,
+                        "assignment": 180,
+                        "statement": 180,
+                        "block_start": 140,
+                        "loop_exit": 140,
+                        "try": 180,
+                        "except": 170,
+                        "yield": 160,
+                        "comprehension_entry": 170,
+                        "complex_comprehension_violation": 210,
+                        "_dummy": 1
+                },
+                "gutters": {
+                        "return": 280,
+                        "loop": 140,
+                        "break": 210.0,
+                        "except": -280
+                }
+        }
+};
+        
+        let network = null;
+        let physicsEnabled = false;
+        
+        // Color mapping for node types
+        const colorMap = {
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'return': '#90ee90',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3'
+        };
+        
+        // Shape mapping for node types
+        const shapeMap = {
+            'entry': 'ellipse',
+            'exit': 'ellipse',
+            'conditional': 'diamond',
+            'loop': 'diamond',
+            'merge': 'circle'
+        };
+        
+        function initializeNetwork() {
+            const container = document.getElementById('network');
+            
+            // Create nodes from all nodes in the data
+            const nodes = new vis.DataSet();
+            
+            functionFlowData.nodes.forEach(node => {
+                const color = colorMap[node.type] || '#97c2fc';
+                const shape = shapeMap[node.type] || 'box';
+                
+                let label = node.label;
+                if (label.length > 50) {
+                    label = label.substring(0, 47) + '...';
+                }
+                
+                // Special styling for entry and exit nodes
+                let borderWidth = 1;
+                let borderColor = '#666666';
+                let fontSize = 12;
+                
+                if (node.type === 'entry') {
+                    borderWidth = 3;
+                    borderColor = '#28a745';
+                    fontSize = 16;
+                } else if (node.type === 'exit') {
+                    borderWidth = 3;
+                    borderColor = '#dc3545';
+                    fontSize = 16;
+                }
+                
+                // Use fixed position from layout calculator if available
+                const nodeConfig = {
+                    id: node.id,
+                    label: label,
+                    title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                    color: {
+                        background: color,
+                        border: borderColor
+                    },
+                    shape: shape,
+                    font: {size: fontSize, bold: node.type === 'entry' || node.type === 'exit', color: '#333'},
+                    borderWidth: borderWidth
+                };
+                
+                // Add fixed position if layout calculator provided it
+                if (node.x !== undefined && node.y !== undefined) {
+                    nodeConfig.x = node.x;
+                    nodeConfig.y = node.y;
+                    // Disable physics for positioned nodes
+                    nodeConfig.physics = false;
+                }
+                
+                nodes.add(nodeConfig);
+            });
+            
+            // Create edges with layout-aware styling
+            const edges = new vis.DataSet(functionFlowData.edges.map(edge => {
+                const edgeConfig = {
+                    from: edge.from,
+                    to: edge.to,
+                    label: edge.label || '',
+                    arrows: 'to',
+                    color: {color: '#666666', highlight: '#007bff'},
+                    width: 2
+                };
+                
+                // Use layout information for edge styling if available
+                if (edge.style) {
+                    if (edge.style.type === 'bezier' && edge.style.curved) {
+                        edgeConfig.smooth = {
+                            type: 'cubicBezier',
+                            roundness: 0.4
+                        };
+                        if (edge.style.dashed) {
+                            edgeConfig.dashes = true;
+                        }
+                    } else if (edge.style.type === 'straight') {
+                        edgeConfig.smooth = false;
+                    }
+                } else {
+                    // Default smooth edge
+                    edgeConfig.smooth = {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    };
+                }
+                
+                return edgeConfig;
+            }));
+            
+            // Create network
+            const data = { nodes: nodes, edges: edges };
+            
+            const options = {
+                layout: {
+                    hierarchical: false,
+                    randomSeed: 42,
+                    improvedLayout: false
+                },
+                physics: {
+                    enabled: false
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    zoomView: true,
+                    dragView: true,
+                    navigationButtons: true,
+                    keyboard: true
+                },
+                nodes: {
+                    borderWidth: 1,
+                    color: {
+                        border: '#666666'
+                    },
+                    font: {color: '#333'},
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 5,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    },
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 3,
+                        x: 1,
+                        y: 1
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+            
+            // Make network globally accessible
+            window.network = network;
+            
+            // Simple fit after network is ready
+            setTimeout(() => {
+                network.fit();
+            }, 100);
+            
+            // Add click event for node details
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    console.log('Clicked node:', node);
+                }
+            });
+        }
+        
+        function changeNodeSize() {
+            const nodeSize = document.getElementById('nodeSizeSelect').value;
+            
+            let nodeSizeValue = 20;
+            if (nodeSize === 'small') nodeSizeValue = 15;
+            else if (nodeSize === 'large') nodeSizeValue = 30;
+            
+            network.setOptions({
+                nodes: { size: nodeSizeValue }
+            });
+        }
+        
+        function resetZoom() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        }
+        
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled,
+                    stabilization: { iterations: physicsEnabled ? 100 : 0 }
+                }
+            });
+        }
+        
+        function exportImage() {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get network canvas
+            const networkCanvas = network.canvas.frame.canvas;
+            
+            // Set canvas size
+            canvas.width = networkCanvas.width;
+            canvas.height = networkCanvas.height;
+            
+            // Draw network canvas to our canvas
+            ctx.drawImage(networkCanvas, 0, 0);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'test_integration_minimal_function_flow.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Load source code
+        async function loadSourceCode() {
+            try {
+                const response = await fetch('');
+                const sourceText = await response.text();
+                
+                // Extract just the function we're visualizing
+                const lines = sourceText.split('\n');
+                const funcName = 'test_integration_minimal';
+                let inFunction = false;
+                let functionLines = [];
+                let indentLevel = 0;
+                
+                for (let line of lines) {
+                    if (line.includes(`def ${funcName}(`)) {
+                        inFunction = true;
+                        functionLines.push(line);
+                        continue;
+                    }
+                    if (inFunction) {
+                        // Check if this line dedents past function level (function end)
+                        const currentIndent = line.search(/\S/);
+                        if (currentIndent === -1 && line.trim().length === 0) continue;
+                        if (currentIndent < indentLevel && line.trim().length > 0) {
+                            inFunction = false;
+                            break;
+                        }
+                        if (currentIndent !== -1) {
+                            indentLevel = currentIndent;
+                        }
+                        functionLines.push(line);
+                    }
+                }
+                
+                document.getElementById('source-code').textContent = functionLines.join('\n');
+            } catch (error) {
+                document.getElementById('source-code').textContent = 'Source code not available';
+            }
+        }
+        
+        // Initialize network when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNetwork();
+            // Only load source code if not already present
+            const sourceElement = document.getElementById('source-code');
+            if (sourceElement && sourceElement.textContent.trim() === '') {
+                loadSourceCode();
+            }
+        });
+    </script>
 </body>
 </html>
-        

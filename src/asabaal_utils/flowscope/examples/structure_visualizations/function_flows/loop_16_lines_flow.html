@@ -382,7 +382,7 @@
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">15</div>
+                <div class="stat-value">17</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -425,7 +425,7 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">15</span>
+                    <span class="metadata-value" id="edge-count">17</span>
                 </div>
 
             </div>
@@ -481,7 +481,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_fac780",
+                        "id": "n_cbf4e8",
                         "type": "entry",
                         "label": "Enter loop_16_lines",
                         "line": 214,
@@ -501,7 +501,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_c286ff",
+                        "id": "n_88a821",
+                        "type": "exit",
+                        "label": "Exit loop_16_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 10,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 1100
+                },
+                {
+                        "id": "n_f623be",
                         "type": "assignment",
                         "label": "results = []",
                         "line": 215,
@@ -521,7 +541,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_61de5b",
+                        "id": "n_a15aba",
                         "type": "loop",
                         "label": "for item in data_list",
                         "line": 216,
@@ -549,7 +569,7 @@
                         "y": 0
                 },
                 {
-                        "id": "n_6f84d7",
+                        "id": "n_73e539",
                         "type": "block_start",
                         "label": "Loop Body",
                         "line": null,
@@ -569,7 +589,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_30ac6a",
+                        "id": "n_137692",
                         "type": "conditional",
                         "label": "if (item is not None)",
                         "line": 217,
@@ -593,7 +613,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_ea51ef",
+                        "id": "n_d165f0",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -613,7 +633,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_eea23f",
+                        "id": "n_2ca330",
                         "type": "assignment",
                         "label": "processed = item.strip().lower()",
                         "line": 218,
@@ -633,7 +653,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_3790fe",
+                        "id": "n_328142",
                         "type": "conditional",
                         "label": "if (len(processed) > 0)",
                         "line": 219,
@@ -657,7 +677,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_a84e39",
+                        "id": "n_691266",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -677,7 +697,7 @@
                         "y": 660
                 },
                 {
-                        "id": "n_964772",
+                        "id": "n_7e43f1",
                         "type": "statement",
                         "label": "results.append(processed)",
                         "line": 220,
@@ -697,7 +717,7 @@
                         "y": 770
                 },
                 {
-                        "id": "n_ed00cf",
+                        "id": "n_b72f26",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -716,12 +736,12 @@
                                 }
                         },
                         "level": 8,
-                        "branch": -1,
+                        "branch": 0,
                         "x": 0,
                         "y": 880
                 },
                 {
-                        "id": "n_bc439a",
+                        "id": "n_fc549b",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -740,12 +760,12 @@
                                 }
                         },
                         "level": 9,
-                        "branch": 0,
-                        "x": 0,
+                        "branch": 2,
+                        "x": 160,
                         "y": 990
                 },
                 {
-                        "id": "n_bdaef8",
+                        "id": "n_469559",
                         "type": "loop_exit",
                         "label": "Exit Loop",
                         "line": null,
@@ -765,7 +785,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_425a18",
+                        "id": "n_3721ac",
                         "type": "return",
                         "label": "return results",
                         "line": 221,
@@ -783,32 +803,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 220
-                },
-                {
-                        "id": "n_37916c",
-                        "type": "exit",
-                        "label": "Exit loop_16_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 10,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 1100
                 }
         ],
         "edges": [
                 {
-                        "from": "n_fac780",
-                        "to": "n_c286ff",
+                        "from": "n_cbf4e8",
+                        "to": "n_f623be",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -817,8 +817,8 @@
                         }
                 },
                 {
-                        "from": "n_c286ff",
-                        "to": "n_61de5b",
+                        "from": "n_f623be",
+                        "to": "n_a15aba",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_back",
@@ -835,8 +835,8 @@
                         ]
                 },
                 {
-                        "from": "n_61de5b",
-                        "to": "n_6f84d7",
+                        "from": "n_a15aba",
+                        "to": "n_73e539",
                         "label": "Iterate",
                         "from_port": "out_body",
                         "to_port": "in",
@@ -845,8 +845,8 @@
                         }
                 },
                 {
-                        "from": "n_6f84d7",
-                        "to": "n_30ac6a",
+                        "from": "n_73e539",
+                        "to": "n_137692",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -855,8 +855,8 @@
                         }
                 },
                 {
-                        "from": "n_30ac6a",
-                        "to": "n_ea51ef",
+                        "from": "n_137692",
+                        "to": "n_d165f0",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -865,8 +865,8 @@
                         }
                 },
                 {
-                        "from": "n_ea51ef",
-                        "to": "n_eea23f",
+                        "from": "n_d165f0",
+                        "to": "n_2ca330",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -875,8 +875,8 @@
                         }
                 },
                 {
-                        "from": "n_eea23f",
-                        "to": "n_3790fe",
+                        "from": "n_2ca330",
+                        "to": "n_328142",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -885,8 +885,8 @@
                         }
                 },
                 {
-                        "from": "n_3790fe",
-                        "to": "n_a84e39",
+                        "from": "n_328142",
+                        "to": "n_691266",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -895,8 +895,8 @@
                         }
                 },
                 {
-                        "from": "n_a84e39",
-                        "to": "n_964772",
+                        "from": "n_691266",
+                        "to": "n_7e43f1",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -905,8 +905,8 @@
                         }
                 },
                 {
-                        "from": "n_964772",
-                        "to": "n_ed00cf",
+                        "from": "n_7e43f1",
+                        "to": "n_b72f26",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -915,8 +915,18 @@
                         }
                 },
                 {
-                        "from": "n_ed00cf",
-                        "to": "n_bc439a",
+                        "from": "n_328142",
+                        "to": "n_b72f26",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_b72f26",
+                        "to": "n_fc549b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -925,8 +935,18 @@
                         }
                 },
                 {
-                        "from": "n_bc439a",
-                        "to": "n_61de5b",
+                        "from": "n_137692",
+                        "to": "n_fc549b",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_fc549b",
+                        "to": "n_a15aba",
                         "label": "next iteration",
                         "from_port": "out",
                         "to_port": "in_back",
@@ -943,8 +963,8 @@
                         ]
                 },
                 {
-                        "from": "n_61de5b",
-                        "to": "n_bdaef8",
+                        "from": "n_a15aba",
+                        "to": "n_469559",
                         "label": "done",
                         "from_port": "out_exit",
                         "to_port": "in",
@@ -953,8 +973,8 @@
                         }
                 },
                 {
-                        "from": "n_bdaef8",
-                        "to": "n_425a18",
+                        "from": "n_469559",
+                        "to": "n_3721ac",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -963,8 +983,8 @@
                         }
                 },
                 {
-                        "from": "n_425a18",
-                        "to": "n_37916c",
+                        "from": "n_3721ac",
+                        "to": "n_88a821",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

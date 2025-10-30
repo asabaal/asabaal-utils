@@ -382,7 +382,7 @@
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">12</div>
+                <div class="stat-value">13</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -435,7 +435,7 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">12</span>
+                    <span class="metadata-value" id="edge-count">13</span>
                 </div>
 
             </div>
@@ -491,7 +491,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_a19867",
+                        "id": "n_eee426",
                         "type": "entry",
                         "label": "Enter binary_18_lines",
                         "line": 110,
@@ -511,7 +511,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_f7e18c",
+                        "id": "n_6c6261",
+                        "type": "exit",
+                        "label": "Exit binary_18_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 990
+                },
+                {
+                        "id": "n_5cf120",
                         "type": "conditional",
                         "label": "if os.path.exists(file_path)",
                         "line": 111,
@@ -535,7 +555,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_b25a4c",
+                        "id": "n_e7caaa",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -555,7 +575,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_76584d",
+                        "id": "n_29490f",
                         "type": "assignment",
                         "label": "stat = os.stat(file_path)",
                         "line": 112,
@@ -575,7 +595,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_b0681a",
+                        "id": "n_97e5e5",
                         "type": "assignment",
                         "label": "size = stat.st_size",
                         "line": 113,
@@ -595,7 +615,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_7cea4b",
+                        "id": "n_60aa16",
                         "type": "assignment",
                         "label": "modified = stat.st_mtime",
                         "line": 114,
@@ -615,7 +635,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_515de0",
+                        "id": "n_19299b",
                         "type": "assignment",
                         "label": "readable = os.access(file_path, os.R_OK)",
                         "line": 115,
@@ -635,7 +655,7 @@
                         "y": 660
                 },
                 {
-                        "id": "n_f4617f",
+                        "id": "n_d8d87f",
                         "type": "return",
                         "label": "return {'exists': True, 'size': size, 'modified': modified, 'readable': readable}",
                         "line": 116,
@@ -655,7 +675,7 @@
                         "y": 770
                 },
                 {
-                        "id": "n_8b6e25",
+                        "id": "n_094b8f",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -675,7 +695,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_c0fd6a",
+                        "id": "n_b6d1e1",
                         "type": "return",
                         "label": "return {'exists': False, 'error': 'File not found', 'suggestions': ['Check path', 'Check permissions']}",
                         "line": 123,
@@ -695,7 +715,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_0e9da6",
+                        "id": "n_6cfa9a",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -713,36 +733,16 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 8,
-                        "branch": 0,
+                        "level": 2,
+                        "branch": 1,
                         "x": 0,
-                        "y": 880
-                },
-                {
-                        "id": "n_88c8a7",
-                        "type": "exit",
-                        "label": "Exit binary_18_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 10,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 1100
+                        "y": 220
                 }
         ],
         "edges": [
                 {
-                        "from": "n_a19867",
-                        "to": "n_f7e18c",
+                        "from": "n_eee426",
+                        "to": "n_5cf120",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -751,8 +751,8 @@
                         }
                 },
                 {
-                        "from": "n_f7e18c",
-                        "to": "n_b25a4c",
+                        "from": "n_5cf120",
+                        "to": "n_e7caaa",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -761,8 +761,8 @@
                         }
                 },
                 {
-                        "from": "n_b25a4c",
-                        "to": "n_76584d",
+                        "from": "n_e7caaa",
+                        "to": "n_29490f",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -771,8 +771,8 @@
                         }
                 },
                 {
-                        "from": "n_76584d",
-                        "to": "n_b0681a",
+                        "from": "n_29490f",
+                        "to": "n_97e5e5",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -781,8 +781,8 @@
                         }
                 },
                 {
-                        "from": "n_b0681a",
-                        "to": "n_7cea4b",
+                        "from": "n_97e5e5",
+                        "to": "n_60aa16",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -791,8 +791,8 @@
                         }
                 },
                 {
-                        "from": "n_7cea4b",
-                        "to": "n_515de0",
+                        "from": "n_60aa16",
+                        "to": "n_19299b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -801,8 +801,8 @@
                         }
                 },
                 {
-                        "from": "n_515de0",
-                        "to": "n_f4617f",
+                        "from": "n_19299b",
+                        "to": "n_d8d87f",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -811,8 +811,18 @@
                         }
                 },
                 {
-                        "from": "n_f7e18c",
-                        "to": "n_8b6e25",
+                        "from": "n_d8d87f",
+                        "to": "n_6c6261",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_5cf120",
+                        "to": "n_094b8f",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -821,8 +831,8 @@
                         }
                 },
                 {
-                        "from": "n_8b6e25",
-                        "to": "n_c0fd6a",
+                        "from": "n_094b8f",
+                        "to": "n_b6d1e1",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -831,28 +841,28 @@
                         }
                 },
                 {
-                        "from": "n_f4617f",
-                        "to": "n_0e9da6",
+                        "from": "n_b6d1e1",
+                        "to": "n_6c6261",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_5cf120",
+                        "to": "n_6cfa9a",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_c0fd6a",
-                        "to": "n_0e9da6",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_right",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_0e9da6",
-                        "to": "n_88c8a7",
+                        "from": "n_6cfa9a",
+                        "to": "n_6c6261",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

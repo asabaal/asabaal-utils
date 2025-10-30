@@ -382,7 +382,7 @@
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">14</div>
+                <div class="stat-value">17</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -425,7 +425,7 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">14</span>
+                    <span class="metadata-value" id="edge-count">17</span>
                 </div>
 
             </div>
@@ -481,7 +481,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_d00130",
+                        "id": "n_442285",
                         "type": "entry",
                         "label": "Enter multi_return_11_lines",
                         "line": 352,
@@ -501,7 +501,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_001b0f",
+                        "id": "n_a2187e",
+                        "type": "exit",
+                        "label": "Exit multi_return_11_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": -3,
+                        "x": -480,
+                        "y": 990
+                },
+                {
+                        "id": "n_0efc0f",
                         "type": "conditional",
                         "label": "if (not text)",
                         "line": 353,
@@ -525,7 +545,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_c96bfc",
+                        "id": "n_5289a0",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -545,7 +565,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_3157c1",
+                        "id": "n_a07f29",
                         "type": "return",
                         "label": "return False",
                         "line": 354,
@@ -565,7 +585,95 @@
                         "y": 330
                 },
                 {
-                        "id": "n_ff17bd",
+                        "id": "n_10bd21",
+                        "type": "merge",
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 1,
+                        "x": 0,
+                        "y": 220
+                },
+                {
+                        "id": "n_ce1706",
+                        "type": "conditional",
+                        "label": "if (len(text) < 3)",
+                        "line": 355,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 330
+                },
+                {
+                        "id": "n_39d04e",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 440
+                },
+                {
+                        "id": "n_e6814e",
+                        "type": "return",
+                        "label": "return False",
+                        "line": 356,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 550
+                },
+                {
+                        "id": "n_4461eb",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -584,15 +692,15 @@
                                 }
                         },
                         "level": 4,
-                        "branch": -1,
+                        "branch": 1,
                         "x": 0,
                         "y": 440
                 },
                 {
-                        "id": "n_d39697",
+                        "id": "n_f95243",
                         "type": "conditional",
-                        "label": "if (len(text) < 3)",
-                        "line": 355,
+                        "label": "if (not text.isalnum())",
+                        "line": 357,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -613,7 +721,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_69917f",
+                        "id": "n_6ff923",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -633,10 +741,10 @@
                         "y": 660
                 },
                 {
-                        "id": "n_61a199",
+                        "id": "n_6ed971",
                         "type": "return",
                         "label": "return False",
-                        "line": 356,
+                        "line": 358,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -653,7 +761,7 @@
                         "y": 770
                 },
                 {
-                        "id": "n_82792e",
+                        "id": "n_d9c6af",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -671,101 +779,13 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 8,
-                        "branch": -1,
+                        "level": 6,
+                        "branch": 1,
                         "x": 0,
-                        "y": 880
+                        "y": 660
                 },
                 {
-                        "id": "n_c83349",
-                        "type": "conditional",
-                        "label": "if (not text.isalnum())",
-                        "line": 357,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "true": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "false": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                }
-                        },
-                        "level": 9,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 990
-                },
-                {
-                        "id": "n_ee2df2",
-                        "type": "block_start",
-                        "label": "Begin True Block",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 10,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 1100
-                },
-                {
-                        "id": "n_562d7a",
-                        "type": "return",
-                        "label": "return False",
-                        "line": 358,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 11,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 1210
-                },
-                {
-                        "id": "n_e7c8ee",
-                        "type": "merge",
-                        "label": "Merge after if",
-                        "line": null,
-                        "ports": {
-                                "in_left": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "in_right": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 12,
-                        "branch": -1,
-                        "x": 0,
-                        "y": 1320
-                },
-                {
-                        "id": "n_169aa6",
+                        "id": "n_a2fc77",
                         "type": "return",
                         "label": "return True",
                         "line": 359,
@@ -779,36 +799,16 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 13,
+                        "level": 7,
                         "branch": 0,
                         "x": 0,
-                        "y": 1430
-                },
-                {
-                        "id": "n_bb57a0",
-                        "type": "exit",
-                        "label": "Exit multi_return_11_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 15,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 1650
+                        "y": 770
                 }
         ],
         "edges": [
                 {
-                        "from": "n_d00130",
-                        "to": "n_001b0f",
+                        "from": "n_442285",
+                        "to": "n_0efc0f",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -817,8 +817,8 @@
                         }
                 },
                 {
-                        "from": "n_001b0f",
-                        "to": "n_c96bfc",
+                        "from": "n_0efc0f",
+                        "to": "n_5289a0",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -827,8 +827,8 @@
                         }
                 },
                 {
-                        "from": "n_c96bfc",
-                        "to": "n_3157c1",
+                        "from": "n_5289a0",
+                        "to": "n_a07f29",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -837,18 +837,28 @@
                         }
                 },
                 {
-                        "from": "n_3157c1",
-                        "to": "n_ff17bd",
+                        "from": "n_a07f29",
+                        "to": "n_a2187e",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_0efc0f",
+                        "to": "n_10bd21",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_ff17bd",
-                        "to": "n_d39697",
+                        "from": "n_10bd21",
+                        "to": "n_ce1706",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -857,8 +867,8 @@
                         }
                 },
                 {
-                        "from": "n_d39697",
-                        "to": "n_69917f",
+                        "from": "n_ce1706",
+                        "to": "n_39d04e",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -867,8 +877,8 @@
                         }
                 },
                 {
-                        "from": "n_69917f",
-                        "to": "n_61a199",
+                        "from": "n_39d04e",
+                        "to": "n_e6814e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -877,18 +887,28 @@
                         }
                 },
                 {
-                        "from": "n_61a199",
-                        "to": "n_82792e",
+                        "from": "n_e6814e",
+                        "to": "n_a2187e",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_ce1706",
+                        "to": "n_4461eb",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_82792e",
-                        "to": "n_c83349",
+                        "from": "n_4461eb",
+                        "to": "n_f95243",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -897,8 +917,8 @@
                         }
                 },
                 {
-                        "from": "n_c83349",
-                        "to": "n_ee2df2",
+                        "from": "n_f95243",
+                        "to": "n_6ff923",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -907,8 +927,8 @@
                         }
                 },
                 {
-                        "from": "n_ee2df2",
-                        "to": "n_562d7a",
+                        "from": "n_6ff923",
+                        "to": "n_6ed971",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -917,18 +937,28 @@
                         }
                 },
                 {
-                        "from": "n_562d7a",
-                        "to": "n_e7c8ee",
+                        "from": "n_6ed971",
+                        "to": "n_a2187e",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_f95243",
+                        "to": "n_d9c6af",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_e7c8ee",
-                        "to": "n_169aa6",
+                        "from": "n_d9c6af",
+                        "to": "n_a2fc77",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -937,8 +967,8 @@
                         }
                 },
                 {
-                        "from": "n_169aa6",
-                        "to": "n_bb57a0",
+                        "from": "n_a2fc77",
+                        "to": "n_a2187e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

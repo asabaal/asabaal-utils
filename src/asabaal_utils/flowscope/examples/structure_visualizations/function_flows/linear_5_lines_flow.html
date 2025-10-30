@@ -477,7 +477,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_8f43f3",
+                        "id": "n_46c5af",
                         "type": "entry",
                         "label": "Enter linear_5_lines",
                         "line": 15,
@@ -497,7 +497,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_b3ae67",
+                        "id": "n_ddedfc",
+                        "type": "exit",
+                        "label": "Exit linear_5_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 550
+                },
+                {
+                        "id": "n_3c51a4",
                         "type": "assignment",
                         "label": "temp = (a * 2)",
                         "line": 16,
@@ -517,7 +537,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_9b00cc",
+                        "id": "n_e7fc09",
                         "type": "assignment",
                         "label": "result = (temp + b)",
                         "line": 17,
@@ -537,7 +557,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_72a498",
+                        "id": "n_78f46b",
                         "type": "return",
                         "label": "return result",
                         "line": 18,
@@ -555,32 +575,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 330
-                },
-                {
-                        "id": "n_23f776",
-                        "type": "exit",
-                        "label": "Exit linear_5_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 5,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 550
                 }
         ],
         "edges": [
                 {
-                        "from": "n_8f43f3",
-                        "to": "n_b3ae67",
+                        "from": "n_46c5af",
+                        "to": "n_3c51a4",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -589,8 +589,8 @@
                         }
                 },
                 {
-                        "from": "n_b3ae67",
-                        "to": "n_9b00cc",
+                        "from": "n_3c51a4",
+                        "to": "n_e7fc09",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -599,8 +599,8 @@
                         }
                 },
                 {
-                        "from": "n_9b00cc",
-                        "to": "n_72a498",
+                        "from": "n_e7fc09",
+                        "to": "n_78f46b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -609,8 +609,8 @@
                         }
                 },
                 {
-                        "from": "n_72a498",
-                        "to": "n_23f776",
+                        "from": "n_78f46b",
+                        "to": "n_ddedfc",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

@@ -481,7 +481,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_f67e3c",
+                        "id": "n_ffc47b",
                         "type": "entry",
                         "label": "Enter binary_9_lines",
                         "line": 83,
@@ -501,7 +501,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_21792d",
+                        "id": "n_6e81db",
+                        "type": "exit",
+                        "label": "Exit binary_9_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 8,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 880
+                },
+                {
+                        "id": "n_28a897",
                         "type": "conditional",
                         "label": "if (age >= 18)",
                         "line": 84,
@@ -525,7 +545,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_ec4657",
+                        "id": "n_14393d",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -545,7 +565,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_8de3de",
+                        "id": "n_05e4c8",
                         "type": "assignment",
                         "label": "status = 'adult'",
                         "line": 85,
@@ -565,7 +585,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_cafb19",
+                        "id": "n_54b44d",
                         "type": "assignment",
                         "label": "can_vote = True",
                         "line": 86,
@@ -585,7 +605,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_2fafb0",
+                        "id": "n_efbf54",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -605,7 +625,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_d0345a",
+                        "id": "n_f7fe4e",
                         "type": "assignment",
                         "label": "status = 'minor'",
                         "line": 88,
@@ -625,7 +645,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_cc823f",
+                        "id": "n_106f1a",
                         "type": "assignment",
                         "label": "can_vote = False",
                         "line": 89,
@@ -645,7 +665,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_dcc750",
+                        "id": "n_234942",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -669,7 +689,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_29d553",
+                        "id": "n_f8edb0",
                         "type": "return",
                         "label": "return (status, can_vote)",
                         "line": 90,
@@ -687,32 +707,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 660
-                },
-                {
-                        "id": "n_2b6615",
-                        "type": "exit",
-                        "label": "Exit binary_9_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 8,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 880
                 }
         ],
         "edges": [
                 {
-                        "from": "n_f67e3c",
-                        "to": "n_21792d",
+                        "from": "n_ffc47b",
+                        "to": "n_28a897",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -721,8 +721,8 @@
                         }
                 },
                 {
-                        "from": "n_21792d",
-                        "to": "n_ec4657",
+                        "from": "n_28a897",
+                        "to": "n_14393d",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -731,8 +731,8 @@
                         }
                 },
                 {
-                        "from": "n_ec4657",
-                        "to": "n_8de3de",
+                        "from": "n_14393d",
+                        "to": "n_05e4c8",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -741,8 +741,8 @@
                         }
                 },
                 {
-                        "from": "n_8de3de",
-                        "to": "n_cafb19",
+                        "from": "n_05e4c8",
+                        "to": "n_54b44d",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -751,8 +751,8 @@
                         }
                 },
                 {
-                        "from": "n_21792d",
-                        "to": "n_2fafb0",
+                        "from": "n_28a897",
+                        "to": "n_efbf54",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -761,8 +761,8 @@
                         }
                 },
                 {
-                        "from": "n_2fafb0",
-                        "to": "n_d0345a",
+                        "from": "n_efbf54",
+                        "to": "n_f7fe4e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -771,8 +771,8 @@
                         }
                 },
                 {
-                        "from": "n_d0345a",
-                        "to": "n_cc823f",
+                        "from": "n_f7fe4e",
+                        "to": "n_106f1a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -781,8 +781,8 @@
                         }
                 },
                 {
-                        "from": "n_cafb19",
-                        "to": "n_dcc750",
+                        "from": "n_54b44d",
+                        "to": "n_234942",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -791,8 +791,8 @@
                         }
                 },
                 {
-                        "from": "n_cc823f",
-                        "to": "n_dcc750",
+                        "from": "n_106f1a",
+                        "to": "n_234942",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_right",
@@ -801,8 +801,8 @@
                         }
                 },
                 {
-                        "from": "n_dcc750",
-                        "to": "n_29d553",
+                        "from": "n_234942",
+                        "to": "n_f8edb0",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -811,8 +811,8 @@
                         }
                 },
                 {
-                        "from": "n_29d553",
-                        "to": "n_2b6615",
+                        "from": "n_f8edb0",
+                        "to": "n_6e81db",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

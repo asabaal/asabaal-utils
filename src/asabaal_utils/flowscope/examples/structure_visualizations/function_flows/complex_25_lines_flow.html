@@ -378,11 +378,11 @@
         <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
             <div class="stat-item">
-                <div class="stat-value">47</div>
+                <div class="stat-value">50</div>
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">48</div>
+                <div class="stat-value">57</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -448,11 +448,11 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Nodes:</span>
-                    <span class="metadata-value" id="node-count">47</span>
+                    <span class="metadata-value" id="node-count">50</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">48</span>
+                    <span class="metadata-value" id="edge-count">57</span>
                 </div>
 
             </div>
@@ -508,7 +508,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_c3b8ae",
+                        "id": "n_9c185d",
                         "type": "entry",
                         "label": "Enter complex_25_lines",
                         "line": 384,
@@ -528,7 +528,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_096a14",
+                        "id": "n_f2ef44",
+                        "type": "exit",
+                        "label": "Exit complex_25_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 19,
+                        "branch": -2,
+                        "x": -320,
+                        "y": 2090
+                },
+                {
+                        "id": "n_84b06f",
                         "type": "statement",
                         "label": "'Complex function combining multiple structures.'",
                         "line": 385,
@@ -548,7 +568,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_db919b",
+                        "id": "n_1452e8",
                         "type": "assignment",
                         "label": "results = []",
                         "line": 386,
@@ -568,7 +588,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_97e1ad",
+                        "id": "n_00556a",
                         "type": "conditional",
                         "label": "if (not data)",
                         "line": 389,
@@ -592,7 +612,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_fbdea8",
+                        "id": "n_8c08b9",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -612,7 +632,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_61c576",
+                        "id": "n_aa143f",
                         "type": "return",
                         "label": "return []",
                         "line": 390,
@@ -632,7 +652,95 @@
                         "y": 550
                 },
                 {
-                        "id": "n_1e2223",
+                        "id": "n_096d06",
+                        "type": "merge",
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": 1,
+                        "x": 408,
+                        "y": 440
+                },
+                {
+                        "id": "n_089cd7",
+                        "type": "conditional",
+                        "label": "if (not options.get('enabled', True))",
+                        "line": 391,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 5,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 550
+                },
+                {
+                        "id": "n_9f2b95",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 660
+                },
+                {
+                        "id": "n_c6d20b",
+                        "type": "return",
+                        "label": "return []",
+                        "line": 392,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 7,
+                        "branch": -1,
+                        "x": 24,
+                        "y": 770
+                },
+                {
+                        "id": "n_9e7a42",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -651,100 +759,12 @@
                                 }
                         },
                         "level": 6,
-                        "branch": -1,
-                        "x": 408,
+                        "branch": 1,
+                        "x": 0,
                         "y": 660
                 },
                 {
-                        "id": "n_70b460",
-                        "type": "conditional",
-                        "label": "if (not options.get('enabled', True))",
-                        "line": 391,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "true": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "false": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                }
-                        },
-                        "level": 7,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 770
-                },
-                {
-                        "id": "n_375e3b",
-                        "type": "block_start",
-                        "label": "Begin True Block",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 8,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 880
-                },
-                {
-                        "id": "n_931c4c",
-                        "type": "return",
-                        "label": "return []",
-                        "line": 392,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 9,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 990
-                },
-                {
-                        "id": "n_15102d",
-                        "type": "merge",
-                        "label": "Merge after if",
-                        "line": null,
-                        "ports": {
-                                "in_left": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "in_right": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 10,
-                        "branch": -1,
-                        "x": 0,
-                        "y": 1100
-                },
-                {
-                        "id": "n_f95635",
+                        "id": "n_c6a1fb",
                         "type": "loop",
                         "label": "for item in data",
                         "line": 395,
@@ -772,7 +792,7 @@
                         "y": 0
                 },
                 {
-                        "id": "n_ffbf1a",
+                        "id": "n_e12cee",
                         "type": "block_start",
                         "label": "Loop Body",
                         "line": null,
@@ -792,7 +812,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_41398a",
+                        "id": "n_a87817",
                         "type": "conditional",
                         "label": "if (item.get('type') == 'special')",
                         "line": 397,
@@ -816,7 +836,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_0168a2",
+                        "id": "n_1c39fd",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -836,7 +856,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_7a05a9",
+                        "id": "n_748a99",
                         "type": "assignment",
                         "label": "processed = process_special_item(item)",
                         "line": 398,
@@ -852,11 +872,11 @@
                         },
                         "level": 4,
                         "branch": 0,
-                        "x": 0,
+                        "x": 204,
                         "y": 440
                 },
                 {
-                        "id": "n_a770ca",
+                        "id": "n_602677",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -876,7 +896,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_f9a9f4",
+                        "id": "n_7867e6",
                         "type": "assignment",
                         "label": "processed = process_regular_item(item)",
                         "line": 400,
@@ -896,7 +916,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_f7c2cb",
+                        "id": "n_02a837",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -920,7 +940,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_af85c8",
+                        "id": "n_bb307e",
                         "type": "conditional",
                         "label": "if (processed['status'] == 'success')",
                         "line": 403,
@@ -944,7 +964,7 @@
                         "y": 660
                 },
                 {
-                        "id": "n_ca5366",
+                        "id": "n_1e443b",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -964,7 +984,7 @@
                         "y": 770
                 },
                 {
-                        "id": "n_61be76",
+                        "id": "n_eac2a3",
                         "type": "statement",
                         "label": "results.append(processed)",
                         "line": 404,
@@ -980,11 +1000,11 @@
                         },
                         "level": 8,
                         "branch": -1,
-                        "x": 44,
+                        "x": -160,
                         "y": 880
                 },
                 {
-                        "id": "n_9d967b",
+                        "id": "n_ee3b69",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -1004,7 +1024,7 @@
                         "y": 770
                 },
                 {
-                        "id": "n_944066",
+                        "id": "n_c96cfe",
                         "type": "conditional",
                         "label": "if (processed['status'] == 'warning')",
                         "line": 405,
@@ -1028,7 +1048,7 @@
                         "y": 880
                 },
                 {
-                        "id": "n_45eee9",
+                        "id": "n_d99a28",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -1048,7 +1068,7 @@
                         "y": 990
                 },
                 {
-                        "id": "n_6f551f",
+                        "id": "n_fc665a",
                         "type": "conditional",
                         "label": "if options.get('include_warnings', False)",
                         "line": 406,
@@ -1072,7 +1092,7 @@
                         "y": 1100
                 },
                 {
-                        "id": "n_269957",
+                        "id": "n_b94141",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -1092,7 +1112,7 @@
                         "y": 1210
                 },
                 {
-                        "id": "n_c58e15",
+                        "id": "n_102b7b",
                         "type": "statement",
                         "label": "results.append(processed)",
                         "line": 407,
@@ -1112,7 +1132,7 @@
                         "y": 1320
                 },
                 {
-                        "id": "n_e98188",
+                        "id": "n_7a54f2",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -1131,12 +1151,12 @@
                                 }
                         },
                         "level": 13,
-                        "branch": -1,
+                        "branch": 0,
                         "x": 0,
                         "y": 1430
                 },
                 {
-                        "id": "n_106a88",
+                        "id": "n_d68551",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -1156,7 +1176,7 @@
                         "y": 990
                 },
                 {
-                        "id": "n_c3bdd8",
+                        "id": "n_907724",
                         "type": "conditional",
                         "label": "if (processed['status'] == 'error')",
                         "line": 408,
@@ -1180,7 +1200,7 @@
                         "y": 1100
                 },
                 {
-                        "id": "n_80d976",
+                        "id": "n_faa21c",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -1200,7 +1220,7 @@
                         "y": 1210
                 },
                 {
-                        "id": "n_d0436c",
+                        "id": "n_6840c4",
                         "type": "conditional",
                         "label": "if options.get('include_errors', False)",
                         "line": 409,
@@ -1224,7 +1244,7 @@
                         "y": 1320
                 },
                 {
-                        "id": "n_b8f8ba",
+                        "id": "n_ec9e9c",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -1244,7 +1264,7 @@
                         "y": 1430
                 },
                 {
-                        "id": "n_ac4d25",
+                        "id": "n_70a1e1",
                         "type": "statement",
                         "label": "results.append(processed)",
                         "line": 410,
@@ -1264,7 +1284,7 @@
                         "y": 1540
                 },
                 {
-                        "id": "n_040d8f",
+                        "id": "n_096d69",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -1283,12 +1303,12 @@
                                 }
                         },
                         "level": 15,
-                        "branch": 0,
+                        "branch": 1,
                         "x": 160,
                         "y": 1650
                 },
                 {
-                        "id": "n_dbc19e",
+                        "id": "n_4314ed",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -1307,12 +1327,12 @@
                                 }
                         },
                         "level": 16,
-                        "branch": 0,
-                        "x": 0,
+                        "branch": 3,
+                        "x": 320,
                         "y": 1760
                 },
                 {
-                        "id": "n_c09f68",
+                        "id": "n_065e17",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -1336,7 +1356,7 @@
                         "y": 1870
                 },
                 {
-                        "id": "n_278ea8",
+                        "id": "n_bc0d6e",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -1360,7 +1380,7 @@
                         "y": 1980
                 },
                 {
-                        "id": "n_bee173",
+                        "id": "n_3fac6d",
                         "type": "loop_exit",
                         "label": "Exit Loop",
                         "line": null,
@@ -1380,9 +1400,9 @@
                         "y": 110
                 },
                 {
-                        "id": "n_cb07b7",
-                        "type": "statement",
-                        "label": "try:\n    final_results = apply_transformations(results, options)\nexcept TransformationError as e:\n    return {'error': str(e), 'partial_results': results}",
+                        "id": "n_a45b93",
+                        "type": "try",
+                        "label": "try",
                         "line": 413,
                         "ports": {
                                 "in": {
@@ -1396,14 +1416,14 @@
                         },
                         "level": 2,
                         "branch": 0,
-                        "x": 204,
+                        "x": 184,
                         "y": 220
                 },
                 {
-                        "id": "n_ff0ff4",
-                        "type": "assignment",
-                        "label": "final_results = apply_transformations(results, options)",
-                        "line": 414,
+                        "id": "n_19f639",
+                        "type": "block_start",
+                        "label": "try body",
+                        "line": null,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -1420,7 +1440,47 @@
                         "y": 330
                 },
                 {
-                        "id": "n_5ac49c",
+                        "id": "n_70b42a",
+                        "type": "assignment",
+                        "label": "final_results = apply_transformations(results, options)",
+                        "line": 414,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 440
+                },
+                {
+                        "id": "n_12a40a",
+                        "type": "except",
+                        "label": "except TransformationError",
+                        "line": 415,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 552,
+                        "y": 330
+                },
+                {
+                        "id": "n_34317b",
                         "type": "return",
                         "label": "return {'error': str(e), 'partial_results': results}",
                         "line": 416,
@@ -1436,11 +1496,35 @@
                         },
                         "level": 4,
                         "branch": 0,
-                        "x": 184,
+                        "x": 368,
                         "y": 440
                 },
                 {
-                        "id": "n_cb370f",
+                        "id": "n_9a5ed1",
+                        "type": "merge",
+                        "label": "After try",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": 0,
+                        "x": 174,
+                        "y": 550
+                },
+                {
+                        "id": "n_9d5f86",
                         "type": "return",
                         "label": "return final_results",
                         "line": 418,
@@ -1454,36 +1538,16 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 5,
+                        "level": 6,
                         "branch": 0,
-                        "x": 0,
-                        "y": 550
-                },
-                {
-                        "id": "n_c58d7e",
-                        "type": "exit",
-                        "label": "Exit complex_25_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 19,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 2090
+                        "x": 184,
+                        "y": 660
                 }
         ],
         "edges": [
                 {
-                        "from": "n_c3b8ae",
-                        "to": "n_096a14",
+                        "from": "n_9c185d",
+                        "to": "n_84b06f",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1492,8 +1556,8 @@
                         }
                 },
                 {
-                        "from": "n_096a14",
-                        "to": "n_db919b",
+                        "from": "n_84b06f",
+                        "to": "n_1452e8",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1502,8 +1566,8 @@
                         }
                 },
                 {
-                        "from": "n_db919b",
-                        "to": "n_97e1ad",
+                        "from": "n_1452e8",
+                        "to": "n_00556a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1512,8 +1576,8 @@
                         }
                 },
                 {
-                        "from": "n_97e1ad",
-                        "to": "n_fbdea8",
+                        "from": "n_00556a",
+                        "to": "n_8c08b9",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1522,8 +1586,8 @@
                         }
                 },
                 {
-                        "from": "n_fbdea8",
-                        "to": "n_61c576",
+                        "from": "n_8c08b9",
+                        "to": "n_aa143f",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1532,18 +1596,28 @@
                         }
                 },
                 {
-                        "from": "n_61c576",
-                        "to": "n_1e2223",
+                        "from": "n_aa143f",
+                        "to": "n_f2ef44",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_00556a",
+                        "to": "n_096d06",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_1e2223",
-                        "to": "n_70b460",
+                        "from": "n_096d06",
+                        "to": "n_089cd7",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1552,8 +1626,8 @@
                         }
                 },
                 {
-                        "from": "n_70b460",
-                        "to": "n_375e3b",
+                        "from": "n_089cd7",
+                        "to": "n_9f2b95",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1562,8 +1636,8 @@
                         }
                 },
                 {
-                        "from": "n_375e3b",
-                        "to": "n_931c4c",
+                        "from": "n_9f2b95",
+                        "to": "n_c6d20b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1572,18 +1646,28 @@
                         }
                 },
                 {
-                        "from": "n_931c4c",
-                        "to": "n_15102d",
+                        "from": "n_c6d20b",
+                        "to": "n_f2ef44",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_089cd7",
+                        "to": "n_9e7a42",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_15102d",
-                        "to": "n_f95635",
+                        "from": "n_9e7a42",
+                        "to": "n_c6a1fb",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_back",
@@ -1595,13 +1679,13 @@
                         "control_points": [
                                 {
                                         "x": 304,
-                                        "y": 530.0
+                                        "y": 310.0
                                 }
                         ]
                 },
                 {
-                        "from": "n_f95635",
-                        "to": "n_ffbf1a",
+                        "from": "n_c6a1fb",
+                        "to": "n_e12cee",
                         "label": "Iterate",
                         "from_port": "out_body",
                         "to_port": "in",
@@ -1610,8 +1694,8 @@
                         }
                 },
                 {
-                        "from": "n_ffbf1a",
-                        "to": "n_41398a",
+                        "from": "n_e12cee",
+                        "to": "n_a87817",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1620,8 +1704,8 @@
                         }
                 },
                 {
-                        "from": "n_41398a",
-                        "to": "n_0168a2",
+                        "from": "n_a87817",
+                        "to": "n_1c39fd",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1630,8 +1714,8 @@
                         }
                 },
                 {
-                        "from": "n_0168a2",
-                        "to": "n_7a05a9",
+                        "from": "n_1c39fd",
+                        "to": "n_748a99",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1640,8 +1724,8 @@
                         }
                 },
                 {
-                        "from": "n_41398a",
-                        "to": "n_a770ca",
+                        "from": "n_a87817",
+                        "to": "n_602677",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -1650,8 +1734,8 @@
                         }
                 },
                 {
-                        "from": "n_a770ca",
-                        "to": "n_f9a9f4",
+                        "from": "n_602677",
+                        "to": "n_7867e6",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1660,18 +1744,8 @@
                         }
                 },
                 {
-                        "from": "n_7a05a9",
-                        "to": "n_f7c2cb",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_left",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_f9a9f4",
-                        "to": "n_f7c2cb",
+                        "from": "n_748a99",
+                        "to": "n_02a837",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_right",
@@ -1680,8 +1754,18 @@
                         }
                 },
                 {
-                        "from": "n_f7c2cb",
-                        "to": "n_af85c8",
+                        "from": "n_7867e6",
+                        "to": "n_02a837",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_right",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_02a837",
+                        "to": "n_bb307e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1690,8 +1774,8 @@
                         }
                 },
                 {
-                        "from": "n_af85c8",
-                        "to": "n_ca5366",
+                        "from": "n_bb307e",
+                        "to": "n_1e443b",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1700,8 +1784,8 @@
                         }
                 },
                 {
-                        "from": "n_ca5366",
-                        "to": "n_61be76",
+                        "from": "n_1e443b",
+                        "to": "n_eac2a3",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1710,8 +1794,8 @@
                         }
                 },
                 {
-                        "from": "n_af85c8",
-                        "to": "n_9d967b",
+                        "from": "n_bb307e",
+                        "to": "n_ee3b69",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -1720,8 +1804,8 @@
                         }
                 },
                 {
-                        "from": "n_9d967b",
-                        "to": "n_944066",
+                        "from": "n_ee3b69",
+                        "to": "n_c96cfe",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1730,8 +1814,8 @@
                         }
                 },
                 {
-                        "from": "n_944066",
-                        "to": "n_45eee9",
+                        "from": "n_c96cfe",
+                        "to": "n_d99a28",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1740,8 +1824,8 @@
                         }
                 },
                 {
-                        "from": "n_45eee9",
-                        "to": "n_6f551f",
+                        "from": "n_d99a28",
+                        "to": "n_fc665a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1750,8 +1834,8 @@
                         }
                 },
                 {
-                        "from": "n_6f551f",
-                        "to": "n_269957",
+                        "from": "n_fc665a",
+                        "to": "n_b94141",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1760,8 +1844,8 @@
                         }
                 },
                 {
-                        "from": "n_269957",
-                        "to": "n_c58e15",
+                        "from": "n_b94141",
+                        "to": "n_102b7b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1770,8 +1854,8 @@
                         }
                 },
                 {
-                        "from": "n_c58e15",
-                        "to": "n_e98188",
+                        "from": "n_102b7b",
+                        "to": "n_7a54f2",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -1780,8 +1864,18 @@
                         }
                 },
                 {
-                        "from": "n_944066",
-                        "to": "n_106a88",
+                        "from": "n_fc665a",
+                        "to": "n_7a54f2",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_c96cfe",
+                        "to": "n_d68551",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -1790,8 +1884,8 @@
                         }
                 },
                 {
-                        "from": "n_106a88",
-                        "to": "n_c3bdd8",
+                        "from": "n_d68551",
+                        "to": "n_907724",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1800,8 +1894,8 @@
                         }
                 },
                 {
-                        "from": "n_c3bdd8",
-                        "to": "n_80d976",
+                        "from": "n_907724",
+                        "to": "n_faa21c",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1810,8 +1904,8 @@
                         }
                 },
                 {
-                        "from": "n_80d976",
-                        "to": "n_d0436c",
+                        "from": "n_faa21c",
+                        "to": "n_6840c4",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1820,8 +1914,8 @@
                         }
                 },
                 {
-                        "from": "n_d0436c",
-                        "to": "n_b8f8ba",
+                        "from": "n_6840c4",
+                        "to": "n_ec9e9c",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1830,8 +1924,8 @@
                         }
                 },
                 {
-                        "from": "n_b8f8ba",
-                        "to": "n_ac4d25",
+                        "from": "n_ec9e9c",
+                        "to": "n_70a1e1",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1840,8 +1934,8 @@
                         }
                 },
                 {
-                        "from": "n_ac4d25",
-                        "to": "n_040d8f",
+                        "from": "n_70a1e1",
+                        "to": "n_096d69",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -1850,8 +1944,48 @@
                         }
                 },
                 {
-                        "from": "n_040d8f",
-                        "to": "n_dbc19e",
+                        "from": "n_6840c4",
+                        "to": "n_096d69",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_096d69",
+                        "to": "n_4314ed",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_907724",
+                        "to": "n_4314ed",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_7a54f2",
+                        "to": "n_065e17",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_4314ed",
+                        "to": "n_065e17",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_right",
@@ -1860,8 +1994,8 @@
                         }
                 },
                 {
-                        "from": "n_e98188",
-                        "to": "n_c09f68",
+                        "from": "n_eac2a3",
+                        "to": "n_bc0d6e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -1870,8 +2004,8 @@
                         }
                 },
                 {
-                        "from": "n_dbc19e",
-                        "to": "n_c09f68",
+                        "from": "n_065e17",
+                        "to": "n_bc0d6e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -1880,28 +2014,8 @@
                         }
                 },
                 {
-                        "from": "n_61be76",
-                        "to": "n_278ea8",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_right",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_c09f68",
-                        "to": "n_278ea8",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_left",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_278ea8",
-                        "to": "n_f95635",
+                        "from": "n_bc0d6e",
+                        "to": "n_c6a1fb",
                         "label": "next iteration",
                         "from_port": "out",
                         "to_port": "in_back",
@@ -1918,8 +2032,8 @@
                         ]
                 },
                 {
-                        "from": "n_f95635",
-                        "to": "n_bee173",
+                        "from": "n_c6a1fb",
+                        "to": "n_3fac6d",
                         "label": "done",
                         "from_port": "out_exit",
                         "to_port": "in",
@@ -1928,8 +2042,8 @@
                         }
                 },
                 {
-                        "from": "n_bee173",
-                        "to": "n_cb07b7",
+                        "from": "n_3fac6d",
+                        "to": "n_a45b93",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1938,8 +2052,18 @@
                         }
                 },
                 {
-                        "from": "n_cb07b7",
-                        "to": "n_ff0ff4",
+                        "from": "n_a45b93",
+                        "to": "n_19f639",
+                        "label": "try",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_19f639",
+                        "to": "n_70b42a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1948,8 +2072,18 @@
                         }
                 },
                 {
-                        "from": "n_ff0ff4",
-                        "to": "n_5ac49c",
+                        "from": "n_a45b93",
+                        "to": "n_12a40a",
+                        "label": "except TransformationError",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_12a40a",
+                        "to": "n_34317b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1958,8 +2092,8 @@
                         }
                 },
                 {
-                        "from": "n_5ac49c",
-                        "to": "n_cb370f",
+                        "from": "n_34317b",
+                        "to": "n_f2ef44",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1968,8 +2102,28 @@
                         }
                 },
                 {
-                        "from": "n_cb370f",
-                        "to": "n_c58d7e",
+                        "from": "n_70b42a",
+                        "to": "n_9a5ed1",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_9a5ed1",
+                        "to": "n_9d5f86",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_9d5f86",
+                        "to": "n_f2ef44",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

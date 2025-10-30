@@ -378,11 +378,11 @@
         <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
             <div class="stat-item">
-                <div class="stat-value">13</div>
+                <div class="stat-value">19</div>
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">10</div>
+                <div class="stat-value">20</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -446,11 +446,11 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Nodes:</span>
-                    <span class="metadata-value" id="node-count">13</span>
+                    <span class="metadata-value" id="node-count">19</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">10</span>
+                    <span class="metadata-value" id="edge-count">20</span>
                 </div>
 
             </div>
@@ -506,7 +506,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_710cee",
+                        "id": "n_05fbc5",
                         "type": "entry",
                         "label": "Enter exception_20_lines",
                         "line": 307,
@@ -526,9 +526,29 @@
                         "y": 0
                 },
                 {
-                        "id": "n_3929b7",
-                        "type": "statement",
-                        "label": "try:\n    response = requests.get(url, timeout=timeout)\n    response.raise_for_status()\n    data = response.json()\n    return {'success': True, 'data': data, 'status_code': response.status_code}\nexcept requests.exceptions.Timeout:\n    return {'success': False, 'error': 'Request timeout', 'retry_after': (timeout * 2)}\nexcept requests.exceptions.ConnectionError:\n    return {'success': False, 'error': 'Connection failed', 'action': 'Check network'}\nexcept requests.exceptions.HTTPError as e:\n    return {'success': False, 'error': f'HTTP error: {e.response.status_code}', 'status_code': e.response.status_code}\nexcept ValueError:\n    return {'success': False, 'error': 'Invalid JSON response'}",
+                        "id": "n_588dd3",
+                        "type": "exit",
+                        "label": "Exit exception_20_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 8,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 880
+                },
+                {
+                        "id": "n_b8599d",
+                        "type": "try",
+                        "label": "try",
                         "line": 308,
                         "ports": {
                                 "in": {
@@ -546,10 +566,10 @@
                         "y": 110
                 },
                 {
-                        "id": "n_36e1c0",
-                        "type": "assignment",
-                        "label": "response = requests.get(url, timeout=timeout)",
-                        "line": 309,
+                        "id": "n_e3428e",
+                        "type": "block_start",
+                        "label": "try body",
+                        "line": null,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -566,10 +586,10 @@
                         "y": 220
                 },
                 {
-                        "id": "n_9ca7aa",
-                        "type": "statement",
-                        "label": "response.raise_for_status()",
-                        "line": 310,
+                        "id": "n_fddca9",
+                        "type": "assignment",
+                        "label": "response = requests.get(url, timeout=timeout)",
+                        "line": 309,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -586,10 +606,10 @@
                         "y": 330
                 },
                 {
-                        "id": "n_b0a65b",
-                        "type": "assignment",
-                        "label": "data = response.json()",
-                        "line": 311,
+                        "id": "n_0e34b0",
+                        "type": "statement",
+                        "label": "response.raise_for_status()",
+                        "line": 310,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -606,10 +626,10 @@
                         "y": 440
                 },
                 {
-                        "id": "n_d397a7",
-                        "type": "return",
-                        "label": "return {'success': True, 'data': data, 'status_code': response.status_code}",
-                        "line": 312,
+                        "id": "n_bc27f5",
+                        "type": "assignment",
+                        "label": "data = response.json()",
+                        "line": 311,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -626,10 +646,10 @@
                         "y": 550
                 },
                 {
-                        "id": "n_17f68c",
+                        "id": "n_38b7e2",
                         "type": "return",
-                        "label": "return {'success': False, 'error': 'Request timeout', 'retry_after': (timeout * 2)}",
-                        "line": 318,
+                        "label": "return {'success': True, 'data': data, 'status_code': response.status_code}",
+                        "line": 312,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -646,7 +666,67 @@
                         "y": 660
                 },
                 {
-                        "id": "n_e70c22",
+                        "id": "n_af9f83",
+                        "type": "except",
+                        "label": "except Exception",
+                        "line": 317,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 552,
+                        "y": 220
+                },
+                {
+                        "id": "n_6feae2",
+                        "type": "return",
+                        "label": "return {'success': False, 'error': 'Request timeout', 'retry_after': (timeout * 2)}",
+                        "line": 318,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 552,
+                        "y": 330
+                },
+                {
+                        "id": "n_1e8c3a",
+                        "type": "except",
+                        "label": "except Exception",
+                        "line": 323,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 184,
+                        "y": 220
+                },
+                {
+                        "id": "n_6e2c6f",
                         "type": "return",
                         "label": "return {'success': False, 'error': 'Connection failed', 'action': 'Check network'}",
                         "line": 324,
@@ -660,13 +740,33 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 7,
+                        "level": 3,
                         "branch": 0,
-                        "x": 0,
-                        "y": 770
+                        "x": 368,
+                        "y": 330
                 },
                 {
-                        "id": "n_2a7d1d",
+                        "id": "n_acea80",
+                        "type": "except",
+                        "label": "except Exception",
+                        "line": 329,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 368,
+                        "y": 220
+                },
+                {
+                        "id": "n_fb8f71",
                         "type": "return",
                         "label": "return {'success': False, 'error': f'HTTP error: {e.response.status_code}', 'status_code': e.response.status_code}",
                         "line": 330,
@@ -680,13 +780,33 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 8,
+                        "level": 3,
                         "branch": 0,
-                        "x": 0,
-                        "y": 880
+                        "x": 736,
+                        "y": 330
                 },
                 {
-                        "id": "n_9b8af2",
+                        "id": "n_be0ad8",
+                        "type": "except",
+                        "label": "except ValueError",
+                        "line": 335,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 736,
+                        "y": 220
+                },
+                {
+                        "id": "n_668ffd",
                         "type": "return",
                         "label": "return {'success': False, 'error': 'Invalid JSON response'}",
                         "line": 336,
@@ -700,36 +820,40 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 9,
+                        "level": 3,
                         "branch": 0,
-                        "x": 0,
-                        "y": 990
+                        "x": 184,
+                        "y": 330
                 },
                 {
-                        "id": "n_90479b",
-                        "type": "exit",
-                        "label": "Exit exception_20_lines",
+                        "id": "n_686990",
+                        "type": "merge",
+                        "label": "After try",
                         "line": null,
                         "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
                                 },
                                 "out": {
                                         "side": "bottom",
                                         "offset": 0.5
                                 }
                         },
-                        "level": 11,
+                        "level": 0,
                         "branch": 0,
-                        "x": 0,
-                        "y": 1210
+                        "x": 174,
+                        "y": 0
                 }
         ],
         "edges": [
                 {
-                        "from": "n_710cee",
-                        "to": "n_3929b7",
+                        "from": "n_05fbc5",
+                        "to": "n_b8599d",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -738,8 +862,18 @@
                         }
                 },
                 {
-                        "from": "n_3929b7",
-                        "to": "n_36e1c0",
+                        "from": "n_b8599d",
+                        "to": "n_e3428e",
+                        "label": "try",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_e3428e",
+                        "to": "n_fddca9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -748,8 +882,8 @@
                         }
                 },
                 {
-                        "from": "n_36e1c0",
-                        "to": "n_9ca7aa",
+                        "from": "n_fddca9",
+                        "to": "n_0e34b0",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -758,8 +892,8 @@
                         }
                 },
                 {
-                        "from": "n_9ca7aa",
-                        "to": "n_b0a65b",
+                        "from": "n_0e34b0",
+                        "to": "n_bc27f5",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -768,8 +902,8 @@
                         }
                 },
                 {
-                        "from": "n_b0a65b",
-                        "to": "n_d397a7",
+                        "from": "n_bc27f5",
+                        "to": "n_38b7e2",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -778,8 +912,8 @@
                         }
                 },
                 {
-                        "from": "n_d397a7",
-                        "to": "n_17f68c",
+                        "from": "n_38b7e2",
+                        "to": "n_588dd3",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -788,8 +922,18 @@
                         }
                 },
                 {
-                        "from": "n_17f68c",
-                        "to": "n_e70c22",
+                        "from": "n_b8599d",
+                        "to": "n_af9f83",
+                        "label": "except Exception",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_af9f83",
+                        "to": "n_6feae2",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -798,8 +942,8 @@
                         }
                 },
                 {
-                        "from": "n_e70c22",
-                        "to": "n_2a7d1d",
+                        "from": "n_6feae2",
+                        "to": "n_588dd3",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -808,8 +952,18 @@
                         }
                 },
                 {
-                        "from": "n_2a7d1d",
-                        "to": "n_9b8af2",
+                        "from": "n_b8599d",
+                        "to": "n_1e8c3a",
+                        "label": "except Exception",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_1e8c3a",
+                        "to": "n_6e2c6f",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -818,8 +972,78 @@
                         }
                 },
                 {
-                        "from": "n_9b8af2",
-                        "to": "n_90479b",
+                        "from": "n_6e2c6f",
+                        "to": "n_588dd3",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_b8599d",
+                        "to": "n_acea80",
+                        "label": "except Exception",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_acea80",
+                        "to": "n_fb8f71",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_fb8f71",
+                        "to": "n_588dd3",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_b8599d",
+                        "to": "n_be0ad8",
+                        "label": "except ValueError",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_be0ad8",
+                        "to": "n_668ffd",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_668ffd",
+                        "to": "n_588dd3",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_686990",
+                        "to": "n_588dd3",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

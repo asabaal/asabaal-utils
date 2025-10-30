@@ -378,11 +378,11 @@
         <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
             <div class="stat-item">
-                <div class="stat-value">11</div>
+                <div class="stat-value">16</div>
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">8</div>
+                <div class="stat-value">16</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -424,11 +424,11 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Nodes:</span>
-                    <span class="metadata-value" id="node-count">11</span>
+                    <span class="metadata-value" id="node-count">16</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">8</span>
+                    <span class="metadata-value" id="edge-count">16</span>
                 </div>
 
             </div>
@@ -484,7 +484,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_4e14b8",
+                        "id": "n_809be8",
                         "type": "entry",
                         "label": "Enter exception_14_lines",
                         "line": 294,
@@ -504,9 +504,29 @@
                         "y": 0
                 },
                 {
-                        "id": "n_2ed117",
-                        "type": "statement",
-                        "label": "try:\n    value = data[key]\n    processed = value.upper()\n    return processed\nexcept KeyError:\n    return f\"Key '{key}' not found\"\nexcept AttributeError:\n    return 'Invalid data type'\nexcept Exception as e:\n    return f'Unexpected error: {str(e)}'",
+                        "id": "n_f5b417",
+                        "type": "exit",
+                        "label": "Exit exception_14_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 7,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 770
+                },
+                {
+                        "id": "n_5050e4",
+                        "type": "try",
+                        "label": "try",
                         "line": 295,
                         "ports": {
                                 "in": {
@@ -524,10 +544,10 @@
                         "y": 110
                 },
                 {
-                        "id": "n_fc32de",
-                        "type": "assignment",
-                        "label": "value = data[key]",
-                        "line": 296,
+                        "id": "n_ed5ce8",
+                        "type": "block_start",
+                        "label": "try body",
+                        "line": null,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -544,10 +564,10 @@
                         "y": 220
                 },
                 {
-                        "id": "n_73d54f",
+                        "id": "n_25612d",
                         "type": "assignment",
-                        "label": "processed = value.upper()",
-                        "line": 297,
+                        "label": "value = data[key]",
+                        "line": 296,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -564,10 +584,10 @@
                         "y": 330
                 },
                 {
-                        "id": "n_6f039d",
-                        "type": "return",
-                        "label": "return processed",
-                        "line": 298,
+                        "id": "n_bc7ad3",
+                        "type": "assignment",
+                        "label": "processed = value.upper()",
+                        "line": 297,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -584,10 +604,10 @@
                         "y": 440
                 },
                 {
-                        "id": "n_44defb",
+                        "id": "n_33252b",
                         "type": "return",
-                        "label": "return f\"Key '{key}' not found\"",
-                        "line": 300,
+                        "label": "return processed",
+                        "line": 298,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -604,7 +624,67 @@
                         "y": 550
                 },
                 {
-                        "id": "n_f76943",
+                        "id": "n_58ab38",
+                        "type": "except",
+                        "label": "except KeyError",
+                        "line": 299,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 184,
+                        "y": 220
+                },
+                {
+                        "id": "n_e7e1e0",
+                        "type": "return",
+                        "label": "return f\"Key '{key}' not found\"",
+                        "line": 300,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 368,
+                        "y": 330
+                },
+                {
+                        "id": "n_b59364",
+                        "type": "except",
+                        "label": "except AttributeError",
+                        "line": 301,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 368,
+                        "y": 220
+                },
+                {
+                        "id": "n_eb574d",
                         "type": "return",
                         "label": "return 'Invalid data type'",
                         "line": 302,
@@ -618,13 +698,33 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 6,
+                        "level": 3,
                         "branch": 0,
-                        "x": 0,
-                        "y": 660
+                        "x": 552,
+                        "y": 330
                 },
                 {
-                        "id": "n_2d6cf8",
+                        "id": "n_cce172",
+                        "type": "except",
+                        "label": "except Exception",
+                        "line": 303,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 552,
+                        "y": 220
+                },
+                {
+                        "id": "n_0982a3",
                         "type": "return",
                         "label": "return f'Unexpected error: {str(e)}'",
                         "line": 304,
@@ -638,36 +738,40 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 7,
+                        "level": 3,
                         "branch": 0,
-                        "x": 0,
-                        "y": 770
+                        "x": 184,
+                        "y": 330
                 },
                 {
-                        "id": "n_1f35fb",
-                        "type": "exit",
-                        "label": "Exit exception_14_lines",
+                        "id": "n_fcf538",
+                        "type": "merge",
+                        "label": "After try",
                         "line": null,
                         "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
                                 },
                                 "out": {
                                         "side": "bottom",
                                         "offset": 0.5
                                 }
                         },
-                        "level": 9,
+                        "level": 0,
                         "branch": 0,
-                        "x": 0,
-                        "y": 990
+                        "x": 174,
+                        "y": 0
                 }
         ],
         "edges": [
                 {
-                        "from": "n_4e14b8",
-                        "to": "n_2ed117",
+                        "from": "n_809be8",
+                        "to": "n_5050e4",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -676,8 +780,18 @@
                         }
                 },
                 {
-                        "from": "n_2ed117",
-                        "to": "n_fc32de",
+                        "from": "n_5050e4",
+                        "to": "n_ed5ce8",
+                        "label": "try",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_ed5ce8",
+                        "to": "n_25612d",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -686,8 +800,8 @@
                         }
                 },
                 {
-                        "from": "n_fc32de",
-                        "to": "n_73d54f",
+                        "from": "n_25612d",
+                        "to": "n_bc7ad3",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -696,8 +810,8 @@
                         }
                 },
                 {
-                        "from": "n_73d54f",
-                        "to": "n_6f039d",
+                        "from": "n_bc7ad3",
+                        "to": "n_33252b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -706,8 +820,8 @@
                         }
                 },
                 {
-                        "from": "n_6f039d",
-                        "to": "n_44defb",
+                        "from": "n_33252b",
+                        "to": "n_f5b417",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -716,8 +830,18 @@
                         }
                 },
                 {
-                        "from": "n_44defb",
-                        "to": "n_f76943",
+                        "from": "n_5050e4",
+                        "to": "n_58ab38",
+                        "label": "except KeyError",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_58ab38",
+                        "to": "n_e7e1e0",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -726,8 +850,8 @@
                         }
                 },
                 {
-                        "from": "n_f76943",
-                        "to": "n_2d6cf8",
+                        "from": "n_e7e1e0",
+                        "to": "n_f5b417",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -736,8 +860,68 @@
                         }
                 },
                 {
-                        "from": "n_2d6cf8",
-                        "to": "n_1f35fb",
+                        "from": "n_5050e4",
+                        "to": "n_b59364",
+                        "label": "except AttributeError",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_b59364",
+                        "to": "n_eb574d",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_eb574d",
+                        "to": "n_f5b417",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_5050e4",
+                        "to": "n_cce172",
+                        "label": "except Exception",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_cce172",
+                        "to": "n_0982a3",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_0982a3",
+                        "to": "n_f5b417",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_fcf538",
+                        "to": "n_f5b417",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

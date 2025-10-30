@@ -478,7 +478,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_a41420",
+                        "id": "n_27693c",
                         "type": "entry",
                         "label": "Enter loop_8_lines",
                         "line": 200,
@@ -498,7 +498,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_e09279",
+                        "id": "n_3ff8bb",
+                        "type": "exit",
+                        "label": "Exit loop_8_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 440
+                },
+                {
+                        "id": "n_34eae3",
                         "type": "assignment",
                         "label": "total = 0",
                         "line": 201,
@@ -518,7 +538,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_6e340b",
+                        "id": "n_5b0a4e",
                         "type": "loop",
                         "label": "for num in numbers",
                         "line": 202,
@@ -546,7 +566,7 @@
                         "y": 0
                 },
                 {
-                        "id": "n_c7f14f",
+                        "id": "n_11ec0d",
                         "type": "block_start",
                         "label": "Loop Body",
                         "line": null,
@@ -566,7 +586,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_277b5f",
+                        "id": "n_98e989",
                         "type": "statement",
                         "label": "total += num",
                         "line": 203,
@@ -586,7 +606,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_5033dd",
+                        "id": "n_80fe6a",
                         "type": "loop_exit",
                         "label": "Exit Loop",
                         "line": null,
@@ -606,7 +626,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_0c1549",
+                        "id": "n_a3ced9",
                         "type": "return",
                         "label": "return total",
                         "line": 204,
@@ -624,32 +644,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 220
-                },
-                {
-                        "id": "n_c5b1e2",
-                        "type": "exit",
-                        "label": "Exit loop_8_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 4,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 440
                 }
         ],
         "edges": [
                 {
-                        "from": "n_a41420",
-                        "to": "n_e09279",
+                        "from": "n_27693c",
+                        "to": "n_34eae3",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -658,8 +658,8 @@
                         }
                 },
                 {
-                        "from": "n_e09279",
-                        "to": "n_6e340b",
+                        "from": "n_34eae3",
+                        "to": "n_5b0a4e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_back",
@@ -676,8 +676,8 @@
                         ]
                 },
                 {
-                        "from": "n_6e340b",
-                        "to": "n_c7f14f",
+                        "from": "n_5b0a4e",
+                        "to": "n_11ec0d",
                         "label": "Iterate",
                         "from_port": "out_body",
                         "to_port": "in",
@@ -686,8 +686,8 @@
                         }
                 },
                 {
-                        "from": "n_c7f14f",
-                        "to": "n_277b5f",
+                        "from": "n_11ec0d",
+                        "to": "n_98e989",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -696,8 +696,8 @@
                         }
                 },
                 {
-                        "from": "n_277b5f",
-                        "to": "n_6e340b",
+                        "from": "n_98e989",
+                        "to": "n_5b0a4e",
                         "label": "next iteration",
                         "from_port": "out",
                         "to_port": "in_back",
@@ -714,8 +714,8 @@
                         ]
                 },
                 {
-                        "from": "n_6e340b",
-                        "to": "n_5033dd",
+                        "from": "n_5b0a4e",
+                        "to": "n_80fe6a",
                         "label": "done",
                         "from_port": "out_exit",
                         "to_port": "in",
@@ -724,8 +724,8 @@
                         }
                 },
                 {
-                        "from": "n_5033dd",
-                        "to": "n_0c1549",
+                        "from": "n_80fe6a",
+                        "to": "n_a3ced9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -734,8 +734,8 @@
                         }
                 },
                 {
-                        "from": "n_0c1549",
-                        "to": "n_c5b1e2",
+                        "from": "n_a3ced9",
+                        "to": "n_3ff8bb",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

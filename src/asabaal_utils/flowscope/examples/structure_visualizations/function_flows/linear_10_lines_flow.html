@@ -478,7 +478,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_bdf842",
+                        "id": "n_a37e76",
                         "type": "entry",
                         "label": "Enter linear_10_lines",
                         "line": 27,
@@ -498,7 +498,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_34300b",
+                        "id": "n_2a5240",
+                        "type": "exit",
+                        "label": "Exit linear_10_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 660
+                },
+                {
+                        "id": "n_29cd5a",
                         "type": "assignment",
                         "label": "filtered = [x for x in items if (x is not None)]",
                         "line": 28,
@@ -518,7 +538,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_4a0326",
+                        "id": "n_ef72f0",
                         "type": "assignment",
                         "label": "unique = list(set(filtered))",
                         "line": 29,
@@ -538,7 +558,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_85d6dd",
+                        "id": "n_cf3ee7",
                         "type": "assignment",
                         "label": "sorted_items = sorted(unique)",
                         "line": 30,
@@ -558,7 +578,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_fe33aa",
+                        "id": "n_37276a",
                         "type": "return",
                         "label": "return len(sorted_items)",
                         "line": 31,
@@ -576,32 +596,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 440
-                },
-                {
-                        "id": "n_c0bbff",
-                        "type": "exit",
-                        "label": "Exit linear_10_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 6,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 660
                 }
         ],
         "edges": [
                 {
-                        "from": "n_bdf842",
-                        "to": "n_34300b",
+                        "from": "n_a37e76",
+                        "to": "n_29cd5a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -610,8 +610,8 @@
                         }
                 },
                 {
-                        "from": "n_34300b",
-                        "to": "n_4a0326",
+                        "from": "n_29cd5a",
+                        "to": "n_ef72f0",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -620,8 +620,8 @@
                         }
                 },
                 {
-                        "from": "n_4a0326",
-                        "to": "n_85d6dd",
+                        "from": "n_ef72f0",
+                        "to": "n_cf3ee7",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -630,8 +630,8 @@
                         }
                 },
                 {
-                        "from": "n_85d6dd",
-                        "to": "n_fe33aa",
+                        "from": "n_cf3ee7",
+                        "to": "n_37276a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -640,8 +640,8 @@
                         }
                 },
                 {
-                        "from": "n_fe33aa",
-                        "to": "n_c0bbff",
+                        "from": "n_37276a",
+                        "to": "n_2a5240",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

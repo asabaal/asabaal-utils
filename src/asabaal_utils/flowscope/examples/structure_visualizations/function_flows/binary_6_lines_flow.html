@@ -382,7 +382,7 @@
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">8</div>
+                <div class="stat-value">9</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -422,7 +422,7 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">8</span>
+                    <span class="metadata-value" id="edge-count">9</span>
                 </div>
 
             </div>
@@ -478,7 +478,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_baf2f9",
+                        "id": "n_1e0dae",
                         "type": "entry",
                         "label": "Enter binary_6_lines",
                         "line": 77,
@@ -498,7 +498,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_b19388",
+                        "id": "n_115fc4",
+                        "type": "exit",
+                        "label": "Exit binary_6_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 550
+                },
+                {
+                        "id": "n_82799d",
                         "type": "conditional",
                         "label": "if (x > 0)",
                         "line": 78,
@@ -522,7 +542,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_866ddf",
+                        "id": "n_fa8013",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -542,7 +562,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_21b537",
+                        "id": "n_90adc6",
                         "type": "return",
                         "label": "return 'positive'",
                         "line": 79,
@@ -562,7 +582,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_519439",
+                        "id": "n_7a731a",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -582,7 +602,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_8829a8",
+                        "id": "n_0dc57c",
                         "type": "return",
                         "label": "return 'non-positive'",
                         "line": 81,
@@ -602,7 +622,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_dc3567",
+                        "id": "n_92767b",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -620,36 +640,16 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 4,
-                        "branch": 0,
+                        "level": 2,
+                        "branch": 1,
                         "x": 0,
-                        "y": 440
-                },
-                {
-                        "id": "n_64cc78",
-                        "type": "exit",
-                        "label": "Exit binary_6_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 6,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 660
+                        "y": 220
                 }
         ],
         "edges": [
                 {
-                        "from": "n_baf2f9",
-                        "to": "n_b19388",
+                        "from": "n_1e0dae",
+                        "to": "n_82799d",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -658,8 +658,8 @@
                         }
                 },
                 {
-                        "from": "n_b19388",
-                        "to": "n_866ddf",
+                        "from": "n_82799d",
+                        "to": "n_fa8013",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -668,8 +668,8 @@
                         }
                 },
                 {
-                        "from": "n_866ddf",
-                        "to": "n_21b537",
+                        "from": "n_fa8013",
+                        "to": "n_90adc6",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -678,8 +678,18 @@
                         }
                 },
                 {
-                        "from": "n_b19388",
-                        "to": "n_519439",
+                        "from": "n_90adc6",
+                        "to": "n_115fc4",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_82799d",
+                        "to": "n_7a731a",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -688,8 +698,8 @@
                         }
                 },
                 {
-                        "from": "n_519439",
-                        "to": "n_8829a8",
+                        "from": "n_7a731a",
+                        "to": "n_0dc57c",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -698,28 +708,28 @@
                         }
                 },
                 {
-                        "from": "n_21b537",
-                        "to": "n_dc3567",
+                        "from": "n_0dc57c",
+                        "to": "n_115fc4",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_82799d",
+                        "to": "n_92767b",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_8829a8",
-                        "to": "n_dc3567",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_right",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_dc3567",
-                        "to": "n_64cc78",
+                        "from": "n_92767b",
+                        "to": "n_115fc4",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

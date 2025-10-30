@@ -478,7 +478,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_d88ac7",
+                        "id": "n_a9b22a",
                         "type": "entry",
                         "label": "Enter linear_8_lines",
                         "line": 21,
@@ -498,7 +498,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_8cef02",
+                        "id": "n_6b3a3b",
+                        "type": "exit",
+                        "label": "Exit linear_8_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 660
+                },
+                {
+                        "id": "n_3c29fb",
                         "type": "assignment",
                         "label": "cleaned = data.strip()",
                         "line": 22,
@@ -518,7 +538,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_c1830b",
+                        "id": "n_6b3f50",
                         "type": "assignment",
                         "label": "normalized = cleaned.lower()",
                         "line": 23,
@@ -538,7 +558,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_e2b666",
+                        "id": "n_a27aa6",
                         "type": "assignment",
                         "label": "processed = normalized.replace(' ', '_')",
                         "line": 24,
@@ -558,7 +578,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_710fa4",
+                        "id": "n_be6a9a",
                         "type": "return",
                         "label": "return processed",
                         "line": 25,
@@ -576,32 +596,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 440
-                },
-                {
-                        "id": "n_dcb357",
-                        "type": "exit",
-                        "label": "Exit linear_8_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 6,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 660
                 }
         ],
         "edges": [
                 {
-                        "from": "n_d88ac7",
-                        "to": "n_8cef02",
+                        "from": "n_a9b22a",
+                        "to": "n_3c29fb",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -610,8 +610,8 @@
                         }
                 },
                 {
-                        "from": "n_8cef02",
-                        "to": "n_c1830b",
+                        "from": "n_3c29fb",
+                        "to": "n_6b3f50",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -620,8 +620,8 @@
                         }
                 },
                 {
-                        "from": "n_c1830b",
-                        "to": "n_e2b666",
+                        "from": "n_6b3f50",
+                        "to": "n_a27aa6",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -630,8 +630,8 @@
                         }
                 },
                 {
-                        "from": "n_e2b666",
-                        "to": "n_710fa4",
+                        "from": "n_a27aa6",
+                        "to": "n_be6a9a",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -640,8 +640,8 @@
                         }
                 },
                 {
-                        "from": "n_710fa4",
-                        "to": "n_dcb357",
+                        "from": "n_be6a9a",
+                        "to": "n_6b3a3b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

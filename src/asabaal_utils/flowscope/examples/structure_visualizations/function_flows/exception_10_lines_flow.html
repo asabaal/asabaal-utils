@@ -378,11 +378,11 @@
         <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
             <div class="stat-item">
-                <div class="stat-value">10</div>
+                <div class="stat-value">14</div>
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">7</div>
+                <div class="stat-value">13</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -422,11 +422,11 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Nodes:</span>
-                    <span class="metadata-value" id="node-count">10</span>
+                    <span class="metadata-value" id="node-count">14</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">7</span>
+                    <span class="metadata-value" id="edge-count">13</span>
                 </div>
 
             </div>
@@ -482,7 +482,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_186e37",
+                        "id": "n_aad840",
                         "type": "entry",
                         "label": "Enter exception_10_lines",
                         "line": 284,
@@ -502,9 +502,29 @@
                         "y": 0
                 },
                 {
-                        "id": "n_5387be",
-                        "type": "statement",
-                        "label": "try:\n    with open(filename, 'r') as f:\n        content = f.read()\n    return content\nexcept FileNotFoundError:\n    return None\nexcept IOError:\n    return None",
+                        "id": "n_2a04e9",
+                        "type": "exit",
+                        "label": "Exit exception_10_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 7,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 770
+                },
+                {
+                        "id": "n_274e56",
+                        "type": "try",
+                        "label": "try",
                         "line": 285,
                         "ports": {
                                 "in": {
@@ -522,10 +542,10 @@
                         "y": 110
                 },
                 {
-                        "id": "n_1f0c95",
-                        "type": "statement",
-                        "label": "with open(filename, 'r') as f:\n    content = f.read()",
-                        "line": 286,
+                        "id": "n_bfa8bf",
+                        "type": "block_start",
+                        "label": "try body",
+                        "line": null,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -542,10 +562,10 @@
                         "y": 220
                 },
                 {
-                        "id": "n_be7485",
-                        "type": "assignment",
-                        "label": "content = f.read()",
-                        "line": 287,
+                        "id": "n_16df7d",
+                        "type": "statement",
+                        "label": "with open(filename, 'r') as f:\n    content = f.read()",
+                        "line": 286,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -558,14 +578,14 @@
                         },
                         "level": 3,
                         "branch": 0,
-                        "x": 0,
+                        "x": 408,
                         "y": 330
                 },
                 {
-                        "id": "n_9fa6db",
-                        "type": "return",
-                        "label": "return content",
-                        "line": 288,
+                        "id": "n_6253b9",
+                        "type": "assignment",
+                        "label": "content = f.read()",
+                        "line": 287,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -582,10 +602,10 @@
                         "y": 440
                 },
                 {
-                        "id": "n_27c8a7",
+                        "id": "n_a011ab",
                         "type": "return",
-                        "label": "return None",
-                        "line": 290,
+                        "label": "return content",
+                        "line": 288,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -602,7 +622,67 @@
                         "y": 550
                 },
                 {
-                        "id": "n_7b11df",
+                        "id": "n_f17437",
+                        "type": "except",
+                        "label": "except FileNotFoundError",
+                        "line": 289,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 368,
+                        "y": 220
+                },
+                {
+                        "id": "n_859619",
+                        "type": "return",
+                        "label": "return None",
+                        "line": 290,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 184,
+                        "y": 330
+                },
+                {
+                        "id": "n_55b3f2",
+                        "type": "except",
+                        "label": "except IOError",
+                        "line": 291,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 0,
+                        "x": 184,
+                        "y": 220
+                },
+                {
+                        "id": "n_71fbf4",
                         "type": "return",
                         "label": "return None",
                         "line": 292,
@@ -616,36 +696,40 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 6,
+                        "level": 3,
                         "branch": 0,
                         "x": 0,
-                        "y": 660
+                        "y": 330
                 },
                 {
-                        "id": "n_a4cb3f",
-                        "type": "exit",
-                        "label": "Exit exception_10_lines",
+                        "id": "n_a459ff",
+                        "type": "merge",
+                        "label": "After try",
                         "line": null,
                         "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
                                 },
                                 "out": {
                                         "side": "bottom",
                                         "offset": 0.5
                                 }
                         },
-                        "level": 8,
+                        "level": 0,
                         "branch": 0,
-                        "x": 0,
-                        "y": 880
+                        "x": 174,
+                        "y": 0
                 }
         ],
         "edges": [
                 {
-                        "from": "n_186e37",
-                        "to": "n_5387be",
+                        "from": "n_aad840",
+                        "to": "n_274e56",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -654,8 +738,18 @@
                         }
                 },
                 {
-                        "from": "n_5387be",
-                        "to": "n_1f0c95",
+                        "from": "n_274e56",
+                        "to": "n_bfa8bf",
+                        "label": "try",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_bfa8bf",
+                        "to": "n_16df7d",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -664,8 +758,8 @@
                         }
                 },
                 {
-                        "from": "n_1f0c95",
-                        "to": "n_be7485",
+                        "from": "n_16df7d",
+                        "to": "n_6253b9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -674,8 +768,8 @@
                         }
                 },
                 {
-                        "from": "n_be7485",
-                        "to": "n_9fa6db",
+                        "from": "n_6253b9",
+                        "to": "n_a011ab",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -684,8 +778,8 @@
                         }
                 },
                 {
-                        "from": "n_9fa6db",
-                        "to": "n_27c8a7",
+                        "from": "n_a011ab",
+                        "to": "n_2a04e9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -694,8 +788,18 @@
                         }
                 },
                 {
-                        "from": "n_27c8a7",
-                        "to": "n_7b11df",
+                        "from": "n_274e56",
+                        "to": "n_f17437",
+                        "label": "except FileNotFoundError",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_f17437",
+                        "to": "n_859619",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -704,8 +808,48 @@
                         }
                 },
                 {
-                        "from": "n_7b11df",
-                        "to": "n_a4cb3f",
+                        "from": "n_859619",
+                        "to": "n_2a04e9",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_274e56",
+                        "to": "n_55b3f2",
+                        "label": "except IOError",
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_55b3f2",
+                        "to": "n_71fbf4",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_71fbf4",
+                        "to": "n_2a04e9",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_a459ff",
+                        "to": "n_2a04e9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

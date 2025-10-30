@@ -489,7 +489,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_e0fde6",
+                        "id": "n_65b3da",
                         "type": "entry",
                         "label": "Enter binary_14_lines",
                         "line": 93,
@@ -509,7 +509,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_e5a298",
+                        "id": "n_82bc90",
+                        "type": "exit",
+                        "label": "Exit binary_14_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 990
+                },
+                {
+                        "id": "n_8272fb",
                         "type": "conditional",
                         "label": "if user.is_authenticated",
                         "line": 94,
@@ -533,7 +553,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_53fd9a",
+                        "id": "n_dfaf03",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -553,7 +573,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_611cdc",
+                        "id": "n_dc7042",
                         "type": "assignment",
                         "label": "profile = get_user_profile(user.id)",
                         "line": 95,
@@ -573,7 +593,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_ff0205",
+                        "id": "n_838532",
                         "type": "assignment",
                         "label": "preferences = load_user_preferences(user.id)",
                         "line": 96,
@@ -593,7 +613,7 @@
                         "y": 440
                 },
                 {
-                        "id": "n_a44778",
+                        "id": "n_4519ef",
                         "type": "assignment",
                         "label": "context = {'user': profile, 'prefs': preferences, 'access_level': 'full'}",
                         "line": 97,
@@ -613,7 +633,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_49f5ee",
+                        "id": "n_94afee",
                         "type": "block_start",
                         "label": "Begin False Block",
                         "line": null,
@@ -633,7 +653,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_c5ee3e",
+                        "id": "n_df0e40",
                         "type": "assignment",
                         "label": "context = {'user': None, 'prefs': {}, 'access_level': 'limited'}",
                         "line": 103,
@@ -653,7 +673,7 @@
                         "y": 330
                 },
                 {
-                        "id": "n_812d45",
+                        "id": "n_be3955",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -677,7 +697,7 @@
                         "y": 660
                 },
                 {
-                        "id": "n_a12d45",
+                        "id": "n_c84da2",
                         "type": "return",
                         "label": "return context",
                         "line": 108,
@@ -695,32 +715,12 @@
                         "branch": 0,
                         "x": 0,
                         "y": 770
-                },
-                {
-                        "id": "n_0f18ea",
-                        "type": "exit",
-                        "label": "Exit binary_14_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 9,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 990
                 }
         ],
         "edges": [
                 {
-                        "from": "n_e0fde6",
-                        "to": "n_e5a298",
+                        "from": "n_65b3da",
+                        "to": "n_8272fb",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -729,8 +729,8 @@
                         }
                 },
                 {
-                        "from": "n_e5a298",
-                        "to": "n_53fd9a",
+                        "from": "n_8272fb",
+                        "to": "n_dfaf03",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -739,8 +739,8 @@
                         }
                 },
                 {
-                        "from": "n_53fd9a",
-                        "to": "n_611cdc",
+                        "from": "n_dfaf03",
+                        "to": "n_dc7042",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -749,8 +749,8 @@
                         }
                 },
                 {
-                        "from": "n_611cdc",
-                        "to": "n_ff0205",
+                        "from": "n_dc7042",
+                        "to": "n_838532",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -759,8 +759,8 @@
                         }
                 },
                 {
-                        "from": "n_ff0205",
-                        "to": "n_a44778",
+                        "from": "n_838532",
+                        "to": "n_4519ef",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -769,8 +769,8 @@
                         }
                 },
                 {
-                        "from": "n_e5a298",
-                        "to": "n_49f5ee",
+                        "from": "n_8272fb",
+                        "to": "n_94afee",
                         "label": "False",
                         "from_port": "false",
                         "to_port": "in",
@@ -779,8 +779,8 @@
                         }
                 },
                 {
-                        "from": "n_49f5ee",
-                        "to": "n_c5ee3e",
+                        "from": "n_94afee",
+                        "to": "n_df0e40",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -789,8 +789,8 @@
                         }
                 },
                 {
-                        "from": "n_a44778",
-                        "to": "n_812d45",
+                        "from": "n_4519ef",
+                        "to": "n_be3955",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_left",
@@ -799,8 +799,8 @@
                         }
                 },
                 {
-                        "from": "n_c5ee3e",
-                        "to": "n_812d45",
+                        "from": "n_df0e40",
+                        "to": "n_be3955",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in_right",
@@ -809,8 +809,8 @@
                         }
                 },
                 {
-                        "from": "n_812d45",
-                        "to": "n_a12d45",
+                        "from": "n_be3955",
+                        "to": "n_c84da2",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -819,8 +819,8 @@
                         }
                 },
                 {
-                        "from": "n_a12d45",
-                        "to": "n_0f18ea",
+                        "from": "n_c84da2",
+                        "to": "n_82bc90",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",

@@ -382,7 +382,7 @@
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">22</div>
+                <div class="stat-value">27</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -434,7 +434,7 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">22</span>
+                    <span class="metadata-value" id="edge-count">27</span>
                 </div>
 
             </div>
@@ -490,7 +490,7 @@
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_837cd7",
+                        "id": "n_92c671",
                         "type": "entry",
                         "label": "Enter multi_return_16_lines",
                         "line": 362,
@@ -510,7 +510,27 @@
                         "y": 0
                 },
                 {
-                        "id": "n_17d611",
+                        "id": "n_6978f9",
+                        "type": "exit",
+                        "label": "Exit multi_return_16_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 13,
+                        "branch": -5,
+                        "x": -800,
+                        "y": 1430
+                },
+                {
+                        "id": "n_59b66e",
                         "type": "conditional",
                         "label": "if (not user.is_authenticated)",
                         "line": 363,
@@ -534,7 +554,7 @@
                         "y": 110
                 },
                 {
-                        "id": "n_2b3812",
+                        "id": "n_5eca68",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -554,7 +574,7 @@
                         "y": 220
                 },
                 {
-                        "id": "n_ebed24",
+                        "id": "n_bafd49",
                         "type": "return",
                         "label": "return {'allowed': False, 'reason': 'Not authenticated'}",
                         "line": 364,
@@ -574,7 +594,95 @@
                         "y": 330
                 },
                 {
-                        "id": "n_aa00ea",
+                        "id": "n_b9066e",
+                        "type": "merge",
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 1,
+                        "x": 0,
+                        "y": 220
+                },
+                {
+                        "id": "n_280750",
+                        "type": "conditional",
+                        "label": "if user.is_suspended",
+                        "line": 366,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 330
+                },
+                {
+                        "id": "n_653316",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 440
+                },
+                {
+                        "id": "n_461772",
+                        "type": "return",
+                        "label": "return {'allowed': False, 'reason': 'Account suspended'}",
+                        "line": 367,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 550
+                },
+                {
+                        "id": "n_71dd8b",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -593,15 +701,15 @@
                                 }
                         },
                         "level": 4,
-                        "branch": -1,
+                        "branch": 1,
                         "x": 0,
                         "y": 440
                 },
                 {
-                        "id": "n_747857",
+                        "id": "n_754eab",
                         "type": "conditional",
-                        "label": "if user.is_suspended",
-                        "line": 366,
+                        "label": "if (action not in user.permissions)",
+                        "line": 369,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -622,7 +730,7 @@
                         "y": 550
                 },
                 {
-                        "id": "n_e24d8d",
+                        "id": "n_2b560b",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -642,10 +750,10 @@
                         "y": 660
                 },
                 {
-                        "id": "n_c8bc7b",
+                        "id": "n_c8bc7e",
                         "type": "return",
-                        "label": "return {'allowed': False, 'reason': 'Account suspended'}",
-                        "line": 367,
+                        "label": "return {'allowed': False, 'reason': 'Insufficient permissions'}",
+                        "line": 370,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -662,7 +770,95 @@
                         "y": 770
                 },
                 {
-                        "id": "n_0df6a9",
+                        "id": "n_a68626",
+                        "type": "merge",
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": 1,
+                        "x": 0,
+                        "y": 660
+                },
+                {
+                        "id": "n_6c61b9",
+                        "type": "conditional",
+                        "label": "if resource.is_deleted",
+                        "line": 372,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 7,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 770
+                },
+                {
+                        "id": "n_0cdf23",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 8,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 880
+                },
+                {
+                        "id": "n_59e065",
+                        "type": "return",
+                        "label": "return {'allowed': False, 'reason': 'Resource not available'}",
+                        "line": 373,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 990
+                },
+                {
+                        "id": "n_549fea",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -681,15 +877,15 @@
                                 }
                         },
                         "level": 8,
-                        "branch": -1,
+                        "branch": 1,
                         "x": 0,
                         "y": 880
                 },
                 {
-                        "id": "n_642fba",
+                        "id": "n_bbde8e",
                         "type": "conditional",
-                        "label": "if (action not in user.permissions)",
-                        "line": 369,
+                        "label": "if ((resource.owner_id != user.id) and (not user.is_admin))",
+                        "line": 375,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -710,7 +906,7 @@
                         "y": 990
                 },
                 {
-                        "id": "n_0dc5c1",
+                        "id": "n_f5770b",
                         "type": "block_start",
                         "label": "Begin True Block",
                         "line": null,
@@ -730,10 +926,10 @@
                         "y": 1100
                 },
                 {
-                        "id": "n_7a6d1d",
+                        "id": "n_a272c0",
                         "type": "return",
-                        "label": "return {'allowed': False, 'reason': 'Insufficient permissions'}",
-                        "line": 370,
+                        "label": "return {'allowed': False, 'reason': 'Access denied'}",
+                        "line": 376,
                         "ports": {
                                 "in": {
                                         "side": "top",
@@ -750,7 +946,7 @@
                         "y": 1210
                 },
                 {
-                        "id": "n_7bb433",
+                        "id": "n_2e30c2",
                         "type": "merge",
                         "label": "Merge after if",
                         "line": null,
@@ -768,189 +964,13 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 12,
-                        "branch": -1,
+                        "level": 10,
+                        "branch": 1,
                         "x": 0,
-                        "y": 1320
+                        "y": 1100
                 },
                 {
-                        "id": "n_fc47fc",
-                        "type": "conditional",
-                        "label": "if resource.is_deleted",
-                        "line": 372,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "true": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "false": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                }
-                        },
-                        "level": 13,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 1430
-                },
-                {
-                        "id": "n_fb2f9d",
-                        "type": "block_start",
-                        "label": "Begin True Block",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 14,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 1540
-                },
-                {
-                        "id": "n_bbd54d",
-                        "type": "return",
-                        "label": "return {'allowed': False, 'reason': 'Resource not available'}",
-                        "line": 373,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 15,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 1650
-                },
-                {
-                        "id": "n_acbe37",
-                        "type": "merge",
-                        "label": "Merge after if",
-                        "line": null,
-                        "ports": {
-                                "in_left": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "in_right": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 16,
-                        "branch": -1,
-                        "x": 0,
-                        "y": 1760
-                },
-                {
-                        "id": "n_93d22d",
-                        "type": "conditional",
-                        "label": "if ((resource.owner_id != user.id) and (not user.is_admin))",
-                        "line": 375,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "true": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "false": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                }
-                        },
-                        "level": 17,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 1870
-                },
-                {
-                        "id": "n_82c5b5",
-                        "type": "block_start",
-                        "label": "Begin True Block",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 18,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 1980
-                },
-                {
-                        "id": "n_b9125a",
-                        "type": "return",
-                        "label": "return {'allowed': False, 'reason': 'Access denied'}",
-                        "line": 376,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 19,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 2090
-                },
-                {
-                        "id": "n_d5b1d4",
-                        "type": "merge",
-                        "label": "Merge after if",
-                        "line": null,
-                        "ports": {
-                                "in_left": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "in_right": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 20,
-                        "branch": -1,
-                        "x": 0,
-                        "y": 2200
-                },
-                {
-                        "id": "n_bb6b39",
+                        "id": "n_e4d96b",
                         "type": "return",
                         "label": "return {'allowed': True, 'resource': resource.to_dict()}",
                         "line": 378,
@@ -964,36 +984,16 @@
                                         "offset": 0.5
                                 }
                         },
-                        "level": 21,
+                        "level": 11,
                         "branch": 0,
                         "x": 0,
-                        "y": 2310
-                },
-                {
-                        "id": "n_06fca6",
-                        "type": "exit",
-                        "label": "Exit multi_return_16_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 23,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 2530
+                        "y": 1210
                 }
         ],
         "edges": [
                 {
-                        "from": "n_837cd7",
-                        "to": "n_17d611",
+                        "from": "n_92c671",
+                        "to": "n_59b66e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1002,8 +1002,8 @@
                         }
                 },
                 {
-                        "from": "n_17d611",
-                        "to": "n_2b3812",
+                        "from": "n_59b66e",
+                        "to": "n_5eca68",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1012,8 +1012,8 @@
                         }
                 },
                 {
-                        "from": "n_2b3812",
-                        "to": "n_ebed24",
+                        "from": "n_5eca68",
+                        "to": "n_bafd49",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1022,18 +1022,28 @@
                         }
                 },
                 {
-                        "from": "n_ebed24",
-                        "to": "n_aa00ea",
+                        "from": "n_bafd49",
+                        "to": "n_6978f9",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_59b66e",
+                        "to": "n_b9066e",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_aa00ea",
-                        "to": "n_747857",
+                        "from": "n_b9066e",
+                        "to": "n_280750",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1042,8 +1052,8 @@
                         }
                 },
                 {
-                        "from": "n_747857",
-                        "to": "n_e24d8d",
+                        "from": "n_280750",
+                        "to": "n_653316",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1052,8 +1062,8 @@
                         }
                 },
                 {
-                        "from": "n_e24d8d",
-                        "to": "n_c8bc7b",
+                        "from": "n_653316",
+                        "to": "n_461772",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1062,18 +1072,28 @@
                         }
                 },
                 {
-                        "from": "n_c8bc7b",
-                        "to": "n_0df6a9",
+                        "from": "n_461772",
+                        "to": "n_6978f9",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_280750",
+                        "to": "n_71dd8b",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_0df6a9",
-                        "to": "n_642fba",
+                        "from": "n_71dd8b",
+                        "to": "n_754eab",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1082,8 +1102,8 @@
                         }
                 },
                 {
-                        "from": "n_642fba",
-                        "to": "n_0dc5c1",
+                        "from": "n_754eab",
+                        "to": "n_2b560b",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1092,8 +1112,8 @@
                         }
                 },
                 {
-                        "from": "n_0dc5c1",
-                        "to": "n_7a6d1d",
+                        "from": "n_2b560b",
+                        "to": "n_c8bc7e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1102,18 +1122,28 @@
                         }
                 },
                 {
-                        "from": "n_7a6d1d",
-                        "to": "n_7bb433",
+                        "from": "n_c8bc7e",
+                        "to": "n_6978f9",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_754eab",
+                        "to": "n_a68626",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_7bb433",
-                        "to": "n_fc47fc",
+                        "from": "n_a68626",
+                        "to": "n_6c61b9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1122,8 +1152,8 @@
                         }
                 },
                 {
-                        "from": "n_fc47fc",
-                        "to": "n_fb2f9d",
+                        "from": "n_6c61b9",
+                        "to": "n_0cdf23",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1132,8 +1162,8 @@
                         }
                 },
                 {
-                        "from": "n_fb2f9d",
-                        "to": "n_bbd54d",
+                        "from": "n_0cdf23",
+                        "to": "n_59e065",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1142,18 +1172,28 @@
                         }
                 },
                 {
-                        "from": "n_bbd54d",
-                        "to": "n_acbe37",
+                        "from": "n_59e065",
+                        "to": "n_6978f9",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_6c61b9",
+                        "to": "n_549fea",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_acbe37",
-                        "to": "n_93d22d",
+                        "from": "n_549fea",
+                        "to": "n_bbde8e",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1162,8 +1202,8 @@
                         }
                 },
                 {
-                        "from": "n_93d22d",
-                        "to": "n_82c5b5",
+                        "from": "n_bbde8e",
+                        "to": "n_f5770b",
                         "label": "True",
                         "from_port": "true",
                         "to_port": "in",
@@ -1172,8 +1212,8 @@
                         }
                 },
                 {
-                        "from": "n_82c5b5",
-                        "to": "n_b9125a",
+                        "from": "n_f5770b",
+                        "to": "n_a272c0",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1182,18 +1222,28 @@
                         }
                 },
                 {
-                        "from": "n_b9125a",
-                        "to": "n_d5b1d4",
+                        "from": "n_a272c0",
+                        "to": "n_6978f9",
                         "label": null,
                         "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_bbde8e",
+                        "to": "n_2e30c2",
+                        "label": "False",
+                        "from_port": "false",
                         "to_port": "in_left",
                         "style": {
                                 "type": "straight"
                         }
                 },
                 {
-                        "from": "n_d5b1d4",
-                        "to": "n_bb6b39",
+                        "from": "n_2e30c2",
+                        "to": "n_e4d96b",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
@@ -1202,8 +1252,8 @@
                         }
                 },
                 {
-                        "from": "n_bb6b39",
-                        "to": "n_06fca6",
+                        "from": "n_e4d96b",
+                        "to": "n_6978f9",
                         "label": null,
                         "from_port": "out",
                         "to_port": "in",
