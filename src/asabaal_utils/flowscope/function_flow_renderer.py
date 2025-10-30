@@ -9,21 +9,21 @@ import json
 from typing import Dict, Any
 from pathlib import Path
 
-# Import hierarchical generator (NEW!)
+# Import dynamic generator
 try:
-    from .hierarchical_flow_generator import generate_hierarchical_function_flow
+    from ..dynamic_function_flow_generator import generate_dynamic_function_flow
 except ImportError:
     try:
-        import hierarchical_flow_generator
-        generate_hierarchical_function_flow = hierarchical_flow_generator.generate_hierarchical_function_flow
+        from . import dynamic_function_flow_generator
+        generate_dynamic_function_flow = dynamic_function_flow_generator.generate_dynamic_function_flow
     except ImportError:
-        # Fallback to old dynamic generator
         try:
-            from .dynamic_function_flow_generator import generate_dynamic_function_flow
-            generate_hierarchical_function_flow = generate_dynamic_function_flow
+            import dynamic_function_flow_generator
+            generate_dynamic_function_flow = dynamic_function_flow_generator.generate_dynamic_function_flow
         except ImportError:
-            def generate_hierarchical_function_flow(*args, **kwargs):
-                raise ImportError("Function flow generator not available. Install required dependencies.")
+            # Fallback: define a stub that raises an informative error
+            def generate_dynamic_function_flow(*args, **kwargs):
+                raise ImportError("Dynamic function flow generator not available. Install required dependencies.")
 
 
 class FunctionFlowRenderer:
@@ -34,21 +34,50 @@ class FunctionFlowRenderer:
         self.function_flows_dir = output_dir / "function_flows"
         self.function_flows_dir.mkdir(parents=True, exist_ok=True)
     
-    def render_function_flow(self, function_flow) -> Path:
+    def render_function_flow(self, function_flow, function_name: str) -> Path:
         """Render a single function flow to HTML using dynamic visualization."""
         
-        # Use new hierarchical generator with proper data conversion
-        flow_data = function_flow.to_dict()
+        # Handle both old format (with .to_dict()) and new format (plain dict)
+        if hasattr(function_flow, 'to_dict'):
+            flow_data = function_flow.to_dict()
+            func_name = function_flow.function_name
+            module_name = function_flow.module
+        else:
+            # New format from function_flow_builder
+            flow_data = function_flow
+            func_name = function_name
+            module_name = 'flowscope.examples.structure_examples'
         
         # Create filename
-        safe_function_name = function_flow.function_name.replace('.', '_').replace('<', '_').replace('>', '_')
+        safe_function_name = func_name.replace('.', '_').replace('<', '_').replace('>', '_')
         output_file = self.function_flows_dir / f"{safe_function_name}_flow.html"
         
-        generate_hierarchical_function_flow(
+        # Add source code to flow data if available
+        if hasattr(flow_data, 'source_code'):
+            flow_data['source_code'] = flow_data.source_code
+        elif 'source_code' not in flow_data:
+            # Try to read source code from file
+            try:
+                import ast
+                with open(flow_data.get('file_path', ''), 'r') as f:
+                    source_lines = f.readlines()
+                
+                # Find function in source
+                tree = ast.parse(''.join(source_lines))
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.FunctionDef) and node.name == func_name:
+                        start_line = node.lineno - 1
+                        end_line = node.end_lineno if hasattr(node, 'end_lineno') else len(source_lines)
+                        flow_data['source_code'] = ''.join(source_lines[start_line:end_line])
+                        break
+            except:
+                flow_data['source_code'] = '# Source code not available'
+        
+        generate_dynamic_function_flow(
             flow_data,
             output_file,
-            function_name=function_flow.function_name,
-            module_name=function_flow.module
+            function_name=func_name,
+            module_name=module_name
         )
         
         return output_file

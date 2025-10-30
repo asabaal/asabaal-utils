@@ -12,11 +12,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 try:
-    from asabaal_utils.flowscope.function_flow_builder import generate_function_flow
+    from asabaal_utils.flowscope.function_flow_parser import FunctionFlowParser
     from asabaal_utils.flowscope.function_flow_renderer import FunctionFlowRenderer
 except ImportError:
     # Try relative imports
-    from ..function_flow_builder import generate_function_flow
+    from ..function_flow_parser import FunctionFlowParser
     from ..function_flow_renderer import FunctionFlowRenderer
 
 # Define the functions to visualize with their expected structure types
@@ -76,7 +76,8 @@ def generate_visualizations():
     with open(structure_examples_file, 'r') as f:
         source_code = f.read()
     
-    # Initialize renderer
+    # Initialize parser and renderer
+    parser = FunctionFlowParser()
     renderer = FunctionFlowRenderer(output_dir)
     
     print("Generating Control Flow Structure Visualizations")
@@ -90,30 +91,24 @@ def generate_visualizations():
             print(f"Structure: {structure_type}")
             print(f"Description: {description}")
             
-            # Generate function flow using new builder
-            function_flow = generate_function_flow(source_code, function_name)
+            # Parse the function
+            function_flow = parser.parse_function(
+                source_code, 
+                function_name,
+                'flowscope.examples.structure_examples',
+                str(structure_examples_file)
+            )
             
             if function_flow is None:
-                print(f"  ❌ Failed to generate function flow")
+                print(f"  ❌ Failed to parse function")
                 continue
             
-            # Add source code to flow data
-            import ast
-            tree = ast.parse(source_code)
-            for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and node.name == function_name:
-                    start_line = node.lineno - 1
-                    end_line = node.end_lineno if hasattr(node, 'end_lineno') else len(source_code.split('\n'))
-                    function_source = '\n'.join(source_code.split('\n')[start_line:end_line])
-                    function_flow['source_code'] = function_source
-                    break
-            
             # Render the visualization
-            output_file = renderer.render_function_flow(function_flow, function_name)
+            output_file = renderer.render_function_flow(function_flow)
             
             # Get statistics
-            node_count = len(function_flow['nodes'])
-            edge_count = len(function_flow['edges'])
+            node_count = len(function_flow.nodes)
+            edge_count = len(function_flow.edges)
             
             result = {
                 'function': function_name,

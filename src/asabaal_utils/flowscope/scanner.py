@@ -2,6 +2,7 @@ import ast
 import sys
 import pkgutil
 import fnmatch
+import json
 from pathlib import Path
 import networkx as nx
 from typing import Set, Optional, List, Dict
@@ -208,55 +209,63 @@ def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: 
         exclude_patterns: Set of directory/file patterns to exclude
         output_dir: Directory to save function flow analysis results
     """
-    # Import function flow analysis modules
+    # Import new function flow builder
     try:
-        from asabaal_utils.flowscope.function_flow_parser import FunctionFlowParser
-        from asabaal_utils.flowscope.function_flow_renderer import FunctionFlowRenderer
+        from function_flow_builder import generate_function_flow
     except ImportError:
-        try:
-            # Try relative import
-            from .function_flow_parser import FunctionFlowParser
-            from .function_flow_renderer import FunctionFlowRenderer
-        except ImportError:
-            try:
-                # Try direct import
-                from function_flow_parser import FunctionFlowParser
-                from function_flow_renderer import FunctionFlowRenderer
-            except ImportError:
-                print("Warning: Function flow analysis modules not available. Skipping function flow analysis.")
-                return
+        print("Warning: Function flow builder not available. Skipping function flow analysis.")
+        return
     
-    parser = FunctionFlowParser()
-    renderer = FunctionFlowRenderer(output_dir)
+    # Create output directory for function flows
+    function_flows_dir = output_dir / "function_flows"
+    function_flows_dir.mkdir(parents=True, exist_ok=True)
     
     print("Analyzing function flows...")
     
-# Analyze each file
+    # Analyze each file
     for file in path.rglob("*.py"):
         if _should_exclude_file(file, exclude_patterns):
             continue
         
         try:
             module_name = file.stem
-            function_flows = parser.parse_file(file, module_name)
+            source_code = file.read_text(encoding="utf-8")
+            
+            # Parse AST to find all functions
+            import ast
+            tree = ast.parse(source_code)
+            
+            function_flows = {}
+            
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef):
+                    try:
+                        # Generate function flow using new builder
+                        function_flow = generate_function_flow(source_code, node.name)
+                        function_flows[node.name] = function_flow
+                    except Exception as e:
+                        print(f"    Error analyzing function {node.name}: {e}")
             
             if function_flows:
                 print(f"  Analyzed {len(function_flows)} functions in {module_name}")
                 
-                # Save JSON data for loading in visualizations
-                renderer.save_function_flows_json(parser, module_name)
+                # Save module data
+                module_data = {
+                    'module': module_name,
+                    'function_flows': function_flows
+                }
                 
-                # Render individual function flows
-                for func_name, flow in function_flows.items():
-                    renderer.render_function_flow(flow)
+                import json
+                output_file = function_flows_dir / f"{module_name}.json"
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    json.dump(module_data, f, indent=2)
                 
-                # Render module overview
-                renderer.render_module_function_flows(function_flows, module_name)
+                print(f"    Saved to {output_file}")
         
         except Exception as e:
             print(f"  Error analyzing {file}: {e}")
     
-    print(f"Function flow analysis complete. Results saved to {output_dir}")
+    print(f"Function flow analysis complete. Results saved to {function_flows_dir}")
 
 
 class FunctionRegistry:

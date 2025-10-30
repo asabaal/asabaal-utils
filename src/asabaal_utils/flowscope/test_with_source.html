@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Function Flow - linear_3_lines</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-size: 12px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+        }
+        
+        .graph-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .graph-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .graph-metadata {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .metadata-label {
+            font-weight: 500;
+        }
+        
+        .metadata-value {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+
+
+        #network {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 0 20px 20px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid #666;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dynamic Function Flow Visualization</h1>
+        <div class="subtitle">linear_3_lines function from flowscope.examples.structure_examples module • FlowScope Analysis</div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <button class="btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+            <button class="btn-success" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Node Size:</label>
+            <select id="nodeSizeSelect" onchange="changeNodeSize()">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-secondary" onclick="exportImage()">Export Image</button>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <h3 style="margin: 0; color: #333;">Function Information</h3>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Control Flow Nodes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">2</div>
+                <div class="stat-label">Flow Edges</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">Unknown</div>
+                <div class="stat-label">Source File</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">flowscope.examples.structure_examples</div>
+                <div class="stat-label">Module</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <h3 style="margin: 0; color: #333;">Source Code</h3>
+        <div id="source-code" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow-y: auto;">
+            "\"\"\"\nComprehensive example functions demonstrating all control flow structures\nacross different line count ranges for systematic visualization testing.\n\"\"\"\n\nimport os\nimport requests\n\n# ===== LINEAR FUNCTIONS =====\n\n# 1-5 lines: Simple linear\ndef linear_3_lines(x):\n    return x + 1\n\ndef linear_5_lines(a, b):\n    temp = a * 2\n    result = temp + b\n    return result\n\n# 6-10 lines: Medium linear\ndef linear_8_lines(data):\n    cleaned = data.strip()\n    normalized = cleaned.lower()\n    processed = normalized.replace(' ', '_')\n    return processed\n\ndef linear_10_lines(items):\n    filtered = [x for x in items if x is not None]\n    unique = list(set(filtered))\n    sorted_items = sorted(unique)\n    return len(sorted_items)\n\n# 11-20 lines: Complex linear\ndef linear_15_lines(user_data):\n    # Extract basic info\n    name = user_data.get('name', '').strip()\n    email = user_data.get('email', '').lower()\n    \n    # Process name\n    first_name = name.split()[0] if name else 'Unknown'\n    last_name = name.split()[-1] if len(name.split()) > 1 else ''\n    \n    # Process email\n    domain = email.split('@')[-1] if '@' in email else 'unknown'\n    \n    # Create summary\n    summary = f\"{first_name} ({domain})\"\n    return summary\n\ndef linear_20_lines(log_entry):\n    # Parse timestamp\n    timestamp_str = log_entry.split(' ')[0]\n    timestamp = int(timestamp_str)\n    \n    # Extract level\n    level_start = len(timestamp_str) + 1\n    level_end = log_entry.find(' ', level_start)\n    level = log_entry[level_start:level_end]\n    \n    # Extract message\n    message = log_entry[level_end + 1:]\n    \n    # Create structured data\n    structured = {\n        'timestamp': timestamp,\n        'level': level.upper(),\n        'message': message.strip(),\n        'length': len(message)\n    }\n    \n    return structured\n\n\n# ===== BINARY BRANCHING FUNCTIONS =====\n\n# 5-10 lines: Simple binary branching\ndef binary_6_lines(x):\n    if x > 0:\n        return \"positive\"\n    else:\n        return \"non-positive\"\n\ndef binary_9_lines(age):\n    if age >= 18:\n        status = \"adult\"\n        can_vote = True\n    else:\n        status = \"minor\"\n        can_vote = False\n    return status, can_vote\n\n# 11-20 lines: Medium binary branching\ndef binary_14_lines(user):\n    if user.is_authenticated:\n        profile = get_user_profile(user.id)\n        preferences = load_user_preferences(user.id)\n        context = {\n            'user': profile,\n            'prefs': preferences,\n            'access_level': 'full'\n        }\n    else:\n        context = {\n            'user': None,\n            'prefs': {},\n            'access_level': 'limited'\n        }\n    return context\n\ndef binary_18_lines(file_path):\n    if os.path.exists(file_path):\n        stat = os.stat(file_path)\n        size = stat.st_size\n        modified = stat.st_mtime\n        readable = os.access(file_path, os.R_OK)\n        return {\n            'exists': True,\n            'size': size,\n            'modified': modified,\n            'readable': readable\n        }\n    else:\n        return {\n            'exists': False,\n            'error': 'File not found',\n            'suggestions': ['Check path', 'Check permissions']\n        }\n\n\n# ===== MULTI-WAY BRANCHING FUNCTIONS =====\n\n# 8-15 lines: Simple multi-way branching\ndef multi_10_lines(score):\n    if score >= 90:\n        grade = 'A'\n    elif score >= 80:\n        grade = 'B'\n    elif score >= 70:\n        grade = 'C'\n    elif score >= 60:\n        grade = 'D'\n    else:\n        grade = 'F'\n    return grade\n\ndef multi_14_lines(status_code):\n    if 200 <= status_code < 300:\n        category = 'Success'\n        action = 'Process response'\n    elif 300 <= status_code < 400:\n        category = 'Redirection'\n        action = 'Follow redirect'\n    elif 400 <= status_code < 500:\n        category = 'Client Error'\n        action = 'Fix request'\n    elif 500 <= status_code < 600:\n        category = 'Server Error'\n        action = 'Retry later'\n    else:\n        category = 'Unknown'\n        action = 'Investigate'\n    return category, action\n\n# 16-25 lines: Complex multi-way branching\ndef multi_22_lines(user_role, permissions):\n    if user_role == 'admin':\n        access_level = 'full'\n        allowed_actions = ['create', 'read', 'update', 'delete', 'manage']\n        rate_limit = 10000\n    elif user_role == 'moderator':\n        access_level = 'high'\n        allowed_actions = ['create', 'read', 'update', 'moderate']\n        rate_limit = 5000\n    elif user_role == 'editor':\n        access_level = 'medium'\n        allowed_actions = ['create', 'read', 'update']\n        rate_limit = 2000\n    elif user_role == 'viewer':\n        access_level = 'low'\n        allowed_actions = ['read']\n        rate_limit = 1000\n    else:\n        access_level = 'none'\n        allowed_actions = []\n        rate_limit = 100\n    \n    # Check permissions\n    final_permissions = [p for p in allowed_actions if p in permissions]\n    \n    return {\n        'access_level': access_level,\n        'permissions': final_permissions,\n        'rate_limit': rate_limit\n    }\n\n\n# ===== LOOP STRUCTURES =====\n\n# 6-12 lines: Simple loops\ndef loop_8_lines(numbers):\n    total = 0\n    for num in numbers:\n        total += num\n    return total\n\ndef loop_11_lines(text):\n    vowels = 0\n    for char in text.lower():\n        if char in 'aeiou':\n            vowels += 1\n    return vowels\n\n# 13-20 lines: Medium loops\ndef loop_16_lines(data_list):\n    results = []\n    for item in data_list:\n        if item is not None:\n            processed = item.strip().lower()\n            if len(processed) > 0:\n                results.append(processed)\n    return results\n\ndef loop_19_lines(numbers, threshold):\n    filtered = []\n    count = 0\n    for num in numbers:\n        if num > threshold:\n            filtered.append(num)\n            count += 1\n            if count >= 10:  # Limit results\n                break\n    return filtered, count\n\n\n# ===== NESTED STRUCTURES =====\n\n# 10-20 lines: Simple nesting\ndef nested_12_lines(matrix):\n    results = []\n    for row in matrix:\n        row_sum = 0\n        for value in row:\n            if value > 0:\n                row_sum += value\n        results.append(row_sum)\n    return results\n\ndef nested_18_lines(data, filters):\n    results = []\n    for category in data:\n        if category in filters:\n            for item in data[category]:\n                if item.get('active', False):\n                    processed = {\n                        'id': item['id'],\n                        'name': item['name'],\n                        'category': category\n                    }\n                    results.append(processed)\n    return results\n\n# 21-30 lines: Complex nesting\ndef nested_25_lines(complex_data, config):\n    output = []\n    for section in complex_data['sections']:\n        if section['type'] in config['allowed_types']:\n            for item in section['items']:\n                if item.get('active', False):\n                    for subitem in item['subitems']:\n                        if subitem['enabled']:\n                            processed = {\n                                'section_id': section['id'],\n                                'item_id': item['id'],\n                                'subitem': subitem['name'],\n                                'value': subitem['value'] * config['multiplier']\n                            }\n                            output.append(processed)\n    return output\n\n\n# ===== EXCEPTION HANDLING =====\n\n# 8-15 lines: Simple exception handling\ndef exception_10_lines(filename):\n    try:\n        with open(filename, 'r') as f:\n            content = f.read()\n        return content\n    except FileNotFoundError:\n        return None\n    except IOError:\n        return None\n\ndef exception_14_lines(data, key):\n    try:\n        value = data[key]\n        processed = value.upper()\n        return processed\n    except KeyError:\n        return f\"Key '{key}' not found\"\n    except AttributeError:\n        return \"Invalid data type\"\n    except Exception as e:\n        return f\"Unexpected error: {str(e)}\"\n\n# 16-25 lines: Complex exception handling\ndef exception_20_lines(url, timeout=5):\n    try:\n        response = requests.get(url, timeout=timeout)\n        response.raise_for_status()\n        data = response.json()\n        return {\n            'success': True,\n            'data': data,\n            'status_code': response.status_code\n        }\n    except requests.exceptions.Timeout:\n        return {\n            'success': False,\n            'error': 'Request timeout',\n            'retry_after': timeout * 2\n        }\n    except requests.exceptions.ConnectionError:\n        return {\n            'success': False,\n            'error': 'Connection failed',\n            'action': 'Check network'\n        }\n    except requests.exceptions.HTTPError as e:\n        return {\n            'success': False,\n            'error': f'HTTP error: {e.response.status_code}',\n            'status_code': e.response.status_code\n        }\n    except ValueError:\n        return {\n            'success': False,\n            'error': 'Invalid JSON response'\n        }\n\n\n# ===== MULTIPLE RETURNS =====\n\n# 5-12 lines: Simple multiple returns\ndef multi_return_7_lines(value):\n    if value is None:\n        return None\n    if value < 0:\n        return 0\n    return value * 2\n\ndef multi_return_11_lines(text):\n    if not text:\n        return False\n    if len(text) < 3:\n        return False\n    if not text.isalnum():\n        return False\n    return True\n\n# 13-20 lines: Complex multiple returns\ndef multi_return_16_lines(user, action, resource):\n    if not user.is_authenticated:\n        return {'allowed': False, 'reason': 'Not authenticated'}\n    \n    if user.is_suspended:\n        return {'allowed': False, 'reason': 'Account suspended'}\n    \n    if action not in user.permissions:\n        return {'allowed': False, 'reason': 'Insufficient permissions'}\n    \n    if resource.is_deleted:\n        return {'allowed': False, 'reason': 'Resource not available'}\n    \n    if resource.owner_id != user.id and not user.is_admin:\n        return {'allowed': False, 'reason': 'Access denied'}\n    \n    return {'allowed': True, 'resource': resource.to_dict()}\n\n\n# ===== COMBINATION EXAMPLES =====\n\n# 20-30 lines: Mixed structures\ndef complex_25_lines(data, options):\n    \"\"\"Complex function combining multiple structures.\"\"\"\n    results = []\n    \n    # Guard clauses (multiple returns)\n    if not data:\n        return []\n    if not options.get('enabled', True):\n        return []\n    \n    # Loop with nested branching\n    for item in data:\n        # Binary branching\n        if item.get('type') == 'special':\n            processed = process_special_item(item)\n        else:\n            processed = process_regular_item(item)\n        \n        # Multi-way branching\n        if processed['status'] == 'success':\n            results.append(processed)\n        elif processed['status'] == 'warning':\n            if options.get('include_warnings', False):\n                results.append(processed)\n        elif processed['status'] == 'error':\n            if options.get('include_errors', False):\n                results.append(processed)\n    \n    # Exception handling\n    try:\n        final_results = apply_transformations(results, options)\n    except TransformationError as e:\n        return {'error': str(e), 'partial_results': results}\n    \n    return final_results\n\n\n# Helper functions for examples\ndef get_user_profile(user_id):\n    pass\n\ndef load_user_preferences(user_id):\n    pass\n\ndef process_special_item(item):\n    return {'status': 'success', 'data': item}\n\ndef process_regular_item(item):\n    return {'status': 'success', 'data': item}\n\ndef apply_transformations(results, options):\n    return results\n\nclass TransformationError(Exception):\n    pass"
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div class="graph-header">
+            <h2 class="graph-title" id="graph-title">linear_3_lines Function Flow</h2>
+            <div class="graph-metadata" id="graph-metadata">
+                <div class="metadata-item">
+                    <span class="metadata-label">Module:</span>
+                    <span class="metadata-value">flowscope.examples.structure_examples</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Nodes:</span>
+                    <span class="metadata-value" id="node-count">5</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Edges:</span>
+                    <span class="metadata-value" id="edge-count">2</span>
+                </div>
+
+            </div>
+        </div>
+        <div id="network" class="loading">Loading function flow graph...</div>
+    </div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <span>Merge Point</span>
+        </div>
+    </div>
+    
+    <script>
+        // Function flow data for linear_3_lines function
+        const functionFlowData = {
+        "function": "linear_3_lines",
+        "type": "function_flow",
+        "nodes": [
+                {
+                        "id": "n_14c3cf",
+                        "type": "entry",
+                        "label": "Enter linear_3_lines",
+                        "line": 12,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 0,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 0
+                },
+                {
+                        "id": "n_4b931b",
+                        "type": "return",
+                        "label": "return (x + 1)",
+                        "line": 13,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 1,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 110
+                },
+                {
+                        "id": "n_81f4e4",
+                        "type": "exit",
+                        "label": "Exit linear_3_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 330
+                }
+        ],
+        "edges": [
+                {
+                        "from": "n_14c3cf",
+                        "to": "n_4b931b",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_4b931b",
+                        "to": "n_81f4e4",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                }
+        ],
+        "source_code": "\"\"\"\nComprehensive example functions demonstrating all control flow structures\nacross different line count ranges for systematic visualization testing.\n\"\"\"\n\nimport os\nimport requests\n\n# ===== LINEAR FUNCTIONS =====\n\n# 1-5 lines: Simple linear\ndef linear_3_lines(x):\n    return x + 1\n\ndef linear_5_lines(a, b):\n    temp = a * 2\n    result = temp + b\n    return result\n\n# 6-10 lines: Medium linear\ndef linear_8_lines(data):\n    cleaned = data.strip()\n    normalized = cleaned.lower()\n    processed = normalized.replace(' ', '_')\n    return processed\n\ndef linear_10_lines(items):\n    filtered = [x for x in items if x is not None]\n    unique = list(set(filtered))\n    sorted_items = sorted(unique)\n    return len(sorted_items)\n\n# 11-20 lines: Complex linear\ndef linear_15_lines(user_data):\n    # Extract basic info\n    name = user_data.get('name', '').strip()\n    email = user_data.get('email', '').lower()\n    \n    # Process name\n    first_name = name.split()[0] if name else 'Unknown'\n    last_name = name.split()[-1] if len(name.split()) > 1 else ''\n    \n    # Process email\n    domain = email.split('@')[-1] if '@' in email else 'unknown'\n    \n    # Create summary\n    summary = f\"{first_name} ({domain})\"\n    return summary\n\ndef linear_20_lines(log_entry):\n    # Parse timestamp\n    timestamp_str = log_entry.split(' ')[0]\n    timestamp = int(timestamp_str)\n    \n    # Extract level\n    level_start = len(timestamp_str) + 1\n    level_end = log_entry.find(' ', level_start)\n    level = log_entry[level_start:level_end]\n    \n    # Extract message\n    message = log_entry[level_end + 1:]\n    \n    # Create structured data\n    structured = {\n        'timestamp': timestamp,\n        'level': level.upper(),\n        'message': message.strip(),\n        'length': len(message)\n    }\n    \n    return structured\n\n\n# ===== BINARY BRANCHING FUNCTIONS =====\n\n# 5-10 lines: Simple binary branching\ndef binary_6_lines(x):\n    if x > 0:\n        return \"positive\"\n    else:\n        return \"non-positive\"\n\ndef binary_9_lines(age):\n    if age >= 18:\n        status = \"adult\"\n        can_vote = True\n    else:\n        status = \"minor\"\n        can_vote = False\n    return status, can_vote\n\n# 11-20 lines: Medium binary branching\ndef binary_14_lines(user):\n    if user.is_authenticated:\n        profile = get_user_profile(user.id)\n        preferences = load_user_preferences(user.id)\n        context = {\n            'user': profile,\n            'prefs': preferences,\n            'access_level': 'full'\n        }\n    else:\n        context = {\n            'user': None,\n            'prefs': {},\n            'access_level': 'limited'\n        }\n    return context\n\ndef binary_18_lines(file_path):\n    if os.path.exists(file_path):\n        stat = os.stat(file_path)\n        size = stat.st_size\n        modified = stat.st_mtime\n        readable = os.access(file_path, os.R_OK)\n        return {\n            'exists': True,\n            'size': size,\n            'modified': modified,\n            'readable': readable\n        }\n    else:\n        return {\n            'exists': False,\n            'error': 'File not found',\n            'suggestions': ['Check path', 'Check permissions']\n        }\n\n\n# ===== MULTI-WAY BRANCHING FUNCTIONS =====\n\n# 8-15 lines: Simple multi-way branching\ndef multi_10_lines(score):\n    if score >= 90:\n        grade = 'A'\n    elif score >= 80:\n        grade = 'B'\n    elif score >= 70:\n        grade = 'C'\n    elif score >= 60:\n        grade = 'D'\n    else:\n        grade = 'F'\n    return grade\n\ndef multi_14_lines(status_code):\n    if 200 <= status_code < 300:\n        category = 'Success'\n        action = 'Process response'\n    elif 300 <= status_code < 400:\n        category = 'Redirection'\n        action = 'Follow redirect'\n    elif 400 <= status_code < 500:\n        category = 'Client Error'\n        action = 'Fix request'\n    elif 500 <= status_code < 600:\n        category = 'Server Error'\n        action = 'Retry later'\n    else:\n        category = 'Unknown'\n        action = 'Investigate'\n    return category, action\n\n# 16-25 lines: Complex multi-way branching\ndef multi_22_lines(user_role, permissions):\n    if user_role == 'admin':\n        access_level = 'full'\n        allowed_actions = ['create', 'read', 'update', 'delete', 'manage']\n        rate_limit = 10000\n    elif user_role == 'moderator':\n        access_level = 'high'\n        allowed_actions = ['create', 'read', 'update', 'moderate']\n        rate_limit = 5000\n    elif user_role == 'editor':\n        access_level = 'medium'\n        allowed_actions = ['create', 'read', 'update']\n        rate_limit = 2000\n    elif user_role == 'viewer':\n        access_level = 'low'\n        allowed_actions = ['read']\n        rate_limit = 1000\n    else:\n        access_level = 'none'\n        allowed_actions = []\n        rate_limit = 100\n    \n    # Check permissions\n    final_permissions = [p for p in allowed_actions if p in permissions]\n    \n    return {\n        'access_level': access_level,\n        'permissions': final_permissions,\n        'rate_limit': rate_limit\n    }\n\n\n# ===== LOOP STRUCTURES =====\n\n# 6-12 lines: Simple loops\ndef loop_8_lines(numbers):\n    total = 0\n    for num in numbers:\n        total += num\n    return total\n\ndef loop_11_lines(text):\n    vowels = 0\n    for char in text.lower():\n        if char in 'aeiou':\n            vowels += 1\n    return vowels\n\n# 13-20 lines: Medium loops\ndef loop_16_lines(data_list):\n    results = []\n    for item in data_list:\n        if item is not None:\n            processed = item.strip().lower()\n            if len(processed) > 0:\n                results.append(processed)\n    return results\n\ndef loop_19_lines(numbers, threshold):\n    filtered = []\n    count = 0\n    for num in numbers:\n        if num > threshold:\n            filtered.append(num)\n            count += 1\n            if count >= 10:  # Limit results\n                break\n    return filtered, count\n\n\n# ===== NESTED STRUCTURES =====\n\n# 10-20 lines: Simple nesting\ndef nested_12_lines(matrix):\n    results = []\n    for row in matrix:\n        row_sum = 0\n        for value in row:\n            if value > 0:\n                row_sum += value\n        results.append(row_sum)\n    return results\n\ndef nested_18_lines(data, filters):\n    results = []\n    for category in data:\n        if category in filters:\n            for item in data[category]:\n                if item.get('active', False):\n                    processed = {\n                        'id': item['id'],\n                        'name': item['name'],\n                        'category': category\n                    }\n                    results.append(processed)\n    return results\n\n# 21-30 lines: Complex nesting\ndef nested_25_lines(complex_data, config):\n    output = []\n    for section in complex_data['sections']:\n        if section['type'] in config['allowed_types']:\n            for item in section['items']:\n                if item.get('active', False):\n                    for subitem in item['subitems']:\n                        if subitem['enabled']:\n                            processed = {\n                                'section_id': section['id'],\n                                'item_id': item['id'],\n                                'subitem': subitem['name'],\n                                'value': subitem['value'] * config['multiplier']\n                            }\n                            output.append(processed)\n    return output\n\n\n# ===== EXCEPTION HANDLING =====\n\n# 8-15 lines: Simple exception handling\ndef exception_10_lines(filename):\n    try:\n        with open(filename, 'r') as f:\n            content = f.read()\n        return content\n    except FileNotFoundError:\n        return None\n    except IOError:\n        return None\n\ndef exception_14_lines(data, key):\n    try:\n        value = data[key]\n        processed = value.upper()\n        return processed\n    except KeyError:\n        return f\"Key '{key}' not found\"\n    except AttributeError:\n        return \"Invalid data type\"\n    except Exception as e:\n        return f\"Unexpected error: {str(e)}\"\n\n# 16-25 lines: Complex exception handling\ndef exception_20_lines(url, timeout=5):\n    try:\n        response = requests.get(url, timeout=timeout)\n        response.raise_for_status()\n        data = response.json()\n        return {\n            'success': True,\n            'data': data,\n            'status_code': response.status_code\n        }\n    except requests.exceptions.Timeout:\n        return {\n            'success': False,\n            'error': 'Request timeout',\n            'retry_after': timeout * 2\n        }\n    except requests.exceptions.ConnectionError:\n        return {\n            'success': False,\n            'error': 'Connection failed',\n            'action': 'Check network'\n        }\n    except requests.exceptions.HTTPError as e:\n        return {\n            'success': False,\n            'error': f'HTTP error: {e.response.status_code}',\n            'status_code': e.response.status_code\n        }\n    except ValueError:\n        return {\n            'success': False,\n            'error': 'Invalid JSON response'\n        }\n\n\n# ===== MULTIPLE RETURNS =====\n\n# 5-12 lines: Simple multiple returns\ndef multi_return_7_lines(value):\n    if value is None:\n        return None\n    if value < 0:\n        return 0\n    return value * 2\n\ndef multi_return_11_lines(text):\n    if not text:\n        return False\n    if len(text) < 3:\n        return False\n    if not text.isalnum():\n        return False\n    return True\n\n# 13-20 lines: Complex multiple returns\ndef multi_return_16_lines(user, action, resource):\n    if not user.is_authenticated:\n        return {'allowed': False, 'reason': 'Not authenticated'}\n    \n    if user.is_suspended:\n        return {'allowed': False, 'reason': 'Account suspended'}\n    \n    if action not in user.permissions:\n        return {'allowed': False, 'reason': 'Insufficient permissions'}\n    \n    if resource.is_deleted:\n        return {'allowed': False, 'reason': 'Resource not available'}\n    \n    if resource.owner_id != user.id and not user.is_admin:\n        return {'allowed': False, 'reason': 'Access denied'}\n    \n    return {'allowed': True, 'resource': resource.to_dict()}\n\n\n# ===== COMBINATION EXAMPLES =====\n\n# 20-30 lines: Mixed structures\ndef complex_25_lines(data, options):\n    \"\"\"Complex function combining multiple structures.\"\"\"\n    results = []\n    \n    # Guard clauses (multiple returns)\n    if not data:\n        return []\n    if not options.get('enabled', True):\n        return []\n    \n    # Loop with nested branching\n    for item in data:\n        # Binary branching\n        if item.get('type') == 'special':\n            processed = process_special_item(item)\n        else:\n            processed = process_regular_item(item)\n        \n        # Multi-way branching\n        if processed['status'] == 'success':\n            results.append(processed)\n        elif processed['status'] == 'warning':\n            if options.get('include_warnings', False):\n                results.append(processed)\n        elif processed['status'] == 'error':\n            if options.get('include_errors', False):\n                results.append(processed)\n    \n    # Exception handling\n    try:\n        final_results = apply_transformations(results, options)\n    except TransformationError as e:\n        return {'error': str(e), 'partial_results': results}\n    \n    return final_results\n\n\n# Helper functions for examples\ndef get_user_profile(user_id):\n    pass\n\ndef load_user_preferences(user_id):\n    pass\n\ndef process_special_item(item):\n    return {'status': 'success', 'data': item}\n\ndef process_regular_item(item):\n    return {'status': 'success', 'data': item}\n\ndef apply_transformations(results, options):\n    return results\n\nclass TransformationError(Exception):\n    pass",
+        "layout": {
+                "vertical_gap": 110,
+                "horizontal_gap": 160,
+                "indent": 120,
+                "node_heights": 60,
+                "node_widths": {
+                        "entry": 140,
+                        "exit": 140,
+                        "return": 160,
+                        "conditional": 180,
+                        "loop": 200,
+                        "merge": 150,
+                        "assignment": 180,
+                        "statement": 180,
+                        "block_start": 140,
+                        "loop_exit": 140
+                }
+        }
+};
+        
+        let network = null;
+        let physicsEnabled = false;
+        
+        // Color mapping for node types
+        const colorMap = {
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'return': '#90ee90',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3'
+        };
+        
+        // Shape mapping for node types
+        const shapeMap = {
+            'entry': 'ellipse',
+            'exit': 'ellipse',
+            'conditional': 'diamond',
+            'loop': 'diamond',
+            'merge': 'circle'
+        };
+        
+        function initializeNetwork() {
+            const container = document.getElementById('network');
+            
+            // Create nodes from all nodes in the data
+            const nodes = new vis.DataSet();
+            
+            functionFlowData.nodes.forEach(node => {
+                const color = colorMap[node.type] || '#97c2fc';
+                const shape = shapeMap[node.type] || 'box';
+                
+                let label = node.label;
+                if (label.length > 50) {
+                    label = label.substring(0, 47) + '...';
+                }
+                
+                // Special styling for entry and exit nodes
+                let borderWidth = 1;
+                let borderColor = '#666666';
+                let fontSize = 12;
+                
+                if (node.type === 'entry') {
+                    borderWidth = 3;
+                    borderColor = '#28a745';
+                    fontSize = 16;
+                } else if (node.type === 'exit') {
+                    borderWidth = 3;
+                    borderColor = '#dc3545';
+                    fontSize = 16;
+                }
+                
+                // Use fixed position from layout calculator if available
+                const nodeConfig = {
+                    id: node.id,
+                    label: label,
+                    title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
+                    color: {
+                        background: color,
+                        border: borderColor
+                    },
+                    shape: shape,
+                    font: {size: fontSize, bold: node.type === 'entry' || node.type === 'exit', color: '#333'},
+                    borderWidth: borderWidth
+                };
+                
+                // Add fixed position if layout calculator provided it
+                if (node.x !== undefined && node.y !== undefined) {
+                    nodeConfig.x = node.x;
+                    nodeConfig.y = node.y;
+                    // Disable physics for positioned nodes
+                    nodeConfig.physics = false;
+                }
+                
+                nodes.add(nodeConfig);
+            });
+            
+            // Create edges with layout-aware styling
+            const edges = new vis.DataSet(functionFlowData.edges.map(edge => {
+                const edgeConfig = {
+                    from: edge.from,
+                    to: edge.to,
+                    label: edge.label || '',
+                    arrows: 'to',
+                    color: {color: '#666666', highlight: '#007bff'},
+                    width: 2
+                };
+                
+                // Use layout information for edge styling if available
+                if (edge.style) {
+                    if (edge.style.type === 'bezier' && edge.style.curved) {
+                        edgeConfig.smooth = {
+                            type: 'cubicBezier',
+                            roundness: 0.4
+                        };
+                        if (edge.style.dashed) {
+                            edgeConfig.dashes = true;
+                        }
+                    } else if (edge.style.type === 'straight') {
+                        edgeConfig.smooth = false;
+                    }
+                } else {
+                    // Default smooth edge
+                    edgeConfig.smooth = {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    };
+                }
+                
+                return edgeConfig;
+            }));
+            
+            // Create network
+            const data = { nodes: nodes, edges: edges };
+            
+            const options = {
+                layout: {
+                    hierarchical: false,
+                    randomSeed: 42,
+                    improvedLayout: false
+                },
+                physics: {
+                    enabled: false
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    zoomView: true,
+                    dragView: true,
+                    navigationButtons: true,
+                    keyboard: true
+                },
+                nodes: {
+                    borderWidth: 1,
+                    color: {
+                        border: '#666666'
+                    },
+                    font: {color: '#333'},
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 5,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    },
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 3,
+                        x: 1,
+                        y: 1
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+            
+            // Make network globally accessible
+            window.network = network;
+            
+            // Simple fit after network is ready
+            setTimeout(() => {
+                network.fit();
+            }, 100);
+            
+            // Add click event for node details
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    console.log('Clicked node:', node);
+                }
+            });
+        }
+        
+        function changeNodeSize() {
+            const nodeSize = document.getElementById('nodeSizeSelect').value;
+            
+            let nodeSizeValue = 20;
+            if (nodeSize === 'small') nodeSizeValue = 15;
+            else if (nodeSize === 'large') nodeSizeValue = 30;
+            
+            network.setOptions({
+                nodes: { size: nodeSizeValue }
+            });
+        }
+        
+        function resetZoom() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        }
+        
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled,
+                    stabilization: { iterations: physicsEnabled ? 100 : 0 }
+                }
+            });
+        }
+        
+        function exportImage() {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get network canvas
+            const networkCanvas = network.canvas.frame.canvas;
+            
+            // Set canvas size
+            canvas.width = networkCanvas.width;
+            canvas.height = networkCanvas.height;
+            
+            // Draw network canvas to our canvas
+            ctx.drawImage(networkCanvas, 0, 0);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'linear_3_lines_function_flow.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Load source code
+        async function loadSourceCode() {
+            try {
+                const response = await fetch('');
+                const sourceText = await response.text();
+                
+                // Extract just the function we're visualizing
+                const lines = sourceText.split('\n');
+                const funcName = 'linear_3_lines';
+                let inFunction = false;
+                let functionLines = [];
+                let indentLevel = 0;
+                
+                for (let line of lines) {
+                    if (line.includes(`def ${funcName}(`)) {
+                        inFunction = true;
+                        functionLines.push(line);
+                        continue;
+                    }
+                    if (inFunction) {
+                        // Check if this line dedents past function level (function end)
+                        const currentIndent = line.search(/\S/);
+                        if (currentIndent === -1 && line.trim().length === 0) continue;
+                        if (currentIndent < indentLevel && line.trim().length > 0) {
+                            inFunction = false;
+                            break;
+                        }
+                        if (currentIndent !== -1) {
+                            indentLevel = currentIndent;
+                        }
+                        functionLines.push(line);
+                    }
+                }
+                
+                document.getElementById('source-code').textContent = functionLines.join('\n');
+            } catch (error) {
+                document.getElementById('source-code').textContent = 'Source code not available';
+            }
+        }
+        
+        // Initialize network when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNetwork();
+            loadSourceCode();
+        });
+    </script>
+</body>
+</html>

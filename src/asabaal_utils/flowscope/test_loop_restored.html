@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Function Flow - binary_9_lines</title>
+    <title>Dynamic Function Flow - loop_8_lines</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
         body {
@@ -162,106 +162,10 @@
             position: relative;
         }
         
-        .main-content {
-            display: flex;
-            gap: 20px;
-            margin: 0 20px 20px 20px;
-            height: calc(100vh - 200px);
-        }
-        
-        .source-panel {
-            flex: 0 0 30%;
-            min-width: 350px;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .source-panel h3 {
-            margin: 0;
-            color: #333;
-            padding: 15px 20px;
-            border-bottom: 1px solid #dee2e6;
-            background: #f8f9fa;
-        }
-        
-        .source-panel #source-code {
-            flex: 1;
-            background: #fff;
-            padding: 15px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            overflow-y: auto;
-            border: none;
-            margin: 0;
-        }
-        
-        .graph-container {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .graph-header {
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        
-        .graph-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-        
-        .graph-metadata {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .metadata-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .metadata-label {
-            font-weight: 500;
-        }
-        
-        .metadata-value {
-            color: #007bff;
-            font-weight: 600;
-        }
-        
-        #network {
-            width: 100%;
-            height: 100%;
-            flex: 1;
-            position: relative;
-        }
-        
         .info-panel {
             background: rgba(255, 255, 255, 0.9);
             padding: 15px 20px;
-            margin: 0 20px;
+            margin: 0 20px 20px 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -351,7 +255,7 @@
 <body>
     <div class="header">
         <h1>Dynamic Function Flow Visualization</h1>
-        <div class="subtitle">binary_9_lines function from flowscope.examples.structure_examples module • FlowScope Analysis</div>
+        <div class="subtitle">loop_8_lines function from flowscope.examples.structure_examples module • FlowScope Analysis</div>
     </div>
     
     <div class="controls">
@@ -378,11 +282,11 @@
         <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
             <div class="stat-item">
-                <div class="stat-value">13</div>
+                <div class="stat-value">10</div>
                 <div class="stat-label">Control Flow Nodes</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">11</div>
+                <div class="stat-value">8</div>
                 <div class="stat-label">Flow Edges</div>
             </div>
             <div class="stat-item">
@@ -396,24 +300,9 @@
         </div>
     </div>
     
-    <div class="main-content">
-        <div class="source-panel">
-            <h3>Source Code</h3>
-            <div id="source-code">
-                def binary_9_lines(age):
-    if age >= 18:
-        status = "adult"
-        can_vote = True
-    else:
-        status = "minor"
-        can_vote = False
-    return status, can_vote
-            </div>
-        </div>
-        
-        <div class="graph-container">
+    <div class="graph-container">
         <div class="graph-header">
-            <h2 class="graph-title" id="graph-title">binary_9_lines Function Flow</h2>
+            <h2 class="graph-title" id="graph-title">loop_8_lines Function Flow</h2>
             <div class="graph-metadata" id="graph-metadata">
                 <div class="metadata-item">
                     <span class="metadata-label">Module:</span>
@@ -421,17 +310,16 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Nodes:</span>
-                    <span class="metadata-value" id="node-count">13</span>
+                    <span class="metadata-value" id="node-count">10</span>
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Edges:</span>
-                    <span class="metadata-value" id="edge-count">11</span>
+                    <span class="metadata-value" id="edge-count">8</span>
                 </div>
 
             </div>
         </div>
         <div id="network" class="loading">Loading function flow graph...</div>
-    </div>
     </div>
     
     <div class="legend">
@@ -475,371 +363,102 @@
     </div>
     
     <script>
-        // Function flow data for binary_9_lines function
+        // Function flow data for loop_8_lines function
         const functionFlowData = {
-        "function": "binary_9_lines",
+        "function": "loop_8_lines",
         "type": "function_flow",
         "nodes": [
                 {
-                        "id": "n_f67e3c",
+                        "id": "n_5f5853",
                         "type": "entry",
-                        "label": "Enter binary_9_lines",
-                        "line": 83,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 0,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 0
+                        "label": "Enter loop_8_lines",
+                        "line": 200
                 },
                 {
-                        "id": "n_21792d",
-                        "type": "conditional",
-                        "label": "if (age >= 18)",
-                        "line": 84,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "true": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "false": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                }
-                        },
-                        "level": 1,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 110
+                        "id": "n_19e14a",
+                        "type": "assignment",
+                        "label": "total = 0",
+                        "line": 201
                 },
                 {
-                        "id": "n_ec4657",
+                        "id": "n_46bf36",
+                        "type": "loop",
+                        "label": "for num in numbers",
+                        "line": 202
+                },
+                {
+                        "id": "n_1d7cbd",
                         "type": "block_start",
-                        "label": "Begin True Block",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 2,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 220
+                        "label": "Loop Body",
+                        "line": null
                 },
                 {
-                        "id": "n_8de3de",
-                        "type": "assignment",
-                        "label": "status = 'adult'",
-                        "line": 85,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 3,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 330
+                        "id": "n_f3f2db",
+                        "type": "statement",
+                        "label": "total += num",
+                        "line": 203
                 },
                 {
-                        "id": "n_cafb19",
-                        "type": "assignment",
-                        "label": "can_vote = True",
-                        "line": 86,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 4,
-                        "branch": -1,
-                        "x": -160,
-                        "y": 440
+                        "id": "n_4fe4a5",
+                        "type": "loop_exit",
+                        "label": "Exit Loop",
+                        "line": null
                 },
                 {
-                        "id": "n_2fafb0",
-                        "type": "block_start",
-                        "label": "Begin False Block",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 2,
-                        "branch": 1,
-                        "x": 160,
-                        "y": 220
-                },
-                {
-                        "id": "n_d0345a",
-                        "type": "assignment",
-                        "label": "status = 'minor'",
-                        "line": 88,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 3,
-                        "branch": 1,
-                        "x": 160,
-                        "y": 330
-                },
-                {
-                        "id": "n_cc823f",
-                        "type": "assignment",
-                        "label": "can_vote = False",
-                        "line": 89,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 4,
-                        "branch": 1,
-                        "x": 160,
-                        "y": 440
-                },
-                {
-                        "id": "n_dcc750",
-                        "type": "merge",
-                        "label": "Merge after if",
-                        "line": null,
-                        "ports": {
-                                "in_left": {
-                                        "side": "left",
-                                        "offset": 0.48
-                                },
-                                "in_right": {
-                                        "side": "right",
-                                        "offset": 0.48
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 5,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 550
-                },
-                {
-                        "id": "n_29d553",
+                        "id": "n_66adf1",
                         "type": "return",
-                        "label": "return (status, can_vote)",
-                        "line": 90,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 6,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 660
+                        "label": "return total",
+                        "line": 204
                 },
                 {
-                        "id": "n_2b6615",
+                        "id": "n_837a5a",
                         "type": "exit",
-                        "label": "Exit binary_9_lines",
-                        "line": null,
-                        "ports": {
-                                "in": {
-                                        "side": "top",
-                                        "offset": 0.5
-                                },
-                                "out": {
-                                        "side": "bottom",
-                                        "offset": 0.5
-                                }
-                        },
-                        "level": 8,
-                        "branch": 0,
-                        "x": 0,
-                        "y": 880
+                        "label": "Exit loop_8_lines",
+                        "line": null
                 }
         ],
         "edges": [
                 {
-                        "from": "n_f67e3c",
-                        "to": "n_21792d",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_5f5853",
+                        "to": "n_19e14a",
+                        "label": null
                 },
                 {
-                        "from": "n_21792d",
-                        "to": "n_ec4657",
-                        "label": "True",
-                        "from_port": "true",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_19e14a",
+                        "to": "n_46bf36",
+                        "label": null
                 },
                 {
-                        "from": "n_ec4657",
-                        "to": "n_8de3de",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_46bf36",
+                        "to": "n_1d7cbd",
+                        "label": "Iterate"
                 },
                 {
-                        "from": "n_8de3de",
-                        "to": "n_cafb19",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_1d7cbd",
+                        "to": "n_f3f2db",
+                        "label": null
                 },
                 {
-                        "from": "n_21792d",
-                        "to": "n_2fafb0",
-                        "label": "False",
-                        "from_port": "false",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_f3f2db",
+                        "to": "n_46bf36",
+                        "label": "next iteration"
                 },
                 {
-                        "from": "n_2fafb0",
-                        "to": "n_d0345a",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_46bf36",
+                        "to": "n_4fe4a5",
+                        "label": "done"
                 },
                 {
-                        "from": "n_d0345a",
-                        "to": "n_cc823f",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_4fe4a5",
+                        "to": "n_66adf1",
+                        "label": null
                 },
                 {
-                        "from": "n_cafb19",
-                        "to": "n_dcc750",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_left",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_cc823f",
-                        "to": "n_dcc750",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in_right",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_dcc750",
-                        "to": "n_29d553",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
-                },
-                {
-                        "from": "n_29d553",
-                        "to": "n_2b6615",
-                        "label": null,
-                        "from_port": "out",
-                        "to_port": "in",
-                        "style": {
-                                "type": "straight"
-                        }
+                        "from": "n_66adf1",
+                        "to": "n_837a5a",
+                        "label": null
                 }
-        ],
-        "source_code": "def binary_9_lines(age):\n    if age >= 18:\n        status = \"adult\"\n        can_vote = True\n    else:\n        status = \"minor\"\n        can_vote = False\n    return status, can_vote",
-        "layout": {
-                "vertical_gap": 110,
-                "horizontal_gap": 160,
-                "indent": 120,
-                "node_heights": 60,
-                "node_widths": {
-                        "entry": 140,
-                        "exit": 140,
-                        "return": 160,
-                        "conditional": 180,
-                        "loop": 200,
-                        "merge": 150,
-                        "assignment": 180,
-                        "statement": 180,
-                        "block_start": 140,
-                        "loop_exit": 140
-                }
-        }
+        ]
 };
         
         let network = null;
@@ -963,12 +582,15 @@
             
             const options = {
                 layout: {
-                    hierarchical: false,
                     randomSeed: 42,
-                    improvedLayout: false
+                    improvedLayout: false,
+                    hierarchical: {
+                        enabled: false
+                    }
                 },
                 physics: {
-                    enabled: false
+                    enabled: false,
+                    stabilization: { iterations: 0 }
                 },
                 interaction: {
                     hover: true,
@@ -1078,7 +700,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'binary_9_lines_function_flow.png';
+                a.download = 'loop_8_lines_function_flow.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -1086,54 +708,9 @@
             });
         }
         
-        // Load source code
-        async function loadSourceCode() {
-            try {
-                const response = await fetch('');
-                const sourceText = await response.text();
-                
-                // Extract just the function we're visualizing
-                const lines = sourceText.split('\n');
-                const funcName = 'binary_9_lines';
-                let inFunction = false;
-                let functionLines = [];
-                let indentLevel = 0;
-                
-                for (let line of lines) {
-                    if (line.includes(`def ${funcName}(`)) {
-                        inFunction = true;
-                        functionLines.push(line);
-                        continue;
-                    }
-                    if (inFunction) {
-                        // Check if this line dedents past function level (function end)
-                        const currentIndent = line.search(/\S/);
-                        if (currentIndent === -1 && line.trim().length === 0) continue;
-                        if (currentIndent < indentLevel && line.trim().length > 0) {
-                            inFunction = false;
-                            break;
-                        }
-                        if (currentIndent !== -1) {
-                            indentLevel = currentIndent;
-                        }
-                        functionLines.push(line);
-                    }
-                }
-                
-                document.getElementById('source-code').textContent = functionLines.join('\n');
-            } catch (error) {
-                document.getElementById('source-code').textContent = 'Source code not available';
-            }
-        }
-        
         // Initialize network when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeNetwork();
-            // Only load source code if not already present
-            const sourceElement = document.getElementById('source-code');
-            if (sourceElement && sourceElement.textContent.trim() === '') {
-                loadSourceCode();
-            }
         });
     </script>
 </body>

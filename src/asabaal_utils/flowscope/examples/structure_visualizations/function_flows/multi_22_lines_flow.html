@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hierarchical Function Flow - multi_22_lines</title>
+    <title>Dynamic Function Flow - multi_22_lines</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
         body {
@@ -34,72 +34,32 @@
             font-size: 14px;
         }
         
-        .structure-info {
+        .controls {
             background: rgba(255, 255, 255, 0.9);
             padding: 15px 20px;
             margin: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
-            gap: 30px;
+            gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
-        .structure-type {
-            font-size: 18px;
-            font-weight: 600;
-            color: #007bff;
-        }
-        
-        .stats {
+        .control-group {
             display: flex;
-            gap: 20px;
+            align-items: center;
+            gap: 8px;
         }
         
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #28a745;
-        }
-        
-        .stat-label {
+        .control-group label {
             font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        .graph-container {
-            margin: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            height: 85vh;
-        }
-        
-        #network {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            color: #555;
+            font-weight: 500;
         }
         
         button {
             padding: 8px 16px;
-            margin: 5px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -125,1962 +85,1852 @@
         .btn-secondary:hover {
             background: #545b62;
         }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .graph-container {
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+        }
+        
+        .graph-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .graph-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .graph-metadata {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .metadata-label {
+            font-weight: 500;
+        }
+        
+        .metadata-value {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+
+
+        #network {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin: 0 20px 20px 20px;
+            height: calc(100vh - 200px);
+        }
+        
+        .source-panel {
+            flex: 0 0 30%;
+            min-width: 350px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .source-panel h3 {
+            margin: 0;
+            color: #333;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+        
+        .source-panel #source-code {
+            flex: 1;
+            background: #fff;
+            padding: 15px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            border: none;
+            margin: 0;
+        }
+        
+        .graph-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .graph-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .graph-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .graph-metadata {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .metadata-label {
+            font-weight: 500;
+        }
+        
+        .metadata-value {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            margin: 0 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid #666;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            max-width: 300px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Hierarchical Function Flow - multi_22_lines</h1>
-        <div class="subtitle">Module: flowscope.examples.structure_examples | Structure: Nested</div>
+        <h1>Dynamic Function Flow Visualization</h1>
+        <div class="subtitle">multi_22_lines function from flowscope.examples.structure_examples module • FlowScope Analysis</div>
     </div>
     
-    <div class="structure-info">
-        <div class="structure-type">Structure Type: Nested</div>
+    <div class="controls">
+        <div class="control-group">
+            <button class="btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+            <button class="btn-success" onclick="togglePhysics()">Toggle Physics</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Node Size:</label>
+            <select id="nodeSizeSelect" onchange="changeNodeSize()">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-secondary" onclick="exportImage()">Export Image</button>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <h3 style="margin: 0; color: #333;">Function Information</h3>
         <div class="stats">
-            <div class="stat">
-                <div class="stat-value">97</div>
-                <div class="stat-label">Nodes</div>
+            <div class="stat-item">
+                <div class="stat-value">37</div>
+                <div class="stat-label">Control Flow Nodes</div>
             </div>
-            <div class="stat">
-                <div class="stat-value">100</div>
-                <div class="stat-label">Edges</div>
+            <div class="stat-item">
+                <div class="stat-value">38</div>
+                <div class="stat-label">Flow Edges</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">Unknown</div>
+                <div class="stat-label">Source File</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">flowscope.examples.structure_examples</div>
+                <div class="stat-label">Module</div>
             </div>
         </div>
     </div>
     
-    <div class="graph-container">
-        <div id="network"></div>
-        <div class="controls">
-            <button class="btn-primary" onclick="network.fit()">Fit to Screen</button>
-            <button class="btn-secondary" onclick="togglePhysics()">Toggle Physics</button>
+    <div class="main-content">
+        <div class="source-panel">
+            <h3>Source Code</h3>
+            <div id="source-code">
+                def multi_22_lines(user_role, permissions):
+    if user_role == 'admin':
+        access_level = 'full'
+        allowed_actions = ['create', 'read', 'update', 'delete', 'manage']
+        rate_limit = 10000
+    elif user_role == 'moderator':
+        access_level = 'high'
+        allowed_actions = ['create', 'read', 'update', 'moderate']
+        rate_limit = 5000
+    elif user_role == 'editor':
+        access_level = 'medium'
+        allowed_actions = ['create', 'read', 'update']
+        rate_limit = 2000
+    elif user_role == 'viewer':
+        access_level = 'low'
+        allowed_actions = ['read']
+        rate_limit = 1000
+    else:
+        access_level = 'none'
+        allowed_actions = []
+        rate_limit = 100
+    
+    # Check permissions
+    final_permissions = [p for p in allowed_actions if p in permissions]
+    
+    return {
+        'access_level': access_level,
+        'permissions': final_permissions,
+        'rate_limit': rate_limit
+    }
+            </div>
+        </div>
+        
+        <div class="graph-container">
+        <div class="graph-header">
+            <h2 class="graph-title" id="graph-title">multi_22_lines Function Flow</h2>
+            <div class="graph-metadata" id="graph-metadata">
+                <div class="metadata-item">
+                    <span class="metadata-label">Module:</span>
+                    <span class="metadata-value">flowscope.examples.structure_examples</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Nodes:</span>
+                    <span class="metadata-value" id="node-count">37</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Edges:</span>
+                    <span class="metadata-value" id="edge-count">38</span>
+                </div>
+
+            </div>
+        </div>
+        <div id="network" class="loading">Loading function flow graph...</div>
+    </div>
+    </div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <span>Merge Point</span>
         </div>
     </div>
-
-    <script type="text/javascript">
-        // Function flow data
+    
+    <script>
+        // Function flow data for multi_22_lines function
         const functionFlowData = {
-        "function_name": "multi_22_lines",
-        "module": "flowscope.examples.structure_examples",
-        "file_path": "flowscope/examples/structure_examples.py",
-        "entry_point": {
-                "id": "node_0",
-                "type": "entry",
-                "label": "Enter multi_22_lines",
-                "line": 0
-        },
-        "exit_point": {
-                "id": "node_1",
-                "type": "exit",
-                "label": "Exit multi_22_lines",
-                "line": 0
-        },
+        "function": "multi_22_lines",
+        "type": "function_flow",
         "nodes": [
                 {
-                        "id": "node_2",
-                        "type": "statement",
-                        "label": "def multi_22_lines(user_role, permissions):\n    if user_role == 'admin':\n        access_level = 'full'\n        allowed_actions = ['create', 'read', 'update', 'delete', 'manage']\n        rate_limit = 10000\n    elif user_role == 'moderator':\n        access_level = 'high'\n        allowed_actions = ['create', 'read', 'update', 'moderate']\n        rate_limit = 5000\n    elif user_role == 'editor':\n        access_level = 'medium'\n        allowed_actions = ['create', 'read', 'update']\n        rate_limit = 2000\n    elif user_role == 'viewer':\n        access_level = 'low'\n        allowed_actions = ['read']\n        rate_limit = 1000\n    else:\n        access_level = 'none'\n        allowed_actions = []\n        rate_limit = 100\n    final_permissions = [p for p in allowed_actions if p in permissions]\n    return {'access_level': access_level, 'permissions': final_permissions, 'rate_limit': rate_limit}",
+                        "id": "n_6eb9a2",
+                        "type": "entry",
+                        "label": "Enter multi_22_lines",
                         "line": 165,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 0,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 0
                 },
                 {
-                        "id": "node_3",
-                        "type": "statement",
-                        "label": "user_role",
-                        "line": 165,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_4",
-                        "type": "statement",
-                        "label": "permissions",
-                        "line": 165,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_5",
+                        "id": "n_844e9d",
                         "type": "conditional",
-                        "label": "if user_role == 'admin'",
+                        "label": "if (user_role == 'admin')",
                         "line": 166,
-                        "condition": "user_role == 'admin'",
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 1,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 110
                 },
                 {
-                        "id": "node_6",
+                        "id": "n_1b0389",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 220
+                },
+                {
+                        "id": "n_ae4411",
                         "type": "assignment",
                         "label": "access_level = 'full'",
                         "line": 167,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 3,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 330
                 },
                 {
-                        "id": "node_7",
-                        "type": "statement",
-                        "label": "access_level = 'full'",
-                        "line": 167,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_8",
-                        "type": "statement",
-                        "label": "access_level",
-                        "line": 167,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_9",
-                        "type": "statement",
-                        "label": "'full'",
-                        "line": 167,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_10",
+                        "id": "n_9d2210",
                         "type": "assignment",
                         "label": "allowed_actions = ['create', 'read', 'update', 'delete', 'manage']",
                         "line": 168,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 440
                 },
                 {
-                        "id": "node_11",
-                        "type": "statement",
-                        "label": "allowed_actions = ['create', 'read', 'update', 'delete', 'manage']",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_12",
-                        "type": "statement",
-                        "label": "allowed_actions",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_13",
-                        "type": "statement",
-                        "label": "['create', 'read', 'update', 'delete', 'manage']",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_14",
-                        "type": "statement",
-                        "label": "'create'",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_15",
-                        "type": "statement",
-                        "label": "'read'",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_16",
-                        "type": "statement",
-                        "label": "'update'",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_17",
-                        "type": "statement",
-                        "label": "'delete'",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_18",
-                        "type": "statement",
-                        "label": "'manage'",
-                        "line": 168,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_19",
+                        "id": "n_9f0484",
                         "type": "assignment",
                         "label": "rate_limit = 10000",
                         "line": 169,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": -1,
+                        "x": -160,
+                        "y": 550
                 },
                 {
-                        "id": "node_20",
-                        "type": "statement",
-                        "label": "rate_limit = 10000",
-                        "line": 169,
-                        "condition": null,
-                        "targets": []
+                        "id": "n_8a61d6",
+                        "type": "block_start",
+                        "label": "Begin False Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 2,
+                        "branch": 1,
+                        "x": 160,
+                        "y": 220
                 },
                 {
-                        "id": "node_21",
-                        "type": "statement",
-                        "label": "rate_limit",
-                        "line": 169,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_22",
-                        "type": "statement",
-                        "label": "10000",
-                        "line": 169,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_23",
+                        "id": "n_55237e",
                         "type": "conditional",
-                        "label": "if user_role == 'moderator'",
+                        "label": "if (user_role == 'moderator')",
                         "line": 170,
-                        "condition": "user_role == 'moderator'",
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 3,
+                        "branch": 1,
+                        "x": 160,
+                        "y": 330
                 },
                 {
-                        "id": "node_24",
+                        "id": "n_e1965f",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 440
+                },
+                {
+                        "id": "n_116f92",
                         "type": "assignment",
                         "label": "access_level = 'high'",
                         "line": 171,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 5,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 550
                 },
                 {
-                        "id": "node_25",
-                        "type": "statement",
-                        "label": "access_level = 'high'",
-                        "line": 171,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_26",
-                        "type": "statement",
-                        "label": "access_level",
-                        "line": 171,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_27",
-                        "type": "statement",
-                        "label": "'high'",
-                        "line": 171,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_28",
+                        "id": "n_4c287b",
                         "type": "assignment",
                         "label": "allowed_actions = ['create', 'read', 'update', 'moderate']",
                         "line": 172,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 660
                 },
                 {
-                        "id": "node_29",
-                        "type": "statement",
-                        "label": "allowed_actions = ['create', 'read', 'update', 'moderate']",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_30",
-                        "type": "statement",
-                        "label": "allowed_actions",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_31",
-                        "type": "statement",
-                        "label": "['create', 'read', 'update', 'moderate']",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_32",
-                        "type": "statement",
-                        "label": "'create'",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_33",
-                        "type": "statement",
-                        "label": "'read'",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_34",
-                        "type": "statement",
-                        "label": "'update'",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_35",
-                        "type": "statement",
-                        "label": "'moderate'",
-                        "line": 172,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_36",
+                        "id": "n_9c1029",
                         "type": "assignment",
                         "label": "rate_limit = 5000",
                         "line": 173,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 7,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 770
                 },
                 {
-                        "id": "node_37",
-                        "type": "statement",
-                        "label": "rate_limit = 5000",
-                        "line": 173,
-                        "condition": null,
-                        "targets": []
+                        "id": "n_391f22",
+                        "type": "block_start",
+                        "label": "Begin False Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 4,
+                        "branch": 2,
+                        "x": 320,
+                        "y": 440
                 },
                 {
-                        "id": "node_38",
-                        "type": "statement",
-                        "label": "rate_limit",
-                        "line": 173,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_39",
-                        "type": "statement",
-                        "label": "5000",
-                        "line": 173,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_40",
+                        "id": "n_b150f9",
                         "type": "conditional",
-                        "label": "if user_role == 'editor'",
+                        "label": "if (user_role == 'editor')",
                         "line": 174,
-                        "condition": "user_role == 'editor'",
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 5,
+                        "branch": 2,
+                        "x": 320,
+                        "y": 550
                 },
                 {
-                        "id": "node_41",
+                        "id": "n_37c54c",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": 1,
+                        "x": 160,
+                        "y": 660
+                },
+                {
+                        "id": "n_4e2612",
                         "type": "assignment",
                         "label": "access_level = 'medium'",
                         "line": 175,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 7,
+                        "branch": 1,
+                        "x": 160,
+                        "y": 770
                 },
                 {
-                        "id": "node_42",
-                        "type": "statement",
-                        "label": "access_level = 'medium'",
-                        "line": 175,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_43",
-                        "type": "statement",
-                        "label": "access_level",
-                        "line": 175,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_44",
-                        "type": "statement",
-                        "label": "'medium'",
-                        "line": 175,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_45",
+                        "id": "n_e4c602",
                         "type": "assignment",
                         "label": "allowed_actions = ['create', 'read', 'update']",
                         "line": 176,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 8,
+                        "branch": 1,
+                        "x": 160,
+                        "y": 880
                 },
                 {
-                        "id": "node_46",
-                        "type": "statement",
-                        "label": "allowed_actions = ['create', 'read', 'update']",
-                        "line": 176,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_47",
-                        "type": "statement",
-                        "label": "allowed_actions",
-                        "line": 176,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_48",
-                        "type": "statement",
-                        "label": "['create', 'read', 'update']",
-                        "line": 176,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_49",
-                        "type": "statement",
-                        "label": "'create'",
-                        "line": 176,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_50",
-                        "type": "statement",
-                        "label": "'read'",
-                        "line": 176,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_51",
-                        "type": "statement",
-                        "label": "'update'",
-                        "line": 176,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_52",
+                        "id": "n_399690",
                         "type": "assignment",
                         "label": "rate_limit = 2000",
                         "line": 177,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": 1,
+                        "x": 160,
+                        "y": 990
                 },
                 {
-                        "id": "node_53",
-                        "type": "statement",
-                        "label": "rate_limit = 2000",
-                        "line": 177,
-                        "condition": null,
-                        "targets": []
+                        "id": "n_cf5ab2",
+                        "type": "block_start",
+                        "label": "Begin False Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 6,
+                        "branch": 3,
+                        "x": 480,
+                        "y": 660
                 },
                 {
-                        "id": "node_54",
-                        "type": "statement",
-                        "label": "rate_limit",
-                        "line": 177,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_55",
-                        "type": "statement",
-                        "label": "2000",
-                        "line": 177,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_56",
+                        "id": "n_ae113f",
                         "type": "conditional",
-                        "label": "if user_role == 'viewer'",
+                        "label": "if (user_role == 'viewer')",
                         "line": 178,
-                        "condition": "user_role == 'viewer'",
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "true": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "false": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                }
+                        },
+                        "level": 7,
+                        "branch": 3,
+                        "x": 480,
+                        "y": 770
                 },
                 {
-                        "id": "node_57",
+                        "id": "n_8fd194",
+                        "type": "block_start",
+                        "label": "Begin True Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 8,
+                        "branch": 2,
+                        "x": 320,
+                        "y": 880
+                },
+                {
+                        "id": "n_1f2ac9",
                         "type": "assignment",
                         "label": "access_level = 'low'",
                         "line": 179,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": 2,
+                        "x": 320,
+                        "y": 990
                 },
                 {
-                        "id": "node_58",
-                        "type": "statement",
-                        "label": "access_level = 'low'",
-                        "line": 179,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_59",
-                        "type": "statement",
-                        "label": "access_level",
-                        "line": 179,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_60",
-                        "type": "statement",
-                        "label": "'low'",
-                        "line": 179,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_61",
+                        "id": "n_e4801e",
                         "type": "assignment",
                         "label": "allowed_actions = ['read']",
                         "line": 180,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 10,
+                        "branch": 2,
+                        "x": 320,
+                        "y": 1100
                 },
                 {
-                        "id": "node_62",
-                        "type": "statement",
-                        "label": "allowed_actions = ['read']",
-                        "line": 180,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_63",
-                        "type": "statement",
-                        "label": "allowed_actions",
-                        "line": 180,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_64",
-                        "type": "statement",
-                        "label": "['read']",
-                        "line": 180,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_65",
-                        "type": "statement",
-                        "label": "'read'",
-                        "line": 180,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_66",
+                        "id": "n_1a53d3",
                         "type": "assignment",
                         "label": "rate_limit = 1000",
                         "line": 181,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 11,
+                        "branch": 2,
+                        "x": 320,
+                        "y": 1210
                 },
                 {
-                        "id": "node_67",
-                        "type": "statement",
-                        "label": "rate_limit = 1000",
-                        "line": 181,
-                        "condition": null,
-                        "targets": []
+                        "id": "n_8215ec",
+                        "type": "block_start",
+                        "label": "Begin False Block",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 8,
+                        "branch": 4,
+                        "x": 640,
+                        "y": 880
                 },
                 {
-                        "id": "node_68",
-                        "type": "statement",
-                        "label": "rate_limit",
-                        "line": 181,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_69",
-                        "type": "statement",
-                        "label": "1000",
-                        "line": 181,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_70",
+                        "id": "n_3a9ced",
                         "type": "assignment",
                         "label": "access_level = 'none'",
                         "line": 183,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 9,
+                        "branch": 4,
+                        "x": 640,
+                        "y": 990
                 },
                 {
-                        "id": "node_71",
-                        "type": "statement",
-                        "label": "access_level = 'none'",
-                        "line": 183,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_72",
-                        "type": "statement",
-                        "label": "access_level",
-                        "line": 183,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_73",
-                        "type": "statement",
-                        "label": "'none'",
-                        "line": 183,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_74",
+                        "id": "n_5a5d2c",
                         "type": "assignment",
                         "label": "allowed_actions = []",
                         "line": 184,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 10,
+                        "branch": 4,
+                        "x": 640,
+                        "y": 1100
                 },
                 {
-                        "id": "node_75",
-                        "type": "statement",
-                        "label": "allowed_actions = []",
-                        "line": 184,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_76",
-                        "type": "statement",
-                        "label": "allowed_actions",
-                        "line": 184,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_77",
-                        "type": "statement",
-                        "label": "[]",
-                        "line": 184,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_78",
+                        "id": "n_f96c89",
                         "type": "assignment",
                         "label": "rate_limit = 100",
                         "line": 185,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 11,
+                        "branch": 4,
+                        "x": 640,
+                        "y": 1210
                 },
                 {
-                        "id": "node_79",
-                        "type": "statement",
-                        "label": "rate_limit = 100",
-                        "line": 185,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_80",
-                        "type": "statement",
-                        "label": "rate_limit",
-                        "line": 185,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_81",
-                        "type": "statement",
-                        "label": "100",
-                        "line": 185,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_82",
+                        "id": "n_02e720",
                         "type": "merge",
-                        "label": "merge",
-                        "line": 178,
-                        "condition": null,
-                        "targets": []
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 12,
+                        "branch": 3,
+                        "x": 480,
+                        "y": 1320
                 },
                 {
-                        "id": "node_83",
+                        "id": "n_f3385d",
                         "type": "merge",
-                        "label": "merge",
-                        "line": 174,
-                        "condition": null,
-                        "targets": []
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 13,
+                        "branch": 1,
+                        "x": 320,
+                        "y": 1430
                 },
                 {
-                        "id": "node_84",
+                        "id": "n_c91e0e",
                         "type": "merge",
-                        "label": "merge",
-                        "line": 170,
-                        "condition": null,
-                        "targets": []
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 14,
+                        "branch": 0,
+                        "x": 160,
+                        "y": 1540
                 },
                 {
-                        "id": "node_85",
+                        "id": "n_d4ba15",
                         "type": "merge",
-                        "label": "merge",
-                        "line": 166,
-                        "condition": null,
-                        "targets": []
+                        "label": "Merge after if",
+                        "line": null,
+                        "ports": {
+                                "in_left": {
+                                        "side": "left",
+                                        "offset": 0.48
+                                },
+                                "in_right": {
+                                        "side": "right",
+                                        "offset": 0.48
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 15,
+                        "branch": -1,
+                        "x": 0,
+                        "y": 1650
                 },
                 {
-                        "id": "node_86",
+                        "id": "n_bee796",
                         "type": "assignment",
-                        "label": "final_permissions = [p for p in allowed_actions if p in permissions]",
+                        "label": "final_permissions = [p for p in allowed_actions if (p in permissions)]",
                         "line": 188,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 16,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 1760
                 },
                 {
-                        "id": "node_87",
-                        "type": "statement",
-                        "label": "final_permissions = [p for p in allowed_actions if p in permissions]",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_88",
-                        "type": "statement",
-                        "label": "final_permissions",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_89",
-                        "type": "statement",
-                        "label": "[p for p in allowed_actions if p in permissions]",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_90",
-                        "type": "statement",
-                        "label": "p",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_91",
-                        "type": "statement",
-                        "label": "p",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_92",
-                        "type": "statement",
-                        "label": "allowed_actions",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_93",
-                        "type": "statement",
-                        "label": "p in permissions",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_94",
-                        "type": "statement",
-                        "label": "p",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_95",
-                        "type": "statement",
-                        "label": "permissions",
-                        "line": 188,
-                        "condition": null,
-                        "targets": []
-                },
-                {
-                        "id": "node_96",
+                        "id": "n_aced5c",
                         "type": "return",
                         "label": "return {'access_level': access_level, 'permissions': final_permissions, 'rate_limit': rate_limit}",
                         "line": 190,
-                        "condition": null,
-                        "targets": []
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 17,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 1870
+                },
+                {
+                        "id": "n_de2e52",
+                        "type": "exit",
+                        "label": "Exit multi_22_lines",
+                        "line": null,
+                        "ports": {
+                                "in": {
+                                        "side": "top",
+                                        "offset": 0.5
+                                },
+                                "out": {
+                                        "side": "bottom",
+                                        "offset": 0.5
+                                }
+                        },
+                        "level": 19,
+                        "branch": 0,
+                        "x": 0,
+                        "y": 2090
                 }
         ],
         "edges": [
                 {
-                        "from": "node_0",
-                        "to": "node_2",
-                        "label": null
-                },
-                {
-                        "from": "node_2",
-                        "to": "node_3",
-                        "label": null
-                },
-                {
-                        "from": "node_3",
-                        "to": "node_4",
-                        "label": null
-                },
-                {
-                        "from": "node_4",
-                        "to": "node_5",
-                        "label": null
-                },
-                {
-                        "from": "node_5",
-                        "to": "node_6",
-                        "label": null
-                },
-                {
-                        "from": "node_6",
-                        "to": "node_7",
-                        "label": null
-                },
-                {
-                        "from": "node_7",
-                        "to": "node_8",
-                        "label": null
-                },
-                {
-                        "from": "node_8",
-                        "to": "node_9",
-                        "label": null
-                },
-                {
-                        "from": "node_9",
-                        "to": "node_10",
-                        "label": null
-                },
-                {
-                        "from": "node_10",
-                        "to": "node_11",
-                        "label": null
-                },
-                {
-                        "from": "node_11",
-                        "to": "node_12",
-                        "label": null
-                },
-                {
-                        "from": "node_12",
-                        "to": "node_13",
-                        "label": null
-                },
-                {
-                        "from": "node_13",
-                        "to": "node_14",
-                        "label": null
-                },
-                {
-                        "from": "node_14",
-                        "to": "node_15",
-                        "label": null
-                },
-                {
-                        "from": "node_15",
-                        "to": "node_16",
-                        "label": null
-                },
-                {
-                        "from": "node_16",
-                        "to": "node_17",
-                        "label": null
-                },
-                {
-                        "from": "node_17",
-                        "to": "node_18",
-                        "label": null
-                },
-                {
-                        "from": "node_18",
-                        "to": "node_19",
-                        "label": null
-                },
-                {
-                        "from": "node_19",
-                        "to": "node_20",
-                        "label": null
-                },
-                {
-                        "from": "node_20",
-                        "to": "node_21",
-                        "label": null
-                },
-                {
-                        "from": "node_21",
-                        "to": "node_22",
-                        "label": null
-                },
-                {
-                        "from": "node_5",
-                        "to": "node_23",
-                        "label": null
-                },
-                {
-                        "from": "node_23",
-                        "to": "node_24",
-                        "label": null
-                },
-                {
-                        "from": "node_24",
-                        "to": "node_25",
-                        "label": null
-                },
-                {
-                        "from": "node_25",
-                        "to": "node_26",
-                        "label": null
-                },
-                {
-                        "from": "node_26",
-                        "to": "node_27",
-                        "label": null
-                },
-                {
-                        "from": "node_27",
-                        "to": "node_28",
-                        "label": null
-                },
-                {
-                        "from": "node_28",
-                        "to": "node_29",
-                        "label": null
-                },
-                {
-                        "from": "node_29",
-                        "to": "node_30",
-                        "label": null
-                },
-                {
-                        "from": "node_30",
-                        "to": "node_31",
-                        "label": null
-                },
-                {
-                        "from": "node_31",
-                        "to": "node_32",
-                        "label": null
-                },
-                {
-                        "from": "node_32",
-                        "to": "node_33",
-                        "label": null
-                },
-                {
-                        "from": "node_33",
-                        "to": "node_34",
-                        "label": null
-                },
-                {
-                        "from": "node_34",
-                        "to": "node_35",
-                        "label": null
-                },
-                {
-                        "from": "node_35",
-                        "to": "node_36",
-                        "label": null
-                },
-                {
-                        "from": "node_36",
-                        "to": "node_37",
-                        "label": null
-                },
-                {
-                        "from": "node_37",
-                        "to": "node_38",
-                        "label": null
-                },
-                {
-                        "from": "node_38",
-                        "to": "node_39",
-                        "label": null
-                },
-                {
-                        "from": "node_23",
-                        "to": "node_40",
-                        "label": null
-                },
-                {
-                        "from": "node_40",
-                        "to": "node_41",
-                        "label": null
-                },
-                {
-                        "from": "node_41",
-                        "to": "node_42",
-                        "label": null
-                },
-                {
-                        "from": "node_42",
-                        "to": "node_43",
-                        "label": null
-                },
-                {
-                        "from": "node_43",
-                        "to": "node_44",
-                        "label": null
-                },
-                {
-                        "from": "node_44",
-                        "to": "node_45",
-                        "label": null
-                },
-                {
-                        "from": "node_45",
-                        "to": "node_46",
-                        "label": null
-                },
-                {
-                        "from": "node_46",
-                        "to": "node_47",
-                        "label": null
-                },
-                {
-                        "from": "node_47",
-                        "to": "node_48",
-                        "label": null
-                },
-                {
-                        "from": "node_48",
-                        "to": "node_49",
-                        "label": null
-                },
-                {
-                        "from": "node_49",
-                        "to": "node_50",
-                        "label": null
-                },
-                {
-                        "from": "node_50",
-                        "to": "node_51",
-                        "label": null
-                },
-                {
-                        "from": "node_51",
-                        "to": "node_52",
-                        "label": null
-                },
-                {
-                        "from": "node_52",
-                        "to": "node_53",
-                        "label": null
-                },
-                {
-                        "from": "node_53",
-                        "to": "node_54",
-                        "label": null
-                },
-                {
-                        "from": "node_54",
-                        "to": "node_55",
-                        "label": null
-                },
-                {
-                        "from": "node_40",
-                        "to": "node_56",
-                        "label": null
-                },
-                {
-                        "from": "node_56",
-                        "to": "node_57",
-                        "label": null
-                },
-                {
-                        "from": "node_57",
-                        "to": "node_58",
-                        "label": null
-                },
-                {
-                        "from": "node_58",
-                        "to": "node_59",
-                        "label": null
-                },
-                {
-                        "from": "node_59",
-                        "to": "node_60",
-                        "label": null
-                },
-                {
-                        "from": "node_60",
-                        "to": "node_61",
-                        "label": null
-                },
-                {
-                        "from": "node_61",
-                        "to": "node_62",
-                        "label": null
-                },
-                {
-                        "from": "node_62",
-                        "to": "node_63",
-                        "label": null
-                },
-                {
-                        "from": "node_63",
-                        "to": "node_64",
-                        "label": null
-                },
-                {
-                        "from": "node_64",
-                        "to": "node_65",
-                        "label": null
-                },
-                {
-                        "from": "node_65",
-                        "to": "node_66",
-                        "label": null
-                },
-                {
-                        "from": "node_66",
-                        "to": "node_67",
-                        "label": null
-                },
-                {
-                        "from": "node_67",
-                        "to": "node_68",
-                        "label": null
-                },
-                {
-                        "from": "node_68",
-                        "to": "node_69",
-                        "label": null
-                },
-                {
-                        "from": "node_56",
-                        "to": "node_70",
-                        "label": null
-                },
-                {
-                        "from": "node_70",
-                        "to": "node_71",
-                        "label": null
-                },
-                {
-                        "from": "node_71",
-                        "to": "node_72",
-                        "label": null
-                },
-                {
-                        "from": "node_72",
-                        "to": "node_73",
-                        "label": null
-                },
-                {
-                        "from": "node_73",
-                        "to": "node_74",
-                        "label": null
-                },
-                {
-                        "from": "node_74",
-                        "to": "node_75",
-                        "label": null
-                },
-                {
-                        "from": "node_75",
-                        "to": "node_76",
-                        "label": null
-                },
-                {
-                        "from": "node_76",
-                        "to": "node_77",
-                        "label": null
-                },
-                {
-                        "from": "node_77",
-                        "to": "node_78",
-                        "label": null
-                },
-                {
-                        "from": "node_78",
-                        "to": "node_79",
-                        "label": null
-                },
-                {
-                        "from": "node_79",
-                        "to": "node_80",
-                        "label": null
-                },
-                {
-                        "from": "node_80",
-                        "to": "node_81",
-                        "label": null
-                },
-                {
-                        "from": "node_69",
-                        "to": "node_82",
-                        "label": "end if"
-                },
-                {
-                        "from": "node_81",
-                        "to": "node_82",
-                        "label": "end else"
-                },
-                {
-                        "from": "node_55",
-                        "to": "node_83",
-                        "label": "end if"
-                },
-                {
-                        "from": "node_82",
-                        "to": "node_83",
-                        "label": "end else"
-                },
-                {
-                        "from": "node_39",
-                        "to": "node_84",
-                        "label": "end if"
-                },
-                {
-                        "from": "node_83",
-                        "to": "node_84",
-                        "label": "end else"
-                },
-                {
-                        "from": "node_22",
-                        "to": "node_85",
-                        "label": "end if"
-                },
-                {
-                        "from": "node_84",
-                        "to": "node_85",
-                        "label": "end else"
-                },
-                {
-                        "from": "node_85",
-                        "to": "node_86",
-                        "label": null
-                },
-                {
-                        "from": "node_86",
-                        "to": "node_87",
-                        "label": null
-                },
-                {
-                        "from": "node_87",
-                        "to": "node_88",
-                        "label": null
-                },
-                {
-                        "from": "node_88",
-                        "to": "node_89",
-                        "label": null
-                },
-                {
-                        "from": "node_89",
-                        "to": "node_90",
-                        "label": null
-                },
-                {
-                        "from": "node_90",
-                        "to": "node_91",
-                        "label": null
-                },
-                {
-                        "from": "node_91",
-                        "to": "node_92",
-                        "label": null
-                },
-                {
-                        "from": "node_92",
-                        "to": "node_93",
-                        "label": null
-                },
-                {
-                        "from": "node_93",
-                        "to": "node_94",
-                        "label": null
-                },
-                {
-                        "from": "node_94",
-                        "to": "node_95",
-                        "label": null
-                },
-                {
-                        "from": "node_95",
-                        "to": "node_96",
-                        "label": null
-                },
-                {
-                        "from": "node_96",
-                        "to": "node_1",
-                        "label": null
+                        "from": "n_6eb9a2",
+                        "to": "n_844e9d",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_844e9d",
+                        "to": "n_1b0389",
+                        "label": "True",
+                        "from_port": "true",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_1b0389",
+                        "to": "n_ae4411",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_ae4411",
+                        "to": "n_9d2210",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_9d2210",
+                        "to": "n_9f0484",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_844e9d",
+                        "to": "n_8a61d6",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_8a61d6",
+                        "to": "n_55237e",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_55237e",
+                        "to": "n_e1965f",
+                        "label": "True",
+                        "from_port": "true",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_e1965f",
+                        "to": "n_116f92",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_116f92",
+                        "to": "n_4c287b",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_4c287b",
+                        "to": "n_9c1029",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_55237e",
+                        "to": "n_391f22",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_391f22",
+                        "to": "n_b150f9",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_b150f9",
+                        "to": "n_37c54c",
+                        "label": "True",
+                        "from_port": "true",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_37c54c",
+                        "to": "n_4e2612",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_4e2612",
+                        "to": "n_e4c602",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_e4c602",
+                        "to": "n_399690",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_b150f9",
+                        "to": "n_cf5ab2",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_cf5ab2",
+                        "to": "n_ae113f",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_ae113f",
+                        "to": "n_8fd194",
+                        "label": "True",
+                        "from_port": "true",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_8fd194",
+                        "to": "n_1f2ac9",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_1f2ac9",
+                        "to": "n_e4801e",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_e4801e",
+                        "to": "n_1a53d3",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_ae113f",
+                        "to": "n_8215ec",
+                        "label": "False",
+                        "from_port": "false",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_8215ec",
+                        "to": "n_3a9ced",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_3a9ced",
+                        "to": "n_5a5d2c",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_5a5d2c",
+                        "to": "n_f96c89",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_1a53d3",
+                        "to": "n_02e720",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_f96c89",
+                        "to": "n_02e720",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_right",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_399690",
+                        "to": "n_f3385d",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_02e720",
+                        "to": "n_f3385d",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_right",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_9c1029",
+                        "to": "n_c91e0e",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_f3385d",
+                        "to": "n_c91e0e",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_right",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_9f0484",
+                        "to": "n_d4ba15",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_left",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_c91e0e",
+                        "to": "n_d4ba15",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in_right",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_d4ba15",
+                        "to": "n_bee796",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_bee796",
+                        "to": "n_aced5c",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
+                },
+                {
+                        "from": "n_aced5c",
+                        "to": "n_de2e52",
+                        "label": null,
+                        "from_port": "out",
+                        "to_port": "in",
+                        "style": {
+                                "type": "straight"
+                        }
                 }
-        ]
-};
-        
-        // Pre-calculated hierarchical positions
-        const hierarchicalPositions = {
-        "node_0": {
-                "x": 0,
-                "y": 0,
-                "level": 0
-        },
-        "node_2": {
-                "x": 0,
-                "y": 150,
-                "level": 1
-        },
-        "node_3": {
-                "x": 0,
-                "y": 300,
-                "level": 2
-        },
-        "node_4": {
-                "x": 0,
-                "y": 450,
-                "level": 3
-        },
-        "node_5": {
-                "x": 0,
-                "y": 600,
-                "level": 4
-        },
-        "node_6": {
-                "x": -125.0,
-                "y": 750,
-                "level": 5
-        },
-        "node_23": {
-                "x": 125.0,
-                "y": 750,
-                "level": 5
-        },
-        "node_7": {
-                "x": -250.0,
-                "y": 900,
-                "level": 6
-        },
-        "node_24": {
-                "x": 0.0,
-                "y": 900,
-                "level": 6
-        },
-        "node_40": {
-                "x": 250.0,
-                "y": 900,
-                "level": 6
-        },
-        "node_8": {
-                "x": -375.0,
-                "y": 1050,
-                "level": 7
-        },
-        "node_25": {
-                "x": -125.0,
-                "y": 1050,
-                "level": 7
-        },
-        "node_41": {
-                "x": 125.0,
-                "y": 1050,
-                "level": 7
-        },
-        "node_56": {
-                "x": 375.0,
-                "y": 1050,
-                "level": 7
-        },
-        "node_9": {
-                "x": -500.0,
-                "y": 1200,
-                "level": 8
-        },
-        "node_26": {
-                "x": -250.0,
-                "y": 1200,
-                "level": 8
-        },
-        "node_42": {
-                "x": 0.0,
-                "y": 1200,
-                "level": 8
-        },
-        "node_57": {
-                "x": 250.0,
-                "y": 1200,
-                "level": 8
-        },
-        "node_70": {
-                "x": 500.0,
-                "y": 1200,
-                "level": 8
-        },
-        "node_10": {
-                "x": -500.0,
-                "y": 1350,
-                "level": 9
-        },
-        "node_27": {
-                "x": -250.0,
-                "y": 1350,
-                "level": 9
-        },
-        "node_43": {
-                "x": 0.0,
-                "y": 1350,
-                "level": 9
-        },
-        "node_58": {
-                "x": 250.0,
-                "y": 1350,
-                "level": 9
-        },
-        "node_71": {
-                "x": 500.0,
-                "y": 1350,
-                "level": 9
-        },
-        "node_11": {
-                "x": -500.0,
-                "y": 1500,
-                "level": 10
-        },
-        "node_28": {
-                "x": -250.0,
-                "y": 1500,
-                "level": 10
-        },
-        "node_44": {
-                "x": 0.0,
-                "y": 1500,
-                "level": 10
-        },
-        "node_59": {
-                "x": 250.0,
-                "y": 1500,
-                "level": 10
-        },
-        "node_72": {
-                "x": 500.0,
-                "y": 1500,
-                "level": 10
-        },
-        "node_12": {
-                "x": -500.0,
-                "y": 1650,
-                "level": 11
-        },
-        "node_29": {
-                "x": -250.0,
-                "y": 1650,
-                "level": 11
-        },
-        "node_45": {
-                "x": 0.0,
-                "y": 1650,
-                "level": 11
-        },
-        "node_60": {
-                "x": 250.0,
-                "y": 1650,
-                "level": 11
-        },
-        "node_73": {
-                "x": 500.0,
-                "y": 1650,
-                "level": 11
-        },
-        "node_13": {
-                "x": -500.0,
-                "y": 1800,
-                "level": 12
-        },
-        "node_30": {
-                "x": -250.0,
-                "y": 1800,
-                "level": 12
-        },
-        "node_46": {
-                "x": 0.0,
-                "y": 1800,
-                "level": 12
-        },
-        "node_61": {
-                "x": 250.0,
-                "y": 1800,
-                "level": 12
-        },
-        "node_74": {
-                "x": 500.0,
-                "y": 1800,
-                "level": 12
-        },
-        "node_14": {
-                "x": -500.0,
-                "y": 1950,
-                "level": 13
-        },
-        "node_31": {
-                "x": -250.0,
-                "y": 1950,
-                "level": 13
-        },
-        "node_47": {
-                "x": 0.0,
-                "y": 1950,
-                "level": 13
-        },
-        "node_62": {
-                "x": 250.0,
-                "y": 1950,
-                "level": 13
-        },
-        "node_75": {
-                "x": 500.0,
-                "y": 1950,
-                "level": 13
-        },
-        "node_15": {
-                "x": -500.0,
-                "y": 2100,
-                "level": 14
-        },
-        "node_32": {
-                "x": -250.0,
-                "y": 2100,
-                "level": 14
-        },
-        "node_48": {
-                "x": 0.0,
-                "y": 2100,
-                "level": 14
-        },
-        "node_63": {
-                "x": 250.0,
-                "y": 2100,
-                "level": 14
-        },
-        "node_76": {
-                "x": 500.0,
-                "y": 2100,
-                "level": 14
-        },
-        "node_16": {
-                "x": -500.0,
-                "y": 2250,
-                "level": 15
-        },
-        "node_33": {
-                "x": -250.0,
-                "y": 2250,
-                "level": 15
-        },
-        "node_49": {
-                "x": 0.0,
-                "y": 2250,
-                "level": 15
-        },
-        "node_64": {
-                "x": 250.0,
-                "y": 2250,
-                "level": 15
-        },
-        "node_77": {
-                "x": 500.0,
-                "y": 2250,
-                "level": 15
-        },
-        "node_17": {
-                "x": -500.0,
-                "y": 2400,
-                "level": 16
-        },
-        "node_34": {
-                "x": -250.0,
-                "y": 2400,
-                "level": 16
-        },
-        "node_50": {
-                "x": 0.0,
-                "y": 2400,
-                "level": 16
-        },
-        "node_65": {
-                "x": 250.0,
-                "y": 2400,
-                "level": 16
-        },
-        "node_78": {
-                "x": 500.0,
-                "y": 2400,
-                "level": 16
-        },
-        "node_18": {
-                "x": -500.0,
-                "y": 2550,
-                "level": 17
-        },
-        "node_35": {
-                "x": -250.0,
-                "y": 2550,
-                "level": 17
-        },
-        "node_51": {
-                "x": 0.0,
-                "y": 2550,
-                "level": 17
-        },
-        "node_66": {
-                "x": 250.0,
-                "y": 2550,
-                "level": 17
-        },
-        "node_79": {
-                "x": 500.0,
-                "y": 2550,
-                "level": 17
-        },
-        "node_19": {
-                "x": -500.0,
-                "y": 2700,
-                "level": 18
-        },
-        "node_36": {
-                "x": -250.0,
-                "y": 2700,
-                "level": 18
-        },
-        "node_52": {
-                "x": 0.0,
-                "y": 2700,
-                "level": 18
-        },
-        "node_67": {
-                "x": 250.0,
-                "y": 2700,
-                "level": 18
-        },
-        "node_80": {
-                "x": 500.0,
-                "y": 2700,
-                "level": 18
-        },
-        "node_20": {
-                "x": -500.0,
-                "y": 2850,
-                "level": 19
-        },
-        "node_37": {
-                "x": -250.0,
-                "y": 2850,
-                "level": 19
-        },
-        "node_53": {
-                "x": 0.0,
-                "y": 2850,
-                "level": 19
-        },
-        "node_68": {
-                "x": 250.0,
-                "y": 2850,
-                "level": 19
-        },
-        "node_81": {
-                "x": 500.0,
-                "y": 2850,
-                "level": 19
-        },
-        "node_21": {
-                "x": -500.0,
-                "y": 3000,
-                "level": 20
-        },
-        "node_38": {
-                "x": -250.0,
-                "y": 3000,
-                "level": 20
-        },
-        "node_54": {
-                "x": 0.0,
-                "y": 3000,
-                "level": 20
-        },
-        "node_69": {
-                "x": 250.0,
-                "y": 3000,
-                "level": 20
-        },
-        "node_82": {
-                "x": 500.0,
-                "y": 3000,
-                "level": 20
-        },
-        "node_22": {
-                "x": -375.0,
-                "y": 3150,
-                "level": 21
-        },
-        "node_39": {
-                "x": -125.0,
-                "y": 3150,
-                "level": 21
-        },
-        "node_55": {
-                "x": 125.0,
-                "y": 3150,
-                "level": 21
-        },
-        "node_83": {
-                "x": 375.0,
-                "y": 3150,
-                "level": 21
-        },
-        "node_85": {
-                "x": -125.0,
-                "y": 3300,
-                "level": 22
-        },
-        "node_84": {
-                "x": 125.0,
-                "y": 3300,
-                "level": 22
-        },
-        "node_86": {
-                "x": 0,
-                "y": 3450,
-                "level": 23
-        },
-        "node_87": {
-                "x": 0,
-                "y": 3600,
-                "level": 24
-        },
-        "node_88": {
-                "x": 0,
-                "y": 3750,
-                "level": 25
-        },
-        "node_89": {
-                "x": 0,
-                "y": 3900,
-                "level": 26
-        },
-        "node_90": {
-                "x": 0,
-                "y": 4050,
-                "level": 27
-        },
-        "node_91": {
-                "x": 0,
-                "y": 4200,
-                "level": 28
-        },
-        "node_92": {
-                "x": 0,
-                "y": 4350,
-                "level": 29
-        },
-        "node_93": {
-                "x": 0,
-                "y": 4500,
-                "level": 30
-        },
-        "node_94": {
-                "x": 0,
-                "y": 4650,
-                "level": 31
-        },
-        "node_95": {
-                "x": 0,
-                "y": 4800,
-                "level": 32
-        },
-        "node_96": {
-                "x": 0,
-                "y": 4950,
-                "level": 33
-        },
-        "node_1": {
-                "x": 0,
-                "y": 5100,
-                "level": 34
+        ],
+        "source_code": "def multi_22_lines(user_role, permissions):\n    if user_role == 'admin':\n        access_level = 'full'\n        allowed_actions = ['create', 'read', 'update', 'delete', 'manage']\n        rate_limit = 10000\n    elif user_role == 'moderator':\n        access_level = 'high'\n        allowed_actions = ['create', 'read', 'update', 'moderate']\n        rate_limit = 5000\n    elif user_role == 'editor':\n        access_level = 'medium'\n        allowed_actions = ['create', 'read', 'update']\n        rate_limit = 2000\n    elif user_role == 'viewer':\n        access_level = 'low'\n        allowed_actions = ['read']\n        rate_limit = 1000\n    else:\n        access_level = 'none'\n        allowed_actions = []\n        rate_limit = 100\n    \n    # Check permissions\n    final_permissions = [p for p in allowed_actions if p in permissions]\n    \n    return {\n        'access_level': access_level,\n        'permissions': final_permissions,\n        'rate_limit': rate_limit\n    }",
+        "layout": {
+                "vertical_gap": 110,
+                "horizontal_gap": 160,
+                "indent": 120,
+                "node_heights": 60,
+                "node_widths": {
+                        "entry": 140,
+                        "exit": 140,
+                        "return": 160,
+                        "conditional": 180,
+                        "loop": 200,
+                        "merge": 150,
+                        "assignment": 180,
+                        "statement": 180,
+                        "block_start": 140,
+                        "loop_exit": 140
+                }
         }
 };
         
-        // Color and shape mappings
+        let network = null;
+        let physicsEnabled = false;
+        
+        // Color mapping for node types
         const colorMap = {
-            'entry': '#28a745',
-            'exit': '#dc3545', 
-            'conditional': '#ffc107',
-            'return': '#17a2b8',
-            'statement': '#007bff',
-            'assignment': '#6f42c1',
-            'loop': '#fd7e14',
-            'merge': '#20c997'
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'return': '#90ee90',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3'
         };
         
+        // Shape mapping for node types
         const shapeMap = {
-            'entry': 'circle',
-            'exit': 'circle',
+            'entry': 'ellipse',
+            'exit': 'ellipse',
             'conditional': 'diamond',
-            'return': 'triangleDown',
-            'statement': 'box',
-            'assignment': 'box',
-            'loop': 'box',
+            'loop': 'diamond',
             'merge': 'circle'
         };
         
-        // Create nodes with hierarchical positions
-        const nodes = new vis.DataSet([
-            {
-                id: functionFlowData.entry_point.id,
-                label: functionFlowData.entry_point.label,
-                title: `${functionFlowData.entry_point.label}\nType: ${functionFlowData.entry_point.type}\nLine: ${functionFlowData.entry_point.line}`,
-                color: {
-                    background: colorMap[functionFlowData.entry_point.type],
-                    border: '#28a745'
-                },
-                shape: shapeMap[functionFlowData.entry_point.type] || 'box',
-                font: {size: 16, bold: true, color: '#333'},
-                borderWidth: 3,
-                x: hierarchicalPositions[functionFlowData.entry_point.id]?.x || 0,
-                y: hierarchicalPositions[functionFlowData.entry_point.id]?.y || 0
-            },
-            {
-                id: functionFlowData.exit_point.id,
-                label: functionFlowData.exit_point.label,
-                title: `${functionFlowData.exit_point.label}\nType: ${functionFlowData.exit_point.type}\nLine: ${functionFlowData.exit_point.line}`,
-                color: {
-                    background: colorMap[functionFlowData.exit_point.type],
-                    border: '#dc3545'
-                },
-                shape: shapeMap[functionFlowData.exit_point.type] || 'box',
-                font: {size: 16, bold: true, color: '#333'},
-                borderWidth: 3,
-                x: hierarchicalPositions[functionFlowData.exit_point.id]?.x || 0,
-                y: hierarchicalPositions[functionFlowData.exit_point.id]?.y || 0
-            }
-        ]);
-        
-        // Add control flow nodes with hierarchical positions
-        functionFlowData.nodes.forEach(node => {
-            if (node.id !== functionFlowData.entry_point.id && node.id !== functionFlowData.exit_point.id) {
+        function initializeNetwork() {
+            const container = document.getElementById('network');
+            
+            // Create nodes from all nodes in the data
+            const nodes = new vis.DataSet();
+            
+            functionFlowData.nodes.forEach(node => {
                 const color = colorMap[node.type] || '#97c2fc';
                 const shape = shapeMap[node.type] || 'box';
                 
                 let label = node.label;
-                if (label.length > 30) {
-                    label = label.substring(0, 27) + '...';
+                if (label.length > 50) {
+                    label = label.substring(0, 47) + '...';
                 }
                 
-                nodes.add({
+                // Special styling for entry and exit nodes
+                let borderWidth = 1;
+                let borderColor = '#666666';
+                let fontSize = 12;
+                
+                if (node.type === 'entry') {
+                    borderWidth = 3;
+                    borderColor = '#28a745';
+                    fontSize = 16;
+                } else if (node.type === 'exit') {
+                    borderWidth = 3;
+                    borderColor = '#dc3545';
+                    fontSize = 16;
+                }
+                
+                // Use fixed position from layout calculator if available
+                const nodeConfig = {
                     id: node.id,
                     label: label,
                     title: `${node.label}\nType: ${node.type}\nLine: ${node.line}`,
                     color: {
                         background: color,
-                        border: '#333'
+                        border: borderColor
                     },
                     shape: shape,
-                    font: {size: 12, color: '#333'},
-                    borderWidth: 2,
-                    x: hierarchicalPositions[node.id]?.x || 0,
-                    y: hierarchicalPositions[node.id]?.y || 0
-                });
-            }
-        });
-        
-        // Create edges with appropriate styling
-        const edges = new vis.DataSet(functionFlowData.edges.map(edge => ({
-            from: edge.from,
-            to: edge.to,
-            label: edge.label || '',
-            arrows: 'to',
-            color: {color: '#666666', highlight: '#007bff'},
-            width: 2,
-            smooth: {
-                type: 'cubicBezier',
-                roundness: 0.1
-            }
-        })));
-        
-        // Create network with hierarchical layout
-        const container = document.getElementById('network');
-        const data = { nodes, edges };
-        
-        const options = {
-            layout: {
-                hierarchical: {
-                    enabled: false,  // Use our manual positions
-                    levelSeparation: 150,
-                    nodeSpacing: 200,
-                    treeSpacing: 200
+                    font: {size: fontSize, bold: node.type === 'entry' || node.type === 'exit', color: '#333'},
+                    borderWidth: borderWidth
+                };
+                
+                // Add fixed position if layout calculator provided it
+                if (node.x !== undefined && node.y !== undefined) {
+                    nodeConfig.x = node.x;
+                    nodeConfig.y = node.y;
+                    // Disable physics for positioned nodes
+                    nodeConfig.physics = false;
                 }
-            },
-            physics: {
-                enabled: false,  // Start with physics disabled
-                stabilization: {
-                    enabled: true,
-                    iterations: 100
+                
+                nodes.add(nodeConfig);
+            });
+            
+            // Create edges with layout-aware styling
+            const edges = new vis.DataSet(functionFlowData.edges.map(edge => {
+                const edgeConfig = {
+                    from: edge.from,
+                    to: edge.to,
+                    label: edge.label || '',
+                    arrows: 'to',
+                    color: {color: '#666666', highlight: '#007bff'},
+                    width: 2
+                };
+                
+                // Use layout information for edge styling if available
+                if (edge.style) {
+                    if (edge.style.type === 'bezier' && edge.style.curved) {
+                        edgeConfig.smooth = {
+                            type: 'cubicBezier',
+                            roundness: 0.4
+                        };
+                        if (edge.style.dashed) {
+                            edgeConfig.dashes = true;
+                        }
+                    } else if (edge.style.type === 'straight') {
+                        edgeConfig.smooth = false;
+                    }
+                } else {
+                    // Default smooth edge
+                    edgeConfig.smooth = {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    };
                 }
-            },
-            interaction: {
-                hover: true,
-                tooltipDelay: 200,
-                dragNodes: true,
-                dragView: true,
-                zoomView: true
-            },
-            nodes: {
-                borderWidth: 2,
-                shadow: true
-            },
-            edges: {
-                shadow: true,
-                smooth: {
-                    type: 'cubicBezier',
-                    roundness: 0.2
-                }
-            }
-        };
-        
-        const network = new vis.Network(container, data, options);
-        
-        // Fit to screen after network is ready
-        network.once('stabilizationIterationsDone', function() {
-            network.fit();
-        });
-        
-        // Control functions
-        function togglePhysics() {
-            const physicsEnabled = !network.physics.physicsEnabled;
-            network.setOptions({
+                
+                return edgeConfig;
+            }));
+            
+            // Create network
+            const data = { nodes: nodes, edges: edges };
+            
+            const options = {
+                layout: {
+                    hierarchical: false,
+                    randomSeed: 42,
+                    improvedLayout: false
+                },
                 physics: {
-                    enabled: physicsEnabled
+                    enabled: false
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    zoomView: true,
+                    dragView: true,
+                    navigationButtons: true,
+                    keyboard: true
+                },
+                nodes: {
+                    borderWidth: 1,
+                    color: {
+                        border: '#666666'
+                    },
+                    font: {color: '#333'},
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 5,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.2
+                    },
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.1)',
+                        size: 3,
+                        x: 1,
+                        y: 1
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+            
+            // Make network globally accessible
+            window.network = network;
+            
+            // Simple fit after network is ready
+            setTimeout(() => {
+                network.fit();
+            }, 100);
+            
+            // Add click event for node details
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    console.log('Clicked node:', node);
                 }
             });
         }
+        
+        function changeNodeSize() {
+            const nodeSize = document.getElementById('nodeSizeSelect').value;
+            
+            let nodeSizeValue = 20;
+            if (nodeSize === 'small') nodeSizeValue = 15;
+            else if (nodeSize === 'large') nodeSizeValue = 30;
+            
+            network.setOptions({
+                nodes: { size: nodeSizeValue }
+            });
+        }
+        
+        function resetZoom() {
+            network.fit({
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        }
+        
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({
+                physics: {
+                    enabled: physicsEnabled,
+                    stabilization: { iterations: physicsEnabled ? 100 : 0 }
+                }
+            });
+        }
+        
+        function exportImage() {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get network canvas
+            const networkCanvas = network.canvas.frame.canvas;
+            
+            // Set canvas size
+            canvas.width = networkCanvas.width;
+            canvas.height = networkCanvas.height;
+            
+            // Draw network canvas to our canvas
+            ctx.drawImage(networkCanvas, 0, 0);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'multi_22_lines_function_flow.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Load source code
+        async function loadSourceCode() {
+            try {
+                const response = await fetch('');
+                const sourceText = await response.text();
+                
+                // Extract just the function we're visualizing
+                const lines = sourceText.split('\n');
+                const funcName = 'multi_22_lines';
+                let inFunction = false;
+                let functionLines = [];
+                let indentLevel = 0;
+                
+                for (let line of lines) {
+                    if (line.includes(`def ${funcName}(`)) {
+                        inFunction = true;
+                        functionLines.push(line);
+                        continue;
+                    }
+                    if (inFunction) {
+                        // Check if this line dedents past function level (function end)
+                        const currentIndent = line.search(/\S/);
+                        if (currentIndent === -1 && line.trim().length === 0) continue;
+                        if (currentIndent < indentLevel && line.trim().length > 0) {
+                            inFunction = false;
+                            break;
+                        }
+                        if (currentIndent !== -1) {
+                            indentLevel = currentIndent;
+                        }
+                        functionLines.push(line);
+                    }
+                }
+                
+                document.getElementById('source-code').textContent = functionLines.join('\n');
+            } catch (error) {
+                document.getElementById('source-code').textContent = 'Source code not available';
+            }
+        }
+        
+        // Initialize network when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNetwork();
+            // Only load source code if not already present
+            const sourceElement = document.getElementById('source-code');
+            if (sourceElement && sourceElement.textContent.trim() === '') {
+                loadSourceCode();
+            }
+        });
     </script>
 </body>
 </html>
