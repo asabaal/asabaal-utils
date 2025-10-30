@@ -216,8 +216,8 @@ def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: 
         print("Warning: Function flow builder not available. Skipping function flow analysis.")
         return
     
-    # Create output directory for function flows
-    function_flows_dir = output_dir / "function_flows"
+    # Create output directory for function flows (use output_dir directly since it's already flowscope_analysis)
+    function_flows_dir = output_dir
     function_flows_dir.mkdir(parents=True, exist_ok=True)
     
     print("Analyzing function flows...")
