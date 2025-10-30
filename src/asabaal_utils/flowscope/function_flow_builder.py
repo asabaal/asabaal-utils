@@ -323,7 +323,22 @@ def generate_function_flow(source: str, func_name: str) -> dict:
 
     for node in tree.body:
         if isinstance(node, ast.FunctionDef) and node.name == func_name:
-            builder = FunctionFlowBuilder(func_name, source)
+            # Extract just this function's source code
+            try:
+                import astor
+                function_source = astor.to_source(node).strip()
+            except Exception:
+                try:
+                    import astunparse
+                    function_source = astunparse.unparse(node).strip()
+                except Exception:
+                    # Fallback: get the function's lines from the full source
+                    lines = source.split('\n')
+                    start_line = node.lineno - 1
+                    end_line = node.end_lineno if hasattr(node, 'end_lineno') else len(lines)
+                    function_source = '\n'.join(lines[start_line:end_line])
+            
+            builder = FunctionFlowBuilder(func_name, function_source)
             builder.visit(node)
             return builder.flow.to_json()
 
