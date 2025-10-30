@@ -216,8 +216,8 @@ def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: 
         print("Warning: Function flow builder not available. Skipping function flow analysis.")
         return
     
-    # Create output directory for function flows (use output_dir directly since it's already flowscope_analysis)
-    function_flows_dir = output_dir
+    # Create output directory for function flows JSON files
+    function_flows_dir = output_dir / "function_flows"
     function_flows_dir.mkdir(parents=True, exist_ok=True)
     
     print("Analyzing function flows...")
@@ -269,7 +269,7 @@ def _analyze_function_flows(path: Path, exclude_patterns: Set[str], output_dir: 
     try:
         from .function_flow_renderer import FunctionFlowRenderer
         print("Generating HTML visualizations...")
-        renderer = FunctionFlowRenderer(function_flows_dir)
+        renderer = FunctionFlowRenderer(output_dir)
         
         # Process all JSON files and convert to HTML
         for json_file in function_flows_dir.glob("*.json"):

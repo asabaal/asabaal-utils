@@ -48,8 +48,9 @@ class Node:
 
 
 class FunctionFlow:
-    def __init__(self, func_name):
+    def __init__(self, func_name, source_code=None):
         self.func_name = func_name
+        self.source_code = source_code
         self.nodes = []
         self.edges = []
 
@@ -62,19 +63,22 @@ class FunctionFlow:
         return node
 
     def to_json(self):
-        return {
+        result = {
             "function": self.func_name,
             "type": "function_flow",
             "nodes": [n.to_dict() for n in self.nodes],
             "edges": self.edges,
         }
+        if self.source_code:
+            result["source_code"] = self.source_code
+        return result
 
 
 class FunctionFlowBuilder(ast.NodeVisitor):
     """AST traversal builder for detailed control flow."""
 
-    def __init__(self, func_name):
-        self.flow = FunctionFlow(func_name)
+    def __init__(self, func_name, source_code=None):
+        self.flow = FunctionFlow(func_name, source_code)
         self.prev_node = None
         self.exit_node = None  # single exit target for all returns
 
@@ -319,7 +323,7 @@ def generate_function_flow(source: str, func_name: str) -> dict:
 
     for node in tree.body:
         if isinstance(node, ast.FunctionDef) and node.name == func_name:
-            builder = FunctionFlowBuilder(func_name)
+            builder = FunctionFlowBuilder(func_name, source)
             builder.visit(node)
             return builder.flow.to_json()
 
