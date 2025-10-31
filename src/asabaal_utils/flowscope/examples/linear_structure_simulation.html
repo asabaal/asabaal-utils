@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Relaxation Simulation</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            margin: 0 10px;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 4px;
+        }
+        
+        .visualization {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <button id="playBtn" onclick="togglePlay()">Play</button>
+                <button id="stepBtn" onclick="stepForward()">Step Forward</button>
+                <button id="stepBackBtn" onclick="stepBackward()">Step Back</button>
+                <button id="resetBtn" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Frame:</label>
+                <span id="frameInfo">0 / 0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>FPS:</label>
+                <input type="range" id="fpsSlider" min="0.5" max="10" step="0.5" value="2" onchange="updateFPS(this.value)">
+                <span id="fpsValue">2.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Speed:</label>
+                <input type="number" id="speedInput" min="1" max="50" value="1" onchange="updateSpeed(this.value)">
+                <span>frames/step</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div id="network"></div>
+            <div class="info">
+                <div><strong>Iteration:</strong> <span id="iteration">0</span></div>
+                <div><strong>Step Size:</strong> <span id="stepSize">0.01</span></div>
+                <div><strong>Nodes:</strong> <span id="nodeCount">0</span></div>
+                <div><strong>Playing:</strong> <span id="playingStatus">No</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulation data
+        const frames = [{"iteration": 0, "step": 0.01, "nodes": {"n0": {"x": 0.0, "y": 0.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 2.0, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 6.0, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 8.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 2, "step": 0.009772151898734177, "nodes": {"n0": {"x": 0.0, "y": -0.2888977505494585, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 1.9228140952192558, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 6.077185904780744, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 8.28889775054946, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 4, "step": 0.009544303797468354, "nodes": {"n0": {"x": 0.0, "y": -0.8673637497102028, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 1.7359386210196972, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 6.264061378980303, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 8.867363749710202, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 6, "step": 0.009316455696202533, "nodes": {"n0": {"x": 0.0, "y": -1.6201104152234453, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 1.4463976153881104, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 6.5536023846118905, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 9.620110415223445, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 8, "step": 0.00908860759493671, "nodes": {"n0": {"x": 0.0, "y": -2.4629079165485894, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 1.0815913621672901, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 6.9184086378327105, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 10.46290791654859, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 10, "step": 0.008860759493670886, "nodes": {"n0": {"x": 0.0, "y": -3.341428833566609, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 0.6723012764503367, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 7.327698723549664, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 11.341428833566608, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 12, "step": 0.008632911392405063, "nodes": {"n0": {"x": 0.0, "y": -4.2216442405985335, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": 0.2430386984725419, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 7.7569613015274586, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 12.221644240598533, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 14, "step": 0.008405063291139239, "nodes": {"n0": {"x": 0.0, "y": -5.082380016073974, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -0.18923839897627287, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 8.189238398976274, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 13.082380016073973, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 16, "step": 0.008177215189873419, "nodes": {"n0": {"x": 0.0, "y": -5.910609645755277, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -0.6135528456592632, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 8.613552845659264, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 13.910609645755276, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 18, "step": 0.007949367088607596, "nodes": {"n0": {"x": 0.0, "y": -6.698565550390877, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -1.023100737524885, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 9.023100737524885, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 14.698565550390878, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 20, "step": 0.007721518987341772, "nodes": {"n0": {"x": 0.0, "y": -7.441941240066279, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -1.4138653613716974, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 9.413865361371696, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 15.44194124006628, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 22, "step": 0.00749367088607595, "nodes": {"n0": {"x": 0.0, "y": -8.138743390148004, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -1.7836661034832835, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 9.783666103483283, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 16.138743390148004, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 24, "step": 0.0072658227848101265, "nodes": {"n0": {"x": 0.0, "y": -8.78853903211103, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -2.1315276923282034, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 10.131527692328202, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 16.78853903211103, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 26, "step": 0.007037974683544304, "nodes": {"n0": {"x": 0.0, "y": -9.391949669488216, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -2.4572642485822382, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 10.457264248582236, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 17.391949669488213, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 28, "step": 0.006810126582278481, "nodes": {"n0": {"x": 0.0, "y": -9.950304143879766, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -2.761203508264312, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 10.76120350826431, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 17.950304143879762, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 30, "step": 0.006582278481012658, "nodes": {"n0": {"x": 0.0, "y": -10.465396321957773, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -3.0440023344180145, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 11.044002334418014, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 18.46539632195777, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 32, "step": 0.006354430379746836, "nodes": {"n0": {"x": 0.0, "y": -10.939313689068099, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -3.3065221862358594, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 11.306522186235858, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 18.939313689068097, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 34, "step": 0.006126582278481012, "nodes": {"n0": {"x": 0.0, "y": -11.374314949559087, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -3.5497444619151235, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 11.549744461915122, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 19.374314949559086, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 36, "step": 0.00589873417721519, "nodes": {"n0": {"x": 0.0, "y": -11.772742141095359, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -3.774712715870115, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 11.774712715870113, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 19.772742141095357, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 38, "step": 0.0056708860759493674, "nodes": {"n0": {"x": 0.0, "y": -12.136957454449645, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -3.9824932198755496, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 11.982493219875547, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 20.136957454449643, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 40, "step": 0.005443037974683544, "nodes": {"n0": {"x": 0.0, "y": -12.469297983815796, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -4.174148185330553, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 12.17414818533055, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 20.469297983815796, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 42, "step": 0.005215189873417722, "nodes": {"n0": {"x": 0.0, "y": -12.772043640967695, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -4.350717803868718, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 12.350717803868715, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 20.772043640967695, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 44, "step": 0.004987341772151899, "nodes": {"n0": {"x": 0.0, "y": -13.04739482339014, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -4.513208471129705, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 12.513208471129703, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 21.04739482339014, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 46, "step": 0.004759493670886076, "nodes": {"n0": {"x": 0.0, "y": -13.297457360468787, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -4.662585363669897, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 12.662585363669896, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 21.297457360468787, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 48, "step": 0.004531645569620254, "nodes": {"n0": {"x": 0.0, "y": -13.524232915886516, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -4.799768084144638, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 12.799768084144638, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 21.524232915886515, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 50, "step": 0.00430379746835443, "nodes": {"n0": {"x": 0.0, "y": -13.729613489736568, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -4.925628464384091, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 12.925628464384092, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 21.729613489736565, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 52, "step": 0.004075949367088608, "nodes": {"n0": {"x": 0.0, "y": -13.915378999838513, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.04098987667885, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.040989876678852, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 21.91537899983851, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 54, "step": 0.0038481012658227853, "nodes": {"n0": {"x": 0.0, "y": -14.083197167591125, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.146627587247288, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.146627587247288, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.08319716759112, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 56, "step": 0.003620253164556962, "nodes": {"n0": {"x": 0.0, "y": -14.234625115836172, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.243269816598548, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.243269816598547, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.234625115836167, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 58, "step": 0.003392405063291139, "nodes": {"n0": {"x": 0.0, "y": -14.371112222694482, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.3315992654071485, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.331599265407146, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.371112222694478, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 60, "step": 0.003164556962025316, "nodes": {"n0": {"x": 0.0, "y": -14.494003878688257, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.412254932445298, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.412254932445295, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.494003878688254, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 62, "step": 0.002936708860759494, "nodes": {"n0": {"x": 0.0, "y": -14.604545873477727, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.485834100529495, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.485834100529491, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.604545873477722, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 64, "step": 0.002708860759493671, "nodes": {"n0": {"x": 0.0, "y": -14.703889199475537, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.552894402507762, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.552894402507759, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.70388919947553, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 66, "step": 0.002481012658227848, "nodes": {"n0": {"x": 0.0, "y": -14.79309510696608, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.613955905688055, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.613955905688051, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.793095106966074, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 68, "step": 0.002253164556962025, "nodes": {"n0": {"x": 0.0, "y": -14.873140282431342, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.669503172383306, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.669503172383303, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.873140282431333, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 70, "step": 0.002025316455696203, "nodes": {"n0": {"x": 0.0, "y": -14.944922050984665, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.719987268293914, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.719987268293911, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 22.944922050984655, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 72, "step": 0.00179746835443038, "nodes": {"n0": {"x": 0.0, "y": -15.009263526933744, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.765827700624654, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.765827700624651, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 23.009263526933733, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 74, "step": 0.001569620253164557, "nodes": {"n0": {"x": 0.0, "y": -15.06691865488032, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.807414275138584, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.807414275138582, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 23.066918654880308, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 76, "step": 0.001341772151898734, "nodes": {"n0": {"x": 0.0, "y": -15.11857709843544, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.84510886652492, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.845108866524917, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 23.118577098435424, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 78, "step": 0.001113924050632911, "nodes": {"n0": {"x": 0.0, "y": -15.164868945363544, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.879247100051832, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.87924710005183, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 23.16486894536353, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}, {"iteration": 80, "step": 0.000886075949367088, "nodes": {"n0": {"x": 0.0, "y": -15.20636920736499, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 2.0, "height": 1.2}, "n1": {"x": 0.0, "y": -5.91013994490162, "label": "x = x + 1", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n2": {"x": 0.0, "y": 4.0, "label": "y = x * 2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.0}, "n3": {"x": 0.0, "y": 13.910139944901617, "label": "return y", "shape": "box", "color": "#90ee90", "width": 2.5, "height": 1.0}, "n4": {"x": 0.0, "y": 23.206369207364972, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 2.0, "height": 1.2}}}];
+        let currentFrame = 0;
+        let isPlaying = false;
+        let fps = 2.0;
+        let speed = 1;
+        let lastFrameTime = 0;
+        let network = null;
+        let animationId = null;
+
+        // Initialize network
+        function initNetwork() {
+            const container = document.getElementById('network');
+            const data = {
+                nodes: new vis.DataSet([]),
+                edges: new vis.DataSet([])
+            };
+            
+            const options = {
+                physics: {
+                    enabled: false
+                },
+                interaction: {
+                    zoomView: true,
+                    dragView: true
+                },
+                layout: {
+                    hierarchical: {
+                        enabled: false
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+        }
+
+        // Update network with current frame
+        function updateNetwork() {
+            if (currentFrame >= frames.length) return;
+            
+            const frame = frames[currentFrame];
+            const nodes = [];
+            const edges = [];
+            
+            // Create nodes
+            Object.entries(frame.nodes).forEach(([id, nodeData]) => {
+                nodes.push({
+                    id: id,
+                    label: nodeData.label,
+                    x: nodeData.x * 50,  // Scale for visibility
+                    y: nodeData.y * 50,
+                    shape: nodeData.shape,
+                    color: {
+                        background: nodeData.color,
+                        border: '#333'
+                    },
+                    font: {
+                        size: 12,
+                        color: '#333'
+                    }
+                });
+            });
+            
+            // Create edges (assuming a simple structure)
+            const edgeConnections = [
+                ['n0', 'n1'], ['n1', 'n2'], ['n1', 'n3'],
+                ['n2', 'n4'], ['n3', 'n4'], ['n4', 'n5'], ['n5', 'n6']
+            ];
+            
+            edgeConnections.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    edges.push({
+                        from: from,
+                        to: to,
+                        color: '#666',
+                        width: 2
+                    });
+                }
+            });
+            
+            network.setData({ nodes: nodes, edges: edges });
+            updateInfo();
+        }
+
+        // Update info display
+        function updateInfo() {
+            if (currentFrame >= frames.length) return;
+            
+            const frame = frames[currentFrame];
+            document.getElementById('frameInfo').textContent = `${currentFrame} / ${frames.length - 1}`;
+            document.getElementById('iteration').textContent = frame.iteration;
+            document.getElementById('stepSize').textContent = frame.step.toFixed(4);
+            document.getElementById('nodeCount').textContent = Object.keys(frame.nodes).length;
+            document.getElementById('playingStatus').textContent = isPlaying ? 'Yes' : 'No';
+            
+            // Update progress bar
+            const progress = (currentFrame / (frames.length - 1)) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Control functions
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            document.getElementById('playBtn').textContent = isPlaying ? 'Pause' : 'Play';
+            
+            if (isPlaying) {
+                lastFrameTime = performance.now();
+                animate();
+            } else {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            }
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+            
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastFrameTime;
+            const frameInterval = 1000 / fps;
+            
+            if (deltaTime >= frameInterval) {
+                stepForward();
+                lastFrameTime = currentTime;
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function stepForward() {
+            if (currentFrame < frames.length - 1) {
+                currentFrame += speed;
+                currentFrame = Math.min(currentFrame, frames.length - 1);
+                updateNetwork();
+            }
+        }
+
+        function stepBackward() {
+            if (currentFrame > 0) {
+                currentFrame -= speed;
+                currentFrame = Math.max(currentFrame, 0);
+                updateNetwork();
+            }
+        }
+
+        function reset() {
+            currentFrame = 0;
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            updateNetwork();
+        }
+
+        function updateFPS(value) {
+            fps = parseFloat(value);
+            document.getElementById('fpsValue').textContent = fps.toFixed(1);
+        }
+
+        function updateSpeed(value) {
+            speed = parseInt(value);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initNetwork();
+            updateNetwork();
+        };
+    </script>
+</body>
+</html>
+        

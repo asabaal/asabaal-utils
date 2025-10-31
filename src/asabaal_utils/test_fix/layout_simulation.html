@@ -1,0 +1,1113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Relaxation Simulation</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .control-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            margin: 0 10px;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 4px;
+        }
+        
+        .visualization {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+            display: flex;
+        }
+        
+        .physics-panel {
+            flex: 0 0 300px;
+            position: relative;
+            border-right: 1px solid #ddd;
+            background: #f8f9fa;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            height: 100%;
+            max-height: 100%;
+        }
+        
+        .graph-panel {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid #ddd;
+        }
+        
+        .force-panel {
+            flex: 1;
+            position: relative;
+        }
+        
+        .physics-section {
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px;
+        }
+        
+        .physics-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .physics-value {
+            margin: 3px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .physics-label {
+            color: #6c757d;
+        }
+        
+        .physics-number {
+            color: #212529;
+            font-weight: bold;
+        }
+        
+        .physics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        
+        .physics-table th,
+        .physics-table td {
+            border: 1px solid #dee2e6;
+            padding: 2px 4px;
+            text-align: left;
+            font-size: 10px;
+        }
+        
+        .physics-table th {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        #forceCanvas {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 1000;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+        
+        .error {
+            color: red;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="error" id="errorMsg"></div>
+            
+            <div class="control-group">
+                <button id="playBtn" onclick="togglePlay()">Play</button>
+                <button id="stepBtn" onclick="stepForward()">Step Forward</button>
+                <button id="stepBackBtn" onclick="stepBackward()">Step Back</button>
+                <button id="resetBtn" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Frame:</label>
+                <span id="frameInfo">0 / 0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>FPS:</label>
+                <input type="range" id="fpsSlider" min="0.5" max="10" step="0.5" value="2" onchange="updateFPS(this.value)">
+                <span id="fpsValue">2.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Speed:</label>
+                <input type="number" id="speedInput" min="1" max="50" value="1" onchange="updateSpeed(this.value)">
+                <span>frames/step</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div class="physics-panel">
+                <div class="physics-section">
+                    <div class="physics-title">Simulation Parameters</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Iteration:</span>
+                        <span class="physics-number" id="physicsIteration">0</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Step Size:</span>
+                        <span class="physics-number" id="physicsStepSize">0.0100</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Spring K:</span>
+                        <span class="physics-number">0.100</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Repulsion K:</span>
+                        <span class="physics-number">5000.0</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Spring Length:</span>
+                        <span class="physics-number">150.0</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Damping:</span>
+                        <span class="physics-number">0.850</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">System Energy</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Total Energy:</span>
+                        <span class="physics-number" id="physicsTotalEnergy">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Spring Energy:</span>
+                        <span class="physics-number" id="physicsSpringEnergy">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Repulsion Energy:</span>
+                        <span class="physics-number" id="physicsRepulsionEnergy">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Kinetic Energy:</span>
+                        <span class="physics-number" id="physicsKineticEnergy">0.00</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Force Statistics</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Avg Force:</span>
+                        <span class="physics-number" id="physicsAvgForce">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Max Force:</span>
+                        <span class="physics-number" id="physicsMaxForce">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Min Force:</span>
+                        <span class="physics-number" id="physicsMinForce">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Force StdDev:</span>
+                        <span class="physics-number" id="physicsForceStdDev">0.00</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Distance Statistics</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Avg Distance:</span>
+                        <span class="physics-number" id="physicsAvgDistance">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Max Distance:</span>
+                        <span class="physics-number" id="physicsMaxDistance">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Min Distance:</span>
+                        <span class="physics-number" id="physicsMinDistance">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Distance StdDev:</span>
+                        <span class="physics-number" id="physicsDistanceStdDev">0.00</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Node Details</div>
+                    <div id="nodeDetailsContainer">
+                        <table class="physics-table">
+                            <thead>
+                                <tr>
+                                    <th>Node</th>
+                                    <th>Force</th>
+                                    <th>Velocity</th>
+                                    <th>Position</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nodeDetailsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Edge Details</div>
+                    <div id="edgeDetailsContainer">
+                        <table class="physics-table">
+                            <thead>
+                                <tr>
+                                    <th>Edge</th>
+                                    <th>Distance</th>
+                                    <th>Spring Force</th>
+                                    <th>Energy</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edgeDetailsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="graph-panel">
+                <div id="network"></div>
+                <div class="info">
+                    <div><strong>Iteration:</strong> <span id="iteration">0</span></div>
+                    <div><strong>Step Size:</strong> <span id="stepSize">0.01</span></div>
+                    <div><strong>Nodes:</strong> <span id="nodeCount">0</span></div>
+                    <div><strong>Playing:</strong> <span id="playingStatus">No</span></div>
+                </div>
+            </div>
+            <div class="force-panel">
+                <canvas id="forceCanvas"></canvas>
+                <div class="info" style="left: 10px; right: auto;">
+                    <div><strong>Total Energy:</strong> <span id="totalEnergy">0.00</span></div>
+                    <div><strong>Avg Force:</strong> <span id="avgForce">0.00</span></div>
+                    <div><strong>Avg Distance:</strong> <span id="avgDistance">0.00</span></div>
+                    <div><strong>Max Force:</strong> <span id="maxForce">0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         // Simulation data
+         const frames = [{"iteration": 0, "step": 0.01, "nodes": {"n0": {"x": 0.0, "y": 0.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 2.0, "y": 2.0, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.0, "y": 4.0, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": 2.0, "y": 4.0, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": 4.0, "y": 6.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 0.0, "y": 6.0, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": -2.0, "y": 8.0, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.0, "y": 8.0, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 0.0, "y": 10.0, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 0.0, "y": 12.0, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 0.0, "y": 14.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 5, "step": 0.009081632653061224, "nodes": {"n0": {"x": -1067679116798618.6, "y": -147644262570695.25, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -8.94981078048682e+17, "y": -1.2326248797411573e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.577232335913446e+17, "y": -1.707277159339262e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -1.0890000338583415e+18, "y": 4.9865254584468134e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -4103468773416046.0, "y": 2693981857713680.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -4.492358100453826e+17, "y": 4.497920874739556e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 9.245666443891132e+17, "y": -8.840591805316431e+17, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -2.1109849913159626e+17, "y": 6.014693577157998e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.343351086788634e+18, "y": -3.275796476900569e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 6.38531508452442e+17, "y": -4.677584649720702e+16, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 760562935372528.5, "y": -55450002630709.586, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 10, "step": 0.00816326530612245, "nodes": {"n0": {"x": -1.869483067340259e+16, "y": -2560280158176272.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.0877869317527567e+18, "y": -2.783344823531065e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -5.905595454393311e+17, "y": -4.048332459745276e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.515227430779045e+18, "y": 1.1462565666991875e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -4.8241090221884824e+16, "y": 2.3666369634684936e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.0432911553501427e+18, "y": 1.0414933631449498e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.1639281866911951e+18, "y": -2.0517836066498112e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -4.74709207168637e+17, "y": 1.4000962993193994e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 3.0932478062481234e+18, "y": -7.584137176193019e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 1.5079673320074035e+18, "y": -1.1460158742479778e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.336686643847926e+16, "y": -985678618500338.1, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 15, "step": 0.007244897959183674, "nodes": {"n0": {"x": -6.728394256805883e+16, "y": -9059016688638604.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.957614129619921e+18, "y": -3.71856137478886e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -8.112927409233711e+17, "y": -5.89739704026834e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.5037216463280517e+18, "y": 1.5838086398464794e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.6548200023322893e+17, "y": 7.767295441456862e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.463898481025073e+18, "y": 1.454903792043605e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.0842489610798234e+18, "y": -2.881216081527882e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.281572576739379e+17, "y": 1.975493978374039e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.2827158960763776e+18, "y": -1.0603618710283283e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.1820644778247634e+18, "y": -1.7600593436132864e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 4.842086339067939e+16, "y": -3640619566793713.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 20, "step": 0.0063265306122448975, "nodes": {"n0": {"x": -1.482636662741982e+17, "y": -1.9509576666647336e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -3.5631571858204293e+18, "y": -4.1279398087926426e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.379575908446074e+17, "y": -7.365407282966627e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.1298621486986706e+18, "y": 1.8460563141435604e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.5618503845052474e+17, "y": 1.6454474692733434e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.739034544043713e+18, "y": 1.7194456333189507e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.745917152116478e+18, "y": -3.4305659465100037e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.858436407639233e+17, "y": 2.3672969261280046e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.003764974723388e+18, "y": -1.2554608412672968e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.7030011826147144e+18, "y": -2.3417535037316208e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.0762050544148877e+17, "y": -8297196524813177.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 25, "step": 0.005408163265306122, "nodes": {"n0": {"x": -2.5560304655949005e+17, "y": -3.272714144364149e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -3.9600328337023345e+18, "y": -4.140685000671772e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.926407759418271e+17, "y": -8.526407009979772e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.4770830749111946e+18, "y": 1.973873861284002e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -6.023530366742803e+17, "y": 2.7568389473932605e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.897590288222401e+18, "y": 1.8668873448314988e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.2024790353324754e+18, "y": -3.759775167128563e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.698879503376128e+17, "y": 2.614554731998072e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.363166540147425e+18, "y": -1.3673497331976868e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.1021262720445804e+18, "y": -2.895726220138273e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.8741915882466342e+17, "y": -1.4865968004025514e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 30, "step": 0.004489795918367347, "nodes": {"n0": {"x": -3.79930278873027e+17, "y": -4.719878055781756e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.1985354769028844e+18, "y": -3.891056344553846e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.972197869985354e+17, "y": -9.433083459523855e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.62496120209244e+18, "y": 2.0071691835222292e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -8.791248541696936e+17, "y": 3.9949462260722496e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.9673571173178117e+18, "y": 1.9278085281241382e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.500685752119391e+18, "y": -3.925156040793623e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.040227851616575e+17, "y": 2.7531674982591073e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.46517411504476e+18, "y": -1.4184798064704003e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.4036398914069883e+18, "y": -3.413777974884355e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 2.816517429449156e+17, "y": -2.3013426794654324e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 35, "step": 0.0035714285714285713, "nodes": {"n0": {"x": -5.1122113363968595e+17, "y": -6.154257264087664e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.322514601748218e+18, "y": -3.497020987315048e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.707744558455887e+17, "y": -1.0127483704129462e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.642144767928244e+18, "y": 1.9806013672339845e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.1621647502000425e+18, "y": 5.248648447044837e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.9738247729805865e+18, "y": 1.9294811484068977e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.680884519132787e+18, "y": -3.9763072470493235e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -5.097910494811201e+17, "y": 2.8145064324028846e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.40107646697332e+18, "y": -1.4284718255364275e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.6272251032879247e+18, "y": -3.8844001346516064e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 3.8324944242946214e+17, "y": -3.22416649120113e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 40, "step": 0.0026530612244897956, "nodes": {"n0": {"x": -6.403708247500364e+17, "y": -7.473502306157122e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.369009143476245e+18, "y": -3.050300876043636e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.284268538009385e+17, "y": -1.0647198835667196e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.583385484136327e+18, "y": 1.9216946319092216e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.4315973664487954e+18, "y": 6.429810565738756e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.9394720152488494e+18, "y": 1.8948453723073057e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.77748084680061e+18, "y": -3.954772685584562e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -4.0467164831850496e+17, "y": 2.8249074646577444e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.24448080376083e+18, "y": -1.413405699499474e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.7896713168328197e+18, "y": -4.298132963034091e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 4.8530036878544474e+17, "y": -4.195184982804655e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 45, "step": 0.0017346938775510204, "nodes": {"n0": {"x": -7.59947410642653e+17, "y": -8.61690070400843e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.368409092454955e+18, "y": -2.6146821784737267e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -8.81208469158553e+17, "y": -1.1028092698432625e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.489506624499972e+18, "y": 1.850675753834018e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.6734108748177859e+18, "y": 7.479211198246161e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.883416142036873e+18, "y": 1.8422766670920678e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.819404481571981e+18, "y": -3.8939304309591194e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -3.015972389639822e+17, "y": 2.805760853575323e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.050725067502496e+18, "y": -1.3857748276800568e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.9057233169307955e+18, "y": -4.649830370334168e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 5.81642986569508e+17, "y": -5.149960392271136e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 50, "step": 0.0008163265306122447, "nodes": {"n0": {"x": -8.643850144024513e+17, "y": -9.560831643848115e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.344989267218106e+18, "y": -2.2293235592880307e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -8.36545675942028e+17, "y": -1.1304832065447732e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.3891277434135987e+18, "y": 1.781349772340006e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.8792435705846886e+18, "y": 8.364770412224152e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.8213665521860536e+18, "y": 1.78588105441712e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.830598336337741e+18, "y": -3.8196705683933235e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -2.093344098898537e+17, "y": 2.7739703130467436e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.858828216085435e+18, "y": -1.3548513446325847e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.988436470193659e+18, "y": -4.938904598292352e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 6.671292110199515e+17, "y": -6.024192925908199e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 0, "step": 0.01, "nodes": {"n0": {"x": 0.0, "y": 0.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 2.0, "y": 2.0, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.0, "y": 4.0, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": 2.0, "y": 4.0, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": 4.0, "y": 6.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 0.0, "y": 6.0, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": -2.0, "y": 8.0, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.0, "y": 8.0, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 0.0, "y": 10.0, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 0.0, "y": 12.0, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 0.0, "y": 14.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 5, "step": 0.008448275862068966, "nodes": {"n0": {"x": 4.814997359234684e+17, "y": 3.809709240566629e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 8.428676142228408e+17, "y": -6.612076981990628e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 4.347063878707919e+17, "y": -4.342035469495828e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -6.808127743441874e+17, "y": -6.083950579252073e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1160928721607773.0, "y": -1362759463469239.8, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -6.143479879860012e+17, "y": 107519482771604.19, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 1.3151084758919834e+17, "y": -3.7981464849050906e+17, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -4.3478161700933146e+17, "y": 4.342111964468852e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": -2.292423183278681e+17, "y": 6.592552606273322e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 6.968281342449042e+16, "y": 6.097570019875026e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 78227358206039.77, "y": 681808426676781.2, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 10, "step": 0.006896551724137931, "nodes": {"n0": {"x": 1.1420812483183355e+18, "y": 8.822119678040269e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 1.9521398270418929e+18, "y": -1.539003867923951e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 1.0214959236942342e+18, "y": -1.0104266728200548e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -1.5593490589252884e+18, "y": -1.407268121558109e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -2.4701768611751184e+16, "y": -2.2753295627140828e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.435552099579582e+18, "y": -8887990917502515.0, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.927140324954678e+17, "y": -8.737256198128668e+17, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -1.0254355166449556e+18, "y": 1.0212404970649019e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": -5.2321070239993594e+17, "y": 1.5172854783807944e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 1.585157247918853e+17, "y": 1.429872809583966e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1302389819697467.5, "y": 1.1454815825936362e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 15, "step": 0.005344827586206896, "nodes": {"n0": {"x": 1.6643416404019845e+18, "y": 1.2366802553744307e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 2.738194927152904e+18, "y": -2.1757220643292116e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 1.4670394080896863e+18, "y": -1.4287576673635139e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.1469700262537103e+18, "y": -1.9699140022640148e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -8.507566561114046e+16, "y": -7.73900310347817e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.0431726914597906e+18, "y": -3.2752893750124508e+16, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.8242111392966886e+17, "y": -1.211088760614865e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -1.481144019075816e+18, "y": 1.4680215979436657e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": -7.157611770900945e+17, "y": 2.105515315741372e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.157173959341855e+17, "y": 2.0460550826283976e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 4409093982122795.0, "y": 3.935316766864672e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 20, "step": 0.0037931034482758617, "nodes": {"n0": {"x": 2.0798176028692547e+18, "y": 1.4747944907935027e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 3.2698488166972396e+18, "y": -2.6221325400063565e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 1.8021159976952276e+18, "y": -1.7229202121632525e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.505173086077195e+18, "y": -2.3468605335863383e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.754400775119076e+17, "y": -1.5974889596071814e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.4827611459849897e+18, "y": -6.82982633117353e+16, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.145064542088583e+17, "y": -1.4245207771424737e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -1.8315848048982664e+18, "y": 1.804550538707499e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": -8.282576990590976e+17, "y": 2.480739364384456e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.4787836165008486e+17, "y": 2.5021862958623165e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 9049580410790952.0, "y": 8.22105324231007e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 25, "step": 0.002241379310344828, "nodes": {"n0": {"x": 2.4100502028109486e+18, "y": 1.6290040622158546e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 3.6193512726518093e+18, "y": -2.928913519546041e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 2.0528807980525233e+18, "y": -1.9262997749074148e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.7055720062249114e+18, "y": -2.5917225687182193e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -2.7958621246442848e+17, "y": -2.5558358059290173e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.7970670764466227e+18, "y": -1.087583871298992e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.089605201039659e+17, "y": -1.5510648978003433e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -2.1001887105758057e+18, "y": 2.0562092883411139e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": -8.863338750431369e+17, "y": 2.706763060828241e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.6311062899357232e+17, "y": 2.8372526843407626e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.439445814208597e+16, "y": 1.33113632968847e+17, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 30, "step": 0.0006896551724137924, "nodes": {"n0": {"x": 2.670503124248882e+18, "y": 1.7299421976349914e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 3.852962509060933e+18, "y": -3.1425175892769807e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 2.2414127402112686e+18, "y": -2.0690070654171497e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.8156936601946076e+18, "y": -2.7535745608825743e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.798814021293822e+17, "y": -3.486660210192201e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -3.024187419695526e+18, "y": -1.472488592158351e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.8646831264012704e+17, "y": -1.6259253248245092e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -2.305995155768799e+18, "y": 2.2449042270763313e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": -9.143599019034787e+17, "y": 2.8435534625073244e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.692303500837341e+17, "y": 3.0851346672542776e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.954050344684822e+16, "y": 1.8340486616334374e+17, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 0, "step": 0.01, "nodes": {"n0": {"x": 0.0, "y": 0.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 2.0, "y": 2.0, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.0, "y": 4.0, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": 2.0, "y": 4.0, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": 4.0, "y": 6.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 0.0, "y": 6.0, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": -2.0, "y": 8.0, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.0, "y": 8.0, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 0.0, "y": 10.0, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 0.0, "y": 12.0, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 0.0, "y": 14.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 5, "step": 0.0076315789473684215, "nodes": {"n0": {"x": -204619026193.01767, "y": -139652482370146.05, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1062700559592024.8, "y": -3.754257852675461e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -1215256929732607.8, "y": 3.74502916882896e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -1.035127149842163e+18, "y": -8.333327048961128e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.0383095747595113e+18, "y": -4.600631210814735e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 1.0363818685652639e+18, "y": 4.5764305714974163e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.3051177095594116e+16, "y": -5.796593725057011e+17, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 1.0362117716049971e+18, "y": 4.588611276968282e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.947208330450785e+16, "y": -2.030639755342818e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": -1.9681987932623944e+16, "y": 5.798155094711475e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -1.9720025927714016e+16, "y": 5.808620005668726e+17, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 10, "step": 0.005263157894736843, "nodes": {"n0": {"x": -32341004665066.18, "y": -5806896426877713.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.654032306347028e+16, "y": -1.1513319176505358e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2131461938304314.2, "y": 1.1405426786074988e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.400527169465593e+18, "y": -2.2071268989094723e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -2.4499777059729884e+18, "y": -1.096524938958535e+18, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 2.403159663159593e+18, "y": 1.0479569456535756e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 6.730509761969591e+16, "y": -1.3482851669241257e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.431694233581014e+18, "y": 1.0741585945996202e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.94826501568359e+16, "y": -1.8234311303902048e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": -4.589669904840013e+16, "y": 1.3580167008006328e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -4.653594402371757e+16, "y": 1.3707440122472407e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 15, "step": 0.0028947368421052633, "nodes": {"n0": {"x": -226095557000984.12, "y": -2.1295573933538376e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -5.147813363507829e+16, "y": -1.7286994810472404e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2379409755865036.5, "y": 1.6981560200579057e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.387858500003322e+18, "y": -3.206641567117844e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.541287891368877e+18, "y": -1.6104966495932634e+18, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 3.391310201365849e+18, "y": 1.4499017442204078e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 1.2427863967025306e+17, "y": -1.9083223642753756e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 3.4880189735386476e+18, "y": 1.5376359809702546e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.1205193743937542e+17, "y": -1.3722013676310261e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": -6.515075375180285e+16, "y": 1.9451712098988728e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -6.7278967942177544e+16, "y": 1.9818108175829248e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 20, "step": 0.0005263157894736847, "nodes": {"n0": {"x": -611986869267566.2, "y": -4.1585692408565336e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -9.438519218778134e+16, "y": -2.1577217442335882e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2251012228650677.8, "y": 2.1039688878026332e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.103757013927166e+18, "y": -3.934479152943933e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -4.384310086198644e+18, "y": -2.0237855986924964e+18, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 4.107211641130076e+18, "y": 1.7221382424084396e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 1.842998272444295e+17, "y": -2.3166317855962783e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 4.288441752507322e+18, "y": 1.88762134034607e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.6788899815432534e+17, "y": -8.34354605287576e+16, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": -7.92071804496975e+16, "y": 2.389437677778759e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -8.3319747174944e+16, "y": 2.4544732860677187e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}];
+         let currentFrame = 0;
+         let isPlaying = false;
+         let fps = 2.0;
+         let speed = 1;
+         let lastFrameTime = 0;
+         let network = null;
+         let animationId = null;
+         let forceCanvas = null;
+         let forceCtx = null;
+
+        // Error handling
+        function showError(message) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            console.error(message);
+        }
+
+        function hideError() {
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // Initialize network
+        function initNetwork() {
+            try {
+                const container = document.getElementById('network');
+                const data = {
+                    nodes: new vis.DataSet([]),
+                    edges: new vis.DataSet([])
+                };
+                
+                const options = {
+                    physics: { enabled: false },
+                    interaction: {
+                        zoomView: true,
+                        dragView: true
+                    },
+                    layout: {
+                        hierarchical: { enabled: false }
+                    },
+                    nodes: {
+                        shape: 'box'
+                    },
+                    edges: {
+                        smooth: { enabled: false }
+                    }
+                };
+                
+                network = new vis.Network(container, data, options);
+                console.log('Network initialized successfully');
+            } catch (error) {
+                showError('Failed to initialize network: ' + error.message);
+            }
+        }
+
+        // Function to detect structure type
+        function detectStructureType(nodeIds) {
+            const name = nodeIds.length > 0 ? nodeIds[0].toLowerCase() : '';
+            if (name.includes('binary')) return 'binary';
+            if (name.includes('loop')) return 'loop';
+            if (name.includes('nested')) return 'nested';
+            if (name.includes('multi')) return 'multi';
+            return 'linear';
+        }
+
+        // Function to create all edges for a structure
+        function createAllEdges(nodeIds, type) {
+            const edges = [];
+            const sortedIds = [...nodeIds].sort();
+            
+            // Linear connections (always present)
+            for (let i = 0; i < sortedIds.length - 1; i++) {
+                edges.push([sortedIds[i], sortedIds[i + 1]]);
+            }
+            
+            // Structure-specific edges
+            if (type === 'binary') {
+                for (let i = 1; i < sortedIds.length; i++) {
+                    const parentIndex = Math.floor((i - 1) / 2);
+                    if (parentIndex < sortedIds.length && parentIndex !== i) {
+                        edges.push([sortedIds[parentIndex], sortedIds[i]]);
+                    }
+                }
+            } else if (type === 'loop') {
+                if (sortedIds.length > 3) {
+                    edges.push([sortedIds[sortedIds.length - 2], sortedIds[2]]);
+                }
+            }
+            
+            return edges;
+        }
+
+        // Calculate forces for current frame
+        function calculateForces(frame) {
+            const nodes = Object.entries(frame.nodes);
+            const forces = {};
+            const springStrength = 0.1;
+            const springLength = 150;
+            const repulsionStrength = 5000;
+            
+            // Initialize forces
+            nodes.forEach(([id, node]) => {
+                forces[id] = { x: 0, y: 0 };
+            });
+            
+            // Create edges
+            const nodeIds = nodes.map(([id]) => id);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            
+            // Spring forces
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 0) {
+                        const force = springStrength * (distance - springLength);
+                        const fx = (dx / distance) * force;
+                        const fy = (dy / distance) * force;
+                        
+                        forces[from].x += fx;
+                        forces[from].y += fy;
+                        forces[to].x -= fx;
+                        forces[to].y -= fy;
+                    }
+                }
+            });
+            
+            // Repulsion forces
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const [idA, nodeA] = nodes[i];
+                    const [idB, nodeB] = nodes[j];
+                    
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 0 && distance < 500) {
+                        const force = repulsionStrength / (distance * distance);
+                        const fx = (dx / distance) * force;
+                        const fy = (dy / distance) * force;
+                        
+                        forces[idA].x -= fx;
+                        forces[idA].y -= fy;
+                        forces[idB].x += fx;
+                        forces[idB].y += fy;
+                    }
+                }
+            }
+            
+            return forces;
+        }
+
+        // Update network with current frame
+        function updateNetwork() {
+            try {
+                if (currentFrame >= frames.length || currentFrame < 0) {
+                    console.warn('Invalid frame index:', currentFrame);
+                    return;
+                }
+                
+                const frame = frames[currentFrame];
+                if (!frame || !frame.nodes) {
+                    showError('Invalid frame data at index ' + currentFrame);
+                    return;
+                }
+                
+                const nodes = [];
+                const edges = [];
+                const nodeIds = Object.keys(frame.nodes);
+                
+                // Create nodes
+                Object.entries(frame.nodes).forEach(([id, nodeData]) => {
+                    nodes.push({
+                        id: id,
+                        label: nodeData.label || id,
+                        x: (nodeData.x || 0) * 50,
+                        y: (nodeData.y || 0) * 50,
+                        shape: nodeData.shape || 'box',
+                        color: {
+                            background: nodeData.color || '#97c2fc',
+                            border: '#333'
+                        },
+                        font: {
+                            size: 12,
+                            color: '#333'
+                        }
+                    });
+                });
+                
+                // Create edges
+                const structureType = detectStructureType(nodeIds);
+                const allEdges = createAllEdges(nodeIds, structureType);
+                
+                allEdges.forEach(([from, to]) => {
+                    edges.push({
+                        from: from,
+                        to: to,
+                        color: '#666',
+                        width: 2,
+                        arrows: 'to',
+                        smooth: { enabled: false }
+                    });
+                });
+                
+                network.setData({ nodes: nodes, edges: edges });
+                updateInfo();
+                updateForceField();
+                updatePhysicsPanel(calculateForces(frame), frame);
+                hideError();
+                
+            } catch (error) {
+                showError('Error updating network: ' + error.message);
+                console.error('Update network error:', error);
+            }
+        }
+
+        // Update info display
+        function updateInfo() {
+            try {
+                if (currentFrame >= frames.length || currentFrame < 0) return;
+                
+                const frame = frames[currentFrame];
+                document.getElementById('frameInfo').textContent = `${currentFrame} / ${frames.length - 1}`;
+                document.getElementById('iteration').textContent = frame.iteration || 0;
+                document.getElementById('stepSize').textContent = (frame.step || 0).toFixed(4);
+                document.getElementById('nodeCount').textContent = Object.keys(frame.nodes || {}).length;
+                document.getElementById('playingStatus').textContent = isPlaying ? 'Yes' : 'No';
+                
+                const progress = frames.length > 1 ? (currentFrame / (frames.length - 1)) * 100 : 0;
+                document.getElementById('progressBar').style.width = progress + '%';
+            } catch (error) {
+                console.error('Error updating info:', error);
+            }
+        }
+
+        // Control functions
+        function togglePlay() {
+            try {
+                isPlaying = !isPlaying;
+                document.getElementById('playBtn').textContent = isPlaying ? 'Pause' : 'Play';
+                
+                if (isPlaying) {
+                    lastFrameTime = performance.now();
+                    animate();
+                } else {
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
+                    }
+                }
+            } catch (error) {
+                showError('Error toggling play: ' + error.message);
+            }
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+            
+            try {
+                const currentTime = performance.now();
+                const deltaTime = currentTime - lastFrameTime;
+                const frameInterval = 1000 / fps;
+                
+                if (deltaTime >= frameInterval) {
+                    stepForward();
+                    lastFrameTime = currentTime;
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            } catch (error) {
+                showError('Animation error: ' + error.message);
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = 'Play';
+            }
+        }
+
+        function stepForward() {
+            try {
+                if (currentFrame < frames.length - 1) {
+                    currentFrame += speed;
+                    currentFrame = Math.min(currentFrame, frames.length - 1);
+                    updateNetwork();
+                }
+            } catch (error) {
+                showError('Error stepping forward: ' + error.message);
+            }
+        }
+
+        function stepBackward() {
+            try {
+                if (currentFrame > 0) {
+                    currentFrame -= speed;
+                    currentFrame = Math.max(currentFrame, 0);
+                    updateNetwork();
+                }
+            } catch (error) {
+                showError('Error stepping backward: ' + error.message);
+            }
+        }
+
+        function reset() {
+            try {
+                currentFrame = 0;
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = 'Play';
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                updateNetwork();
+            } catch (error) {
+                showError('Error resetting: ' + error.message);
+            }
+        }
+
+        function updateFPS(value) {
+            fps = parseFloat(value);
+            document.getElementById('fpsValue').textContent = fps.toFixed(1);
+        }
+
+        function updateSpeed(value) {
+            speed = parseInt(value);
+            speed = Math.max(1, Math.min(50, speed));
+        }
+
+        // Initialize force canvas
+        function initForceCanvas() {
+            forceCanvas = document.getElementById('forceCanvas');
+            forceCtx = forceCanvas.getContext('2d');
+            resizeForceCanvas();
+        }
+        
+        // Resize force canvas
+        function resizeForceCanvas() {
+            const rect = forceCanvas.parentElement.getBoundingClientRect();
+            forceCanvas.width = rect.width;
+            forceCanvas.height = rect.height;
+        }
+        
+        // Update force field visualization
+        function updateForceField() {
+            if (!forceCtx || currentFrame >= frames.length) return;
+            
+            const frame = frames[currentFrame];
+            const forces = calculateForces(frame);
+            
+            // Clear canvas
+            forceCtx.clearRect(0, 0, forceCanvas.width, forceCanvas.height);
+            
+            // Calculate actual node bounds for proper scaling
+            const nodes = Object.values(frame.nodes);
+            const padding = 40;
+            
+            // Find min/max coordinates of nodes
+            const minX = Math.min(...nodes.map(n => n.x * 50));
+            const maxX = Math.max(...nodes.map(n => n.x * 50));
+            const minY = Math.min(...nodes.map(n => n.y * 50));
+            const maxY = Math.max(...nodes.map(n => n.y * 50));
+            
+            const nodeWidth = maxX - minX || 100;
+            const nodeHeight = maxY - minY || 100;
+            
+            // Calculate scale to fit nodes in canvas with padding
+            const scaleX = (forceCanvas.width - 2 * padding) / nodeWidth;
+            const scaleY = (forceCanvas.height - 2 * padding) / nodeHeight;
+            const scale = Math.min(scaleX, scaleY, 2.0);
+            
+            // Center the visualization
+            const centerX = forceCanvas.width / 2;
+            const centerY = forceCanvas.height / 2;
+            const offsetX = (minX + maxX) * 25 * scale; // Average offset * 50 * scale / 2
+            const offsetY = (minY + maxY) * 25 * scale;
+            
+            // Transform coordinates
+            const transformX = (x) => centerX + x * 50 * scale - offsetX;
+            const transformY = (y) => centerY + y * 50 * scale - offsetY;
+            
+            // Draw force field heatmap
+            const gridSize = 25;
+            const cellWidth = forceCanvas.width / gridSize;
+            const cellHeight = forceCanvas.height / gridSize;
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const x = (i + 0.5) * cellWidth;
+                    const y = (j + 0.5) * cellHeight;
+                    
+                    let totalForce = 0;
+                    Object.entries(frame.nodes).forEach(([id, node]) => {
+                        const nodeX = transformX(node.x);
+                        const nodeY = transformY(node.y);
+                        const dx = x - nodeX;
+                        const dy = y - nodeY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance > 0 && distance < 200 * scale) {
+                            totalForce += 3000 / (distance * distance);
+                        }
+                    });
+                    
+                    const intensity = Math.min(totalForce / 8, 1);
+                    const hue = (1 - intensity) * 240; // Blue to red
+                    forceCtx.fillStyle = `hsla(${hue}, 100%, 50%, 0.25)`;
+                    forceCtx.fillRect(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+                }
+            }
+            
+            // Draw nodes and force vectors
+            Object.entries(frame.nodes).forEach(([id, node]) => {
+                const x = transformX(node.x);
+                const y = transformY(node.y);
+                
+                // Draw node
+                forceCtx.fillStyle = 'white';
+                forceCtx.strokeStyle = 'black';
+                forceCtx.lineWidth = 2;
+                forceCtx.beginPath();
+                forceCtx.arc(x, y, 8, 0, Math.PI * 2);
+                forceCtx.fill();
+                forceCtx.stroke();
+                
+                // Draw node label
+                forceCtx.fillStyle = 'black';
+                forceCtx.font = '10px Arial';
+                forceCtx.textAlign = 'center';
+                forceCtx.textBaseline = 'middle';
+                forceCtx.fillText(id, x, y);
+                
+                // Draw force vector
+                const force = forces[id];
+                const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                if (forceMag > 0.05) {
+                    const vectorScale = Math.min(forceMag * scale * 0.02, 60);
+                    const endX = x + (force.x / forceMag) * vectorScale;
+                    const endY = y + (force.y / forceMag) * vectorScale;
+                    
+                    forceCtx.strokeStyle = 'red';
+                    forceCtx.lineWidth = 2;
+                    forceCtx.beginPath();
+                    forceCtx.moveTo(x, y);
+                    forceCtx.lineTo(endX, endY);
+                    forceCtx.stroke();
+                    
+                    // Arrowhead
+                    const angle = Math.atan2(force.y, force.x);
+                    const arrowSize = 6;
+                    forceCtx.beginPath();
+                    forceCtx.moveTo(endX, endY);
+                    forceCtx.lineTo(endX - arrowSize * Math.cos(angle - 0.5), endY - arrowSize * Math.sin(angle - 0.5));
+                    forceCtx.lineTo(endX - arrowSize * Math.cos(angle + 0.5), endY - arrowSize * Math.sin(angle + 0.5));
+                    forceCtx.closePath();
+                    forceCtx.fillStyle = 'red';
+                    forceCtx.fill();
+                }
+            });
+            
+            updateForceMetrics(forces, frame);
+        }
+        
+        // Update force metrics
+        function updateForceMetrics(forces, frame) {
+            const forceValues = Object.values(forces);
+            const avgForce = forceValues.reduce((sum, f) => sum + Math.sqrt(f.x * f.x + f.y * f.y), 0) / forceValues.length;
+            const maxForce = Math.max(...forceValues.map(f => Math.sqrt(f.x * f.x + f.y * f.y)));
+            
+            let totalDistance = 0;
+            let edgeCount = 0;
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    totalDistance += Math.sqrt(dx * dx + dy * dy);
+                    edgeCount++;
+                }
+            });
+            const avgDistance = edgeCount > 0 ? totalDistance / edgeCount : 0;
+            
+            // Calculate total energy
+            let totalEnergy = 0;
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    totalEnergy += 0.5 * 0.1 * Math.pow(distance - 150, 2);
+                }
+            });
+            
+            document.getElementById('totalEnergy').textContent = totalEnergy.toFixed(2);
+            document.getElementById('avgForce').textContent = avgForce.toFixed(2);
+            document.getElementById('avgDistance').textContent = avgDistance.toFixed(2);
+            document.getElementById('maxForce').textContent = maxForce.toFixed(2);
+        }
+        
+        // Update physics panel with detailed information
+        function updatePhysicsPanel(forces, frame) {
+            // Update basic parameters
+            document.getElementById('physicsIteration').textContent = frame.iteration || 0;
+            document.getElementById('physicsStepSize').textContent = (frame.step || 0).toFixed(4);
+            
+            // Calculate detailed energy breakdown
+            const energyBreakdown = calculateEnergyBreakdown(forces, frame);
+            document.getElementById('physicsTotalEnergy').textContent = energyBreakdown.total.toFixed(2);
+            document.getElementById('physicsSpringEnergy').textContent = energyBreakdown.spring.toFixed(2);
+            document.getElementById('physicsRepulsionEnergy').textContent = energyBreakdown.repulsion.toFixed(2);
+            document.getElementById('physicsKineticEnergy').textContent = energyBreakdown.kinetic.toFixed(2);
+            
+            // Calculate force statistics
+            const forceStats = calculateForceStatistics(forces);
+            document.getElementById('physicsAvgForce').textContent = forceStats.avg.toFixed(2);
+            document.getElementById('physicsMaxForce').textContent = forceStats.max.toFixed(2);
+            document.getElementById('physicsMinForce').textContent = forceStats.min.toFixed(2);
+            document.getElementById('physicsForceStdDev').textContent = forceStats.stdDev.toFixed(2);
+            
+            // Calculate distance statistics
+            const distanceStats = calculateDistanceStatistics(frame);
+            document.getElementById('physicsAvgDistance').textContent = distanceStats.avg.toFixed(2);
+            document.getElementById('physicsMaxDistance').textContent = distanceStats.max.toFixed(2);
+            document.getElementById('physicsMinDistance').textContent = distanceStats.min.toFixed(2);
+            document.getElementById('physicsDistanceStdDev').textContent = distanceStats.stdDev.toFixed(2);
+            
+            // Update node details table
+            updateNodeDetailsTable(forces, frame);
+            
+            // Update edge details table
+            updateEdgeDetailsTable(frame);
+        }
+        
+        // Calculate detailed energy breakdown
+        function calculateEnergyBreakdown(forces, frame) {
+            let springEnergy = 0;
+            let repulsionEnergy = 0;
+            let kineticEnergy = 0;
+            
+            const springStrength = 0.1;
+            const springLength = 150;
+            const repulsionStrength = 5000;
+            
+            // Spring energy
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    springEnergy += 0.5 * springStrength * Math.pow(distance - springLength, 2);
+                }
+            });
+            
+            // Repulsion energy
+            const nodes = Object.entries(frame.nodes);
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const [idA, nodeA] = nodes[i];
+                    const [idB, nodeB] = nodes[j];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance > 0 && distance < 500) {
+                        repulsionEnergy += repulsionStrength / distance;
+                    }
+                }
+            }
+            
+            // Kinetic energy (simplified - based on forces)
+            Object.values(forces).forEach(force => {
+                const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                kineticEnergy += 0.5 * forceMag * forceMag;
+            });
+            
+            return {
+                total: springEnergy + repulsionEnergy + kineticEnergy,
+                spring: springEnergy,
+                repulsion: repulsionEnergy,
+                kinetic: kineticEnergy
+            };
+        }
+        
+        // Calculate force statistics
+        function calculateForceStatistics(forces) {
+            const forceMagnitudes = Object.values(forces).map(f => Math.sqrt(f.x * f.x + f.y * f.y));
+            const avg = forceMagnitudes.reduce((sum, f) => sum + f, 0) / forceMagnitudes.length;
+            const max = Math.max(...forceMagnitudes);
+            const min = Math.min(...forceMagnitudes);
+            
+            const variance = forceMagnitudes.reduce((sum, f) => sum + Math.pow(f - avg, 2), 0) / forceMagnitudes.length;
+            const stdDev = Math.sqrt(variance);
+            
+            return { avg, max, min, stdDev };
+        }
+        
+        // Calculate distance statistics
+        function calculateDistanceStatistics(frame) {
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            const distances = [];
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    distances.push(distance);
+                }
+            });
+            
+            if (distances.length === 0) return { avg: 0, max: 0, min: 0, stdDev: 0 };
+            
+            const avg = distances.reduce((sum, d) => sum + d, 0) / distances.length;
+            const max = Math.max(...distances);
+            const min = Math.min(...distances);
+            
+            const variance = distances.reduce((sum, d) => sum + Math.pow(d - avg, 2), 0) / distances.length;
+            const stdDev = Math.sqrt(variance);
+            
+            return { avg, max, min, stdDev };
+        }
+        
+        // Update node details table
+        function updateNodeDetailsTable(forces, frame) {
+            const tbody = document.getElementById('nodeDetailsTable');
+            tbody.innerHTML = '';
+            
+            Object.entries(frame.nodes).forEach(([id, node]) => {
+                const force = forces[id];
+                const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = id;
+                row.insertCell(1).textContent = forceMag.toFixed(2);
+                row.insertCell(2).textContent = "(" + force.x.toFixed(1) + ", " + force.y.toFixed(1) + ")";
+                row.insertCell(3).textContent = "(" + node.x.toFixed(1) + ", " + node.y.toFixed(1) + ")";
+            });
+        }
+        
+        // Update edge details table
+        function updateEdgeDetailsTable(frame) {
+            const tbody = document.getElementById('edgeDetailsTable');
+            tbody.innerHTML = '';
+            
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            const springStrength = 0.1;
+            const springLength = 150;
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const springForce = Math.abs(springStrength * (distance - springLength));
+                    const energy = 0.5 * springStrength * Math.pow(distance - springLength, 2);
+                    
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = from + "→" + to;
+                    row.insertCell(1).textContent = distance.toFixed(2);
+                    row.insertCell(2).textContent = springForce.toFixed(2);
+                    row.insertCell(3).textContent = energy.toFixed(2);
+                }
+            });
+        }
+        
+        // Handle window resize
+        window.onresize = function() {
+            if (network) {
+                network.redraw();
+                network.fit();
+            }
+            if (forceCanvas) {
+                resizeForceCanvas();
+                updateForceField();
+            }
+        };
+
+         // Initialize on load
+         window.onload = function() {
+             console.log('Page loaded, initializing...');
+             try {
+                 if (frames.length === 0) {
+                     showError('No simulation frames available');
+                     return;
+                 }
+                 
+                 initNetwork();
+                 initForceCanvas();
+                 updateNetwork();
+                 console.log('Initialization complete');
+             } catch (error) {
+                 showError('Initialization error: ' + error.message);
+                 console.error('Init error:', error);
+             }
+         };
+    </script>
+</body>
+</html>
+        

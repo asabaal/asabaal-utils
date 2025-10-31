@@ -1,0 +1,5894 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incremental Layout Demo: multi_10_lines</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stage-info {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .add-stage {
+            border-left: 4px solid #2196F3;
+        }
+        .correct-stage {
+            border-left: 4px solid #4CAF50;
+        }
+        #graph {
+            height: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .play-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .step-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .reset-btn {
+            background-color: #FF9800;
+            color: white;
+        }
+        .speed-control {
+            margin: 10px;
+        }
+        .stage-counter {
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            margin: 0 10px;
+        }
+        .legend {
+            background: white;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            margin: 5px 15px 5px 0;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+        }
+        .legend-shape {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border: 1px solid #666;
+            background: rgba(255,255,255,0.3);
+        }
+        .legend-item span {
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Incremental Layout Demo</h1>
+        <h2>multi_10_lines</h2>
+        <p><strong>Multi-way Branching</strong> - 10 lines - Simple multi-way</p>
+    </div>
+    
+    <div class="controls">
+        <button class="play-btn" onclick="playAnimation()">▶️ Play Animation</button>
+        <button class="step-btn" onclick="nextStage()">⏭️ Next Stage</button>
+        <button class="step-btn" onclick="previousStage()">⏮️ Previous Stage</button>
+        <button class="step-btn" onclick="goToFinal()">⏭️ Go to Final</button>
+        <button class="reset-btn" onclick="resetAnimation()">🔄 Reset</button>
+        <div class="stage-counter">
+            <span id="stageCounter">Stage 0 of 0</span>
+        </div>
+        <div class="speed-control">
+            <label>Animation Speed: </label>
+            <input type="range" id="speedSlider" min="100" max="2000" value="800" step="100">
+            <span id="speedValue">800ms</span>
+        </div>
+    </div>
+    
+    <div class="stage-info" id="stageInfo">
+        <h3>Stage 0: Ready to Start</h3>
+        <p>Click "Play Animation" to see the incremental layout process</p>
+    </div>
+    
+    <div id="graph"></div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <div class="legend-shape" style="border-radius: 50%;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <div class="legend-shape" style="border-radius: 50%;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <div class="legend-shape"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <div class="legend-shape" style="transform: rotate(45deg);"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <div class="legend-shape" style="transform: rotate(45deg);"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <div class="legend-shape"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <div class="legend-shape"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <div class="legend-shape"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <div class="legend-shape" style="border-radius: 50%;"></div>
+            <span>Merge Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e6f3ff;"></div>
+            <div class="legend-shape"></div>
+            <span>Block Start</span>
+        </div>
+    </div>
+    
+    <script>
+        const stages = [
+  {
+    "stage_number": 1,
+    "stage_type": "add",
+    "node_added": "n_31e5f3",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    },
+    "edges": [],
+    "total_nodes": 1,
+    "total_edges": 0
+  },
+  {
+    "stage_number": 2,
+    "stage_type": "correct",
+    "node_corrected": "n_31e5f3",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      }
+    },
+    "edges": [],
+    "total_nodes": 1,
+    "total_edges": 0,
+    "crossings_fixed": 0
+  },
+  {
+    "stage_number": 3,
+    "stage_type": "add",
+    "node_added": "n_2b6798",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ]
+    ],
+    "total_nodes": 2,
+    "total_edges": 1
+  },
+  {
+    "stage_number": 4,
+    "stage_type": "correct",
+    "node_corrected": "n_2b6798",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ]
+    ],
+    "total_nodes": 2,
+    "total_edges": 1,
+    "crossings_fixed": 0
+  },
+  {
+    "stage_number": 5,
+    "stage_type": "add",
+    "node_added": "n_3f4fa1",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ]
+    ],
+    "total_nodes": 3,
+    "total_edges": 2
+  },
+  {
+    "stage_number": 6,
+    "stage_type": "correct",
+    "node_corrected": "n_3f4fa1",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ]
+    ],
+    "total_nodes": 3,
+    "total_edges": 2,
+    "crossings_fixed": 1
+  },
+  {
+    "stage_number": 7,
+    "stage_type": "add",
+    "node_added": "n_c05014",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ]
+    ],
+    "total_nodes": 4,
+    "total_edges": 3
+  },
+  {
+    "stage_number": 8,
+    "stage_type": "correct",
+    "node_corrected": "n_c05014",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ]
+    ],
+    "total_nodes": 4,
+    "total_edges": 3,
+    "crossings_fixed": 1
+  },
+  {
+    "stage_number": 9,
+    "stage_type": "add",
+    "node_added": "n_d65480",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ]
+    ],
+    "total_nodes": 5,
+    "total_edges": 4
+  },
+  {
+    "stage_number": 10,
+    "stage_type": "correct",
+    "node_corrected": "n_d65480",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 0.0,
+        "y": 2.0
+      },
+      "n_c05014": {
+        "x": 1.7999999999999998,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ]
+    ],
+    "total_nodes": 5,
+    "total_edges": 4,
+    "crossings_fixed": 2
+  },
+  {
+    "stage_number": 11,
+    "stage_type": "add",
+    "node_added": "n_eb7ae7",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ]
+    ],
+    "total_nodes": 6,
+    "total_edges": 5
+  },
+  {
+    "stage_number": 12,
+    "stage_type": "correct",
+    "node_corrected": "n_eb7ae7",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 0.0,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 1.7999999999999998,
+        "y": 2.0
+      },
+      "n_c05014": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ]
+    ],
+    "total_nodes": 6,
+    "total_edges": 5,
+    "crossings_fixed": 2
+  },
+  {
+    "stage_number": 13,
+    "stage_type": "add",
+    "node_added": "n_1248a0",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ]
+    ],
+    "total_nodes": 7,
+    "total_edges": 6
+  },
+  {
+    "stage_number": 14,
+    "stage_type": "correct",
+    "node_corrected": "n_1248a0",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 0.0,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 1.7999999999999998,
+        "y": 2.0
+      },
+      "n_1248a0": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_c05014": {
+        "x": 4.6499999999999995,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ]
+    ],
+    "total_nodes": 7,
+    "total_edges": 6,
+    "crossings_fixed": 3
+  },
+  {
+    "stage_number": 15,
+    "stage_type": "add",
+    "node_added": "n_fb8bb3",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ]
+    ],
+    "total_nodes": 8,
+    "total_edges": 7
+  },
+  {
+    "stage_number": 16,
+    "stage_type": "correct",
+    "node_corrected": "n_fb8bb3",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 0.0,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 1.7999999999999998,
+        "y": 2.0
+      },
+      "n_1248a0": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_c05014": {
+        "x": 4.6499999999999995,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 5.699999999999999,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ]
+    ],
+    "total_nodes": 8,
+    "total_edges": 7,
+    "crossings_fixed": 3
+  },
+  {
+    "stage_number": 17,
+    "stage_type": "add",
+    "node_added": "n_530ce7",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ]
+    ],
+    "total_nodes": 9,
+    "total_edges": 8
+  },
+  {
+    "stage_number": 18,
+    "stage_type": "correct",
+    "node_corrected": "n_530ce7",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 3.7,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 5.0,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 6.05,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 7.1,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ]
+    ],
+    "total_nodes": 9,
+    "total_edges": 8,
+    "crossings_fixed": 4
+  },
+  {
+    "stage_number": 19,
+    "stage_type": "add",
+    "node_added": "n_08bf25",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ]
+    ],
+    "total_nodes": 10,
+    "total_edges": 9
+  },
+  {
+    "stage_number": 20,
+    "stage_type": "correct",
+    "node_corrected": "n_08bf25",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 3.7,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 5.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 6.3,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 7.35,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 8.399999999999999,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ]
+    ],
+    "total_nodes": 10,
+    "total_edges": 9,
+    "crossings_fixed": 4
+  },
+  {
+    "stage_number": 21,
+    "stage_type": "add",
+    "node_added": "n_a91da2",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ]
+    ],
+    "total_nodes": 11,
+    "total_edges": 10
+  },
+  {
+    "stage_number": 22,
+    "stage_type": "correct",
+    "node_corrected": "n_a91da2",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 3.7,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 5.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 6.3,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 7.6,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 8.65,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 9.700000000000001,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ]
+    ],
+    "total_nodes": 11,
+    "total_edges": 10,
+    "crossings_fixed": 5
+  },
+  {
+    "stage_number": 23,
+    "stage_type": "add",
+    "node_added": "n_548939",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ]
+    ],
+    "total_nodes": 12,
+    "total_edges": 11
+  },
+  {
+    "stage_number": 24,
+    "stage_type": "correct",
+    "node_corrected": "n_548939",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_eb7ae7": {
+        "x": 3.7,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 5.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 6.3,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 7.6,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 8.65,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 9.700000000000001,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 10.750000000000002,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ]
+    ],
+    "total_nodes": 12,
+    "total_edges": 11,
+    "crossings_fixed": 5
+  },
+  {
+    "stage_number": 25,
+    "stage_type": "add",
+    "node_added": "n_dc7ea8",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ]
+    ],
+    "total_nodes": 13,
+    "total_edges": 12
+  },
+  {
+    "stage_number": 26,
+    "stage_type": "correct",
+    "node_corrected": "n_dc7ea8",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 5.6,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 6.8999999999999995,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 8.2,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 9.5,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 10.55,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 11.600000000000001,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 12.650000000000002,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ]
+    ],
+    "total_nodes": 13,
+    "total_edges": 12,
+    "crossings_fixed": 6
+  },
+  {
+    "stage_number": 27,
+    "stage_type": "add",
+    "node_added": "n_0f5b7c",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ]
+    ],
+    "total_nodes": 14,
+    "total_edges": 13
+  },
+  {
+    "stage_number": 28,
+    "stage_type": "correct",
+    "node_corrected": "n_0f5b7c",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 5.6,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 6.8999999999999995,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 8.2,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 9.5,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 10.8,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 11.850000000000001,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 12.900000000000002,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 13.950000000000003,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ]
+    ],
+    "total_nodes": 14,
+    "total_edges": 13,
+    "crossings_fixed": 6
+  },
+  {
+    "stage_number": 29,
+    "stage_type": "add",
+    "node_added": "n_ecd36a",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ]
+    ],
+    "total_nodes": 15,
+    "total_edges": 14
+  },
+  {
+    "stage_number": 30,
+    "stage_type": "correct",
+    "node_corrected": "n_ecd36a",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 5.6,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 6.8999999999999995,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 8.2,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 9.5,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 10.8,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 12.100000000000001,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 13.150000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 14.200000000000003,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 15.250000000000004,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ]
+    ],
+    "total_nodes": 15,
+    "total_edges": 14,
+    "crossings_fixed": 7
+  },
+  {
+    "stage_number": 31,
+    "stage_type": "add",
+    "node_added": "n_5c0ec4",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ]
+    ],
+    "total_nodes": 16,
+    "total_edges": 15
+  },
+  {
+    "stage_number": 32,
+    "stage_type": "correct",
+    "node_corrected": "n_5c0ec4",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_3f4fa1": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 5.6,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 6.8999999999999995,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 8.2,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 9.5,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 10.8,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 12.100000000000001,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 13.150000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 14.200000000000003,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 15.250000000000004,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 16.300000000000004,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ]
+    ],
+    "total_nodes": 16,
+    "total_edges": 15,
+    "crossings_fixed": 7
+  },
+  {
+    "stage_number": 33,
+    "stage_type": "add",
+    "node_added": "n_320380",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ]
+    ],
+    "total_nodes": 17,
+    "total_edges": 16
+  },
+  {
+    "stage_number": 34,
+    "stage_type": "correct",
+    "node_corrected": "n_320380",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 15.050000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 16.1,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 17.150000000000002,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 18.200000000000003,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ]
+    ],
+    "total_nodes": 17,
+    "total_edges": 16,
+    "crossings_fixed": 8
+  },
+  {
+    "stage_number": 35,
+    "stage_type": "add",
+    "node_added": "n_7112af",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ]
+    ],
+    "total_nodes": 18,
+    "total_edges": 17
+  },
+  {
+    "stage_number": 36,
+    "stage_type": "correct",
+    "node_corrected": "n_7112af",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 15.050000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 16.1,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 17.150000000000002,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 18.200000000000003,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 19.250000000000004,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ]
+    ],
+    "total_nodes": 18,
+    "total_edges": 17,
+    "crossings_fixed": 8
+  },
+  {
+    "stage_number": 37,
+    "stage_type": "add",
+    "node_added": "n_31659c",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      },
+      "n_31659c": {
+        "x": 0.0,
+        "y": 9.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ]
+    ],
+    "total_nodes": 19,
+    "total_edges": 19
+  },
+  {
+    "stage_number": 38,
+    "stage_type": "correct",
+    "node_corrected": "n_31659c",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 15.050000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 16.1,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 17.150000000000002,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 18.200000000000003,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 19.250000000000004,
+        "y": 3.0
+      },
+      "n_31659c": {
+        "x": -3.5999999999999996,
+        "y": 4.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ]
+    ],
+    "total_nodes": 19,
+    "total_edges": 19,
+    "crossings_fixed": 9
+  },
+  {
+    "stage_number": 39,
+    "stage_type": "add",
+    "node_added": "n_2e8dd7",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      },
+      "n_31659c": {
+        "x": 0.0,
+        "y": 9.0
+      },
+      "n_2e8dd7": {
+        "x": 2.0,
+        "y": 9.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ]
+    ],
+    "total_nodes": 20,
+    "total_edges": 21
+  },
+  {
+    "stage_number": 40,
+    "stage_type": "correct",
+    "node_corrected": "n_2e8dd7",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 15.050000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 16.1,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 17.150000000000002,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 18.200000000000003,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 19.250000000000004,
+        "y": 3.0
+      },
+      "n_31659c": {
+        "x": -3.5999999999999996,
+        "y": 4.0
+      },
+      "n_2e8dd7": {
+        "x": -1.7999999999999998,
+        "y": 4.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ]
+    ],
+    "total_nodes": 20,
+    "total_edges": 21,
+    "crossings_fixed": 10
+  },
+  {
+    "stage_number": 41,
+    "stage_type": "add",
+    "node_added": "n_fc83bb",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      },
+      "n_31659c": {
+        "x": 0.0,
+        "y": 9.0
+      },
+      "n_2e8dd7": {
+        "x": 2.0,
+        "y": 9.0
+      },
+      "n_fc83bb": {
+        "x": 4.0,
+        "y": 9.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ]
+    ],
+    "total_nodes": 21,
+    "total_edges": 23
+  },
+  {
+    "stage_number": 42,
+    "stage_type": "correct",
+    "node_corrected": "n_fc83bb",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 15.050000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 16.1,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 17.150000000000002,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 18.200000000000003,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 19.250000000000004,
+        "y": 3.0
+      },
+      "n_31659c": {
+        "x": -3.5999999999999996,
+        "y": 4.0
+      },
+      "n_2e8dd7": {
+        "x": -1.7999999999999998,
+        "y": 4.0
+      },
+      "n_fc83bb": {
+        "x": 0.0,
+        "y": 4.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ]
+    ],
+    "total_nodes": 21,
+    "total_edges": 23,
+    "crossings_fixed": 11
+  },
+  {
+    "stage_number": 43,
+    "stage_type": "add",
+    "node_added": "n_9b12ce",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      },
+      "n_31659c": {
+        "x": 0.0,
+        "y": 9.0
+      },
+      "n_2e8dd7": {
+        "x": 2.0,
+        "y": 9.0
+      },
+      "n_fc83bb": {
+        "x": 4.0,
+        "y": 9.0
+      },
+      "n_9b12ce": {
+        "x": 0.0,
+        "y": 10.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ],
+      [
+        "n_c05014",
+        "n_9b12ce"
+      ],
+      [
+        "n_fc83bb",
+        "n_9b12ce"
+      ]
+    ],
+    "total_nodes": 22,
+    "total_edges": 25
+  },
+  {
+    "stage_number": 44,
+    "stage_type": "correct",
+    "node_corrected": "n_9b12ce",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 15.050000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 16.1,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 17.150000000000002,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 18.200000000000003,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 19.250000000000004,
+        "y": 3.0
+      },
+      "n_31659c": {
+        "x": -3.5999999999999996,
+        "y": 4.0
+      },
+      "n_2e8dd7": {
+        "x": -1.7999999999999998,
+        "y": 4.0
+      },
+      "n_fc83bb": {
+        "x": 0.0,
+        "y": 4.0
+      },
+      "n_9b12ce": {
+        "x": 1.7999999999999998,
+        "y": 4.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ],
+      [
+        "n_c05014",
+        "n_9b12ce"
+      ],
+      [
+        "n_fc83bb",
+        "n_9b12ce"
+      ]
+    ],
+    "total_nodes": 22,
+    "total_edges": 25,
+    "crossings_fixed": 12
+  },
+  {
+    "stage_number": 45,
+    "stage_type": "add",
+    "node_added": "n_a1412e",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      },
+      "n_31659c": {
+        "x": 0.0,
+        "y": 9.0
+      },
+      "n_2e8dd7": {
+        "x": 2.0,
+        "y": 9.0
+      },
+      "n_fc83bb": {
+        "x": 4.0,
+        "y": 9.0
+      },
+      "n_9b12ce": {
+        "x": 0.0,
+        "y": 10.5
+      },
+      "n_a1412e": {
+        "x": 2.0,
+        "y": 10.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ],
+      [
+        "n_c05014",
+        "n_9b12ce"
+      ],
+      [
+        "n_fc83bb",
+        "n_9b12ce"
+      ],
+      [
+        "n_9b12ce",
+        "n_a1412e"
+      ]
+    ],
+    "total_nodes": 23,
+    "total_edges": 26
+  },
+  {
+    "stage_number": 46,
+    "stage_type": "correct",
+    "node_corrected": "n_a1412e",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_d65480": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_2b6798": {
+        "x": 4.8999999999999995,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 6.199999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 7.499999999999999,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 8.799999999999999,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 10.1,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 11.4,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 12.700000000000001,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 14.000000000000002,
+        "y": 3.0
+      },
+      "n_a1412e": {
+        "x": 15.100000000000001,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 16.150000000000002,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 17.200000000000003,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 18.250000000000004,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 19.300000000000004,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 20.350000000000005,
+        "y": 3.0
+      },
+      "n_31659c": {
+        "x": -3.5999999999999996,
+        "y": 4.0
+      },
+      "n_2e8dd7": {
+        "x": -1.7999999999999998,
+        "y": 4.0
+      },
+      "n_fc83bb": {
+        "x": 0.0,
+        "y": 4.0
+      },
+      "n_9b12ce": {
+        "x": 1.7999999999999998,
+        "y": 4.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ],
+      [
+        "n_c05014",
+        "n_9b12ce"
+      ],
+      [
+        "n_fc83bb",
+        "n_9b12ce"
+      ],
+      [
+        "n_9b12ce",
+        "n_a1412e"
+      ]
+    ],
+    "total_nodes": 23,
+    "total_edges": 26,
+    "crossings_fixed": 13
+  },
+  {
+    "stage_number": 47,
+    "stage_type": "add",
+    "node_added": "n_1d877f",
+    "nodes": {
+      "n_31e5f3": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_2b6798": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_3f4fa1": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_c05014": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_d65480": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_eb7ae7": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_1248a0": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_530ce7": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_a91da2": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_548939": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_dc7ea8": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_0f5b7c": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_ecd36a": {
+        "x": 4.0,
+        "y": 6.0
+      },
+      "n_5c0ec4": {
+        "x": 0.0,
+        "y": 7.5
+      },
+      "n_320380": {
+        "x": 2.0,
+        "y": 7.5
+      },
+      "n_7112af": {
+        "x": 4.0,
+        "y": 7.5
+      },
+      "n_31659c": {
+        "x": 0.0,
+        "y": 9.0
+      },
+      "n_2e8dd7": {
+        "x": 2.0,
+        "y": 9.0
+      },
+      "n_fc83bb": {
+        "x": 4.0,
+        "y": 9.0
+      },
+      "n_9b12ce": {
+        "x": 0.0,
+        "y": 10.5
+      },
+      "n_a1412e": {
+        "x": 2.0,
+        "y": 10.5
+      },
+      "n_1d877f": {
+        "x": 4.0,
+        "y": 10.5
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ],
+      [
+        "n_c05014",
+        "n_9b12ce"
+      ],
+      [
+        "n_fc83bb",
+        "n_9b12ce"
+      ],
+      [
+        "n_9b12ce",
+        "n_a1412e"
+      ],
+      [
+        "n_a1412e",
+        "n_1d877f"
+      ]
+    ],
+    "total_nodes": 24,
+    "total_edges": 27
+  },
+  {
+    "stage_number": 48,
+    "stage_type": "correct",
+    "node_corrected": "n_1d877f",
+    "nodes": {
+      "n_31e5f3": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_1d877f": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_d65480": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_530ce7": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_dc7ea8": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_320380": {
+        "x": 4.949999999999999,
+        "y": 3.0
+      },
+      "n_2b6798": {
+        "x": 6.249999999999999,
+        "y": 3.0
+      },
+      "n_3f4fa1": {
+        "x": 7.549999999999999,
+        "y": 3.0
+      },
+      "n_eb7ae7": {
+        "x": 8.85,
+        "y": 3.0
+      },
+      "n_1248a0": {
+        "x": 10.15,
+        "y": 3.0
+      },
+      "n_08bf25": {
+        "x": 11.450000000000001,
+        "y": 3.0
+      },
+      "n_a91da2": {
+        "x": 12.750000000000002,
+        "y": 3.0
+      },
+      "n_0f5b7c": {
+        "x": 14.050000000000002,
+        "y": 3.0
+      },
+      "n_ecd36a": {
+        "x": 15.350000000000003,
+        "y": 3.0
+      },
+      "n_a1412e": {
+        "x": 16.450000000000003,
+        "y": 3.0
+      },
+      "n_c05014": {
+        "x": 17.500000000000004,
+        "y": 3.0
+      },
+      "n_fb8bb3": {
+        "x": 18.550000000000004,
+        "y": 3.0
+      },
+      "n_548939": {
+        "x": 19.600000000000005,
+        "y": 3.0
+      },
+      "n_5c0ec4": {
+        "x": 20.650000000000006,
+        "y": 3.0
+      },
+      "n_7112af": {
+        "x": 21.700000000000006,
+        "y": 3.0
+      },
+      "n_31659c": {
+        "x": -3.5999999999999996,
+        "y": 4.0
+      },
+      "n_2e8dd7": {
+        "x": -1.7999999999999998,
+        "y": 4.0
+      },
+      "n_fc83bb": {
+        "x": 0.0,
+        "y": 4.0
+      },
+      "n_9b12ce": {
+        "x": 1.7999999999999998,
+        "y": 4.0
+      }
+    },
+    "edges": [
+      [
+        "n_31e5f3",
+        "n_2b6798"
+      ],
+      [
+        "n_2b6798",
+        "n_3f4fa1"
+      ],
+      [
+        "n_3f4fa1",
+        "n_c05014"
+      ],
+      [
+        "n_2b6798",
+        "n_d65480"
+      ],
+      [
+        "n_d65480",
+        "n_eb7ae7"
+      ],
+      [
+        "n_eb7ae7",
+        "n_1248a0"
+      ],
+      [
+        "n_1248a0",
+        "n_fb8bb3"
+      ],
+      [
+        "n_eb7ae7",
+        "n_530ce7"
+      ],
+      [
+        "n_530ce7",
+        "n_08bf25"
+      ],
+      [
+        "n_08bf25",
+        "n_a91da2"
+      ],
+      [
+        "n_a91da2",
+        "n_548939"
+      ],
+      [
+        "n_08bf25",
+        "n_dc7ea8"
+      ],
+      [
+        "n_dc7ea8",
+        "n_0f5b7c"
+      ],
+      [
+        "n_0f5b7c",
+        "n_ecd36a"
+      ],
+      [
+        "n_ecd36a",
+        "n_5c0ec4"
+      ],
+      [
+        "n_0f5b7c",
+        "n_320380"
+      ],
+      [
+        "n_320380",
+        "n_7112af"
+      ],
+      [
+        "n_5c0ec4",
+        "n_31659c"
+      ],
+      [
+        "n_7112af",
+        "n_31659c"
+      ],
+      [
+        "n_548939",
+        "n_2e8dd7"
+      ],
+      [
+        "n_31659c",
+        "n_2e8dd7"
+      ],
+      [
+        "n_fb8bb3",
+        "n_fc83bb"
+      ],
+      [
+        "n_2e8dd7",
+        "n_fc83bb"
+      ],
+      [
+        "n_c05014",
+        "n_9b12ce"
+      ],
+      [
+        "n_fc83bb",
+        "n_9b12ce"
+      ],
+      [
+        "n_9b12ce",
+        "n_a1412e"
+      ],
+      [
+        "n_a1412e",
+        "n_1d877f"
+      ]
+    ],
+    "total_nodes": 24,
+    "total_edges": 27,
+    "crossings_fixed": 13
+  }
+];
+        const nodeInfo = {
+  "n_31e5f3": {
+    "label": "Enter multi_10_lines",
+    "type": "entry",
+    "line": 133
+  },
+  "n_2b6798": {
+    "label": "if (score >= 90)",
+    "type": "conditional",
+    "line": 134
+  },
+  "n_3f4fa1": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_c05014": {
+    "label": "grade = 'A'",
+    "type": "assignment",
+    "line": 135
+  },
+  "n_d65480": {
+    "label": "Begin False Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_eb7ae7": {
+    "label": "if (score >= 80)",
+    "type": "conditional",
+    "line": 136
+  },
+  "n_1248a0": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_fb8bb3": {
+    "label": "grade = 'B'",
+    "type": "assignment",
+    "line": 137
+  },
+  "n_530ce7": {
+    "label": "Begin False Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_08bf25": {
+    "label": "if (score >= 70)",
+    "type": "conditional",
+    "line": 138
+  },
+  "n_a91da2": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_548939": {
+    "label": "grade = 'C'",
+    "type": "assignment",
+    "line": 139
+  },
+  "n_dc7ea8": {
+    "label": "Begin False Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_0f5b7c": {
+    "label": "if (score >= 60)",
+    "type": "conditional",
+    "line": 140
+  },
+  "n_ecd36a": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_5c0ec4": {
+    "label": "grade = 'D'",
+    "type": "assignment",
+    "line": 141
+  },
+  "n_320380": {
+    "label": "Begin False Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_7112af": {
+    "label": "grade = 'F'",
+    "type": "assignment",
+    "line": 143
+  },
+  "n_31659c": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_2e8dd7": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_fc83bb": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_9b12ce": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_a1412e": {
+    "label": "return grade",
+    "type": "return",
+    "line": 144
+  },
+  "n_1d877f": {
+    "label": "Exit multi_10_lines",
+    "type": "exit",
+    "line": null
+  }
+};
+        let currentStage = -1;
+        let network = null;
+        let animationTimer = null;
+        
+        // Color mapping for node types (same as original visualizations)
+        const colorMap = {
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3',
+            'return': '#ff6b6b',
+            'block_start': '#e6f3ff',
+            'loop_exit': '#ffcccc'
+        };
+        
+        // Shape mapping for node types (same as original visualizations)
+        const shapeMap = {
+            'entry': 'ellipse',
+            'exit': 'ellipse',
+            'conditional': 'diamond',
+            'loop': 'diamond',
+            'merge': 'circle',
+            'return': 'ellipse',
+            'block_start': 'box',
+            'loop_exit': 'ellipse'
+        };
+        
+        function initNetwork() {
+            const container = document.getElementById('graph');
+            const data = {
+                nodes: new vis.DataSet([]),
+                edges: new vis.DataSet([])
+            };
+            
+            const options = {
+                layout: {
+                    hierarchical: false,
+                    improvedLayout: false
+                },
+                physics: {
+                    enabled: false
+                },
+                nodes: {
+                    shape: 'box',
+                    margin: 10,
+                    font: {
+                        size: 12,
+                        face: 'monospace'
+                    },
+                    borderWidth: 2
+                },
+                edges: {
+                    arrows: 'to',
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.4
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+        }
+        
+        function updateStage(stageIndex) {
+            if (stageIndex < -1 || stageIndex >= stages.length) return;
+            
+            currentStage = stageIndex;
+            
+            // Update stage counter
+            updateStageCounter();
+            
+            if (stageIndex === -1) {
+                // Reset state
+                network.setData({
+                    nodes: new vis.DataSet([]),
+                    edges: new vis.DataSet([])
+                });
+                document.getElementById('stageInfo').innerHTML = `
+                    <h3>Stage 0: Ready to Start</h3>
+                    <p>Click "Play Animation" to see the incremental layout process</p>
+                `;
+                return;
+            }
+            
+            const stage = stages[stageIndex];
+            const stageType = stage.stage_type;
+            const stageNum = stage.stage_number;
+            
+            // Update nodes
+            const nodes = Object.entries(stage.nodes).map(([id, pos]) => {
+                const info = nodeInfo[id] || {};
+                const label = info.label || id.substring(0, 8) + '...';
+                const nodeType = info.type || 'statement';
+                const line = info.line || '';
+                
+                // Create shorter label for display
+                let displayLabel = label;
+                if (label.length > 30) {
+                    displayLabel = label.substring(0, 27) + '...';
+                }
+                
+                // Get base color and shape from node type
+                const baseColor = colorMap[nodeType] || '#97c2fc';
+                const shape = shapeMap[nodeType] || 'box';
+                
+                // Apply stage-specific highlighting
+                let nodeColor, borderColor;
+                if (stageType === 'add') {
+                    nodeColor = baseColor;
+                    borderColor = '#1976D2';
+                    borderWidth = 3;
+                } else {
+                    nodeColor = baseColor;
+                    borderColor = '#388E3C';
+                    borderWidth = 2;
+                }
+                
+                // Highlight newly added/corrected node
+                if ((stageType === 'add' && stage.node_added === id) ||
+                    (stageType === 'correct' && stage.node_corrected === id)) {
+                    nodeColor = stageType === 'add' ? '#BBDEFB' : '#C8E6C9';
+                    borderWidth = 4;
+                }
+                
+                return {
+                    id: id,
+                    label: displayLabel,
+                    title: `${label}\nType: ${nodeType}\nLine: ${line}`,
+                    x: pos.x * 100,  // Scale for visualization
+                    y: pos.y * 100,
+                    shape: shape,
+                    color: {
+                        background: nodeColor,
+                        border: borderColor
+                    },
+                    font: {
+                        size: nodeType === 'entry' || nodeType === 'exit' ? 14 : 12,
+                        bold: nodeType === 'entry' || nodeType === 'exit',
+                        color: '#333'
+                    },
+                    borderWidth: borderWidth
+                };
+            });
+            
+            // Highlight the newly added/corrected node
+            if (stageType === 'add' && stage.node_added) {
+                const addedNode = nodes.find(n => n.id === stage.node_added);
+                if (addedNode) {
+                    addedNode.color = '#BBDEFB';
+                    addedNode.borderColor = '#1976D2';
+                    addedNode.borderWidth = 3;
+                }
+            } else if (stageType === 'correct' && stage.node_corrected) {
+                const correctedNode = nodes.find(n => n.id === stage.node_corrected);
+                if (correctedNode) {
+                    correctedNode.color = '#C8E6C9';
+                    correctedNode.borderColor = '#388E3C';
+                    correctedNode.borderWidth = 3;
+                }
+            }
+            
+            // Update edges
+            const edges = stage.edges.map(([from, to], index) => ({
+                from: from,
+                to: to,
+                color: stageType === 'add' ? '#90CAF9' : '#81C784',
+                width: stageType === 'add' ? 2 : 3
+            }));
+            
+            network.setData({
+                nodes: new vis.DataSet(nodes),
+                edges: new vis.DataSet(edges)
+            });
+            
+            // Update stage info
+            const stageTitle = stageType === 'add' ? 
+                `Stage ${stageNum}: Adding Node "${stage.node_added}"` :
+                `Stage ${stageNum}: Correcting Layout for Node "${stage.node_corrected}"`;
+            
+            const stageDescription = stageType === 'add' ?
+                `<p>Node "${stage.node_added}" has been added to the graph.</p>
+                 <p>Current graph: ${stage.total_nodes} nodes, ${stage.total_edges} edges</p>` :
+                `<p>Layout has been optimized to resolve edge crossings.</p>
+                 <p>Current graph: ${stage.total_nodes} nodes, ${stage.total_edges} edges</p>
+                 <p>Crossings addressed: ${stage.crossings_fixed || 0}</p>`;
+            
+            const stageClass = stageType === 'add' ? 'add-stage' : 'correct-stage';
+            
+            document.getElementById('stageInfo').innerHTML = `
+                <h3>${stageTitle}</h3>
+                ${stageDescription}
+            `;
+            document.getElementById('stageInfo').className = 'stage-info ' + stageClass;
+        }
+        
+        function playAnimation() {
+            resetAnimation();
+            const speed = parseInt(document.getElementById('speedSlider').value);
+            
+            function animate() {
+                if (currentStage < stages.length - 1) {
+                    nextStage();
+                    animationTimer = setTimeout(animate, speed);
+                }
+            }
+            
+            animate();
+        }
+        
+        function nextStage() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(currentStage + 1);
+        }
+        
+        function previousStage() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(currentStage - 1);
+        }
+        
+        function updateStageCounter() {
+            const totalStages = stages.length;
+            const currentDisplayStage = currentStage === -1 ? 0 : currentStage + 1;
+            document.getElementById('stageCounter').textContent = `Stage ${currentDisplayStage} of ${totalStages}`;
+        }
+        
+        function goToFinal() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(stages.length - 1);
+        }
+        
+        function resetAnimation() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(-1);
+        }
+        
+        // Speed slider
+        document.getElementById('speedSlider').addEventListener('input', function(e) {
+            document.getElementById('speedValue').textContent = e.target.value + 'ms';
+        });
+        
+        // Initialize on load
+        window.onload = function() {
+            initNetwork();
+            updateStage(-1);
+        };
+    </script>
+</body>
+</html>
+    

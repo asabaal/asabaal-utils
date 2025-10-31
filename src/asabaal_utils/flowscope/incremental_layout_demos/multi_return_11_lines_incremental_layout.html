@@ -1,0 +1,2690 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incremental Layout Demo: multi_return_11_lines</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stage-info {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .add-stage {
+            border-left: 4px solid #2196F3;
+        }
+        .correct-stage {
+            border-left: 4px solid #4CAF50;
+        }
+        #graph {
+            height: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .play-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .step-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .reset-btn {
+            background-color: #FF9800;
+            color: white;
+        }
+        .speed-control {
+            margin: 10px;
+        }
+        .stage-counter {
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            margin: 0 10px;
+        }
+        .legend {
+            background: white;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            margin: 5px 15px 5px 0;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+        }
+        .legend-shape {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border: 1px solid #666;
+            background: rgba(255,255,255,0.3);
+        }
+        .legend-item span {
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Incremental Layout Demo</h1>
+        <h2>multi_return_11_lines</h2>
+        <p><strong>Multiple Returns</strong> - 11 lines - Medium multi-return</p>
+    </div>
+    
+    <div class="controls">
+        <button class="play-btn" onclick="playAnimation()">▶️ Play Animation</button>
+        <button class="step-btn" onclick="nextStage()">⏭️ Next Stage</button>
+        <button class="step-btn" onclick="previousStage()">⏮️ Previous Stage</button>
+        <button class="step-btn" onclick="goToFinal()">⏭️ Go to Final</button>
+        <button class="reset-btn" onclick="resetAnimation()">🔄 Reset</button>
+        <div class="stage-counter">
+            <span id="stageCounter">Stage 0 of 0</span>
+        </div>
+        <div class="speed-control">
+            <label>Animation Speed: </label>
+            <input type="range" id="speedSlider" min="100" max="2000" value="800" step="100">
+            <span id="speedValue">800ms</span>
+        </div>
+    </div>
+    
+    <div class="stage-info" id="stageInfo">
+        <h3>Stage 0: Ready to Start</h3>
+        <p>Click "Play Animation" to see the incremental layout process</p>
+    </div>
+    
+    <div id="graph"></div>
+    
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #90ee90;"></div>
+            <div class="legend-shape" style="border-radius: 50%;"></div>
+            <span>Entry Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <div class="legend-shape" style="border-radius: 50%;"></div>
+            <span>Exit Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd700;"></div>
+            <div class="legend-shape"></div>
+            <span>Assignment</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa500;"></div>
+            <div class="legend-shape" style="transform: rotate(45deg);"></div>
+            <span>Conditional</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9999;"></div>
+            <div class="legend-shape" style="transform: rotate(45deg);"></div>
+            <span>Loop</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #97c2fc;"></div>
+            <div class="legend-shape"></div>
+            <span>Statement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dda0dd;"></div>
+            <div class="legend-shape"></div>
+            <span>Try Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e68c;"></div>
+            <div class="legend-shape"></div>
+            <span>Except Block</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d3d3d3;"></div>
+            <div class="legend-shape" style="border-radius: 50%;"></div>
+            <span>Merge Point</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e6f3ff;"></div>
+            <div class="legend-shape"></div>
+            <span>Block Start</span>
+        </div>
+    </div>
+    
+    <script>
+        const stages = [
+  {
+    "stage_number": 1,
+    "stage_type": "add",
+    "node_added": "n_b66f18",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    },
+    "edges": [],
+    "total_nodes": 1,
+    "total_edges": 0
+  },
+  {
+    "stage_number": 2,
+    "stage_type": "correct",
+    "node_corrected": "n_b66f18",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      }
+    },
+    "edges": [],
+    "total_nodes": 1,
+    "total_edges": 0,
+    "crossings_fixed": 0
+  },
+  {
+    "stage_number": 3,
+    "stage_type": "add",
+    "node_added": "n_49ee93",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ]
+    ],
+    "total_nodes": 2,
+    "total_edges": 1
+  },
+  {
+    "stage_number": 4,
+    "stage_type": "correct",
+    "node_corrected": "n_49ee93",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ]
+    ],
+    "total_nodes": 2,
+    "total_edges": 1,
+    "crossings_fixed": 0
+  },
+  {
+    "stage_number": 5,
+    "stage_type": "add",
+    "node_added": "n_cea9f6",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ]
+    ],
+    "total_nodes": 3,
+    "total_edges": 2
+  },
+  {
+    "stage_number": 6,
+    "stage_type": "correct",
+    "node_corrected": "n_cea9f6",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_49ee93": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ]
+    ],
+    "total_nodes": 3,
+    "total_edges": 2,
+    "crossings_fixed": 1
+  },
+  {
+    "stage_number": 7,
+    "stage_type": "add",
+    "node_added": "n_85e353",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ]
+    ],
+    "total_nodes": 4,
+    "total_edges": 3
+  },
+  {
+    "stage_number": 8,
+    "stage_type": "correct",
+    "node_corrected": "n_85e353",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_49ee93": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ]
+    ],
+    "total_nodes": 4,
+    "total_edges": 3,
+    "crossings_fixed": 1
+  },
+  {
+    "stage_number": 9,
+    "stage_type": "add",
+    "node_added": "n_f98afe",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ]
+    ],
+    "total_nodes": 5,
+    "total_edges": 4
+  },
+  {
+    "stage_number": 10,
+    "stage_type": "correct",
+    "node_corrected": "n_f98afe",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_f98afe": {
+        "x": -1.7999999999999998,
+        "y": 2.0
+      },
+      "n_49ee93": {
+        "x": 0.0,
+        "y": 2.0
+      },
+      "n_85e353": {
+        "x": 1.7999999999999998,
+        "y": 2.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ]
+    ],
+    "total_nodes": 5,
+    "total_edges": 4,
+    "crossings_fixed": 2
+  },
+  {
+    "stage_number": 11,
+    "stage_type": "add",
+    "node_added": "n_55343d",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ]
+    ],
+    "total_nodes": 6,
+    "total_edges": 5
+  },
+  {
+    "stage_number": 12,
+    "stage_type": "correct",
+    "node_corrected": "n_55343d",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55343d": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_f98afe": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_49ee93": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_85e353": {
+        "x": 3.5,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ]
+    ],
+    "total_nodes": 6,
+    "total_edges": 5,
+    "crossings_fixed": 2
+  },
+  {
+    "stage_number": 13,
+    "stage_type": "add",
+    "node_added": "n_9e3c6b",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ]
+    ],
+    "total_nodes": 7,
+    "total_edges": 6
+  },
+  {
+    "stage_number": 14,
+    "stage_type": "correct",
+    "node_corrected": "n_9e3c6b",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55343d": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_f98afe": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_49ee93": {
+        "x": 3.55,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 4.65,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ]
+    ],
+    "total_nodes": 7,
+    "total_edges": 6,
+    "crossings_fixed": 3
+  },
+  {
+    "stage_number": 15,
+    "stage_type": "add",
+    "node_added": "n_0960a6",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ]
+    ],
+    "total_nodes": 8,
+    "total_edges": 7
+  },
+  {
+    "stage_number": 16,
+    "stage_type": "correct",
+    "node_corrected": "n_0960a6",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55343d": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_f98afe": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_49ee93": {
+        "x": 3.55,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 4.65,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 5.75,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ]
+    ],
+    "total_nodes": 8,
+    "total_edges": 7,
+    "crossings_fixed": 3
+  },
+  {
+    "stage_number": 17,
+    "stage_type": "add",
+    "node_added": "n_45a6a6",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ]
+    ],
+    "total_nodes": 9,
+    "total_edges": 8
+  },
+  {
+    "stage_number": 18,
+    "stage_type": "correct",
+    "node_corrected": "n_45a6a6",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55343d": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 0.6,
+        "y": 2.0
+      },
+      "n_f98afe": {
+        "x": 2.4,
+        "y": 2.0
+      },
+      "n_45a6a6": {
+        "x": 3.6,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 4.75,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 5.85,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 6.949999999999999,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ]
+    ],
+    "total_nodes": 9,
+    "total_edges": 8,
+    "crossings_fixed": 4
+  },
+  {
+    "stage_number": 19,
+    "stage_type": "add",
+    "node_added": "n_55b32c",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_55b32c": {
+        "x": 0.0,
+        "y": 4.5
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ]
+    ],
+    "total_nodes": 10,
+    "total_edges": 9
+  },
+  {
+    "stage_number": 20,
+    "stage_type": "correct",
+    "node_corrected": "n_55b32c",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55b32c": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_55343d": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_f98afe": {
+        "x": 4.2,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 5.4,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 6.550000000000001,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 7.65,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 8.75,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ]
+    ],
+    "total_nodes": 10,
+    "total_edges": 9,
+    "crossings_fixed": 4
+  },
+  {
+    "stage_number": 21,
+    "stage_type": "add",
+    "node_added": "n_5f8c79",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_55b32c": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_5f8c79": {
+        "x": 2.0,
+        "y": 4.5
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ]
+    ],
+    "total_nodes": 11,
+    "total_edges": 10
+  },
+  {
+    "stage_number": 22,
+    "stage_type": "correct",
+    "node_corrected": "n_5f8c79",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55b32c": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_55343d": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_5f8c79": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_f98afe": {
+        "x": 5.5,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 6.7,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 7.8500000000000005,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 8.950000000000001,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 10.05,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ]
+    ],
+    "total_nodes": 11,
+    "total_edges": 10,
+    "crossings_fixed": 5
+  },
+  {
+    "stage_number": 23,
+    "stage_type": "add",
+    "node_added": "n_c3ce92",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_55b32c": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_5f8c79": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_c3ce92": {
+        "x": 4.0,
+        "y": 4.5
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ]
+    ],
+    "total_nodes": 12,
+    "total_edges": 11
+  },
+  {
+    "stage_number": 24,
+    "stage_type": "correct",
+    "node_corrected": "n_c3ce92",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55b32c": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_55343d": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_5f8c79": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_f98afe": {
+        "x": 5.5,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 6.7,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 7.8500000000000005,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 8.950000000000001,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 10.05,
+        "y": 3.0
+      },
+      "n_c3ce92": {
+        "x": 11.15,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ]
+    ],
+    "total_nodes": 12,
+    "total_edges": 11,
+    "crossings_fixed": 5
+  },
+  {
+    "stage_number": 25,
+    "stage_type": "add",
+    "node_added": "n_74778d",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_55b32c": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_5f8c79": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_c3ce92": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_74778d": {
+        "x": 0.0,
+        "y": 6.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ],
+      [
+        "n_c3ce92",
+        "n_74778d"
+      ]
+    ],
+    "total_nodes": 13,
+    "total_edges": 12
+  },
+  {
+    "stage_number": 26,
+    "stage_type": "correct",
+    "node_corrected": "n_74778d",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55b32c": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_55343d": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_5f8c79": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_f98afe": {
+        "x": 5.5,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 6.7,
+        "y": 3.0
+      },
+      "n_74778d": {
+        "x": 7.9,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 9.05,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 10.15,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 11.25,
+        "y": 3.0
+      },
+      "n_c3ce92": {
+        "x": 12.35,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ],
+      [
+        "n_c3ce92",
+        "n_74778d"
+      ]
+    ],
+    "total_nodes": 13,
+    "total_edges": 12,
+    "crossings_fixed": 6
+  },
+  {
+    "stage_number": 27,
+    "stage_type": "add",
+    "node_added": "n_abe8f8",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_55b32c": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_5f8c79": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_c3ce92": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_74778d": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_abe8f8": {
+        "x": 2.0,
+        "y": 6.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ],
+      [
+        "n_c3ce92",
+        "n_74778d"
+      ],
+      [
+        "n_74778d",
+        "n_abe8f8"
+      ]
+    ],
+    "total_nodes": 14,
+    "total_edges": 13
+  },
+  {
+    "stage_number": 28,
+    "stage_type": "correct",
+    "node_corrected": "n_abe8f8",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_55b32c": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_55343d": {
+        "x": -1.2,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": 1.2,
+        "y": 2.0
+      },
+      "n_9e3c6b": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "n_5f8c79": {
+        "x": 4.3,
+        "y": 3.0
+      },
+      "n_f98afe": {
+        "x": 5.5,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 6.7,
+        "y": 3.0
+      },
+      "n_74778d": {
+        "x": 7.9,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 9.05,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 10.15,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 11.25,
+        "y": 3.0
+      },
+      "n_c3ce92": {
+        "x": 12.35,
+        "y": 3.0
+      },
+      "n_abe8f8": {
+        "x": 13.4,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ],
+      [
+        "n_c3ce92",
+        "n_74778d"
+      ],
+      [
+        "n_74778d",
+        "n_abe8f8"
+      ]
+    ],
+    "total_nodes": 14,
+    "total_edges": 13,
+    "crossings_fixed": 6
+  },
+  {
+    "stage_number": 29,
+    "stage_type": "add",
+    "node_added": "n_097bce",
+    "nodes": {
+      "n_b66f18": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "n_49ee93": {
+        "x": 2.0,
+        "y": 0.0
+      },
+      "n_cea9f6": {
+        "x": 4.0,
+        "y": 0.0
+      },
+      "n_85e353": {
+        "x": 0.0,
+        "y": 1.5
+      },
+      "n_f98afe": {
+        "x": 2.0,
+        "y": 1.5
+      },
+      "n_55343d": {
+        "x": 4.0,
+        "y": 1.5
+      },
+      "n_9e3c6b": {
+        "x": 0.0,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 2.0,
+        "y": 3.0
+      },
+      "n_45a6a6": {
+        "x": 4.0,
+        "y": 3.0
+      },
+      "n_55b32c": {
+        "x": 0.0,
+        "y": 4.5
+      },
+      "n_5f8c79": {
+        "x": 2.0,
+        "y": 4.5
+      },
+      "n_c3ce92": {
+        "x": 4.0,
+        "y": 4.5
+      },
+      "n_74778d": {
+        "x": 0.0,
+        "y": 6.0
+      },
+      "n_abe8f8": {
+        "x": 2.0,
+        "y": 6.0
+      },
+      "n_097bce": {
+        "x": 4.0,
+        "y": 6.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ],
+      [
+        "n_c3ce92",
+        "n_74778d"
+      ],
+      [
+        "n_74778d",
+        "n_abe8f8"
+      ],
+      [
+        "n_abe8f8",
+        "n_097bce"
+      ]
+    ],
+    "total_nodes": 15,
+    "total_edges": 14
+  },
+  {
+    "stage_number": 30,
+    "stage_type": "correct",
+    "node_corrected": "n_097bce",
+    "nodes": {
+      "n_b66f18": {
+        "x": -3.5999999999999996,
+        "y": 0.0
+      },
+      "n_097bce": {
+        "x": -3.5999999999999996,
+        "y": 2.0
+      },
+      "n_55b32c": {
+        "x": -0.6,
+        "y": 2.0
+      },
+      "n_55343d": {
+        "x": 1.7999999999999998,
+        "y": 2.0
+      },
+      "n_cea9f6": {
+        "x": 3.0999999999999996,
+        "y": 3.0
+      },
+      "n_9e3c6b": {
+        "x": 4.3999999999999995,
+        "y": 3.0
+      },
+      "n_5f8c79": {
+        "x": 5.699999999999999,
+        "y": 3.0
+      },
+      "n_f98afe": {
+        "x": 3.5999999999999996,
+        "y": 2.0
+      },
+      "n_45a6a6": {
+        "x": 6.8999999999999995,
+        "y": 3.0
+      },
+      "n_74778d": {
+        "x": 8.1,
+        "y": 3.0
+      },
+      "n_49ee93": {
+        "x": 9.25,
+        "y": 3.0
+      },
+      "n_85e353": {
+        "x": 10.35,
+        "y": 3.0
+      },
+      "n_0960a6": {
+        "x": 11.45,
+        "y": 3.0
+      },
+      "n_c3ce92": {
+        "x": 12.549999999999999,
+        "y": 3.0
+      },
+      "n_abe8f8": {
+        "x": 13.6,
+        "y": 3.0
+      }
+    },
+    "edges": [
+      [
+        "n_b66f18",
+        "n_49ee93"
+      ],
+      [
+        "n_49ee93",
+        "n_cea9f6"
+      ],
+      [
+        "n_cea9f6",
+        "n_85e353"
+      ],
+      [
+        "n_85e353",
+        "n_f98afe"
+      ],
+      [
+        "n_f98afe",
+        "n_55343d"
+      ],
+      [
+        "n_55343d",
+        "n_9e3c6b"
+      ],
+      [
+        "n_9e3c6b",
+        "n_0960a6"
+      ],
+      [
+        "n_0960a6",
+        "n_45a6a6"
+      ],
+      [
+        "n_45a6a6",
+        "n_55b32c"
+      ],
+      [
+        "n_55b32c",
+        "n_5f8c79"
+      ],
+      [
+        "n_5f8c79",
+        "n_c3ce92"
+      ],
+      [
+        "n_c3ce92",
+        "n_74778d"
+      ],
+      [
+        "n_74778d",
+        "n_abe8f8"
+      ],
+      [
+        "n_abe8f8",
+        "n_097bce"
+      ]
+    ],
+    "total_nodes": 15,
+    "total_edges": 14,
+    "crossings_fixed": 7
+  }
+];
+        const nodeInfo = {
+  "n_b66f18": {
+    "label": "Enter multi_return_11_lines",
+    "type": "entry",
+    "line": 352
+  },
+  "n_49ee93": {
+    "label": "if (not text)",
+    "type": "conditional",
+    "line": 353
+  },
+  "n_cea9f6": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_85e353": {
+    "label": "return False",
+    "type": "return",
+    "line": 354
+  },
+  "n_f98afe": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_55343d": {
+    "label": "if (len(text) < 3)",
+    "type": "conditional",
+    "line": 355
+  },
+  "n_9e3c6b": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_0960a6": {
+    "label": "return False",
+    "type": "return",
+    "line": 356
+  },
+  "n_45a6a6": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_55b32c": {
+    "label": "if (not text.isalnum())",
+    "type": "conditional",
+    "line": 357
+  },
+  "n_5f8c79": {
+    "label": "Begin True Block",
+    "type": "block_start",
+    "line": null
+  },
+  "n_c3ce92": {
+    "label": "return False",
+    "type": "return",
+    "line": 358
+  },
+  "n_74778d": {
+    "label": "Merge after if",
+    "type": "merge",
+    "line": null
+  },
+  "n_abe8f8": {
+    "label": "return True",
+    "type": "return",
+    "line": 359
+  },
+  "n_097bce": {
+    "label": "Exit multi_return_11_lines",
+    "type": "exit",
+    "line": null
+  }
+};
+        let currentStage = -1;
+        let network = null;
+        let animationTimer = null;
+        
+        // Color mapping for node types (same as original visualizations)
+        const colorMap = {
+            'entry': '#90ee90',
+            'exit': '#ff6b6b',
+            'assignment': '#ffd700',
+            'conditional': '#ffa500',
+            'loop': '#ff9999',
+            'statement': '#97c2fc',
+            'try': '#dda0dd',
+            'except': '#f0e68c',
+            'merge': '#d3d3d3',
+            'return': '#ff6b6b',
+            'block_start': '#e6f3ff',
+            'loop_exit': '#ffcccc'
+        };
+        
+        // Shape mapping for node types (same as original visualizations)
+        const shapeMap = {
+            'entry': 'ellipse',
+            'exit': 'ellipse',
+            'conditional': 'diamond',
+            'loop': 'diamond',
+            'merge': 'circle',
+            'return': 'ellipse',
+            'block_start': 'box',
+            'loop_exit': 'ellipse'
+        };
+        
+        function initNetwork() {
+            const container = document.getElementById('graph');
+            const data = {
+                nodes: new vis.DataSet([]),
+                edges: new vis.DataSet([])
+            };
+            
+            const options = {
+                layout: {
+                    hierarchical: false,
+                    improvedLayout: false
+                },
+                physics: {
+                    enabled: false
+                },
+                nodes: {
+                    shape: 'box',
+                    margin: 10,
+                    font: {
+                        size: 12,
+                        face: 'monospace'
+                    },
+                    borderWidth: 2
+                },
+                edges: {
+                    arrows: 'to',
+                    smooth: {
+                        type: 'cubicBezier',
+                        roundness: 0.4
+                    }
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+        }
+        
+        function updateStage(stageIndex) {
+            if (stageIndex < -1 || stageIndex >= stages.length) return;
+            
+            currentStage = stageIndex;
+            
+            // Update stage counter
+            updateStageCounter();
+            
+            if (stageIndex === -1) {
+                // Reset state
+                network.setData({
+                    nodes: new vis.DataSet([]),
+                    edges: new vis.DataSet([])
+                });
+                document.getElementById('stageInfo').innerHTML = `
+                    <h3>Stage 0: Ready to Start</h3>
+                    <p>Click "Play Animation" to see the incremental layout process</p>
+                `;
+                return;
+            }
+            
+            const stage = stages[stageIndex];
+            const stageType = stage.stage_type;
+            const stageNum = stage.stage_number;
+            
+            // Update nodes
+            const nodes = Object.entries(stage.nodes).map(([id, pos]) => {
+                const info = nodeInfo[id] || {};
+                const label = info.label || id.substring(0, 8) + '...';
+                const nodeType = info.type || 'statement';
+                const line = info.line || '';
+                
+                // Create shorter label for display
+                let displayLabel = label;
+                if (label.length > 30) {
+                    displayLabel = label.substring(0, 27) + '...';
+                }
+                
+                // Get base color and shape from node type
+                const baseColor = colorMap[nodeType] || '#97c2fc';
+                const shape = shapeMap[nodeType] || 'box';
+                
+                // Apply stage-specific highlighting
+                let nodeColor, borderColor;
+                if (stageType === 'add') {
+                    nodeColor = baseColor;
+                    borderColor = '#1976D2';
+                    borderWidth = 3;
+                } else {
+                    nodeColor = baseColor;
+                    borderColor = '#388E3C';
+                    borderWidth = 2;
+                }
+                
+                // Highlight newly added/corrected node
+                if ((stageType === 'add' && stage.node_added === id) ||
+                    (stageType === 'correct' && stage.node_corrected === id)) {
+                    nodeColor = stageType === 'add' ? '#BBDEFB' : '#C8E6C9';
+                    borderWidth = 4;
+                }
+                
+                return {
+                    id: id,
+                    label: displayLabel,
+                    title: `${label}\nType: ${nodeType}\nLine: ${line}`,
+                    x: pos.x * 100,  // Scale for visualization
+                    y: pos.y * 100,
+                    shape: shape,
+                    color: {
+                        background: nodeColor,
+                        border: borderColor
+                    },
+                    font: {
+                        size: nodeType === 'entry' || nodeType === 'exit' ? 14 : 12,
+                        bold: nodeType === 'entry' || nodeType === 'exit',
+                        color: '#333'
+                    },
+                    borderWidth: borderWidth
+                };
+            });
+            
+            // Highlight the newly added/corrected node
+            if (stageType === 'add' && stage.node_added) {
+                const addedNode = nodes.find(n => n.id === stage.node_added);
+                if (addedNode) {
+                    addedNode.color = '#BBDEFB';
+                    addedNode.borderColor = '#1976D2';
+                    addedNode.borderWidth = 3;
+                }
+            } else if (stageType === 'correct' && stage.node_corrected) {
+                const correctedNode = nodes.find(n => n.id === stage.node_corrected);
+                if (correctedNode) {
+                    correctedNode.color = '#C8E6C9';
+                    correctedNode.borderColor = '#388E3C';
+                    correctedNode.borderWidth = 3;
+                }
+            }
+            
+            // Update edges
+            const edges = stage.edges.map(([from, to], index) => ({
+                from: from,
+                to: to,
+                color: stageType === 'add' ? '#90CAF9' : '#81C784',
+                width: stageType === 'add' ? 2 : 3
+            }));
+            
+            network.setData({
+                nodes: new vis.DataSet(nodes),
+                edges: new vis.DataSet(edges)
+            });
+            
+            // Update stage info
+            const stageTitle = stageType === 'add' ? 
+                `Stage ${stageNum}: Adding Node "${stage.node_added}"` :
+                `Stage ${stageNum}: Correcting Layout for Node "${stage.node_corrected}"`;
+            
+            const stageDescription = stageType === 'add' ?
+                `<p>Node "${stage.node_added}" has been added to the graph.</p>
+                 <p>Current graph: ${stage.total_nodes} nodes, ${stage.total_edges} edges</p>` :
+                `<p>Layout has been optimized to resolve edge crossings.</p>
+                 <p>Current graph: ${stage.total_nodes} nodes, ${stage.total_edges} edges</p>
+                 <p>Crossings addressed: ${stage.crossings_fixed || 0}</p>`;
+            
+            const stageClass = stageType === 'add' ? 'add-stage' : 'correct-stage';
+            
+            document.getElementById('stageInfo').innerHTML = `
+                <h3>${stageTitle}</h3>
+                ${stageDescription}
+            `;
+            document.getElementById('stageInfo').className = 'stage-info ' + stageClass;
+        }
+        
+        function playAnimation() {
+            resetAnimation();
+            const speed = parseInt(document.getElementById('speedSlider').value);
+            
+            function animate() {
+                if (currentStage < stages.length - 1) {
+                    nextStage();
+                    animationTimer = setTimeout(animate, speed);
+                }
+            }
+            
+            animate();
+        }
+        
+        function nextStage() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(currentStage + 1);
+        }
+        
+        function previousStage() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(currentStage - 1);
+        }
+        
+        function updateStageCounter() {
+            const totalStages = stages.length;
+            const currentDisplayStage = currentStage === -1 ? 0 : currentStage + 1;
+            document.getElementById('stageCounter').textContent = `Stage ${currentDisplayStage} of ${totalStages}`;
+        }
+        
+        function goToFinal() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(stages.length - 1);
+        }
+        
+        function resetAnimation() {
+            if (animationTimer) {
+                clearTimeout(animationTimer);
+                animationTimer = null;
+            }
+            updateStage(-1);
+        }
+        
+        // Speed slider
+        document.getElementById('speedSlider').addEventListener('input', function(e) {
+            document.getElementById('speedValue').textContent = e.target.value + 'ms';
+        });
+        
+        // Initialize on load
+        window.onload = function() {
+            initNetwork();
+            updateStage(-1);
+        };
+    </script>
+</body>
+</html>
+    

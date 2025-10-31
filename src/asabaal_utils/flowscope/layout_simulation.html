@@ -1,0 +1,720 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Relaxation Simulation</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .control-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            margin: 0 10px;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 4px;
+        }
+        
+        .visualization {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+            display: flex;
+        }
+        
+        .graph-panel {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid #ddd;
+        }
+        
+        .force-panel {
+            flex: 1;
+            position: relative;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        #forceCanvas {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 1000;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+        
+        .error {
+            color: red;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="error" id="errorMsg"></div>
+            
+            <div class="control-group">
+                <button id="playBtn" onclick="togglePlay()">Play</button>
+                <button id="stepBtn" onclick="stepForward()">Step Forward</button>
+                <button id="stepBackBtn" onclick="stepBackward()">Step Back</button>
+                <button id="resetBtn" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Frame:</label>
+                <span id="frameInfo">0 / 0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>FPS:</label>
+                <input type="range" id="fpsSlider" min="0.5" max="10" step="0.5" value="2" onchange="updateFPS(this.value)">
+                <span id="fpsValue">2.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Speed:</label>
+                <input type="number" id="speedInput" min="1" max="50" value="1" onchange="updateSpeed(this.value)">
+                <span>frames/step</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div class="graph-panel">
+                <div id="network"></div>
+                <div class="info">
+                    <div><strong>Iteration:</strong> <span id="iteration">0</span></div>
+                    <div><strong>Step Size:</strong> <span id="stepSize">0.01</span></div>
+                    <div><strong>Nodes:</strong> <span id="nodeCount">0</span></div>
+                    <div><strong>Playing:</strong> <span id="playingStatus">No</span></div>
+                </div>
+            </div>
+            <div class="force-panel">
+                <canvas id="forceCanvas"></canvas>
+                <div class="info" style="left: 10px; right: auto;">
+                    <div><strong>Total Energy:</strong> <span id="totalEnergy">0.00</span></div>
+                    <div><strong>Avg Force:</strong> <span id="avgForce">0.00</span></div>
+                    <div><strong>Avg Distance:</strong> <span id="avgDistance">0.00</span></div>
+                    <div><strong>Max Force:</strong> <span id="maxForce">0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         // Simulation data
+         const frames = [{"iteration": 0, "step": 0.01, "nodes": {"n0": {"x": 0.0, "y": 0.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 2.0, "y": 2.0, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.0, "y": 4.0, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": 2.0, "y": 4.0, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": 4.0, "y": 6.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 0.0, "y": 6.0, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": -2.0, "y": 8.0, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.0, "y": 8.0, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 0.0, "y": 10.0, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 0.0, "y": 12.0, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 0.0, "y": 14.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 5, "step": 0.009545454545454546, "nodes": {"n0": {"x": -690538257700294.0, "y": -700414544560237.2, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -5.539795522279372e+17, "y": -5.6110317125874054e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 2576492557864324.0, "y": -6.583467425150834e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -1.191986147228617e+18, "y": 2.3781538600534915e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1445857963627045.0, "y": 1361163316428258.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -6.446659273645216e+17, "y": 1.4049208648606816e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 8.590569852357354e+17, "y": -1.4317499214925542e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -22450098327199.25, "y": 6.564675277942911e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.239199956914724e+18, "y": -2.3639787222690816e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.356928993813934e+17, "y": 1.1939835237713405e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -4.3735860948987144e+16, "y": 6.581784346643692e+17, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 10, "step": 0.009090909090909092, "nodes": {"n0": {"x": -1.2441057692255188e+16, "y": -1.2574906578357696e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.298000161378782e+18, "y": -1.299585788295432e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 1.861493043519965e+16, "y": -1.5434129709601004e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.744202620166885e+18, "y": 5.3433773457581376e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -5.023004909163372e+16, "y": 1.2069613650561772e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.4888249111849915e+18, "y": 3.131269925387691e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.0061648141087293e+18, "y": -3.324718215150704e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 1.1765031117123328e+16, "y": 1.5219418707481147e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 2.850608478880387e+18, "y": -5.4413655120532794e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 8.023123894428056e+17, "y": 2.779307445433526e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -9.576684446969773e+16, "y": 1.563644775243136e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 15, "step": 0.008636363636363636, "nodes": {"n0": {"x": -4.619330077075147e+16, "y": -4.639659373923773e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.8513118905477885e+18, "y": -1.8160196496250545e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 5.9854251852054216e+16, "y": -2.2042763891180861e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.790826147436657e+18, "y": 7.046154941895391e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.9080202244872947e+17, "y": 4.019253951005966e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.0701892630645517e+18, "y": 4.0443610652868544e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.842787116102823e+18, "y": -4.666379856322486e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 4.639992953668923e+16, "y": 2.1288006376024515e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 3.933828424697197e+18, "y": -7.514936019163185e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 1.1851909986763108e+18, "y": 3.919034076163349e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -1.1873809659659611e+17, "y": 2.287487236727096e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 20, "step": 0.008181818181818182, "nodes": {"n0": {"x": -1.0524965265283517e+17, "y": -1.0480042375707858e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.246780938778657e+18, "y": -2.1446414945468073e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 1.2731328563624502e+17, "y": -2.6818790595897155e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.40330128287561e+18, "y": 7.609734132719793e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -4.303650727944841e+17, "y": 8.597540886091882e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.4230685272525793e+18, "y": 4.195922771623842e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.4202370779714565e+18, "y": -5.540587969954001e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 1.053421913538044e+17, "y": 2.5143285417619963e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.5609804183792087e+18, "y": -8.722262712967707e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 1.50753669187027e+18, "y": 4.686039014182079e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -1.126441908568191e+17, "y": 2.8772265639050107e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 25, "step": 0.007727272727272727, "nodes": {"n0": {"x": -1.8797775818699267e+17, "y": -1.8521655626500054e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.5117681945735414e+18, "y": -2.3228823539576847e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 2.1488635457831597e+17, "y": -3.0106914915139753e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.668970603371433e+18, "y": 7.253697511085094e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -7.526020871598031e+17, "y": 1.4453832532309632e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.5855170684050673e+18, "y": 3.70467054190825e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.78557439181254e+18, "y": -6.033239252540609e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 1.841292813666145e+17, "y": 2.7178199452470083e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.820597205202983e+18, "y": -9.230936944189852e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 1.7814864494224653e+18, "y": 5.152218666379067e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -7.98379706860814e+16, "y": 3.3647096064477414e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 30, "step": 0.007272727272727274, "nodes": {"n0": {"x": -2.899359174598486e+17, "y": -2.8231433445764883e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.66939348653849e+18, "y": -2.387483815257267e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 3.131489484914854e+17, "y": -3.2196537462361385e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.677878519137358e+18, "y": 6.234826054735415e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.129434344557159e+18, "y": 2.086579440511192e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.5959202426068e+18, "y": 2.7208501202446803e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.9809899957326e+18, "y": -6.226395053909836e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.754723012632591e+17, "y": 2.7774403502674964e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.804456311764362e+18, "y": -9.21400815673005e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.0124878442982912e+18, "y": 5.384586207898444e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": -2.399289125034205e+16, "y": 3.7709956458188227e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 35, "step": 0.006818181818181818, "nodes": {"n0": {"x": -4.0538322727065875e+17, "y": -3.897719483991144e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.7397278480954276e+18, "y": -2.371730506028334e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 4.122422970467604e+17, "y": -3.333132013669873e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.5131767335283784e+18, "y": 4.803604954532511e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.5297770382257897e+18, "y": 2.709041653596828e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.490769448173122e+18, "y": 1.4006519572062299e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.043697509374366e+18, "y": -6.194454928187322e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 3.715582233173838e+17, "y": 2.728195529091462e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.598084908389597e+18, "y": -8.832335255564433e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.2026916131766812e+18, "y": 5.442721807259878e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 5.055974398858811e+16, "y": 4.110075728956185e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 40, "step": 0.006363636363636365, "nodes": {"n0": {"x": -5.2831547572422394e+17, "y": -5.01448720791596e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.740644317463178e+18, "y": -2.3038162876393085e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 5.037396797594564e+17, "y": -3.3717414372420096e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.2452923018104335e+18, "y": 3.17674814657617e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.925301085862201e+18, "y": 3.250317707810455e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.3032397758969597e+18, "y": -1.1084184098835028e+16, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.0060546477834286e+18, "y": -6.002016673607483e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 4.655254313207013e+17, "y": 2.600781604975497e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.274924967098131e+18, "y": -8.22381927325713e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.3532795564249e+18, "y": 5.377431628990177e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.3926867437038002e+17, "y": 4.391569411300604e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 45, "step": 0.005909090909090909, "nodes": {"n0": {"x": -6.531399316773882e+17, "y": -6.120690166573938e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.6882730607813883e+18, "y": -2.206192119252075e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 5.815949005694815e+17, "y": -3.3529847555913825e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.9293913482985155e+18, "y": 1.5236771442611392e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -2.2936015839152942e+18, "y": 3.666873974838734e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.0623253752634765e+18, "y": -1.6897528152266282e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.8957725116211154e+18, "y": -5.703042664496304e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 5.5221579107189325e+17, "y": 2.421100183758969e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 3.8936493167416535e+18, "y": -7.49854706113086e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.465833855097732e+18, "y": 5.230386140333893e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 2.3766492483418806e+17, "y": 4.622577107630051e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 50, "step": 0.005454545454545454, "nodes": {"n0": {"x": -7.75077445427946e+17, "y": -7.175367259043674e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.5971344059286164e+18, "y": -2.0956596818305933e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 6.42377843594116e+17, "y": -3.291717053726944e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.6053523346492616e+18, "y": -3633621972536264.0, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -2.619363696335552e+18, "y": 3.935782709659212e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.7923885884037117e+18, "y": -3.238126482193778e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.736159421345382e+18, "y": -5.340975568946442e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 6.283758753670829e+17, "y": 2.2102464113510515e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 3.49787750478589e+18, "y": -6.738418669076457e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.542949499708866e+18, "y": 5.034480242386525e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 3.4157632594375315e+17, "y": 4.808872242804405e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 55, "step": 0.005, "nodes": {"n0": {"x": -8.903610730103745e+17, "y": -8.14992996386411e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.480075900757421e+18, "y": -1.9839569779944282e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 6.850326808908933e+17, "y": -3.2004763538007864e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.299386570004598e+18, "y": -1.4299239389514448e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -2.894153460156071e+18, "y": 4.0527688887768403e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.5130369490233134e+18, "y": -4.684739315735112e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.5463929544817874e+18, "y": -4.949491457480277e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 6.924957485809964e+17, "y": 1.984808763130461e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 3.117495324075138e+18, "y": -5.999748326880979e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.5883197253762647e+18, "y": 4.814668681061451e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 4.472775195467008e+17, "y": 4.955604610749058e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 60, "step": 0.004545454545454545, "nodes": {"n0": {"x": -9.962864246880965e+17, "y": -9.027136606983814e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.3481392034308454e+18, "y": -1.878607551876318e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 7.103754952864788e+17, "y": -3.089727112587948e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.0265283658571643e+18, "y": -2.6214720346183725e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.115397268531785e+18, "y": 4.0282459999772224e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.239267099924239e+18, "y": -5.983265475224824e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.341830128788499e+18, "y": -4.553633130830389e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 7.44453778708849e+17, "y": 1.757352560998776e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 2.7708653216922143e+18, "y": -5.3174915843846925e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.606507454293632e+18, "y": 4.5890645191483187e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 5.5158618366245997e+17, "y": 5.067662685271007e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 65, "step": 0.004090909090909091, "nodes": {"n0": {"x": -1.091158677765288e+18, "y": -9.799220636568521e+17, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.2104529431312548e+18, "y": -1.7838530439947807e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 7.205027825951932e+17, "y": -2.9680578696819707e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.7933860633459615e+18, "y": -3.6035752995399066e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.2849979797909453e+18, "y": 3.882645770757061e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -9.818200255703465e+17, "y": -7.108858174139443e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.134363697739064e+18, "y": -4.1711231012539e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 7.850975827223995e+17, "y": 1.5369910186856028e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 2.467365651141172e+18, "y": -4.7100404961396186e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.602574374786556e+18, "y": 4.370133559115666e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 6.519116006194127e+17, "y": 5.149814320692424e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 70, "step": 0.0036363636363636364, "nodes": {"n0": {"x": -1.1741731530807373e+18, "y": -1.0465718665151758e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.0742078492977705e+18, "y": -1.7015435144847956e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 7.182285649473414e+17, "y": -2.842362543198987e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.6007381091342787e+18, "y": -4.3878220842240877e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.4079049579101583e+18, "y": 3.641949811229107e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -7.476896504539434e+17, "y": -8.053976355645944e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.932822796991168e+18, "y": -3.8137087929111793e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.158480558717114e+17, "y": 1.329975706970434e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 2.2098634073594468e+18, "y": -4.1838525936055334e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.581689584928625e+18, "y": 4.1658643354633784e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 7.462613097785987e+17, "y": 5.206716796900969e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 75, "step": 0.003181818181818182, "nodes": {"n0": {"x": -1.2452594099889288e+18, "y": -1.1031355206174406e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.9447333108548106e+18, "y": -1.6319107336874675e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 7.066177012801243e+17, "y": -2.718022213530704e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.4457358413458427e+18, "y": -4.996915614866588e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.490834440904414e+18, "y": 3.333954668267054e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -5.407248917921022e+17, "y": -8.82407287378493e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.7434059037232394e+18, "y": -3.488439115854028e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.38374427796834e+17, "y": 1.1402615513449751e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.9968844828617546e+18, "y": -3.737476954085148e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.5487925502723154e+18, "y": 3.9808357747166234e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 8.332128289518346e+17, "y": 5.242861335075002e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 80, "step": 0.0027272727272727275, "nodes": {"n0": {"x": -1.3049123743613153e+18, "y": -1.1504188168065736e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.8256668199125614e+18, "y": -1.574190748118031e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 6.886428589587529e+17, "y": -2.5990935713321856e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.3236158319183616e+18, "y": -5.458565570211315e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.541238566418313e+18, "y": 2.9854964770145734e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -3.622676405931568e+17, "y": -9.43356667998752e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.5701271121159347e+18, "y": -3.1988101607989755e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.543579953037426e+17, "y": 9.70019578829761e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.824368098397691e+18, "y": -3.364779707674891e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.508346456844666e+18, "y": 3.8171397353157734e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 9.118587115829272e+17, "y": 5.262495530996146e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 85, "step": 0.002272727272727273, "nodes": {"n0": {"x": -1.3540279272614792e+18, "y": -1.189410593540054e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.7191914033092654e+18, "y": -1.527091557750099e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 6.669646245958282e+17, "y": -2.4885027548978524e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.228923107253945e+18, "y": -5.801182370324782e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.5665504721970017e+18, "y": 2.6206450487864288e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -2.1177660517038646e+17, "y": -9.902355974752794e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.415254316275327e+18, "y": -2.945748045022259e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.653418109276645e+17, "y": 8.200839823540568e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.6869849182793605e+18, "y": -3.057341594915187e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.4641900768397906e+18, "y": 3.675142338590533e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 9.817337682741124e+17, "y": 5.269550119386308e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 90, "step": 0.0018181818181818186, "nodes": {"n0": {"x": -1.3937547655227372e+18, "y": -1.2211690466288604e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.6263099920313324e+18, "y": -1.4891202682511685e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 6.438176540862284e+17, "y": -2.3882391444708485e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.1563053291076856e+18, "y": -6.051164857196544e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.573687661846103e+18, "y": 2.2597459409132653e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -8.739823122969872e+16, "y": -1.025299597246304e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.2797195549124739e+18, "y": -2.728419365871491e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.726522118597946e+17, "y": 6.903293708814239e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.57905497013513e+18, "y": -2.806105946547564e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.419478657310386e+18, "y": 3.5540866144927903e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.0427329314335497e+18, "y": 5.267583923377541e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 95, "step": 0.001363636363636364, "nodes": {"n0": {"x": -1.4253694149824786e+18, "y": -1.2467414994640525e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.5471270494970248e+18, "y": -1.4587935523183176e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 6.20978359835004e+17, "y": -2.2995422543283653e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.1009649599266964e+18, "y": -6.231458311898335e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.568771704764889e+18, "y": 1.9191272039247677e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 1.3541056417016828e+16, "y": -1.0508564769714546e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.163486209611967e+18, "y": -2.544875209739775e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.773736370747464e+17, "y": 5.799801435340749e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.4951314080450557e+18, "y": -2.602408669155739e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.3766953343667456e+18, "y": 3.4525506304895273e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.0950271238205591e+18, "y": 5.259752196511291e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 100, "step": 0.0009090909090909084, "nodes": {"n0": {"x": -1.4501772234660628e+18, "y": -1.267112216574276e+18, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -1.4811136586570732e+18, "y": -1.434758099036546e+18, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": 5.997886863555656e+17, "y": -2.2230753504179203e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.0588609738626506e+18, "y": -6.361036523155642e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.557013666438228e+18, "y": 1.6112753894270426e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 9.413430042176115e+16, "y": -1.0691171979941222e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.065863483142264e+18, "y": -2.392544383566457e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 8.803584168774212e+17, "y": 4.87857565281842e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.4303258675243182e+18, "y": -2.4385370417289648e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.337711875036369e+18, "y": 3.368781406553479e+18, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.138982893066322e+18, "y": 5.248798093299754e+18, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 0, "step": 0.01, "nodes": {"n0": {"x": 0.0, "y": 0.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": 2.0, "y": 2.0, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.0, "y": 4.0, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": 2.0, "y": 4.0, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": 4.0, "y": 6.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": 0.0, "y": 6.0, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": -2.0, "y": 8.0, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": 2.0, "y": 8.0, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 0.0, "y": 10.0, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 0.0, "y": 12.0, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 0.0, "y": 14.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 5, "step": 0.009081632653061224, "nodes": {"n0": {"x": -1067679116798618.6, "y": -147644262570695.25, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -8.94981078048682e+17, "y": -1.2326248797411573e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -2.577232335913446e+17, "y": -1.707277159339262e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -1.0890000338583415e+18, "y": 4.9865254584468134e+17, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -4103468773416046.0, "y": 2693981857713680.0, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -4.492358100453826e+17, "y": 4.497920874739556e+17, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 9.245666443891132e+17, "y": -8.840591805316431e+17, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -2.1109849913159626e+17, "y": 6.014693577157998e+17, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 1.343351086788634e+18, "y": -3.275796476900569e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 6.38531508452442e+17, "y": -4.677584649720702e+16, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 760562935372528.5, "y": -55450002630709.586, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 10, "step": 0.00816326530612245, "nodes": {"n0": {"x": -1.869483067340259e+16, "y": -2560280158176272.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.0877869317527567e+18, "y": -2.783344823531065e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -5.905595454393311e+17, "y": -4.048332459745276e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -2.515227430779045e+18, "y": 1.1462565666991875e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -4.8241090221884824e+16, "y": 2.3666369634684936e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.0432911553501427e+18, "y": 1.0414933631449498e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 2.1639281866911951e+18, "y": -2.0517836066498112e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -4.74709207168637e+17, "y": 1.4000962993193994e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 3.0932478062481234e+18, "y": -7.584137176193019e+17, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 1.5079673320074035e+18, "y": -1.1460158742479778e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.336686643847926e+16, "y": -985678618500338.1, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 15, "step": 0.007244897959183674, "nodes": {"n0": {"x": -6.728394256805883e+16, "y": -9059016688638604.0, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -2.957614129619921e+18, "y": -3.71856137478886e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -8.112927409233711e+17, "y": -5.89739704026834e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -3.5037216463280517e+18, "y": 1.5838086398464794e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.6548200023322893e+17, "y": 7.767295441456862e+16, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.463898481025073e+18, "y": 1.454903792043605e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.0842489610798234e+18, "y": -2.881216081527882e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.281572576739379e+17, "y": 1.975493978374039e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.2827158960763776e+18, "y": -1.0603618710283283e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.1820644778247634e+18, "y": -1.7600593436132864e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 4.842086339067939e+16, "y": -3640619566793713.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 20, "step": 0.0063265306122448975, "nodes": {"n0": {"x": -1.482636662741982e+17, "y": -1.9509576666647336e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -3.5631571858204293e+18, "y": -4.1279398087926426e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.379575908446074e+17, "y": -7.365407282966627e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.1298621486986706e+18, "y": 1.8460563141435604e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -3.5618503845052474e+17, "y": 1.6454474692733434e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.739034544043713e+18, "y": 1.7194456333189507e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 3.745917152116478e+18, "y": -3.4305659465100037e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.858436407639233e+17, "y": 2.3672969261280046e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.003764974723388e+18, "y": -1.2554608412672968e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 2.7030011826147144e+18, "y": -2.3417535037316208e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.0762050544148877e+17, "y": -8297196524813177.0, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 25, "step": 0.005408163265306122, "nodes": {"n0": {"x": -2.5560304655949005e+17, "y": -3.272714144364149e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -3.9600328337023345e+18, "y": -4.140685000671772e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.926407759418271e+17, "y": -8.526407009979772e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.4770830749111946e+18, "y": 1.973873861284002e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -6.023530366742803e+17, "y": 2.7568389473932605e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.897590288222401e+18, "y": 1.8668873448314988e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.2024790353324754e+18, "y": -3.759775167128563e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.698879503376128e+17, "y": 2.614554731998072e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.363166540147425e+18, "y": -1.3673497331976868e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.1021262720445804e+18, "y": -2.895726220138273e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 1.8741915882466342e+17, "y": -1.4865968004025514e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 30, "step": 0.004489795918367347, "nodes": {"n0": {"x": -3.79930278873027e+17, "y": -4.719878055781756e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.1985354769028844e+18, "y": -3.891056344553846e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.972197869985354e+17, "y": -9.433083459523855e+17, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.62496120209244e+18, "y": 2.0071691835222292e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -8.791248541696936e+17, "y": 3.9949462260722496e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.9673571173178117e+18, "y": 1.9278085281241382e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.500685752119391e+18, "y": -3.925156040793623e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -6.040227851616575e+17, "y": 2.7531674982591073e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.46517411504476e+18, "y": -1.4184798064704003e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.4036398914069883e+18, "y": -3.413777974884355e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 2.816517429449156e+17, "y": -2.3013426794654324e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 35, "step": 0.0035714285714285713, "nodes": {"n0": {"x": -5.1122113363968595e+17, "y": -6.154257264087664e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.322514601748218e+18, "y": -3.497020987315048e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.707744558455887e+17, "y": -1.0127483704129462e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.642144767928244e+18, "y": 1.9806013672339845e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.1621647502000425e+18, "y": 5.248648447044837e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.9738247729805865e+18, "y": 1.9294811484068977e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.680884519132787e+18, "y": -3.9763072470493235e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -5.097910494811201e+17, "y": 2.8145064324028846e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.40107646697332e+18, "y": -1.4284718255364275e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.6272251032879247e+18, "y": -3.8844001346516064e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 3.8324944242946214e+17, "y": -3.22416649120113e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 40, "step": 0.0026530612244897956, "nodes": {"n0": {"x": -6.403708247500364e+17, "y": -7.473502306157122e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.369009143476245e+18, "y": -3.050300876043636e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -9.284268538009385e+17, "y": -1.0647198835667196e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.583385484136327e+18, "y": 1.9216946319092216e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.4315973664487954e+18, "y": 6.429810565738756e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.9394720152488494e+18, "y": 1.8948453723073057e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.77748084680061e+18, "y": -3.954772685584562e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -4.0467164831850496e+17, "y": 2.8249074646577444e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.24448080376083e+18, "y": -1.413405699499474e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.7896713168328197e+18, "y": -4.298132963034091e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 4.8530036878544474e+17, "y": -4.195184982804655e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 45, "step": 0.0017346938775510204, "nodes": {"n0": {"x": -7.59947410642653e+17, "y": -8.61690070400843e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.368409092454955e+18, "y": -2.6146821784737267e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -8.81208469158553e+17, "y": -1.1028092698432625e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.489506624499972e+18, "y": 1.850675753834018e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.6734108748177859e+18, "y": 7.479211198246161e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.883416142036873e+18, "y": 1.8422766670920678e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.819404481571981e+18, "y": -3.8939304309591194e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -3.015972389639822e+17, "y": 2.805760853575323e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 5.050725067502496e+18, "y": -1.3857748276800568e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.9057233169307955e+18, "y": -4.649830370334168e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 5.81642986569508e+17, "y": -5.149960392271136e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}, {"iteration": 50, "step": 0.0008163265306122447, "nodes": {"n0": {"x": -8.643850144024513e+17, "y": -9.560831643848115e+16, "label": "entry", "shape": "ellipse", "color": "#90ee90", "width": 1.8, "height": 1.2}, "n1": {"x": -4.344989267218106e+18, "y": -2.2293235592880307e+17, "label": "cond1", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n2": {"x": -8.36545675942028e+17, "y": -1.1304832065447732e+18, "label": "assign1", "shape": "box", "color": "#ffd700", "width": 2.8, "height": 1.2}, "n3": {"x": -4.3891277434135987e+18, "y": 1.781349772340006e+18, "label": "loop", "shape": "diamond", "color": "#ff9999", "width": 2.0, "height": 1.6}, "n4": {"x": -1.8792435705846886e+18, "y": 8.364770412224152e+17, "label": "assign2", "shape": "box", "color": "#ffd700", "width": 2.5, "height": 1.2}, "n5": {"x": -1.8213665521860536e+18, "y": 1.78588105441712e+18, "label": "cond2", "shape": "diamond", "color": "#ffa500", "width": 2.2, "height": 1.6}, "n6": {"x": 4.830598336337741e+18, "y": -3.8196705683933235e+18, "label": "assign3", "shape": "box", "color": "#ffd700", "width": 2.0, "height": 1.2}, "n7": {"x": -2.093344098898537e+17, "y": 2.7739703130467436e+18, "label": "merge1", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n8": {"x": 4.858828216085435e+18, "y": -1.3548513446325847e+18, "label": "merge2", "shape": "circle", "color": "#d3d3d3", "width": 1.2, "height": 1.2}, "n9": {"x": 3.988436470193659e+18, "y": -4.938904598292352e+17, "label": "return", "shape": "box", "color": "#90ee90", "width": 2.2, "height": 1.2}, "n10": {"x": 6.671292110199515e+17, "y": -6.024192925908199e+16, "label": "exit", "shape": "ellipse", "color": "#ff6b6b", "width": 1.8, "height": 1.2}}}];
+         let currentFrame = 0;
+         let isPlaying = false;
+         let fps = 2.0;
+         let speed = 1;
+         let lastFrameTime = 0;
+         let network = null;
+         let animationId = null;
+         let forceCanvas = null;
+         let forceCtx = null;
+         let energyHistory = [];
+         let forceHistory = [];
+         let distanceHistory = [];
+
+        // Error handling
+        function showError(message) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            console.error(message);
+        }
+
+        function hideError() {
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // Initialize network
+        function initNetwork() {
+            try {
+                const container = document.getElementById('network');
+                const data = {
+                    nodes: new vis.DataSet([]),
+                    edges: new vis.DataSet([])
+                };
+                
+                const options = {
+                    physics: {
+                        enabled: false
+                    },
+                    interaction: {
+                        zoomView: true,
+                        dragView: true
+                    },
+                    layout: {
+                        hierarchical: {
+                            enabled: false
+                        }
+                    },
+                    nodes: {
+                        shape: 'box'
+                    },
+                    edges: {
+                        smooth: {
+                            type: 'continuous'
+                        }
+                    }
+                };
+                
+                network = new vis.Network(container, data, options);
+                console.log('Network initialized successfully');
+            } catch (error) {
+                showError('Failed to initialize network: ' + error.message);
+            }
+        }
+
+        // Update network with current frame
+        function updateNetwork() {
+            try {
+                if (currentFrame >= frames.length || currentFrame < 0) {
+                    console.warn('Invalid frame index:', currentFrame);
+                    return;
+                }
+                
+                const frame = frames[currentFrame];
+                if (!frame || !frame.nodes) {
+                    showError('Invalid frame data at index ' + currentFrame);
+                    return;
+                }
+                
+                const nodes = [];
+                const edges = [];
+                const nodeIds = Object.keys(frame.nodes);
+                
+                // Create nodes
+                Object.entries(frame.nodes).forEach(([id, nodeData]) => {
+                    nodes.push({
+                        id: id,
+                        label: nodeData.label || id,
+                        x: (nodeData.x || 0) * 50,  // Scale for visibility
+                        y: (nodeData.y || 0) * 50,
+                        shape: nodeData.shape || 'box',
+                        color: {
+                            background: nodeData.color || '#97c2fc',
+                            border: '#333'
+                        },
+                        font: {
+                            size: 12,
+                            color: '#333'
+                        }
+                    });
+                });
+                
+                // Create edges based on node connectivity pattern
+                // This is a generic approach that works for most structures
+                const sortedIds = nodeIds.sort();
+                for (let i = 0; i < sortedIds.length - 1; i++) {
+                    const from = sortedIds[i];
+                    const to = sortedIds[i + 1];
+                    
+                    // Only create edge if it makes sense (sequential or common patterns)
+                    if (shouldCreateEdge(from, to, sortedIds)) {
+                        edges.push({
+                            from: from,
+                            to: to,
+                            color: '#666',
+                            width: 2,
+                            arrows: 'to'
+                        });
+                    }
+                }
+                
+                 network.setData({ nodes: nodes, edges: edges });
+                 updateInfo();
+                 updateForceField();
+                 hideError();
+                
+            } catch (error) {
+                showError('Error updating network: ' + error.message);
+                console.error('Update network error:', error);
+            }
+        }
+
+        // Determine if we should create an edge between two nodes
+        function shouldCreateEdge(from, to, allIds) {
+            const fromNum = parseInt(from.replace(/[^0-9]/g, ''));
+            const toNum = parseInt(to.replace(/[^0-9]/g, ''));
+            
+            // Sequential connection (most common)
+            if (toNum === fromNum + 1) return true;
+            
+            // Common patterns for different structures
+            // Loop back edges
+            if (fromNum > toNum && fromNum - toNum <= 2) return true;
+            
+            // Merge patterns (multiple nodes to one)
+            const laterNodes = allIds.filter(id => {
+                const num = parseInt(id.replace(/[^0-9]/g, ''));
+                return num > toNum;
+            });
+            
+            // If this is one of the last nodes, it might be a merge target
+            if (laterNodes.length <= 2) return true;
+            
+            return false;
+        }
+
+        // Update info display
+        function updateInfo() {
+            try {
+                if (currentFrame >= frames.length || currentFrame < 0) return;
+                
+                const frame = frames[currentFrame];
+                document.getElementById('frameInfo').textContent = `${currentFrame} / ${frames.length - 1}`;
+                document.getElementById('iteration').textContent = frame.iteration || 0;
+                document.getElementById('stepSize').textContent = (frame.step || 0).toFixed(4);
+                document.getElementById('nodeCount').textContent = Object.keys(frame.nodes || {}).length;
+                document.getElementById('playingStatus').textContent = isPlaying ? 'Yes' : 'No';
+                
+                // Update progress bar
+                const progress = frames.length > 1 ? (currentFrame / (frames.length - 1)) * 100 : 0;
+                document.getElementById('progressBar').style.width = progress + '%';
+            } catch (error) {
+                console.error('Error updating info:', error);
+            }
+        }
+
+        // Control functions
+        function togglePlay() {
+            try {
+                isPlaying = !isPlaying;
+                document.getElementById('playBtn').textContent = isPlaying ? 'Pause' : 'Play';
+                
+                if (isPlaying) {
+                    lastFrameTime = performance.now();
+                    animate();
+                } else {
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
+                    }
+                }
+            } catch (error) {
+                showError('Error toggling play: ' + error.message);
+            }
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+            
+            try {
+                const currentTime = performance.now();
+                const deltaTime = currentTime - lastFrameTime;
+                const frameInterval = 1000 / fps;
+                
+                if (deltaTime >= frameInterval) {
+                    stepForward();
+                    lastFrameTime = currentTime;
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            } catch (error) {
+                showError('Animation error: ' + error.message);
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = 'Play';
+            }
+        }
+
+        function stepForward() {
+            try {
+                if (currentFrame < frames.length - 1) {
+                    currentFrame += speed;
+                    currentFrame = Math.min(currentFrame, frames.length - 1);
+                    updateNetwork();
+                }
+            } catch (error) {
+                showError('Error stepping forward: ' + error.message);
+            }
+        }
+
+        function stepBackward() {
+            try {
+                if (currentFrame > 0) {
+                    currentFrame -= speed;
+                    currentFrame = Math.max(currentFrame, 0);
+                    updateNetwork();
+                }
+            } catch (error) {
+                showError('Error stepping backward: ' + error.message);
+            }
+        }
+
+        function reset() {
+            try {
+                currentFrame = 0;
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = 'Play';
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                updateNetwork();
+            } catch (error) {
+                showError('Error resetting: ' + error.message);
+            }
+        }
+
+        function updateFPS(value) {
+            fps = parseFloat(value);
+            document.getElementById('fpsValue').textContent = fps.toFixed(1);
+        }
+
+        function updateSpeed(value) {
+            speed = parseInt(value);
+            speed = Math.max(1, Math.min(50, speed)); // Clamp to valid range
+        }
+
+         // Initialize on load
+         window.onload = function() {
+             console.log('Page loaded, initializing...');
+             try {
+                 if (frames.length === 0) {
+                     showError('No simulation frames available');
+                     return;
+                 }
+                 
+                 initNetwork();
+                 initForceCanvas();
+                 updateNetwork();
+                 updateForceField();
+                 console.log('Initialization complete');
+             } catch (error) {
+                 showError('Initialization error: ' + error.message);
+                 console.error('Init error:', error);
+             }
+         };
+
+         // Initialize force canvas
+         function initForceCanvas() {
+             forceCanvas = document.getElementById('forceCanvas');
+             forceCtx = forceCanvas.getContext('2d');
+             resizeForceCanvas();
+         }
+         
+         // Resize force canvas
+         function resizeForceCanvas() {
+             const rect = forceCanvas.parentElement.getBoundingClientRect();
+             forceCanvas.width = rect.width;
+             forceCanvas.height = rect.height;
+         }
+         
+         // Calculate forces for current frame
+         function calculateForces(frame) {
+             const nodes = Object.entries(frame.nodes);
+             const forces = {};
+             const springStrength = 0.1;
+             const springLength = 150;
+             const repulsionStrength = 5000;
+             
+             // Initialize forces
+             nodes.forEach(([id, node]) => {
+                 forces[id] = { x: 0, y: 0 };
+             });
+             
+             // Spring forces along edges
+             const nodeIds = nodes.map(([id]) => id);
+             for (let i = 0; i < nodeIds.length - 1; i++) {
+                 const from = nodeIds[i];
+                 const to = nodeIds[i + 1];
+                 
+                 if (shouldCreateEdge(from, to, nodeIds)) {
+                     const nodeA = frame.nodes[from];
+                     const nodeB = frame.nodes[to];
+                     const dx = (nodeB.x - nodeA.x) * 50;
+                     const dy = (nodeB.y - nodeA.y) * 50;
+                     const distance = Math.sqrt(dx * dx + dy * dy);
+                     
+                     if (distance > 0) {
+                         const force = springStrength * (distance - springLength);
+                         const fx = (dx / distance) * force;
+                         const fy = (dy / distance) * force;
+                         
+                         forces[from].x += fx;
+                         forces[from].y += fy;
+                         forces[to].x -= fx;
+                         forces[to].y -= fy;
+                     }
+                 }
+             }
+             
+             // Repulsion forces between all nodes
+             for (let i = 0; i < nodes.length; i++) {
+                 for (let j = i + 1; j < nodes.length; j++) {
+                     const [idA, nodeA] = nodes[i];
+                     const [idB, nodeB] = nodes[j];
+                     
+                     const dx = (nodeB.x - nodeA.x) * 50;
+                     const dy = (nodeB.y - nodeA.y) * 50;
+                     const distance = Math.sqrt(dx * dx + dy * dy);
+                     
+                     if (distance > 0 && distance < 500) {
+                         const force = repulsionStrength / (distance * distance);
+                         const fx = (dx / distance) * force;
+                         const fy = (dy / distance) * force;
+                         
+                         forces[idA].x -= fx;
+                         forces[idA].y -= fy;
+                         forces[idB].x += fx;
+                         forces[idB].y += fy;
+                     }
+                 }
+             }
+             
+             return forces;
+         }
+         
+         // Update force field visualization
+         function updateForceField() {
+             if (!forceCtx || currentFrame >= frames.length) return;
+             
+             const frame = frames[currentFrame];
+             const forces = calculateForces(frame);
+             
+             // Clear canvas
+             forceCtx.clearRect(0, 0, forceCanvas.width, forceCanvas.height);
+             
+             // Draw force field heatmap
+             const gridSize = 20;
+             const cellWidth = forceCanvas.width / gridSize;
+             const cellHeight = forceCanvas.height / gridSize;
+             
+             for (let i = 0; i < gridSize; i++) {
+                 for (let j = 0; j < gridSize; j++) {
+                     const x = (i + 0.5) * cellWidth;
+                     const y = (j + 0.5) * cellHeight;
+                     
+                     let totalForce = 0;
+                     Object.entries(frame.nodes).forEach(([id, node]) => {
+                         const nodeX = node.x * 50 + forceCanvas.width / 2;
+                         const nodeY = node.y * 50 + forceCanvas.height / 2;
+                         const dx = x - nodeX;
+                         const dy = y - nodeY;
+                         const distance = Math.sqrt(dx * dx + dy * dy);
+                         
+                         if (distance > 0 && distance < 200) {
+                             totalForce += 5000 / (distance * distance);
+                         }
+                     });
+                     
+                     const intensity = Math.min(totalForce / 10, 1);
+                     const hue = (1 - intensity) * 240; // Blue to red
+                     forceCtx.fillStyle = `hsla(${hue}, 100%, 50%, 0.6)`;
+                     forceCtx.fillRect(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+                 }
+             }
+             
+             // Draw nodes and force vectors
+             Object.entries(frame.nodes).forEach(([id, node]) => {
+                 const x = node.x * 50 + forceCanvas.width / 2;
+                 const y = node.y * 50 + forceCanvas.height / 2;
+                 
+                 // Draw node
+                 forceCtx.fillStyle = 'white';
+                 forceCtx.strokeStyle = 'black';
+                 forceCtx.lineWidth = 2;
+                 forceCtx.beginPath();
+                 forceCtx.arc(x, y, 8, 0, Math.PI * 2);
+                 forceCtx.fill();
+                 forceCtx.stroke();
+                 
+                 // Draw force vector
+                 const force = forces[id];
+                 const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                 if (forceMag > 0.1) {
+                     const scale = Math.min(forceMag * 0.5, 50);
+                     const endX = x + (force.x / forceMag) * scale;
+                     const endY = y + (force.y / forceMag) * scale;
+                     
+                     forceCtx.strokeStyle = 'red';
+                     forceCtx.lineWidth = 3;
+                     forceCtx.beginPath();
+                     forceCtx.moveTo(x, y);
+                     forceCtx.lineTo(endX, endY);
+                     forceCtx.stroke();
+                     
+                     // Arrowhead
+                     const angle = Math.atan2(force.y, force.x);
+                     forceCtx.beginPath();
+                     forceCtx.moveTo(endX, endY);
+                     forceCtx.lineTo(endX - 8 * Math.cos(angle - 0.5), endY - 8 * Math.sin(angle - 0.5));
+                     forceCtx.lineTo(endX - 8 * Math.cos(angle + 0.5), endY - 8 * Math.sin(angle + 0.5));
+                     forceCtx.closePath();
+                     forceCtx.fillStyle = 'red';
+                     forceCtx.fill();
+                 }
+             });
+             
+             // Calculate and update metrics
+             updateForceMetrics(forces, frame);
+         }
+         
+         // Update force metrics
+         function updateForceMetrics(forces, frame) {
+             const forceValues = Object.values(forces);
+             const avgForce = forceValues.reduce((sum, f) => sum + Math.sqrt(f.x * f.x + f.y * f.y), 0) / forceValues.length;
+             const maxForce = Math.max(...forceValues.map(f => Math.sqrt(f.x * f.x + f.y * f.y)));
+             
+             let totalDistance = 0;
+             let edgeCount = 0;
+             const nodeIds = Object.keys(frame.nodes);
+             for (let i = 0; i < nodeIds.length - 1; i++) {
+                 const from = nodeIds[i];
+                 const to = nodeIds[i + 1];
+                 if (shouldCreateEdge(from, to, nodeIds)) {
+                     const nodeA = frame.nodes[from];
+                     const nodeB = frame.nodes[to];
+                     const dx = (nodeB.x - nodeA.x) * 50;
+                     const dy = (nodeB.y - nodeA.y) * 50;
+                     totalDistance += Math.sqrt(dx * dx + dy * dy);
+                     edgeCount++;
+                 }
+             }
+             const avgDistance = edgeCount > 0 ? totalDistance / edgeCount : 0;
+             
+             // Calculate total energy
+             let totalEnergy = 0;
+             // Spring energy
+             for (let i = 0; i < nodeIds.length - 1; i++) {
+                 const from = nodeIds[i];
+                 const to = nodeIds[i + 1];
+                 if (shouldCreateEdge(from, to, nodeIds)) {
+                     const nodeA = frame.nodes[from];
+                     const nodeB = frame.nodes[to];
+                     const dx = (nodeB.x - nodeA.x) * 50;
+                     const dy = (nodeB.y - nodeA.y) * 50;
+                     const distance = Math.sqrt(dx * dx + dy * dy);
+                     totalEnergy += 0.5 * 0.1 * Math.pow(distance - 150, 2);
+                 }
+             }
+             
+             document.getElementById('totalEnergy').textContent = totalEnergy.toFixed(2);
+             document.getElementById('avgForce').textContent = avgForce.toFixed(2);
+             document.getElementById('avgDistance').textContent = avgDistance.toFixed(2);
+             document.getElementById('maxForce').textContent = maxForce.toFixed(2);
+             
+             // Store history
+             energyHistory.push(totalEnergy);
+             forceHistory.push(avgForce);
+             distanceHistory.push(avgDistance);
+         }
+         
+         // Handle window resize
+         window.onresize = function() {
+             if (network) {
+                 network.redraw();
+                 network.fit();
+             }
+             if (forceCanvas) {
+                 resizeForceCanvas();
+                 updateForceField();
+             }
+         };
+    </script>
+</body>
+</html>
+        

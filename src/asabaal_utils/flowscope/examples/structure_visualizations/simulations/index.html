@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structure Layout Simulations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .simulations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .simulation-card {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: #fff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .simulation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .simulation-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .simulation-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .simulation-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .simulation-link:hover {
+            background: #0056b3;
+        }
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .linear { background: #e3f2fd; color: #1976d2; }
+        .binary_branching { background: #f3e5f5; color: #7b1fa2; }
+        .loop { background: #fff3e0; color: #f57c00; }
+        .nested { background: #fce4ec; color: #c2185b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Structure Layout Simulations</h1>
+        
+        <div class="simulations">
+
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge linear">Linear</span>
+                    linear_3_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 3 | Nodes: 3 | Edges: 2
+                </div>
+                <div>
+                    <a href="linear_3_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge linear">Linear</span>
+                    linear_5_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 5 | Nodes: 4 | Edges: 3
+                </div>
+                <div>
+                    <a href="linear_5_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge linear">Linear</span>
+                    linear_8_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 8 | Nodes: 5 | Edges: 4
+                </div>
+                <div>
+                    <a href="linear_8_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge linear">Linear</span>
+                    linear_10_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 10 | Nodes: 6 | Edges: 5
+                </div>
+                <div>
+                    <a href="linear_10_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge binary_branching">Binary Branching</span>
+                    binary_6_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 6 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="binary_6_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge binary_branching">Binary Branching</span>
+                    binary_9_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 9 | Nodes: 8 | Edges: 8
+                </div>
+                <div>
+                    <a href="binary_9_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge binary_branching">Binary Branching</span>
+                    binary_14_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 14 | Nodes: 8 | Edges: 8
+                </div>
+                <div>
+                    <a href="binary_14_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge binary_branching">Binary Branching</span>
+                    binary_18_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 18 | Nodes: 8 | Edges: 8
+                </div>
+                <div>
+                    <a href="binary_18_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge multi_way_branching">Multi Way Branching</span>
+                    multi_10_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 10 | Nodes: 8 | Edges: 10
+                </div>
+                <div>
+                    <a href="multi_10_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge multi_way_branching">Multi Way Branching</span>
+                    multi_14_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 14 | Nodes: 8 | Edges: 10
+                </div>
+                <div>
+                    <a href="multi_14_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge multi_way_branching">Multi Way Branching</span>
+                    multi_22_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 22 | Nodes: 8 | Edges: 10
+                </div>
+                <div>
+                    <a href="multi_22_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge loop_structures">Loop Structures</span>
+                    loop_8_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 8 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="loop_8_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge loop_structures">Loop Structures</span>
+                    loop_11_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 11 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="loop_11_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge loop_structures">Loop Structures</span>
+                    loop_16_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 16 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="loop_16_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge loop_structures">Loop Structures</span>
+                    loop_19_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 19 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="loop_19_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge nested_structures">Nested Structures</span>
+                    nested_12_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 12 | Nodes: 8 | Edges: 9
+                </div>
+                <div>
+                    <a href="nested_12_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge nested_structures">Nested Structures</span>
+                    nested_18_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 18 | Nodes: 8 | Edges: 9
+                </div>
+                <div>
+                    <a href="nested_18_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge nested_structures">Nested Structures</span>
+                    nested_25_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 25 | Nodes: 8 | Edges: 9
+                </div>
+                <div>
+                    <a href="nested_25_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge exception_handling">Exception Handling</span>
+                    exception_10_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 10 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="exception_10_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge exception_handling">Exception Handling</span>
+                    exception_14_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 14 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="exception_14_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge exception_handling">Exception Handling</span>
+                    exception_20_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 20 | Nodes: 6 | Edges: 6
+                </div>
+                <div>
+                    <a href="exception_20_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge multiple_returns">Multiple Returns</span>
+                    multi_return_7_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 7 | Nodes: 8 | Edges: 10
+                </div>
+                <div>
+                    <a href="multi_return_7_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge multiple_returns">Multiple Returns</span>
+                    multi_return_11_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 11 | Nodes: 8 | Edges: 10
+                </div>
+                <div>
+                    <a href="multi_return_11_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge multiple_returns">Multiple Returns</span>
+                    multi_return_16_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 16 | Nodes: 8 | Edges: 10
+                </div>
+                <div>
+                    <a href="multi_return_16_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+            <div class="simulation-card">
+                <div class="simulation-title">
+                    <span class="type-badge complex_mixed">Complex Mixed</span>
+                    complex_25_lines
+                </div>
+                <div class="simulation-meta">
+                    Lines: 25 | Nodes: 10 | Edges: 14
+                </div>
+                <div>
+                    <a href="complex_25_lines_layout_simulation.html" class="simulation-link">View Simulation</a>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+</body>
+</html>
+    

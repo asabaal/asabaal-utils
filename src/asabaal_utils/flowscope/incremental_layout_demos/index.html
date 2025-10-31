@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incremental Layout Demos - Index</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .demo-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .demo-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .demo-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .demo-description {
+            color: #666;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .demo-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #888;
+        }
+        .demo-link {
+            display: inline-block;
+            background-color: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .demo-link:hover {
+            background-color: #1976D2;
+        }
+        .structure-section {
+            margin-bottom: 30px;
+        }
+        .structure-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 Incremental Layout Demos</h1>
+        <p>Interactive visualizations showing how nodes are added one at a time and how the layout algorithm resolves edge crossings</p>
+        <p><strong>Each demo shows two stages:</strong> ADD (node added) → CORRECT (crossings resolved)</p>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Linear</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">linear_3_lines</div>
+                <div class="demo-description">3 lines - Simple linear</div>
+                <div class="demo-stats">
+                    <span>📍 3 nodes</span>
+                    <span>🔗 2 edges</span>
+                    <span>🎬 6 stages</span>
+                </div>
+                <a href="linear_3_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">linear_5_lines</div>
+                <div class="demo-description">5 lines - Basic linear</div>
+                <div class="demo-stats">
+                    <span>📍 5 nodes</span>
+                    <span>🔗 4 edges</span>
+                    <span>🎬 10 stages</span>
+                </div>
+                <a href="linear_5_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">linear_8_lines</div>
+                <div class="demo-description">8 lines - Medium linear</div>
+                <div class="demo-stats">
+                    <span>📍 6 nodes</span>
+                    <span>🔗 5 edges</span>
+                    <span>🎬 12 stages</span>
+                </div>
+                <a href="linear_8_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">linear_10_lines</div>
+                <div class="demo-description">10 lines - Complex linear</div>
+                <div class="demo-stats">
+                    <span>📍 6 nodes</span>
+                    <span>🔗 5 edges</span>
+                    <span>🎬 12 stages</span>
+                </div>
+                <a href="linear_10_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Binary Branching</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">binary_6_lines</div>
+                <div class="demo-description">6 lines - Simple binary</div>
+                <div class="demo-stats">
+                    <span>📍 8 nodes</span>
+                    <span>🔗 8 edges</span>
+                    <span>🎬 16 stages</span>
+                </div>
+                <a href="binary_6_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">binary_9_lines</div>
+                <div class="demo-description">9 lines - Medium binary</div>
+                <div class="demo-stats">
+                    <span>📍 11 nodes</span>
+                    <span>🔗 11 edges</span>
+                    <span>🎬 22 stages</span>
+                </div>
+                <a href="binary_9_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">binary_14_lines</div>
+                <div class="demo-description">14 lines - Complex binary</div>
+                <div class="demo-stats">
+                    <span>📍 11 nodes</span>
+                    <span>🔗 11 edges</span>
+                    <span>🎬 22 stages</span>
+                </div>
+                <a href="binary_14_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">binary_18_lines</div>
+                <div class="demo-description">18 lines - Advanced binary</div>
+                <div class="demo-stats">
+                    <span>📍 12 nodes</span>
+                    <span>🔗 12 edges</span>
+                    <span>🎬 24 stages</span>
+                </div>
+                <a href="binary_18_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Multi-way Branching</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">multi_10_lines</div>
+                <div class="demo-description">10 lines - Simple multi-way</div>
+                <div class="demo-stats">
+                    <span>📍 24 nodes</span>
+                    <span>🔗 27 edges</span>
+                    <span>🎬 48 stages</span>
+                </div>
+                <a href="multi_10_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">multi_14_lines</div>
+                <div class="demo-description">14 lines - Medium multi-way</div>
+                <div class="demo-stats">
+                    <span>📍 29 nodes</span>
+                    <span>🔗 32 edges</span>
+                    <span>🎬 58 stages</span>
+                </div>
+                <a href="multi_14_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">multi_22_lines</div>
+                <div class="demo-description">22 lines - Complex multi-way</div>
+                <div class="demo-stats">
+                    <span>📍 35 nodes</span>
+                    <span>🔗 38 edges</span>
+                    <span>🎬 70 stages</span>
+                </div>
+                <a href="multi_22_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Loop Structures</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">loop_8_lines</div>
+                <div class="demo-description">8 lines - Simple loop</div>
+                <div class="demo-stats">
+                    <span>📍 8 nodes</span>
+                    <span>🔗 8 edges</span>
+                    <span>🎬 16 stages</span>
+                </div>
+                <a href="loop_8_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">loop_11_lines</div>
+                <div class="demo-description">11 lines - Medium loop</div>
+                <div class="demo-stats">
+                    <span>📍 11 nodes</span>
+                    <span>🔗 11 edges</span>
+                    <span>🎬 22 stages</span>
+                </div>
+                <a href="loop_11_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">loop_16_lines</div>
+                <div class="demo-description">16 lines - Complex loop</div>
+                <div class="demo-stats">
+                    <span>📍 15 nodes</span>
+                    <span>🔗 15 edges</span>
+                    <span>🎬 30 stages</span>
+                </div>
+                <a href="loop_16_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">loop_19_lines</div>
+                <div class="demo-description">19 lines - Advanced loop</div>
+                <div class="demo-stats">
+                    <span>📍 17 nodes</span>
+                    <span>🔗 17 edges</span>
+                    <span>🎬 34 stages</span>
+                </div>
+                <a href="loop_19_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Nested Structures</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">nested_12_lines</div>
+                <div class="demo-description">12 lines - Simple nesting</div>
+                <div class="demo-stats">
+                    <span>📍 16 nodes</span>
+                    <span>🔗 17 edges</span>
+                    <span>🎬 32 stages</span>
+                </div>
+                <a href="nested_12_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">nested_18_lines</div>
+                <div class="demo-description">18 lines - Medium nesting</div>
+                <div class="demo-stats">
+                    <span>📍 18 nodes</span>
+                    <span>🔗 19 edges</span>
+                    <span>🎬 36 stages</span>
+                </div>
+                <a href="nested_18_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">nested_25_lines</div>
+                <div class="demo-description">25 lines - Complex nesting</div>
+                <div class="demo-stats">
+                    <span>📍 24 nodes</span>
+                    <span>🔗 26 edges</span>
+                    <span>🎬 48 stages</span>
+                </div>
+                <a href="nested_25_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Exception Handling</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">exception_10_lines</div>
+                <div class="demo-description">10 lines - Simple exception</div>
+                <div class="demo-stats">
+                    <span>📍 8 nodes</span>
+                    <span>🔗 7 edges</span>
+                    <span>🎬 16 stages</span>
+                </div>
+                <a href="exception_10_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">exception_14_lines</div>
+                <div class="demo-description">14 lines - Medium exception</div>
+                <div class="demo-stats">
+                    <span>📍 9 nodes</span>
+                    <span>🔗 8 edges</span>
+                    <span>🎬 18 stages</span>
+                </div>
+                <a href="exception_14_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">exception_20_lines</div>
+                <div class="demo-description">20 lines - Complex exception</div>
+                <div class="demo-stats">
+                    <span>📍 11 nodes</span>
+                    <span>🔗 10 edges</span>
+                    <span>🎬 22 stages</span>
+                </div>
+                <a href="exception_20_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Multiple Returns</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">multi_return_7_lines</div>
+                <div class="demo-description">7 lines - Simple multi-return</div>
+                <div class="demo-stats">
+                    <span>📍 11 nodes</span>
+                    <span>🔗 10 edges</span>
+                    <span>🎬 22 stages</span>
+                </div>
+                <a href="multi_return_7_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">multi_return_11_lines</div>
+                <div class="demo-description">11 lines - Medium multi-return</div>
+                <div class="demo-stats">
+                    <span>📍 15 nodes</span>
+                    <span>🔗 14 edges</span>
+                    <span>🎬 30 stages</span>
+                </div>
+                <a href="multi_return_11_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+            <div class="demo-card">
+                <div class="demo-title">multi_return_16_lines</div>
+                <div class="demo-description">16 lines - Complex multi-return</div>
+                <div class="demo-stats">
+                    <span>📍 23 nodes</span>
+                    <span>🔗 22 edges</span>
+                    <span>🎬 46 stages</span>
+                </div>
+                <a href="multi_return_16_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+    <div class="structure-section">
+        <h2 class="structure-title">Complex Mixed</h2>
+        <div class="demo-grid">
+            <div class="demo-card">
+                <div class="demo-title">complex_25_lines</div>
+                <div class="demo-description">25 lines - Mixed structures</div>
+                <div class="demo-stats">
+                    <span>📍 45 nodes</span>
+                    <span>🔗 48 edges</span>
+                    <span>🎬 90 stages</span>
+                </div>
+                <a href="complex_25_lines_incremental_layout.html" class="demo-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+    
