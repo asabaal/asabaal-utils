@@ -4,6 +4,14 @@
 from itertools import combinations
 from math import sqrt
 
+# Import surface anchor system
+try:
+    from surface_anchors import surface_point_toward
+except ImportError:
+    # Fallback if surface_anchors module not available
+    def surface_point_toward(node, tx, ty):
+        return node.x, node.y
+
 # ------------------------------
 # Data structures
 # ------------------------------
@@ -59,6 +67,9 @@ class GraphLayout:
 
         # Edge corridor "thickness" (no-penetration)
         self.edge_radius = 0.30
+
+        # Surface anchor system feature flag
+        self.use_surface_anchors = True
 
         # Internal: velocities for smooth integration
         self._vel = {}           # name -> [vx, vy]
@@ -552,11 +563,20 @@ def _segment_segment_distance(ax, ay, bx, by, cx, cy, dx, dy):
 def _relax_iteration(G: GraphLayout):
     forces = {name: [0.0, 0.0] for name in G.nodes}
 
-    # 1) Spring attraction (center-to-center), small L0
+    # 1) Spring attraction (surface-to-surface if enabled), small L0
     for e in G.edges:
         a = G.nodes[e.start]
         b = G.nodes[e.end]
-        d, dx, dy = _dist_dxdy(a.x, a.y, b.x, b.y)
+        
+        # Surface anchor integration
+        if G.use_surface_anchors:
+            ax, ay = surface_point_toward(a, b.x, b.y)
+            bx, by = surface_point_toward(b, a.x, a.y)
+            d, dx, dy = _dist_dxdy(ax, ay, bx, by)
+        else:
+            # Fallback to center-based calculation
+            d, dx, dy = _dist_dxdy(a.x, a.y, b.x, b.y)
+        
         delta = d - _effective_L0(G, a, b)
         fx = (dx / d) * (G.k_spring * delta)
         fy = (dy / d) * (G.k_spring * delta)
@@ -626,13 +646,38 @@ def _relax_iteration(G: GraphLayout):
 
 def _effective_L0(G: GraphLayout, a: Node, b: Node):
     """
-    Small positive rest length, scaled slightly by footprint so big labels don't squeeze too hard.
+    Rest length accounting for surface anchor distances.
     """
-    # Use average of shorter half-axes to nudge L0 for large nodes
-    ax, ay = _aabb_half_extents(a)
-    bx, by = _aabb_half_extents(b)
-    scale = 0.25 * (min(ax, ay) + min(bx, by))
-    return G.L0 + scale
+    if G.use_surface_anchors:
+        # For surface anchors, we want the surface-to-surface rest length
+        # to be close to the original center-to-center rest length
+        # But we need to account for the fact that surfaces are closer
+        
+        # Get surface points to calculate the distance reduction
+        # surface_point_toward is already imported at module level
+        ax, ay = surface_point_toward(a, b.x, b.y)
+        bx, by = surface_point_toward(b, a.x, a.y)
+        
+        # Calculate the reduction in distance due to surface anchoring
+        center_dist = sqrt((b.x - a.x)**2 + (b.y - a.y)**2)
+        surface_dist = sqrt((bx - ax)**2 + (by - ay)**2)
+        
+        # We want the surface rest length to be proportional to the original L0
+        # but scaled by the ratio of surface to center distances
+        if center_dist > 0:
+            distance_ratio = surface_dist / center_dist
+            effective_L0 = G.L0 * distance_ratio
+            
+            # Add small buffer for stability
+            return effective_L0 + 0.01
+        else:
+            return G.L0 + 0.01
+    else:
+        # Original center-based calculation
+        ax, ay = _aabb_half_extents(a)
+        bx, by = _aabb_half_extents(b)
+        scale = 0.25 * (min(ax, ay) + min(bx, by))
+        return G.L0 + scale
 
 # ------------------------------
 # Demo
