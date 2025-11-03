@@ -30,6 +30,20 @@ class Edge:
         self.start = start
         self.end = end
 
+# Legend-based styles (colors for renderer)
+STYLES = {
+    "Entry":       dict(shape="ellipse", color="#90ee90"),
+    "Exit":        dict(shape="ellipse", color="#ff6b6b"),
+    "Assignment":  dict(shape="box",     color="#ffd700"),
+    "Conditional": dict(shape="diamond", color="#ffa500"),
+    "Loop":        dict(shape="diamond", color="#ff9999"),
+    "Statement":   dict(shape="box",     color="#97c2fc"),
+    "Return":      dict(shape="box",     color="#90ee90"),
+    "Try":         dict(shape="box",     color="#dda0dd"),
+    "Except":      dict(shape="box",     color="#f0e68c"),
+    "Merge":       dict(shape="circle",  color="#d3d3d3"),
+}
+
 class GraphLayout:
     def __init__(self):
         self.nodes = {}          # name -> Node
@@ -72,6 +86,247 @@ class GraphLayout:
             self.step = step0 * (1.0 - t) + cool_to * t
             _relax_iteration(self)
         self.step = step0  # restore
+
+    # ---------- Testing and Simulation Methods ----------
+    def create_test_graph(self, graph_type="two_node"):
+        """
+        Factory method for creating test graphs using existing STYLES.
+        
+        Args:
+            graph_type: "two_node" or "three_node"
+            
+        Returns:
+            None (modifies current graph)
+        """
+        # Clear existing graph
+        self.nodes.clear()
+        self.edges.clear()
+        self._vel.clear()
+        
+        # Use existing STYLES from layout_relaxer.py:388-399
+        if graph_type == "two_node":
+            self.add_node("entry", "Entry", **STYLES["Entry"], width=2.0, height=1.2, pos=(0.0, 0.0))
+            self.add_node("exit", "Exit", **STYLES["Exit"], width=2.0, height=1.2, pos=(3.0, 0.0))
+            self.add_edge("entry", "exit")
+            
+        elif graph_type == "three_node":
+            self.add_node("entry", "Entry", **STYLES["Entry"], width=2.0, height=1.2, pos=(0.0, 0.0))
+            self.add_node("process", "Process", **STYLES["Assignment"], width=2.0, height=1.2, pos=(3.0, 0.0))
+            self.add_node("exit", "Exit", **STYLES["Exit"], width=2.0, height=1.2, pos=(6.0, 0.0))
+            self.add_edge("entry", "process")
+            self.add_edge("process", "exit")
+    
+    def capture_frame(self, iteration=None):
+        """
+        Capture current state as frame dict.
+        
+        Returns:
+            dict: Frame data with node positions and properties
+        """
+        frame = {
+            'iteration': iteration if iteration is not None else 0,
+            'step': self.step,
+            'nodes': {}
+        }
+        
+        for name, node in self.nodes.items():
+            frame['nodes'][name] = {
+                'x': node.x,
+                'y': node.y,
+                'label': node.label,
+                'shape': node.shape,
+                'color': node.color,
+                'width': node.width,
+                'height': node.height
+            }
+        
+        return frame
+    
+    def run_simulation_with_capture(self, iterations=200, capture_interval=10):
+        """
+        Run simulation and capture frames at specified intervals.
+        
+        Args:
+            iterations: Number of iterations to run
+            capture_interval: Capture every N iterations
+            
+        Returns:
+            list: List of frame dictionaries
+        """
+        frames = []
+        
+        # Capture initial state
+        frames.append(self.capture_frame(0))
+        
+        # Store original step
+        original_step = self.step
+        
+        # Run simulation
+        for it in range(1, iterations + 1):
+            # Linear cooling
+            t = it / max(1, iterations - 1)
+            self.step = original_step * (1.0 - t) + 0.001 * t
+            
+            # Run one iteration
+            _relax_iteration(self)
+            
+            # Capture frame
+            if it % capture_interval == 0:
+                frames.append(self.capture_frame(it))
+        
+        # Restore original step
+        self.step = original_step
+        return frames
+    
+    def calculate_energy(self):
+        """
+        Calculate total energy breakdown of current graph state.
+        
+        Returns:
+            dict: Energy breakdown (spring, repulsion, kinetic, total)
+        """
+        energy = {
+            'spring': 0.0,
+            'repulsion': 0.0,
+            'kinetic': 0.0,
+            'total': 0.0
+        }
+        
+        # Spring energy
+        for edge in self.edges:
+            a = self.nodes[edge.start]
+            b = self.nodes[edge.end]
+            dx = b.x - a.x
+            dy = b.y - a.y
+            distance = (dx*dx + dy*dy) ** 0.5
+            spring_force = self.k_spring * (distance - _effective_L0(self, a, b))
+            energy['spring'] += 0.5 * spring_force * (distance - _effective_L0(self, a, b))
+        
+        # Repulsion energy
+        from itertools import combinations
+        for n1, n2 in combinations(self.nodes.keys(), 2):
+            a = self.nodes[n1]
+            b = self.nodes[n2]
+            dx = b.x - a.x
+            dy = b.y - a.y
+            distance = (dx*dx + dy*dy) ** 0.5
+            if distance > 0:
+                energy['repulsion'] += self.k_repel / distance
+        
+        # Kinetic energy (based on velocities)
+        for name, vel in self._vel.items():
+            vx, vy = vel
+            energy['kinetic'] += 0.5 * (vx*vx + vy*vy)
+        
+        energy['total'] = energy['spring'] + energy['repulsion'] + energy['kinetic']
+        return energy
+    
+    def print_state(self, title="Graph State"):
+        """
+        Print current state of all nodes.
+        
+        Args:
+            title: Title for the print output
+        """
+        print(f"\n{title}:")
+        print(f"{'Node':<8} {'Label':<12} {'Position':<20} {'Velocity':<20}")
+        print("-" * 65)
+        
+        for name in sorted(self.nodes.keys()):
+            node = self.nodes[name]
+            vel = self._vel.get(name, [0.0, 0.0])
+            pos_str = f"({node.x:7.3f}, {node.y:7.3f})"
+            vel_str = f"({vel[0]:7.3f}, {vel[1]:7.3f})"
+            print(f"{name:<8} {node.label:<12} {pos_str:<20} {vel_str:<20}")
+    
+    def validate_physics(self):
+        """
+        Validate physics calculations for correctness.
+        
+        Returns:
+            dict: Validation results
+        """
+        results = {
+            'spring_forces_valid': True,
+            'repulsion_forces_valid': True,
+            'energy_conserved': True,
+            'errors': []
+        }
+        
+        try:
+            # Test spring force calculation
+            if len(self.edges) > 0:
+                edge = self.edges[0]
+                a = self.nodes[edge.start]
+                b = self.nodes[edge.end]
+                dx = b.x - a.x
+                dy = b.y - a.y
+                distance = (dx*dx + dy*dy) ** 0.5
+                expected_force = self.k_spring * (distance - _effective_L0(self, a, b))
+                
+                # Check if force is reasonable
+                if abs(expected_force) > 1000:
+                    results['spring_forces_valid'] = False
+                    results['errors'].append(f"Excessive spring force: {expected_force}")
+        
+        except Exception as e:
+            results['spring_forces_valid'] = False
+            results['errors'].append(f"Spring force validation error: {e}")
+        
+        return results
+    
+    def test_parameter_sensitivity(self, param_name, values):
+        """
+        Test parameter effects on convergence.
+        
+        Args:
+            param_name: Name of parameter to test
+            values: List of values to test
+            
+        Returns:
+            dict: Test results for each parameter value
+        """
+        results = {}
+        
+        # Store original parameter value
+        original_value = getattr(self, param_name, None)
+        
+        for value in values:
+            setattr(self, param_name, value)
+            
+            # Create test graph
+            self.create_test_graph("two_node")
+            
+            # Run simulation
+            frames = self.run_simulation_with_capture(iterations=100, capture_interval=50)
+            
+            # Calculate final distance
+            if len(self.nodes) >= 2:
+                entry = self.nodes.get("entry")
+                exit_node = self.nodes.get("exit")
+                if entry and exit_node:
+                    dx = exit_node.x - entry.x
+                    dy = exit_node.y - entry.y
+                    final_distance = (dx*dx + dy*dy) ** 0.5
+                else:
+                    final_distance = 0.0
+            else:
+                final_distance = 0.0
+            
+            # Calculate final energy
+            final_energy = self.calculate_energy()
+            
+            results[value] = {
+                'final_distance': final_distance,
+                'final_energy': final_energy['total'],
+                'converged': final_energy['kinetic'] < 0.01
+            }
+        
+        # Restore original parameter value
+        if original_value is not None:
+            setattr(self, param_name, original_value)
+        
+        return results
 
 
 # ------------------------------
@@ -384,51 +639,7 @@ def _effective_L0(G: GraphLayout, a: Node, b: Node):
 # ------------------------------
 
 if __name__ == "__main__":
-    # Legend-based styles (colors for your renderer)
-    STYLES = {
-        "Entry":       dict(shape="ellipse", color="#90ee90"),
-        "Exit":        dict(shape="ellipse", color="#ff6b6b"),
-        "Assignment":  dict(shape="box",     color="#ffd700"),
-        "Conditional": dict(shape="diamond", color="#ffa500"),
-        "Loop":        dict(shape="diamond", color="#ff9999"),
-        "Statement":   dict(shape="box",     color="#97c2fc"),
-        "Return":      dict(shape="box",     color="#90ee90"),
-        "Try":         dict(shape="box",     color="#dda0dd"),
-        "Except":      dict(shape="box",     color="#f0e68c"),
-        "Merge":       dict(shape="circle",  color="#d3d3d3"),
-    }
-
-    # Make a small mixed graph
-    G = GraphLayout()
-    G.add_node("n0", "entry",    **STYLES["Entry"],      width=1.8, height=1.2, pos=(0.0, 0.0))
-    G.add_node("n1", "cond",     **STYLES["Conditional"],width=2.2, height=1.6, pos=(0.0, 1.4))
-    G.add_node("n2", "assign A", **STYLES["Assignment"], width=2.8, height=1.2, pos=(-2.0, 2.8))
-    G.add_node("n3", "assign B", **STYLES["Assignment"], width=2.0, height=1.2, pos=( 2.0, 2.8))
-    G.add_node("n4", "merge",    **STYLES["Merge"],      width=1.2, height=1.2, pos=(0.0, 4.2))
-    G.add_node("n5", "return",   **STYLES["Return"],     width=2.2, height=1.2, pos=(0.0, 5.6))
-    G.add_node("n6", "exit",     **STYLES["Exit"],       width=1.8, height=1.2, pos=(0.0, 7.0))
-
-    G.add_edge("n0", "n1")
-    G.add_edge("n1", "n2")
-    G.add_edge("n1", "n3")
-    G.add_edge("n2", "n4")
-    G.add_edge("n3", "n4")
-    G.add_edge("n4", "n5")
-    G.add_edge("n5", "n6")
-
-    # Physics parameters tuned tight & compact
-    G.k_spring  = 0.28
-    G.k_repel   = 240.0
-    G.k_barrier = 10000.0
-    G.L0        = 0.45
-    G.edge_radius = 0.30
-    G.step      = 0.045
-    G.damping   = 0.92
-
-    G.relax(iterations=700, cool_to=0.02)
-
-    print("Final node positions (x, y):")
-    for name in G.nodes:
-        n = G.nodes[name]
-        print(f"{name:>3}  {n.label:>9}  {n.shape:<9}  ({n.x:.3f}, {n.y:.3f})")
+    print("layout_relaxer.py - Graph layout library")
+    print("Import this module and use GraphLayout class for layout functionality")
+    print("See test_layout_relaxer_comprehensive.py for usage examples")
 

@@ -1,0 +1,1122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Relaxation Simulation</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .control-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        
+        button {
+            padding: 8px 16px;
+            margin: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            margin: 0 10px;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 4px;
+        }
+        
+        .visualization {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+            display: flex;
+        }
+        
+        .physics-panel {
+            flex: 0 0 300px;
+            position: relative;
+            border-right: 1px solid #ddd;
+            background: #f8f9fa;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            height: 100%;
+            max-height: 100%;
+        }
+        
+        .graph-panel {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid #ddd;
+        }
+        
+        .force-panel {
+            flex: 1;
+            position: relative;
+        }
+        
+        .physics-section {
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px;
+        }
+        
+        .physics-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .physics-value {
+            margin: 3px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .physics-label {
+            color: #6c757d;
+        }
+        
+        .physics-number {
+            color: #212529;
+            font-weight: bold;
+        }
+        
+        .physics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        
+        .physics-table th,
+        .physics-table td {
+            border: 1px solid #dee2e6;
+            padding: 2px 4px;
+            text-align: left;
+            font-size: 10px;
+        }
+        
+        .physics-table th {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        #forceCanvas {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 1000;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+        
+        .error {
+            color: red;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="error" id="errorMsg"></div>
+            
+            <div class="control-group">
+                <button id="playBtn" onclick="togglePlay()">Play</button>
+                <button id="stepBtn" onclick="stepForward()">Step Forward</button>
+                <button id="stepBackBtn" onclick="stepBackward()">Step Back</button>
+                <button id="resetBtn" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Frame:</label>
+                <span id="frameInfo">0 / 0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>FPS:</label>
+                <input type="range" id="fpsSlider" min="0.5" max="10" step="0.5" value="2" onchange="updateFPS(this.value)">
+                <span id="fpsValue">2.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Speed:</label>
+                <input type="number" id="speedInput" min="1" max="50" value="1" onchange="updateSpeed(this.value)">
+                <span>frames/step</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div class="physics-panel">
+                <div class="physics-section">
+                    <div class="physics-title">Simulation Parameters</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Iteration:</span>
+                        <span class="physics-number" id="physicsIteration">0</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Step Size:</span>
+                        <span class="physics-number" id="physicsStepSize">0.0100</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Spring K:</span>
+                        <span class="physics-number" id="physicsSpringK">0.100</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Repulsion K:</span>
+                        <span class="physics-number" id="physicsRepulsionK">5000.0</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Spring Length:</span>
+                        <span class="physics-number" id="physicsSpringLength">50.0</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Damping:</span>
+                        <span class="physics-number" id="physicsDamping">0.850</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">System Energy</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Total Energy:</span>
+                        <span class="physics-number" id="physicsTotalEnergy">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Spring Energy:</span>
+                        <span class="physics-number" id="physicsSpringEnergy">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Repulsion Energy:</span>
+                        <span class="physics-number" id="physicsRepulsionEnergy">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Kinetic Energy:</span>
+                        <span class="physics-number" id="physicsKineticEnergy">0.00</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Force Statistics</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Avg Force:</span>
+                        <span class="physics-number" id="physicsAvgForce">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Max Force:</span>
+                        <span class="physics-number" id="physicsMaxForce">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Min Force:</span>
+                        <span class="physics-number" id="physicsMinForce">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Force StdDev:</span>
+                        <span class="physics-number" id="physicsForceStdDev">0.00</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Distance Statistics</div>
+                    <div class="physics-value">
+                        <span class="physics-label">Avg Distance:</span>
+                        <span class="physics-number" id="physicsAvgDistance">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Max Distance:</span>
+                        <span class="physics-number" id="physicsMaxDistance">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Min Distance:</span>
+                        <span class="physics-number" id="physicsMinDistance">0.00</span>
+                    </div>
+                    <div class="physics-value">
+                        <span class="physics-label">Distance StdDev:</span>
+                        <span class="physics-number" id="physicsDistanceStdDev">0.00</span>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Node Details</div>
+                    <div id="nodeDetailsContainer">
+                        <table class="physics-table">
+                            <thead>
+                                <tr>
+                                    <th>Node</th>
+                                    <th>Force</th>
+                                    <th>Velocity</th>
+                                    <th>Position</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nodeDetailsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="physics-section">
+                    <div class="physics-title">Edge Details</div>
+                    <div id="edgeDetailsContainer">
+                        <table class="physics-table">
+                            <thead>
+                                <tr>
+                                    <th>Edge</th>
+                                    <th>Distance</th>
+                                    <th>Spring Force</th>
+                                    <th>Energy</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edgeDetailsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="graph-panel">
+                <div id="network"></div>
+                <div class="info">
+                    <div><strong>Iteration:</strong> <span id="iteration">0</span></div>
+                    <div><strong>Step Size:</strong> <span id="stepSize">0.01</span></div>
+                    <div><strong>Nodes:</strong> <span id="nodeCount">0</span></div>
+                    <div><strong>Playing:</strong> <span id="playingStatus">No</span></div>
+                </div>
+            </div>
+            <div class="force-panel">
+                <canvas id="forceCanvas"></canvas>
+                <div class="info" style="left: 10px; right: auto;">
+                    <div><strong>Total Energy:</strong> <span id="totalEnergy">0.00</span></div>
+                    <div><strong>Avg Force:</strong> <span id="avgForce">0.00</span></div>
+                    <div><strong>Avg Distance:</strong> <span id="avgDistance">0.00</span></div>
+                    <div><strong>Max Force:</strong> <span id="maxForce">0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         // Simulation data
+         const frames = [{"iteration": 0, "step": 0.01, "nodes": {"a": {"x": 0.0, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.0, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 2, "step": 0.00981818181818182, "nodes": {"a": {"x": -0.012792080167729248, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.012792080167729, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 4, "step": 0.009636363636363636, "nodes": {"a": {"x": -0.03863965873244303, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.038639658732443, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 6, "step": 0.009454545454545457, "nodes": {"a": {"x": -0.07271212464916102, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.072712124649161, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 8, "step": 0.009272727272727273, "nodes": {"a": {"x": -0.11056931766596247, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1105693176659623, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 10, "step": 0.009090909090909092, "nodes": {"a": {"x": -0.14847560098110577, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1484756009811057, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 12, "step": 0.008909090909090908, "nodes": {"a": {"x": -0.18355445032614703, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.183554450326147, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 14, "step": 0.008727272727272728, "nodes": {"a": {"x": -0.21381686234838335, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2138168623483834, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 16, "step": 0.008545454545454545, "nodes": {"a": {"x": -0.23810147839336887, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.238101478393369, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 18, "step": 0.008363636363636363, "nodes": {"a": {"x": -0.2559601331299979, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.255960133129998, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 20, "step": 0.008181818181818182, "nodes": {"a": {"x": -0.26751572272503077, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2675157227250313, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 22, "step": 0.008, "nodes": {"a": {"x": -0.27331252964588654, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2733125296458874, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 24, "step": 0.007818181818181818, "nodes": {"a": {"x": -0.27417324319344766, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2741732431934487, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 26, "step": 0.0076363636363636364, "nodes": {"a": {"x": -0.2710719931212004, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2710719931212013, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 28, "step": 0.007454545454545454, "nodes": {"a": {"x": -0.26502871711111425, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.265028717111115, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 30, "step": 0.007272727272727274, "nodes": {"a": {"x": -0.2570270406676136, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.257027040667614, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 32, "step": 0.00709090909090909, "nodes": {"a": {"x": -0.24795548733573972, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.24795548733574, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 34, "step": 0.00690909090909091, "nodes": {"a": {"x": -0.23857017521701068, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2385701752170113, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 36, "step": 0.006727272727272728, "nodes": {"a": {"x": -0.22947609666836616, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.229476096668367, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 38, "step": 0.006545454545454545, "nodes": {"a": {"x": -0.2211235175818665, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2211235175818675, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 40, "step": 0.006363636363636365, "nodes": {"a": {"x": -0.21381586619324564, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2138158661932468, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 42, "step": 0.0061818181818181816, "nodes": {"a": {"x": -0.2077256112076621, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.207725611207663, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 44, "step": 0.006, "nodes": {"a": {"x": -0.20291496825639863, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2029149682563993, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 46, "step": 0.005818181818181818, "nodes": {"a": {"x": -0.1993587471798403, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.199358747179841, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 48, "step": 0.005636363636363636, "nodes": {"a": {"x": -0.1969671962471787, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1969671962471793, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 50, "step": 0.005454545454545454, "nodes": {"a": {"x": -0.1956072592134576, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.195607259213458, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 52, "step": 0.005272727272727272, "nodes": {"a": {"x": -0.19512119328520008, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1951211932852006, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 54, "step": 0.005090909090909091, "nodes": {"a": {"x": -0.19534196772766355, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.195341967727664, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 56, "step": 0.004909090909090909, "nodes": {"a": {"x": -0.19610525273391985, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1961052527339207, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 58, "step": 0.0047272727272727275, "nodes": {"a": {"x": -0.1972581065402889, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1972581065402896, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 60, "step": 0.004545454545454545, "nodes": {"a": {"x": -0.19866467608721292, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.1986646760872137, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 62, "step": 0.004363636363636364, "nodes": {"a": {"x": -0.20020935116584346, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2002093511658445, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 64, "step": 0.0041818181818181815, "nodes": {"a": {"x": -0.20179786741166034, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.201797867411661, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 66, "step": 0.004000000000000001, "nodes": {"a": {"x": -0.20335685547486326, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.203356855474864, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 68, "step": 0.0038181818181818187, "nodes": {"a": {"x": -0.2048322980201828, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2048322980201838, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 70, "step": 0.0036363636363636364, "nodes": {"a": {"x": -0.2061872971454054, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2061872971454064, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 72, "step": 0.0034545454545454545, "nodes": {"a": {"x": -0.20739948417283455, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2073994841728357, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 74, "step": 0.0032727272727272726, "nodes": {"a": {"x": -0.208458330606282, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.208458330606283, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 76, "step": 0.0030909090909090916, "nodes": {"a": {"x": -0.20936254971594456, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2093625497159453, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 78, "step": 0.0029090909090909093, "nodes": {"a": {"x": -0.21011771671336701, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2101177167133677, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 80, "step": 0.0027272727272727275, "nodes": {"a": {"x": -0.21073418389178455, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2107341838917853, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 82, "step": 0.0025454545454545456, "nodes": {"a": {"x": -0.21122532606863081, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2112253260686314, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 84, "step": 0.0023636363636363633, "nodes": {"a": {"x": -0.21160612079819055, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.211606120798191, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 86, "step": 0.0021818181818181815, "nodes": {"a": {"x": -0.21189204610142645, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.211892046101427, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 88, "step": 0.0020000000000000005, "nodes": {"a": {"x": -0.21209826451795272, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.212098264517953, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 90, "step": 0.0018181818181818186, "nodes": {"a": {"x": -0.21223905462797152, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2122390546279718, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 92, "step": 0.0016363636363636363, "nodes": {"a": {"x": -0.21232744835635403, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2123274483563544, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 94, "step": 0.0014545454545454545, "nodes": {"a": {"x": -0.21237503302404695, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2123750330240473, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 96, "step": 0.0012727272727272726, "nodes": {"a": {"x": -0.21239188010687826, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2123918801068787, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 98, "step": 0.0010909090909090905, "nodes": {"a": {"x": -0.21238656706048592, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2123865670604865, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}, {"iteration": 100, "step": 0.0009090909090909084, "nodes": {"a": {"x": -0.21236626364201505, "y": 0.0, "label": "A", "shape": "box", "color": "#ff0000", "width": 50, "height": 30}, "b": {"x": 2.2123662636420156, "y": 0.0, "label": "B", "shape": "box", "color": "#00ff00", "width": 50, "height": 30}}}];
+         let currentFrame = 0;
+         let isPlaying = false;
+         let fps = 2.0;
+         let speed = 1;
+         let lastFrameTime = 0;
+         let network = null;
+         let animationId = null;
+         let forceCanvas = null;
+         let forceCtx = null;
+
+        // Error handling
+        function showError(message) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            console.error(message);
+        }
+
+        function hideError() {
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // Initialize network
+        function initNetwork() {
+            try {
+                const container = document.getElementById('network');
+                const data = {
+                    nodes: new vis.DataSet([]),
+                    edges: new vis.DataSet([])
+                };
+                
+                const options = {
+                    physics: { enabled: false },
+                    interaction: {
+                        zoomView: true,
+                        dragView: true
+                    },
+                    layout: {
+                        hierarchical: { enabled: false }
+                    },
+                    nodes: {
+                        shape: 'box'
+                    },
+                    edges: {
+                        smooth: { enabled: false }
+                    }
+                };
+                
+                network = new vis.Network(container, data, options);
+                console.log('Network initialized successfully');
+            } catch (error) {
+                showError('Failed to initialize network: ' + error.message);
+            }
+        }
+
+        // Function to detect structure type
+        function detectStructureType(nodeIds) {
+            const name = nodeIds.length > 0 ? nodeIds[0].toLowerCase() : '';
+            if (name.includes('binary')) return 'binary';
+            if (name.includes('loop')) return 'loop';
+            if (name.includes('nested')) return 'nested';
+            if (name.includes('multi')) return 'multi';
+            return 'linear';
+        }
+
+        // Function to create all edges for a structure
+        function createAllEdges(nodeIds, type) {
+            const edges = [];
+            const sortedIds = [...nodeIds].sort();
+            
+            // Linear connections (always present)
+            for (let i = 0; i < sortedIds.length - 1; i++) {
+                edges.push([sortedIds[i], sortedIds[i + 1]]);
+            }
+            
+            // Structure-specific edges
+            if (type === 'binary') {
+                for (let i = 1; i < sortedIds.length; i++) {
+                    const parentIndex = Math.floor((i - 1) / 2);
+                    if (parentIndex < sortedIds.length && parentIndex !== i) {
+                        edges.push([sortedIds[parentIndex], sortedIds[i]]);
+                    }
+                }
+            } else if (type === 'loop') {
+                if (sortedIds.length > 3) {
+                    edges.push([sortedIds[sortedIds.length - 2], sortedIds[2]]);
+                }
+            }
+            
+            return edges;
+        }
+
+        // Calculate forces for current frame
+        function calculateForces(frame) {
+            const nodes = Object.entries(frame.nodes);
+            const forces = {};
+            const springStrength = 0.1;
+            const springLength = 50;
+            const repulsionStrength = 5000;
+            
+            // Initialize forces
+            nodes.forEach(([id, node]) => {
+                forces[id] = { x: 0, y: 0 };
+            });
+            
+            // Create edges
+            const nodeIds = nodes.map(([id]) => id);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            
+            // Spring forces
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 0) {
+                        const force = springStrength * (distance - springLength);
+                        const fx = (dx / distance) * force;
+                        const fy = (dy / distance) * force;
+                        
+                        forces[from].x += fx;
+                        forces[from].y += fy;
+                        forces[to].x -= fx;
+                        forces[to].y -= fy;
+                    }
+                }
+            });
+            
+            // Repulsion forces
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const [idA, nodeA] = nodes[i];
+                    const [idB, nodeB] = nodes[j];
+                    
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 0 && distance < 500) {
+                        const force = repulsionStrength / (distance * distance);
+                        const fx = (dx / distance) * force;
+                        const fy = (dy / distance) * force;
+                        
+                        forces[idA].x -= fx;
+                        forces[idA].y -= fy;
+                        forces[idB].x += fx;
+                        forces[idB].y += fy;
+                    }
+                }
+            }
+            
+            return forces;
+        }
+
+        // Update network with current frame
+        function updateNetwork() {
+            try {
+                if (currentFrame >= frames.length || currentFrame < 0) {
+                    console.warn('Invalid frame index:', currentFrame);
+                    return;
+                }
+                
+                const frame = frames[currentFrame];
+                if (!frame || !frame.nodes) {
+                    showError('Invalid frame data at index ' + currentFrame);
+                    return;
+                }
+                
+                const nodes = [];
+                const edges = [];
+                const nodeIds = Object.keys(frame.nodes);
+                
+                // Create nodes
+                Object.entries(frame.nodes).forEach(([id, nodeData]) => {
+                    nodes.push({
+                        id: id,
+                        label: nodeData.label || id,
+                        x: (nodeData.x || 0) * 50,
+                        y: (nodeData.y || 0) * 50,
+                        shape: nodeData.shape || 'box',
+                        color: {
+                            background: nodeData.color || '#97c2fc',
+                            border: '#333'
+                        },
+                        font: {
+                            size: 12,
+                            color: '#333'
+                        }
+                    });
+                });
+                
+                // Create edges
+                const structureType = detectStructureType(nodeIds);
+                const allEdges = createAllEdges(nodeIds, structureType);
+                
+                allEdges.forEach(([from, to]) => {
+                    edges.push({
+                        from: from,
+                        to: to,
+                        color: '#666',
+                        width: 2,
+                        arrows: 'to',
+                        smooth: { enabled: false }
+                    });
+                });
+                
+                network.setData({ nodes: nodes, edges: edges });
+                updateInfo();
+                updateForceField();
+                updatePhysicsPanel(calculateForces(frame), frame);
+                hideError();
+                
+            } catch (error) {
+                showError('Error updating network: ' + error.message);
+                console.error('Update network error:', error);
+            }
+        }
+
+        // Update info display
+        function updateInfo() {
+            try {
+                if (currentFrame >= frames.length || currentFrame < 0) return;
+                
+                const frame = frames[currentFrame];
+                document.getElementById('frameInfo').textContent = `${currentFrame} / ${frames.length - 1}`;
+                document.getElementById('iteration').textContent = frame.iteration || 0;
+                document.getElementById('stepSize').textContent = (frame.step || 0).toFixed(4);
+                document.getElementById('nodeCount').textContent = Object.keys(frame.nodes || {}).length;
+                document.getElementById('playingStatus').textContent = isPlaying ? 'Yes' : 'No';
+                
+                const progress = frames.length > 1 ? (currentFrame / (frames.length - 1)) * 100 : 0;
+                document.getElementById('progressBar').style.width = progress + '%';
+            } catch (error) {
+                console.error('Error updating info:', error);
+            }
+        }
+
+        // Control functions
+        function togglePlay() {
+            try {
+                isPlaying = !isPlaying;
+                document.getElementById('playBtn').textContent = isPlaying ? 'Pause' : 'Play';
+                
+                if (isPlaying) {
+                    lastFrameTime = performance.now();
+                    animate();
+                } else {
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
+                    }
+                }
+            } catch (error) {
+                showError('Error toggling play: ' + error.message);
+            }
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+            
+            try {
+                const currentTime = performance.now();
+                const deltaTime = currentTime - lastFrameTime;
+                const frameInterval = 1000 / fps;
+                
+                if (deltaTime >= frameInterval) {
+                    stepForward();
+                    lastFrameTime = currentTime;
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            } catch (error) {
+                showError('Animation error: ' + error.message);
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = 'Play';
+            }
+        }
+
+        function stepForward() {
+            try {
+                if (currentFrame < frames.length - 1) {
+                    currentFrame += speed;
+                    currentFrame = Math.min(currentFrame, frames.length - 1);
+                    updateNetwork();
+                }
+            } catch (error) {
+                showError('Error stepping forward: ' + error.message);
+            }
+        }
+
+        function stepBackward() {
+            try {
+                if (currentFrame > 0) {
+                    currentFrame -= speed;
+                    currentFrame = Math.max(currentFrame, 0);
+                    updateNetwork();
+                }
+            } catch (error) {
+                showError('Error stepping backward: ' + error.message);
+            }
+        }
+
+        function reset() {
+            try {
+                currentFrame = 0;
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = 'Play';
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                updateNetwork();
+            } catch (error) {
+                showError('Error resetting: ' + error.message);
+            }
+        }
+
+        function updateFPS(value) {
+            fps = parseFloat(value);
+            document.getElementById('fpsValue').textContent = fps.toFixed(1);
+        }
+
+        function updateSpeed(value) {
+            speed = parseInt(value);
+            speed = Math.max(1, Math.min(50, speed));
+        }
+
+        // Initialize force canvas
+        function initForceCanvas() {
+            forceCanvas = document.getElementById('forceCanvas');
+            forceCtx = forceCanvas.getContext('2d');
+            resizeForceCanvas();
+        }
+        
+        // Resize force canvas
+        function resizeForceCanvas() {
+            const rect = forceCanvas.parentElement.getBoundingClientRect();
+            forceCanvas.width = rect.width;
+            forceCanvas.height = rect.height;
+        }
+        
+        // Update force field visualization
+        function updateForceField() {
+            if (!forceCtx || currentFrame >= frames.length) return;
+            
+            const frame = frames[currentFrame];
+            const forces = calculateForces(frame);
+            
+            // Clear canvas
+            forceCtx.clearRect(0, 0, forceCanvas.width, forceCanvas.height);
+            
+            // Use same coordinate system as vis-network (already scaled by 50)
+            const padding = 40;
+            const nodes = Object.values(frame.nodes);
+            
+            // Find min/max coordinates in vis-network space
+            const minX = Math.min(...nodes.map(n => n.x * 50));
+            const maxX = Math.max(...nodes.map(n => n.x * 50));
+            const minY = Math.min(...nodes.map(n => n.y * 50));
+            const maxY = Math.max(...nodes.map(n => n.y * 50));
+            
+            const nodeWidth = maxX - minX || 100;
+            const nodeHeight = maxY - minY || 100;
+            
+            // Calculate uniform scale to fit canvas
+            const scaleX = (forceCanvas.width - 2 * padding) / nodeWidth;
+            const scaleY = (forceCanvas.height - 2 * padding) / nodeHeight;
+            const uniformScale = Math.min(scaleX, scaleY);
+            
+            // Center the visualization
+            const centerX = forceCanvas.width / 2;
+            const centerY = forceCanvas.height / 2;
+            const offsetX = (minX + maxX) / 2;
+            const offsetY = (minY + maxY) / 2;
+            
+            // Transform coordinates to match vis-network viewport
+            const transformX = (x) => centerX + (x * 50 - offsetX) * uniformScale;
+            const transformY = (y) => centerY + (y * 50 - offsetY) * uniformScale;
+            
+            // Draw force field heatmap
+            const gridSize = 25;
+            const cellWidth = forceCanvas.width / gridSize;
+            const cellHeight = forceCanvas.height / gridSize;
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const x = (i + 0.5) * cellWidth;
+                    const y = (j + 0.5) * cellHeight;
+                    
+                    let totalForce = 0;
+                    Object.entries(frame.nodes).forEach(([id, node]) => {
+                        const nodeX = transformX(node.x);
+                        const nodeY = transformY(node.y);
+                        const dx = x - nodeX;
+                        const dy = y - nodeY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance > 0 && distance < 200 * uniformScale) {
+                            totalForce += 3000 / (distance * distance);
+                        }
+                    });
+                    
+                    const intensity = Math.min(totalForce / 8, 1);
+                    const hue = (1 - intensity) * 240; // Blue to red
+                    forceCtx.fillStyle = `hsla(${hue}, 100%, 50%, 0.25)`;
+                    forceCtx.fillRect(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+                }
+            }
+            
+            // Draw nodes and force vectors
+            Object.entries(frame.nodes).forEach(([id, node]) => {
+                const x = transformX(node.x);
+                const y = transformY(node.y);
+                
+                // Draw node
+                forceCtx.fillStyle = 'white';
+                forceCtx.strokeStyle = 'black';
+                forceCtx.lineWidth = 2;
+                forceCtx.beginPath();
+                forceCtx.arc(x, y, 8, 0, Math.PI * 2);
+                forceCtx.fill();
+                forceCtx.stroke();
+                
+                // Draw node label
+                forceCtx.fillStyle = 'black';
+                forceCtx.font = '10px Arial';
+                forceCtx.textAlign = 'center';
+                forceCtx.textBaseline = 'middle';
+                forceCtx.fillText(id, x, y);
+                
+                // Draw force vector
+                const force = forces[id];
+                const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                if (forceMag > 0.05) {
+                    const vectorScale = Math.min(forceMag * uniformScale * 1.5, 120);
+                    const endX = x + (force.x / forceMag) * vectorScale;
+                    const endY = y + (force.y / forceMag) * vectorScale;
+                    
+                    forceCtx.strokeStyle = 'red';
+                    forceCtx.lineWidth = 2;
+                    forceCtx.beginPath();
+                    forceCtx.moveTo(x, y);
+                    forceCtx.lineTo(endX, endY);
+                    forceCtx.stroke();
+                    
+                    // Arrowhead
+                    const angle = Math.atan2(force.y, force.x);
+                    const arrowSize = 8;
+                    forceCtx.beginPath();
+                    forceCtx.moveTo(endX, endY);
+                    forceCtx.lineTo(endX - arrowSize * Math.cos(angle - 0.5), endY - arrowSize * Math.sin(angle - 0.5));
+                    forceCtx.lineTo(endX - arrowSize * Math.cos(angle + 0.5), endY - arrowSize * Math.sin(angle + 0.5));
+                    forceCtx.closePath();
+                    forceCtx.fillStyle = 'red';
+                    forceCtx.fill();
+                }
+            });
+            
+            updateForceMetrics(forces, frame);
+        }
+        
+        // Update force metrics
+        function updateForceMetrics(forces, frame) {
+            const forceValues = Object.values(forces);
+            const avgForce = forceValues.reduce((sum, f) => sum + Math.sqrt(f.x * f.x + f.y * f.y), 0) / forceValues.length;
+            const maxForce = Math.max(...forceValues.map(f => Math.sqrt(f.x * f.x + f.y * f.y)));
+            
+            let totalDistance = 0;
+            let edgeCount = 0;
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    totalDistance += Math.sqrt(dx * dx + dy * dy);
+                    edgeCount++;
+                }
+            });
+            const avgDistance = edgeCount > 0 ? totalDistance / edgeCount : 0;
+            
+            // Calculate total energy
+            let totalEnergy = 0;
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    totalEnergy += 0.5 * 0.1 * Math.pow(distance - 150, 2);
+                }
+            });
+            
+            document.getElementById('totalEnergy').textContent = totalEnergy.toFixed(2);
+            document.getElementById('avgForce').textContent = avgForce.toFixed(2);
+            document.getElementById('avgDistance').textContent = avgDistance.toFixed(2);
+            document.getElementById('maxForce').textContent = maxForce.toFixed(2);
+        }
+        
+        // Update physics panel with detailed information
+        function updatePhysicsPanel(forces, frame) {
+            // Update basic parameters
+            document.getElementById('physicsIteration').textContent = frame.iteration || 0;
+            document.getElementById('physicsStepSize').textContent = (frame.step || 0).toFixed(4);
+            
+            // Update physics constants (these should match the simulation)
+            document.getElementById('physicsSpringK').textContent = '0.100';
+            document.getElementById('physicsRepulsionK').textContent = '5000.0';
+            document.getElementById('physicsSpringLength').textContent = '50.0';
+            document.getElementById('physicsDamping').textContent = '0.850';
+            
+            // Calculate detailed energy breakdown
+            const energyBreakdown = calculateEnergyBreakdown(forces, frame);
+            document.getElementById('physicsTotalEnergy').textContent = energyBreakdown.total.toFixed(2);
+            document.getElementById('physicsSpringEnergy').textContent = energyBreakdown.spring.toFixed(2);
+            document.getElementById('physicsRepulsionEnergy').textContent = energyBreakdown.repulsion.toFixed(2);
+            document.getElementById('physicsKineticEnergy').textContent = energyBreakdown.kinetic.toFixed(2);
+            
+            // Calculate force statistics
+            const forceStats = calculateForceStatistics(forces);
+            document.getElementById('physicsAvgForce').textContent = forceStats.avg.toFixed(2);
+            document.getElementById('physicsMaxForce').textContent = forceStats.max.toFixed(2);
+            document.getElementById('physicsMinForce').textContent = forceStats.min.toFixed(2);
+            document.getElementById('physicsForceStdDev').textContent = forceStats.stdDev.toFixed(2);
+            
+            // Calculate distance statistics
+            const distanceStats = calculateDistanceStatistics(frame);
+            document.getElementById('physicsAvgDistance').textContent = distanceStats.avg.toFixed(2);
+            document.getElementById('physicsMaxDistance').textContent = distanceStats.max.toFixed(2);
+            document.getElementById('physicsMinDistance').textContent = distanceStats.min.toFixed(2);
+            document.getElementById('physicsDistanceStdDev').textContent = distanceStats.stdDev.toFixed(2);
+            
+            // Update node details table
+            updateNodeDetailsTable(forces, frame);
+            
+            // Update edge details table
+            updateEdgeDetailsTable(frame);
+        }
+        
+        // Calculate detailed energy breakdown
+        function calculateEnergyBreakdown(forces, frame) {
+            let springEnergy = 0;
+            let repulsionEnergy = 0;
+            let kineticEnergy = 0;
+            
+            const springStrength = 0.1;
+            const springLength = 50;
+            const repulsionStrength = 5000;
+            
+            // Spring energy
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    springEnergy += 0.5 * springStrength * Math.pow(distance - springLength, 2);
+                }
+            });
+            
+            // Repulsion energy
+            const nodes = Object.entries(frame.nodes);
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const [idA, nodeA] = nodes[i];
+                    const [idB, nodeB] = nodes[j];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance > 0 && distance < 500) {
+                        repulsionEnergy += repulsionStrength / distance;
+                    }
+                }
+            }
+            
+            // Kinetic energy (simplified - based on forces)
+            Object.values(forces).forEach(force => {
+                const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                kineticEnergy += 0.5 * forceMag * forceMag;
+            });
+            
+            return {
+                total: springEnergy + repulsionEnergy + kineticEnergy,
+                spring: springEnergy,
+                repulsion: repulsionEnergy,
+                kinetic: kineticEnergy
+            };
+        }
+        
+        // Calculate force statistics
+        function calculateForceStatistics(forces) {
+            const forceMagnitudes = Object.values(forces).map(f => Math.sqrt(f.x * f.x + f.y * f.y));
+            const avg = forceMagnitudes.reduce((sum, f) => sum + f, 0) / forceMagnitudes.length;
+            const max = Math.max(...forceMagnitudes);
+            const min = Math.min(...forceMagnitudes);
+            
+            const variance = forceMagnitudes.reduce((sum, f) => sum + Math.pow(f - avg, 2), 0) / forceMagnitudes.length;
+            const stdDev = Math.sqrt(variance);
+            
+            return { avg, max, min, stdDev };
+        }
+        
+        // Calculate distance statistics
+        function calculateDistanceStatistics(frame) {
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            const distances = [];
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    distances.push(distance);
+                }
+            });
+            
+            if (distances.length === 0) return { avg: 0, max: 0, min: 0, stdDev: 0 };
+            
+            const avg = distances.reduce((sum, d) => sum + d, 0) / distances.length;
+            const max = Math.max(...distances);
+            const min = Math.min(...distances);
+            
+            const variance = distances.reduce((sum, d) => sum + Math.pow(d - avg, 2), 0) / distances.length;
+            const stdDev = Math.sqrt(variance);
+            
+            return { avg, max, min, stdDev };
+        }
+        
+        // Update node details table
+        function updateNodeDetailsTable(forces, frame) {
+            const tbody = document.getElementById('nodeDetailsTable');
+            tbody.innerHTML = '';
+            
+            Object.entries(frame.nodes).forEach(([id, node]) => {
+                const force = forces[id];
+                const forceMag = Math.sqrt(force.x * force.x + force.y * force.y);
+                
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = id;
+                row.insertCell(1).textContent = forceMag.toFixed(2);
+                row.insertCell(2).textContent = "(" + force.x.toFixed(1) + ", " + force.y.toFixed(1) + ")";
+                row.insertCell(3).textContent = "(" + node.x.toFixed(1) + ", " + node.y.toFixed(1) + ")";
+            });
+        }
+        
+        // Update edge details table
+        function updateEdgeDetailsTable(frame) {
+            const tbody = document.getElementById('edgeDetailsTable');
+            tbody.innerHTML = '';
+            
+            const nodeIds = Object.keys(frame.nodes);
+            const structureType = detectStructureType(nodeIds);
+            const edges = createAllEdges(nodeIds, structureType);
+            const springStrength = 0.1;
+            const springLength = 50;
+            
+            edges.forEach(([from, to]) => {
+                if (frame.nodes[from] && frame.nodes[to]) {
+                    const nodeA = frame.nodes[from];
+                    const nodeB = frame.nodes[to];
+                    const dx = (nodeB.x - nodeA.x) * 50;
+                    const dy = (nodeB.y - nodeA.y) * 50;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const springForce = Math.abs(springStrength * (distance - springLength));
+                    const energy = 0.5 * springStrength * Math.pow(distance - springLength, 2);
+                    
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = from + "→" + to;
+                    row.insertCell(1).textContent = distance.toFixed(2);
+                    row.insertCell(2).textContent = springForce.toFixed(2);
+                    row.insertCell(3).textContent = energy.toFixed(2);
+                }
+            });
+        }
+        
+        // Handle window resize
+        window.onresize = function() {
+            if (network) {
+                network.redraw();
+                network.fit();
+            }
+            if (forceCanvas) {
+                resizeForceCanvas();
+                // Small delay to ensure canvas dimensions are updated
+                setTimeout(() => {
+                    updateForceField();
+                }, 50);
+            }
+        };
+
+         // Initialize on load
+         window.onload = function() {
+             console.log('Page loaded, initializing...');
+             try {
+                 if (frames.length === 0) {
+                     showError('No simulation frames available');
+                     return;
+                 }
+                 
+                 initNetwork();
+                 initForceCanvas();
+                 updateNetwork();
+                 console.log('Initialization complete');
+             } catch (error) {
+                 showError('Initialization error: ' + error.message);
+                 console.error('Init error:', error);
+             }
+         };
+    </script>
+</body>
+</html>
+        
