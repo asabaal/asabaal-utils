@@ -1,0 +1,88 @@
+# PR Analysis Configuration
+analysis_settings:
+  # Impact scoring weights (must sum to 1.0)
+  impact_weights:
+    business_value: 0.4
+    technical_quality: 0.3
+    user_experience: 0.2
+    maintainability: 0.1
+  
+  # Analysis thresholds
+  thresholds:
+    high_impact_lines: 100        # Files with 100+ lines changed are high impact
+    complex_file_threshold: 500   # Files with 500+ lines are considered complex
+    risk_score_threshold: 7.0     # Risk scores above 7.0 are flagged
+    large_pr_threshold: 1000      # PRs with 1000+ lines are considered large
+  
+  # Business impact scoring
+  business_impact_factors:
+    new_revenue_streams: 10
+    user_experience_improvement: 8
+    operational_efficiency: 6
+    brand_enhancement: 4
+    content_creation: 5
+    social_media_integration: 6
+    database_implementation: 7
+    
+  # Technical impact scoring  
+  technical_impact_factors:
+    architecture_improvement: 9
+    performance_optimization: 7
+    security_enhancement: 9
+    code_quality_improvement: 6
+    technical_debt_reduction: 5
+    new_feature_implementation: 7
+    
+  # Risk factors (negative scores)
+  risk_factors:
+    breaking_changes: -8
+    new_dependencies: -3
+    complex_migrations: -6
+    security_vulnerabilities: -10
+    large_file_changes: -4
+    
+# Report generation options
+report_options:
+  # Content inclusion
+  include_full_diffs: false
+  max_diff_lines: 50
+  show_file_previews: true
+  include_complexity_metrics: true
+  
+  # Visualization options
+  generate_charts: true
+  interactive_visualizations: true
+  mobile_responsive: true
+  
+  # Export options
+  enable_pdf_export: false
+  enable_data_export: true
+  
+  # Performance settings
+  max_files_for_detailed_analysis: 200
+  diff_context_lines: 3
+  
+# Display customization
+display_settings:
+  # Color scheme
+  colors:
+    added: "#22c55e"      # Green for additions
+    removed: "#ef4444"    # Red for deletions  
+    modified: "#f59e0b"   # Orange for modifications
+    high_impact: "#dc2626" # Red for high impact
+    medium_impact: "#f59e0b" # Orange for medium impact
+    low_impact: "#10b981"   # Green for low impact
+    
+  # Icon mapping
+  change_type_icons:
+    added: "➕"
+    modified: "📝"
+    deleted: "❌"
+    moved: "📁"
+    
+  # Chart preferences
+  chart_types:
+    file_distribution: "pie"
+    lines_changed: "bar"
+    impact_over_time: "line"
+    complexity_scatter: "scatter"

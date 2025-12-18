@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Graph Structure</title>
+    <script src="lib/vis-network/vis-network.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #network { width: 400px; height: 300px; border: 1px solid #ccc; }
+        .debug { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Debug Graph Structure</h1>
+    <div id="network"></div>
+    <div class="debug">
+        <h2>Debug Output:</h2>
+        <pre id="debugOutput"></pre>
+    </div>
+
+    <script>
+        // Create test data
+        const nodes = new vis.DataSet([
+            {id: 'a', label: 'Node A'},
+            {id: 'b', label: 'Node B'}
+        ]);
+        
+        const edges = new vis.DataSet([
+            {from: 'a', to: 'b'}
+        ]);
+        
+        const container = document.getElementById('network');
+        const network = new vis.Network(container, {
+            nodes: nodes,
+            edges: edges
+        }, {});
+        
+        function debugGraphStructure() {
+            const debug = {
+                'nodes object': nodes,
+                'edges object': edges,
+                'network object': network,
+                'network.getPositions()': network.getPositions(),
+                'edges.get()': edges.get(),
+                'typeof edges.get()': typeof edges.get(),
+                'edges.get() length': edges.get() ? edges.get().length : 'undefined',
+                'network.body.data.edges': network.body.data.edges,
+                'network.body.data.edges.get()': network.body.data.edges.get()
+            };
+            
+            document.getElementById('debugOutput').textContent = JSON.stringify(debug, null, 2);
+        }
+        
+        // Run debug after network initializes
+        setTimeout(debugGraphStructure, 1000);
+    </script>
+</body>
+</html>

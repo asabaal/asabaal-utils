@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Edge Info</title>
+</head>
+<body>
+    <div id="edgeInfoContainer"></div>
+    
+    <script>
+        // Mock data to test edge info display
+        const positions = {
+            'a': { x: 100, y: 100 },
+            'b': { x: 200, y: 150 }
+        };
+        
+        const edgeList = [
+            { from: 'a', to: 'b' }
+        ];
+        
+        const physicsParams = {
+            L0: 100,
+            k_spring: 0.1
+        };
+        
+        function updateEdgeInfoDisplay(positions, edgeList) {
+            const container = document.getElementById('edgeInfoContainer');
+            container.innerHTML = '';
+            
+            if (!edgeList || edgeList.length === 0) {
+                container.innerHTML = '<div class="force-item"><span class="force-name">No edges found</span></div>';
+                return;
+            }
+            
+            edgeList.forEach(edge => {
+                const pos1 = positions[edge.from];
+                const pos2 = positions[edge.to];
+                const dx = pos2.x - pos1.x;
+                const dy = pos2.y - pos1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                // Calculate edge properties
+                const stretch = distance - physicsParams.L0;
+                const stretchPercent = (stretch / physicsParams.L0) * 100;
+                const springForce = physicsParams.k_spring * stretch;
+                
+                // Calculate edge midpoint
+                const midpoint = {
+                    x: (pos1.x + pos2.x) / 2,
+                    y: (pos1.y + pos2.y) / 2
+                };
+                
+                const edgeDiv = document.createElement('div');
+                edgeDiv.style.border = '1px solid #ccc';
+                edgeDiv.style.padding = '10px';
+                edgeDiv.style.margin = '5px';
+                edgeDiv.innerHTML = `
+                    <div style="font-weight: bold;">Edge ${edge.from.toUpperCase()}-${edge.to.toUpperCase()}</div>
+                    <div>Start Node: ${edge.from.toUpperCase()}</div>
+                    <div>End Node: ${edge.to.toUpperCase()}</div>
+                    <div>Length: ${distance.toFixed(3)}</div>
+                    <div>Rest Length: ${physicsParams.L0.toFixed(3)}</div>
+                    <div>Stretch: ${stretch.toFixed(3)} (${stretchPercent.toFixed(1)}%)</div>
+                    <div>Spring Force: ${springForce.toFixed(3)}</div>
+                    <div>Angle: ${angle.toFixed(1)}°</div>
+                    <div>Midpoint: (${midpoint.x.toFixed(1)}, ${midpoint.y.toFixed(1)})</div>
+                    <div>Direction: (${(dx/distance).toFixed(3)}, ${(dy/distance).toFixed(3)})</div>
+                `;
+                container.appendChild(edgeDiv);
+            });
+        }
+        
+        // Test the function
+        updateEdgeInfoDisplay(positions, edgeList);
+        console.log('Edge info test completed');
+    </script>
+</body>
+</html>

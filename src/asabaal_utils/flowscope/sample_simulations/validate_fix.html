@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Validate Edge Fix</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #network { width: 400px; height: 300px; border: 1px solid #ccc; margin-bottom: 20px; }
+        .result { padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Validate Edge Information Fix</h1>
+    <div id="network"></div>
+    <div id="results"></div>
+    
+    <script>
+        // Test the exact same updateEdgeInfoDisplay function from interactive calculator
+        function updateEdgeInfoDisplay(positions, edgeList) {
+            const container = document.createElement('div');
+            container.className = 'result';
+            
+            if (!edgeList || edgeList.length === 0) {
+                container.innerHTML = '<h3>❌ Edge Information Test Failed</h3><p>No edges found</p>';
+                return container;
+            }
+            
+            let html = '<h3>✅ Edge Information Test Passed</h3>';
+            html += `<p>Found ${edgeList.length} edges</p>`;
+            
+            edgeList.forEach(edge => {
+                const pos1 = positions[edge.from];
+                const pos2 = positions[edge.to];
+                
+                if (!pos1 || !pos2) {
+                    html += `<p>❌ Edge ${edge.from}-${edge.to}: Missing positions</p>`;
+                    return;
+                }
+                
+                const dx = pos2.x - pos1.x;
+                const dy = pos2.y - pos1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                html += `<p>✅ Edge ${edge.from.toUpperCase()}-${edge.to.toUpperCase()}: `;
+                html += `Length=${distance.toFixed(1)}, Angle=${angle.toFixed(1)}°</p>`;
+            });
+            
+            container.innerHTML = html;
+            return container;
+        }
+        
+        // Initialize test network
+        const nodes = new vis.DataSet([
+            {id: 'a', label: 'Node A'},
+            {id: 'b', label: 'Node B'}
+        ]);
+        
+        const edges = new vis.DataSet([
+            {from: 'a', to: 'b'}
+        ]);
+        
+        const container = document.getElementById('network');
+        const network = new vis.Network(container, {
+            nodes: nodes,
+            edges: edges
+        }, {});
+        
+        // Test after network initializes
+        setTimeout(() => {
+            const positions = network.getPositions();
+            const edgeList = edges.get();
+            
+            const results = document.getElementById('results');
+            
+            // Show debug info
+            const debugDiv = document.createElement('div');
+            debugDiv.className = 'result';
+            debugDiv.innerHTML = `
+                <h3>Debug Information</h3>
+                <p><strong>Positions:</strong> ${JSON.stringify(positions, null, 2)}</p>
+                <p><strong>EdgeList:</strong> ${JSON.stringify(edgeList, null, 2)}</p>
+                <p><strong>EdgeList Type:</strong> ${typeof edgeList}</p>
+                <p><strong>EdgeList Length:</strong> ${edgeList ? edgeList.length : 'undefined'}</p>
+            `;
+            results.appendChild(debugDiv);
+            
+            // Test the function
+            const result = updateEdgeInfoDisplay(positions, edgeList);
+            results.appendChild(result);
+            
+        }, 1000);
+    </script>
+</body>
+</html>

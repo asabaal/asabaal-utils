@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Debug Edge</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #network { width: 400px; height: 300px; border: 1px solid #ccc; margin-bottom: 20px; }
+        #edgeInfoContainer { padding: 10px; border: 1px solid #ccc; background: #f9f9f9; min-height: 100px; }
+        .force-item { margin: 5px 0; padding: 5px; background: white; }
+    </style>
+</head>
+<body>
+    <h1>Test Debug Edge Information</h1>
+    <div id="network"></div>
+    <h2>Edge Information:</h2>
+    <div id="edgeInfoContainer">Loading...</div>
+    
+    <script>
+        // Mock the required objects and functions
+        let nodes = null;
+        let nodeSizes = {};
+        let physicsParams = {L0: 1.0, k_spring: 1.0};
+        
+        function calculatePenetrationDepth(node1, node2) {
+            // Simple box overlap detection
+            if (node1.shape === 'box' && node2.shape === 'box') {
+                const dx = Math.abs(node1.x - node2.x);
+                const dy = Math.abs(node1.y - node2.y);
+                const minDist = (node1.size + node2.size) / 2;
+                
+                if (dx < minDist && dy < minDist) {
+                    return -Math.sqrt((minDist - dx) * (minDist - dx) + (minDist - dy) * (minDist - dy));
+                }
+            }
+            return null;
+        }
+        
+        function surfacePointToward(node, targetX, targetY) {
+            // Simple implementation
+            return {x: node.x, y: node.y};
+        }
+        
+        // Initialize network
+        const nodesData = new vis.DataSet([
+            {id: 'a', label: 'A', x: -200, y: 0, shape: 'box', color: '#ff6b6b'},
+            {id: 'b', label: 'B', x: 200, y: 0, shape: 'box', color: '#4ecdc4'}
+        ]);
+        
+        const edgesData = new vis.DataSet([
+            {from: 'a', to: 'b'}
+        ]);
+        
+        const container = document.getElementById('network');
+        const network = new vis.Network(container, {
+            nodes: nodesData,
+            edges: edgesData
+        }, {});
+        
+        // Set up global variables
+        nodes = nodesData;
+        nodeSizes = {
+            'a': {width: 50, height: 30, textWidth: 20},
+            'b': {width: 50, height: 30, textWidth: 20}
+        };
+        
+        // Copy the exact updateEdgeInfoDisplay function
+        function updateEdgeInfoDisplay(positions, edgeList) {
+            const container = document.getElementById('edgeInfoContainer');
+            container.innerHTML = '';
+            
+            // Debug information
+            console.log('updateEdgeInfoDisplay called with:', {
+                positions: positions,
+                edgeList: edgeList,
+                edgeListLength: edgeList ? edgeList.length : 'undefined',
+                edgeListType: typeof edgeList
+            });
+            
+            if (!edgeList || edgeList.length === 0) {
+                container.innerHTML = '<div class="force-item"><span class="force-name">No edges found</span></div>';
+                console.log('No edges found - edgeList:', edgeList);
+                return;
+            }
+            
+            edgeList.forEach(edge => {
+                // Debug node access
+                console.log('Processing edge:', edge);
+                console.log('nodes object:', nodes);
+                console.log('nodeSizes object:', nodeSizes);
+                console.log('positions object:', positions);
+                
+                const node1Data = nodes.get(edge.from);
+                const node2Data = nodes.get(edge.to);
+                
+                console.log('node1Data:', node1Data);
+                console.log('node2Data:', node2Data);
+                
+                if (!node1Data || !node2Data) {
+                    console.error('Missing node data for edge:', edge);
+                    container.innerHTML += '<div class="force-item">❌ Missing node data for edge ' + edge.from + '-' + edge.to + '</div>';
+                    return;
+                }
+                
+                const node1 = {x: positions[edge.from].x, y: positions[edge.from].y, shape: node1Data.shape, size: nodeSizes[edge.from]};
+                const node2 = {x: positions[edge.to].x, y: positions[edge.to].y, shape: node2Data.shape, size: nodeSizes[edge.to]};
+                
+                // Check for overlap first
+                const penetration1 = calculatePenetrationDepth(node1, node2);
+                const penetration2 = calculatePenetrationDepth(node2, node1);
+                
+                let distance, pos1, pos2, isOverlapping = false;
+                
+                if (penetration1 !== null || penetration2 !== null) {
+                    // Nodes overlap - use negative distance
+                    distance = penetration1 !== null ? penetration1 : penetration2;
+                    isOverlapping = true;
+                    pos1 = {x: node2.x, y: node2.y};
+                    pos2 = {x: node1.x, y: node1.y};
+                } else {
+                    // No overlap - calculate surface anchor points
+                    const surface1 = surfacePointToward(node1, node2.x, node2.y);
+                    const surface2 = surfacePointToward(node2, node1.x, node1.y);
+                    
+                    // Use surface anchor points for all calculations
+                    pos1 = surface1;
+                    pos2 = surface2;
+                    const dx = pos2.x - pos1.x;
+                    const dy = pos2.y - pos1.y;
+                    distance = Math.sqrt(dx * dx + dy * dy);
+                }
+                
+                const angle = Math.atan2(pos2.y - pos1.y, pos2.x - pos1.x) * (180 / Math.PI);
+                
+                // Calculate edge properties with surface anchor rest length
+                const effectiveL0 = physicsParams.L0 * 1.5;
+                const stretch = distance - effectiveL0;
+                const stretchPercent = (stretch / effectiveL0) * 100;
+                const springForce = physicsParams.k_spring * stretch;
+                
+                // Calculate edge midpoint
+                const midpoint = {
+                    x: (pos1.x + pos2.x) / 2,
+                    y: (pos1.y + pos2.y) / 2
+                };
+                
+                const edgeDiv = document.createElement('div');
+                edgeDiv.className = 'force-item';
+                edgeDiv.innerHTML = `
+                    <div><strong>Edge ${edge.from.toUpperCase()}-${edge.to.toUpperCase()}</strong></div>
+                    <div>Distance: ${distance.toFixed(3)}</div>
+                    <div>Angle: ${angle.toFixed(1)}°</div>
+                    <div>Stretch: ${stretch.toFixed(3)} (${stretchPercent.toFixed(1)}%)</div>
+                    <div>Spring Force: ${springForce.toFixed(3)}</div>
+                `;
+                container.appendChild(edgeDiv);
+            });
+        }
+        
+        // Test after network initializes
+        setTimeout(() => {
+            const positions = network.getPositions();
+            const edgeList = edgesData.get();
+            
+            console.log('Testing with:', {
+                positions: positions,
+                edgeList: edgeList,
+                edges: edgesData
+            });
+            
+            updateEdgeInfoDisplay(positions, edgeList);
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+services:
+  api:
+    image: python:3.11-slim
+    working_dir: /srv
+    volumes:
+      - ./:/srv
+    environment:
+      - ADMIN_SECRET=change_me
+      - MODEL_BACKEND=ollama
+      - EMBEDDINGS_MODEL=bge-small
+      - VECTOR_STORE_DIR=/srv/data/vector
+      - GRAPH_BACKEND=kuzu
+    command: bash -lc "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8080"
+    ports:
+      - "8080:8080"

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test NaN Fixes</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #network { width: 400px; height: 300px; border: 1px solid #ccc; margin-bottom: 20px; }
+        #results { padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .pass { background: #d4edda; border-color: #c3e6cb; }
+        .fail { background: #f8d7da; border-color: #f5c6cb; }
+        .nan { background: #fff3cd; border-color: #ffeaa7; }
+    </style>
+</head>
+<body>
+    <h1>Test NaN Fixes</h1>
+    <div id="network"></div>
+    <div id="results">Running tests...</div>
+    
+    <script>
+        // Test the NaN fixes
+        let textMeasurementContext = null;
+        let textMeasurementCanvas = null;
+        
+        // Initialize text measurement
+        function initTextMeasurement() {
+            textMeasurementCanvas = document.createElement('canvas');
+            textMeasurementContext = textMeasurementCanvas.getContext('2d');
+        }
+        
+        // Helper function to validate and fix NaN values
+        function safeValue(value, fallback = 0) {
+            return (isFinite(value) && !isNaN(value)) ? value : fallback;
+        }
+        
+        // Helper function to validate node object
+        function validateNode(node, fallbackId = 'unknown') {
+            return {
+                x: safeValue(node.x, 0),
+                y: safeValue(node.y, 0),
+                shape: node.shape || 'box',
+                size: {
+                    width: safeValue(node.size?.width || node.size, 50),
+                    height: safeValue(node.size?.height || node.size, 30)
+                }
+            };
+        }
+        
+        // Measure text dimensions
+        function measureText(text, font = '14px Arial') {
+            // Ensure text measurement context is initialized
+            if (!textMeasurementContext) {
+                initTextMeasurement();
+            }
+            
+            textMeasurementContext.font = font;
+            const metrics = textMeasurementContext.measureText(text);
+            
+            // Safely parse font size with fallback
+            const fontSizeMatch = font.match(/(\d+)/);
+            const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[0]) : 14;
+            
+            return {
+                width: metrics.width || 0,
+                height: fontSize * 1.2  // Approximate line height
+            };
+        }
+        
+        // Calculate node size based on label
+        function calculateNodeSize(label, fontSize = 14, padding = 20) {
+            const font = `${fontSize}px Arial`;
+            const textDimensions = measureText(label, font);
+            
+            return {
+                width: textDimensions.width + padding * 2,
+                height: textDimensions.height + padding * 2,
+                textWidth: textDimensions.width,
+                textHeight: textDimensions.height,
+                padding: padding
+            };
+        }
+        
+        // Test surface point functions
+        function surfacePointBox(node, angle) {
+            const halfWidth = (node.size.width || 50) / 2;
+            const halfHeight = (node.size.height || 30) / 2;
+            
+            // Handle edge cases and validate inputs
+            if (!isFinite(halfWidth) || !isFinite(halfHeight) || !isFinite(angle)) {
+                return {x: node.x || 0, y: node.y || 0};
+            }
+            
+            // Calculate intersection with box edges
+            const tanAngle = Math.tan(angle);
+            
+            // Check for tan edge cases
+            if (!isFinite(tanAngle)) {
+                // Angle is π/2 or -π/2 (vertical)
+                return {
+                    x: node.x,
+                    y: node.y + (Math.sin(angle) > 0 ? halfHeight : -halfHeight)
+                };
+            }
+            
+            let x, y;
+            
+            // Avoid division by zero
+            if (Math.abs(tanAngle) <= halfHeight / halfWidth) {
+                // Intersects with left or right edge
+                x = Math.cos(angle) > 0 ? halfWidth : -halfWidth;
+                y = x * tanAngle;
+            } else {
+                // Intersects with top or bottom edge
+                y = Math.sin(angle) > 0 ? halfHeight : -halfHeight;
+                x = Math.abs(tanAngle) > 0.0001 ? y / tanAngle : 0; // Avoid division by very small numbers
+            }
+            
+            // Validate results
+            if (!isFinite(x) || !isFinite(y)) {
+                return {x: node.x || 0, y: node.y || 0};
+            }
+            
+            return {
+                x: (node.x || 0) + x,
+                y: (node.y || 0) + y
+            };
+        }
+        
+        function surfacePointToward(node, targetX, targetY) {
+            const validatedNode = validateNode(node);
+            
+            // Validate inputs
+            if (!isFinite(targetX) || !isFinite(targetY)) {
+                return {x: validatedNode.x, y: validatedNode.y};
+            }
+            
+            const dx = targetX - validatedNode.x;
+            const dy = targetY - validatedNode.y;
+            const angle = Math.atan2(dy, dx);
+            
+            return surfacePointBox(validatedNode, angle);
+        }
+        
+        // Test functions
+        function runTests() {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            
+            let testsPassed = 0;
+            let totalTests = 0;
+            
+            // Test 1: Text measurement initialization
+            totalTests++;
+            try {
+                const size = calculateNodeSize('Test');
+                const hasNaN = isNaN(size.width) || isNaN(size.height) || isNaN(size.textWidth);
+                const testResult = document.createElement('div');
+                testResult.className = `test-result ${hasNaN ? 'fail' : 'pass'}`;
+                testResult.innerHTML = `<strong>Test 1 - Text Measurement:</strong> ${hasNaN ? 'FAIL - NaN detected' : 'PASS - No NaN'}`;
+                results.appendChild(testResult);
+                if (!hasNaN) testsPassed++;
+            } catch (error) {
+                const testResult = document.createElement('div');
+                testResult.className = 'test-result fail';
+                testResult.innerHTML = `<strong>Test 1 - Text Measurement:</strong> FAIL - Error: ${error.message}`;
+                results.appendChild(testResult);
+            }
+            
+            // Test 2: Surface point calculations
+            totalTests++;
+            try {
+                const node = {x: 0, y: 0, shape: 'box', size: {width: 50, height: 30}};
+                const surfacePoint = surfacePointToward(node, 100, 100);
+                const hasNaN = isNaN(surfacePoint.x) || isNaN(surfacePoint.y);
+                const testResult = document.createElement('div');
+                testResult.className = `test-result ${hasNaN ? 'fail' : 'pass'}`;
+                testResult.innerHTML = `<strong>Test 2 - Surface Point:</strong> ${hasNaN ? 'FAIL - NaN detected' : 'PASS - No NaN'}`;
+                results.appendChild(testResult);
+                if (!hasNaN) testsPassed++;
+            } catch (error) {
+                const testResult = document.createElement('div');
+                testResult.className = 'test-result fail';
+                testResult.innerHTML = `<strong>Test 2 - Surface Point:</strong> FAIL - Error: ${error.message}`;
+                results.appendChild(testResult);
+            }
+            
+            // Test 3: Edge case angles
+            totalTests++;
+            try {
+                const node = {x: 0, y: 0, shape: 'box', size: {width: 50, height: 30}};
+                const angles = [0, Math.PI/2, Math.PI, 3*Math.PI/2]; // Edge case angles
+                let hasNaN = false;
+                
+                angles.forEach(angle => {
+                    const point = surfacePointBox(node, angle);
+                    if (isNaN(point.x) || isNaN(point.y)) {
+                        hasNaN = true;
+                    }
+                });
+                
+                const testResult = document.createElement('div');
+                testResult.className = `test-result ${hasNaN ? 'fail' : 'pass'}`;
+                testResult.innerHTML = `<strong>Test 3 - Edge Case Angles:</strong> ${hasNaN ? 'FAIL - NaN detected' : 'PASS - No NaN'}`;
+                results.appendChild(testResult);
+                if (!hasNaN) testsPassed++;
+            } catch (error) {
+                const testResult = document.createElement('div');
+                testResult.className = 'test-result fail';
+                testResult.innerHTML = `<strong>Test 3 - Edge Case Angles:</strong> FAIL - Error: ${error.message}`;
+                results.appendChild(testResult);
+            }
+            
+            // Summary
+            const summary = document.createElement('div');
+            summary.className = `test-result ${testsPassed === totalTests ? 'pass' : 'fail'}`;
+            summary.innerHTML = `
+                <strong>Summary:</strong> ${testsPassed}/${totalTests} tests passed
+                ${testsPassed === totalTests ? '✅ All NaN fixes working!' : '❌ Some NaN issues remain'}
+            `;
+            results.appendChild(summary);
+        }
+        
+        // Initialize network and run tests
+        const nodes = new vis.DataSet([
+            {id: 'a', label: 'A', x: -200, y: 0, shape: 'box', color: '#ff6b6b'},
+            {id: 'b', label: 'B', x: 200, y: 0, shape: 'box', color: '#4ecdc4'}
+        ]);
+        
+        const edges = new vis.DataSet([
+            {from: 'a', to: 'b'}
+        ]);
+        
+        const container = document.getElementById('network');
+        const network = new vis.Network(container, {
+            nodes: nodes,
+            edges: edges
+        }, {});
+        
+        // Run tests after network initializes
+        setTimeout(() => {
+            runTests();
+        }, 1000);
+    </script>
+</body>
+</html>

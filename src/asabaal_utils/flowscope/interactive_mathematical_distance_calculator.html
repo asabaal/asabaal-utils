@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Mathematical Distance Calculator</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+        }
+        
+        .header {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            min-height: 0;
+        }
+        
+        .graph-panel {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calculator-panel {
+            flex: 0 0 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            flex: 0 0 120px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .control-group input[type="text"],
+        .control-group select {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .control-group input[type="range"] {
+            flex: 1;
+        }
+        
+        .control-group span {
+            flex: 0 0 40px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .panel-section {
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+        }
+        
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 5px;
+        }
+        
+        .calculation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+        
+        .calculation-name {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .calculation-value {
+            font-family: 'Courier New', monospace;
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .node-info {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 11px;
+        }
+        
+        .node-info-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .node-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+        
+        .surface-point {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .distance-highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .distance-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .distance-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #dc3545;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Interactive Mathematical Distance Calculator</h1>
+            <p>Explore how text labels and node geometry affect mathematical surface-to-surface distances</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Node A Label:</label>
+                <input type="text" id="nodeALabel" value="Function" oninput="updateCalculator()">
+            </div>
+            
+            <div class="control-group">
+                <label>Node B Label:</label>
+                <input type="text" id="nodeBLabel" value="Process" oninput="updateCalculator()">
+            </div>
+            
+            <div class="control-group">
+                <label>Node A Shape:</label>
+                <select id="nodeAShape" onchange="updateCalculator()">
+                    <option value="box">Box</option>
+                    <option value="circle">Circle</option>
+                    <option value="ellipse">Ellipse</option>
+                    <option value="diamond">Diamond</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Node B Shape:</label>
+                <select id="nodeBShape" onchange="updateCalculator()">
+                    <option value="box">Box</option>
+                    <option value="circle">Circle</option>
+                    <option value="ellipse">Ellipse</option>
+                    <option value="diamond">Diamond</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Padding:</label>
+                <input type="range" id="padding" min="5" max="30" step="1" value="15" oninput="updateCalculator()">
+                <span id="paddingValue">15</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="graph-panel" id="network"></div>
+            
+            <div class="calculator-panel">
+                <div class="panel-section">
+                    <div class="section-title">Node Information</div>
+                    <div id="nodeInfoContainer"></div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">Surface Anchor Points</div>
+                    <div id="surfacePointsContainer"></div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">Distance Calculations</div>
+                    <div id="distanceContainer"></div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="section-title">Mathematical Breakdown</div>
+                    <div id="breakdownContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let network = null;
+        let nodes = null;
+        let edges = null;
+        
+        // Text dimension calculation
+        function calculateTextDimensions(text, padding) {
+            const lines = text.split('\n');
+            // Use display-appropriate units for consistency with node positions
+            const maxWidth = Math.max(...lines.map(line => line.length)) * 6;  // 6 units per character
+            const height = lines.length * 12;  // 12 units per line
+            return {
+                width: maxWidth + padding * 2,
+                height: height + padding * 2
+            };
+        }
+        
+        // Surface anchor calculations for different shapes
+        function surfacePointBox(node, targetX, targetY) {
+            const dx = targetX - node.x;
+            const dy = targetY - node.y;
+            const angle = Math.atan2(dy, dx);
+            
+            const halfWidth = node.width / 2;
+            const halfHeight = node.height / 2;
+            
+            const tanAngle = Math.tan(angle);
+            
+            let x, y;
+            
+            if (Math.abs(tanAngle) <= halfHeight / halfWidth) {
+                // Intersects left or right edge
+                x = halfWidth * (Math.cos(angle) > 0 ? 1 : -1);
+                y = x * tanAngle;
+            } else {
+                // Intersects top or bottom edge
+                y = halfHeight * (Math.sin(angle) > 0 ? 1 : -1);
+                x = y / tanAngle;
+            }
+            
+            return {
+                x: node.x + x,
+                y: node.y + y
+            };
+        }
+        
+        function surfacePointCircle(node, targetX, targetY) {
+            const dx = targetX - node.x;
+            const dy = targetY - node.y;
+            const angle = Math.atan2(dy, dx);
+            const radius = Math.min(node.width, node.height) / 2;
+            
+            return {
+                x: node.x + radius * Math.cos(angle),
+                y: node.y + radius * Math.sin(angle)
+            };
+        }
+        
+        function surfacePointEllipse(node, targetX, targetY) {
+            const dx = targetX - node.x;
+            const dy = targetY - node.y;
+            const angle = Math.atan2(dy, dx);
+            
+            const a = node.width / 2; // semi-major axis
+            const b = node.height / 2; // semi-minor axis
+            
+            // Parametric equation for ellipse surface point
+            const cosAngle = Math.cos(angle);
+            const sinAngle = Math.sin(angle);
+            
+            // Calculate the angle on the ellipse that points toward the target
+            const ellipseAngle = Math.atan2(b * sinAngle, a * cosAngle);
+            
+            return {
+                x: node.x + a * Math.cos(ellipseAngle),
+                y: node.y + b * Math.sin(ellipseAngle)
+            };
+        }
+        
+        function surfacePointDiamond(node, targetX, targetY) {
+            const dx = targetX - node.x;
+            const dy = targetY - node.y;
+            const angle = Math.atan2(dy, dx);
+            
+            const halfWidth = node.width / 2;
+            const halfHeight = node.height / 2;
+            
+            // Diamond has vertices at (0, ±h) and (±w, 0)
+            // The edges are lines connecting these vertices
+            
+            // Normalize angle to [0, 2π]
+            let normalizedAngle = angle;
+            if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+            
+            let x, y;
+            
+            // Determine which edge of the diamond the angle points to
+            if (normalizedAngle < Math.PI / 2 || normalizedAngle >= 3 * Math.PI / 2) {
+                // Right edge
+                const t = (Math.tan(angle) * halfWidth + halfHeight) / (2 * halfHeight);
+                x = halfWidth;
+                y = halfHeight * (2 * t - 1);
+            } else {
+                // Left edge
+                const t = (-Math.tan(angle) * halfWidth + halfHeight) / (2 * halfHeight);
+                x = -halfWidth;
+                y = halfHeight * (2 * t - 1);
+            }
+            
+            return {
+                x: node.x + x,
+                y: node.y + y
+            };
+        }
+        
+        // Overlap detection functions
+        function isPointInBox(node, x, y) {
+            const halfWidth = node.width / 2;
+            const halfHeight = node.height / 2;
+            const relX = x - node.x;
+            const relY = y - node.y;
+            return Math.abs(relX) <= halfWidth && Math.abs(relY) <= halfHeight;
+        }
+        
+        function isPointInCircle(node, x, y) {
+            const dx = x - node.x;
+            const dy = y - node.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const radius = node.width / 2;
+            return distance <= radius;
+        }
+        
+        function isPointInEllipse(node, x, y) {
+            const dx = x - node.x;
+            const dy = y - node.y;
+            const a = node.width / 2;
+            const b = node.height / 2;
+            return (dx * dx) / (a * a) + (dy * dy) / (b * b) <= 1;
+        }
+        
+        function isPointInDiamond(node, x, y) {
+            const dx = Math.abs(x - node.x);
+            const dy = Math.abs(y - node.y);
+            const halfWidth = node.width / 2;
+            const halfHeight = node.height / 2;
+            return (dx / halfWidth + dy / halfHeight) <= 1;
+        }
+        
+        // Penetration calculation for overlapping nodes
+        function calculatePenetrationDepth(node1, node2) {
+            switch (node1.shape) {
+                case 'box':
+                    return calculateBoxPenetration(node1, node2);
+                case 'circle':
+                    return calculateCirclePenetration(node1, node2);
+                case 'ellipse':
+                    return calculateEllipsePenetration(node1, node2);
+                case 'diamond':
+                    return calculateDiamondPenetration(node1, node2);
+                default:
+                    return calculateBoxPenetration(node1, node2);
+            }
+        }
+        
+        function calculateBoxPenetration(node1, node2) {
+            const halfWidth1 = node1.width / 2;
+            const halfHeight1 = node1.height / 2;
+            const halfWidth2 = node2.width / 2;
+            const halfHeight2 = node2.height / 2;
+            
+            const dx = Math.abs(node2.x - node1.x);
+            const dy = Math.abs(node2.y - node1.y);
+            
+            const overlapX = (halfWidth1 + halfWidth2) - dx;
+            const overlapY = (halfHeight1 + halfHeight2) - dy;
+            
+            if (overlapX > 0 && overlapY > 0) {
+                // Nodes overlap - return negative penetration depth
+                return -Math.min(overlapX, overlapY);
+            }
+            return null; // No overlap
+        }
+        
+        function calculateCirclePenetration(node1, node2) {
+            const dx = node2.x - node1.x;
+            const dy = node2.y - node1.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const radius1 = node1.width / 2;
+            const radius2 = node2.width / 2;
+            
+            if (distance < radius1 + radius2) {
+                // Circles overlap - return negative penetration depth
+                return -(radius1 + radius2 - distance);
+            }
+            return null; // No overlap
+        }
+        
+        function calculateEllipsePenetration(node1, node2) {
+            // Simplified ellipse overlap - use bounding box approximation
+            return calculateBoxPenetration(node1, node2);
+        }
+        
+        function calculateDiamondPenetration(node1, node2) {
+            // Simplified diamond overlap - use bounding box approximation
+            return calculateBoxPenetration(node1, node2);
+        }
+        
+        function getSurfacePoint(node, targetX, targetY) {
+            // Check for overlap first
+            const isTargetInside = isPointInShape(node, targetX, targetY);
+            
+            if (isTargetInside) {
+                // Target is inside - this is an overlap situation
+                // Return a point indicating penetration
+                return {
+                    x: targetX,
+                    y: targetY,
+                    isOverlap: true
+                };
+            }
+            
+            // Target is outside - use normal surface point calculation
+            const surfacePoint = getSurfacePointNormal(node, targetX, targetY);
+            surfacePoint.isOverlap = false;
+            return surfacePoint;
+        }
+        
+        function isPointInShape(node, x, y) {
+            switch (node.shape) {
+                case 'box':
+                    return isPointInBox(node, x, y);
+                case 'circle':
+                    return isPointInCircle(node, x, y);
+                case 'ellipse':
+                    return isPointInEllipse(node, x, y);
+                case 'diamond':
+                    return isPointInDiamond(node, x, y);
+                default:
+                    return isPointInBox(node, x, y);
+            }
+        }
+        
+        function getSurfacePointNormal(node, targetX, targetY) {
+            switch (node.shape) {
+                case 'box':
+                    return surfacePointBox(node, targetX, targetY);
+                case 'circle':
+                    return surfacePointCircle(node, targetX, targetY);
+                case 'ellipse':
+                    return surfacePointEllipse(node, targetX, targetY);
+                case 'diamond':
+                    return surfacePointDiamond(node, targetX, targetY);
+                default:
+                    return surfacePointBox(node, targetX, targetY);
+            }
+        }
+        
+        function calculateDistance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+        
+        function updateCalculator() {
+            // Get control values
+            const nodeALabel = document.getElementById('nodeALabel').value;
+            const nodeBLabel = document.getElementById('nodeBLabel').value;
+            const nodeAShape = document.getElementById('nodeAShape').value;
+            const nodeBShape = document.getElementById('nodeBShape').value;
+            const padding = parseInt(document.getElementById('padding').value);
+            
+            // Update padding display
+            document.getElementById('paddingValue').textContent = padding;
+            
+            // Calculate node dimensions based on labels
+            const nodeADims = calculateTextDimensions(nodeALabel, padding);
+            const nodeBDims = calculateTextDimensions(nodeBLabel, padding);
+            
+            // Create nodes with calculated dimensions
+            nodes = new vis.DataSet([
+                {
+                    id: 'a',
+                    label: nodeALabel,
+                    x: -200,
+                    y: 0,
+                    shape: nodeAShape,
+                    color: '#ff6b6b',
+                    font: { size: 14, color: 'white' },
+                    width: nodeADims.width, // No scaling needed - use consistent units
+                    height: nodeADims.height
+                },
+                {
+                    id: 'b',
+                    label: nodeBLabel,
+                    x: 200,
+                    y: 0,
+                    shape: nodeBShape,
+                    color: '#4ecdc4',
+                    font: { size: 14, color: 'white' },
+                    width: nodeBDims.width, // No scaling needed - use consistent units
+                    height: nodeBDims.height
+                }
+            ]);
+            
+            // Create edge
+            edges = new vis.DataSet([
+                { from: 'a', to: 'b', color: '#333', width: 2 }
+            ]);
+            
+            // Update network
+            if (network) {
+                network.setData({ nodes: nodes, edges: edges });
+            } else {
+                const container = document.getElementById('network');
+                const data = { nodes: nodes, edges: edges };
+                const options = {
+                    physics: false,
+                    interaction: {
+                        dragNodes: true,
+                        dragView: false,
+                        zoomView: false
+                    },
+                    nodes: {
+                        borderWidth: 2,
+                        borderColor: '#333'
+                    },
+                    edges: {
+                        width: 2,
+                        color: { color: '#333' },
+                        smooth: false
+                    }
+                };
+                network = new vis.Network(container, data, options);
+                
+                // Add event listeners for dragging
+                network.on("dragging", function(params) {
+                    if (params.nodes.length > 0) {
+                        updateCalculations();
+                    }
+                });
+                
+                network.on("dragEnd", function(params) {
+                    if (params.nodes.length > 0) {
+                        updateCalculations();
+                    }
+                });
+            }
+            
+            updateCalculations();
+        }
+        
+        function updateCalculations() {
+            const nodePositions = network.getPositions();
+            const nodeA = nodes.get('a');
+            const nodeB = nodes.get('b');
+            
+            // Get actual positions
+            const posA = nodePositions['a'];
+            const posB = nodePositions['b'];
+            
+            // Create node objects with positions
+            const nodeAObj = {
+                id: 'a',
+                label: nodeA.label,
+                x: posA.x,
+                y: posA.y,
+                width: nodeA.width,
+                height: nodeA.height,
+                shape: nodeA.shape
+            };
+            
+            const nodeBObj = {
+                id: 'b',
+                label: nodeB.label,
+                x: posB.x,
+                y: posB.y,
+                width: nodeB.width,
+                height: nodeB.height,
+                shape: nodeB.shape
+            };
+            
+            // Check for overlap first
+            const penetrationA = calculatePenetrationDepth(nodeAObj, nodeBObj);
+            const penetrationB = calculatePenetrationDepth(nodeBObj, nodeAObj);
+            
+            let surfaceDistance;
+            let surfaceA, surfaceB;
+            
+            if (penetrationA !== null || penetrationB !== null) {
+                // Nodes overlap - calculate negative distance
+                const penetration = penetrationA !== null ? penetrationA : penetrationB;
+                surfaceDistance = penetration;
+                
+                // For display, show the penetration points
+                surfaceA = { x: nodeBObj.x, y: nodeBObj.y, isOverlap: true };
+                surfaceB = { x: nodeAObj.x, y: nodeAObj.y, isOverlap: true };
+            } else {
+                // No overlap - calculate normal surface points
+                surfaceA = getSurfacePoint(nodeAObj, nodeBObj.x, nodeBObj.y);
+                surfaceB = getSurfacePoint(nodeBObj, nodeAObj.x, nodeAObj.y);
+                surfaceDistance = calculateDistance(surfaceA.x, surfaceA.y, surfaceB.x, surfaceB.y);
+            }
+            
+            // Calculate center distance
+            const centerDistance = calculateDistance(nodeAObj.x, nodeAObj.y, nodeBObj.x, nodeBObj.y);
+            
+            // Update node information
+            const nodeInfoHtml = `
+                <div class="node-info">
+                    <div class="node-info-title">Node A: ${nodeAObj.label}</div>
+                    <div class="node-info-item">
+                        <span>Position:</span>
+                        <span>(${nodeAObj.x.toFixed(1)}, ${nodeAObj.y.toFixed(1)})</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span>Size:</span>
+                        <span>${nodeAObj.width.toFixed(1)} × ${nodeAObj.height.toFixed(1)}</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span>Shape:</span>
+                        <span>${nodeAObj.shape}</span>
+                    </div>
+                </div>
+                <div class="node-info">
+                    <div class="node-info-title">Node B: ${nodeBObj.label}</div>
+                    <div class="node-info-item">
+                        <span>Position:</span>
+                        <span>(${nodeBObj.x.toFixed(1)}, ${nodeBObj.y.toFixed(1)})</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span>Size:</span>
+                        <span>${nodeBObj.width.toFixed(1)} × ${nodeBObj.height.toFixed(1)}</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span>Shape:</span>
+                        <span>${nodeBObj.shape}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('nodeInfoContainer').innerHTML = nodeInfoHtml;
+            
+            // Update surface anchor points
+            const isOverlapping = surfaceDistance < 0;
+            const surfacePointsHtml = `
+                <div class="calculation-item">
+                    <span class="calculation-name">Node A Surface Point:</span>
+                    <span class="calculation-value surface-point">${isOverlapping ? 'OVERLAP' : `(${surfaceA.x.toFixed(1)}, ${surfaceA.y.toFixed(1)})`}</span>
+                </div>
+                <div class="calculation-item">
+                    <span class="calculation-name">Node B Surface Point:</span>
+                    <span class="calculation-value surface-point">${isOverlapping ? 'OVERLAP' : `(${surfaceB.x.toFixed(1)}, ${surfaceB.y.toFixed(1)})`}</span>
+                </div>
+                ${isOverlapping ? '<div class="calculation-item"><span class="calculation-name" style="color: red;">Status:</span><span class="calculation-value" style="color: red; font-weight: bold;">NODES OVERLAP</span></div>' : ''}
+            `;
+            document.getElementById('surfacePointsContainer').innerHTML = surfacePointsHtml;
+            
+            // Update distance calculations
+            const distanceHtml = `
+                <div class="calculation-item">
+                    <span class="calculation-name">Center-to-Center:</span>
+                    <span class="calculation-value">${centerDistance.toFixed(3)}</span>
+                </div>
+                <div class="calculation-item">
+                    <span class="calculation-name">Surface-to-Surface:</span>
+                    <span class="calculation-value" style="color: ${isOverlapping ? 'red' : '#007bff'};">${surfaceDistance.toFixed(3)}</span>
+                </div>
+                <div class="calculation-item">
+                    <span class="calculation-name">Difference:</span>
+                    <span class="calculation-value">${(surfaceDistance - centerDistance).toFixed(3)}</span>
+                </div>
+                <div class="distance-highlight" style="background: ${isOverlapping ? '#f8d7da' : '#fff3cd'}; border-color: ${isOverlapping ? '#f5c6cb' : '#ffeaa7'};">
+                    <div class="distance-title" style="color: ${isOverlapping ? '#721c24' : '#856404'};">Mathematical Distance</div>
+                    <div class="distance-value" style="color: ${isOverlapping ? 'red' : '#dc3545'};">${surfaceDistance.toFixed(3)} units</div>
+                    ${isOverlapping ? '<div style="font-size: 12px; color: #721c24; text-align: center; margin-top: 5px;">Negative value indicates overlap</div>' : ''}
+                </div>
+            `;
+            document.getElementById('distanceContainer').innerHTML = distanceHtml;
+            
+            // Update mathematical breakdown
+            const breakdownHtml = `
+                <div class="calculation-item">
+                    <span class="calculation-name">Angle (A→B):</span>
+                    <span class="calculation-value">${(Math.atan2(nodeBObj.y - nodeAObj.y, nodeBObj.x - nodeAObj.x) * 180 / Math.PI).toFixed(1)}°</span>
+                </div>
+                <div class="calculation-item">
+                    <span class="calculation-name">Angle (B→A):</span>
+                    <span class="calculation-value">${(Math.atan2(nodeAObj.y - nodeBObj.y, nodeAObj.x - nodeBObj.x) * 180 / Math.PI).toFixed(1)}°</span>
+                </div>
+                <div class="calculation-item">
+                    <span class="calculation-name">ΔX:</span>
+                    <span class="calculation-value">${(nodeBObj.x - nodeAObj.x).toFixed(1)}</span>
+                </div>
+                <div class="calculation-item">
+                    <span class="calculation-name">ΔY:</span>
+                    <span class="calculation-value">${(nodeBObj.y - nodeAObj.y).toFixed(1)}</span>
+                </div>
+            `;
+            document.getElementById('breakdownContainer').innerHTML = breakdownHtml;
+        }
+        
+        // Initialize calculator on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalculator();
+        });
+    </script>
+</body>
+</html>

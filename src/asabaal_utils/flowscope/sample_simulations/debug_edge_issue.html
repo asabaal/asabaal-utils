@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Edge Issue</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #network { width: 400px; height: 300px; border: 1px solid #ccc; margin-bottom: 20px; }
+        #edgeInfoContainer { padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+        .force-item { margin: 5px 0; padding: 5px; background: white; }
+    </style>
+</head>
+<body>
+    <h1>Debug Edge Information Issue</h1>
+    <div id="network"></div>
+    <h2>Edge Information:</h2>
+    <div id="edgeInfoContainer"></div>
+    
+    <script>
+        // Initialize network exactly like the main calculator
+        const nodes = new vis.DataSet([
+            {id: 'a', label: 'A', x: -200, y: 0, shape: 'box', color: '#ff6b6b'},
+            {id: 'b', label: 'B', x: 200, y: 0, shape: 'box', color: '#4ecdc4'}
+        ]);
+        
+        const edges = new vis.DataSet([
+            {from: 'a', to: 'b'}
+        ]);
+        
+        const container = document.getElementById('network');
+        const network = new vis.Network(container, {
+            nodes: nodes,
+            edges: edges
+        }, {});
+        
+        // Test the exact same updateEdgeInfoDisplay function
+        function updateEdgeInfoDisplay(positions, edgeList) {
+            const container = document.getElementById('edgeInfoContainer');
+            container.innerHTML = '';
+            
+            console.log('updateEdgeInfoDisplay called with:', {
+                positions: positions,
+                edgeList: edgeList,
+                edgeListLength: edgeList ? edgeList.length : 'undefined',
+                edgeListType: typeof edgeList
+            });
+            
+            if (!edgeList || edgeList.length === 0) {
+                container.innerHTML = '<div class="force-item"><span class="force-name">No edges found</span></div>';
+                console.log('No edges found - edgeList:', edgeList);
+                return;
+            }
+            
+            let html = '<div class="force-item"><strong>Found ' + edgeList.length + ' edges:</strong></div>';
+            
+            edgeList.forEach(edge => {
+                const pos1 = positions[edge.from];
+                const pos2 = positions[edge.to];
+                
+                if (!pos1 || !pos2) {
+                    html += '<div class="force-item">❌ Edge ' + edge.from + '-' + edge.to + ': Missing positions</div>';
+                    return;
+                }
+                
+                const dx = pos2.x - pos1.x;
+                const dy = pos2.y - pos1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                html += '<div class="force-item">✅ Edge ' + edge.from.toUpperCase() + '-' + edge.to.toUpperCase() + ': Length=' + distance.toFixed(3) + '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Test after network initializes
+        setTimeout(() => {
+            const positions = network.getPositions();
+            const edgeList = edges.get();
+            
+            console.log('Testing with:', {
+                positions: positions,
+                edgeList: edgeList,
+                edges: edges
+            });
+            
+            updateEdgeInfoDisplay(positions, edgeList);
+        }, 1000);
+    </script>
+</body>
+</html>

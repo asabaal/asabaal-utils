@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Initialization Sequence</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <div id="network" style="width: 400px; height: 300px; border: 1px solid #ccc;"></div>
+    <div id="output"></div>
+    
+    <script>
+        let nodes, edges, network;
+        
+        // Simulate the exact same initialization as interactive calculator
+        function initNetwork() {
+            const container = document.getElementById('network');
+            network = new vis.Network(container, {
+                nodes: [],
+                edges: []
+            }, {});
+            console.log('Network initialized:', network);
+        }
+        
+        function loadScenario() {
+            // Simulate 2-node scenario
+            const scenario = {
+                nodes: [
+                    {id: 'a', label: 'Node A'},
+                    {id: 'b', label: 'Node B'}
+                ],
+                edges: [
+                    {from: 'a', to: 'b'}
+                ]
+            };
+            
+            // Update network exactly like interactive calculator
+            nodes = new vis.DataSet(scenario.nodes);
+            edges = new vis.DataSet(scenario.edges);
+            network.setData({nodes: nodes, edges: edges});
+            
+            console.log('Scenario loaded - nodes:', nodes, 'edges:', edges);
+            
+            // Test immediately
+            testEdgeData('Immediate');
+            
+            // Test after 100ms delay (like interactive calculator)
+            setTimeout(() => {
+                testEdgeData('After 100ms');
+            }, 100);
+            
+            // Test after 500ms delay
+            setTimeout(() => {
+                testEdgeData('After 500ms');
+            }, 500);
+        }
+        
+        function testEdgeData(timing) {
+            const positions = network.getPositions();
+            const edgeList = edges.get();
+            
+            const output = document.getElementById('output');
+            const result = {
+                timing: timing,
+                positions: positions,
+                edgeList: edgeList,
+                edgeListType: typeof edgeList,
+                edgeListLength: edgeList ? edgeList.length : 'undefined',
+                networkExists: !!network,
+                edgesExists: !!edges,
+                nodesExist: !!nodes
+            };
+            
+            console.log(`=== ${timing} ===`, result);
+            
+            output.innerHTML += `
+                <h3>${timing}</h3>
+                <pre>${JSON.stringify(result, null, 2)}</pre>
+            `;
+            
+            // Test edge processing
+            if (edgeList && edgeList.length > 0) {
+                console.log(`${timing}: Processing edges...`);
+                edgeList.forEach((edge, index) => {
+                    const pos1 = positions[edge.from];
+                    const pos2 = positions[edge.to];
+                    console.log(`${timing}: Edge ${index}:`, edge, 'Pos1:', pos1, 'Pos2:', pos2);
+                });
+            } else {
+                console.log(`${timing}: No edges to process!`);
+            }
+        }
+        
+        // Initialize exactly like interactive calculator
+        window.onload = function() {
+            initNetwork();
+            loadScenario();
+        };
+    </script>
+</body>
+</html>
