@@ -52,7 +52,10 @@ dependencies = [
     "networkx>=3.0",
     "pyvis>=0.3.0",
     # Notebook sync dependencies
-    "jupytext>=1.14.0"
+    "jupytext>=1.14.0",
+    # Audio transcription dependencies
+    "faster-whisper>=1.0.0",
+    "watchdog>=3.0.0",
 ]
 
 [project.urls]
@@ -86,6 +89,8 @@ transcript-combiner = "asabaal_utils.video_processing.transcript_combiner:main"
 spec-coder = "asabaal_utils.agents.spec_coder.cli:main"
 flowscope = "asabaal_utils.flowscope.cli:main"
 sync-notebooks = "asabaal_utils.notebook_sync.cli:main"
+audio-transcribe = "asabaal_utils.audio_transcription.cli:main"
+sync-lyrics = "asabaal_utils.video_processing.sync_lyrics_cli:main"
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
